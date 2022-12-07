@@ -63,12 +63,55 @@ definition {
 
 	@prose = "I search the activation key with the keyword ${keyword}"
 	macro seachActivationKey {
-
 		Type(
 			locator1 = "CustomerActivationKey#SEARCH_ACTIVATION_KEY_FIELD",
 			value1 = "${keyword}");
-		
+
 		Click(locator1 = "CustomerActivationKey#SEARCH_ACTIVATION_KEY_BUTTON");
+	}
+
+	@prose = "I should be able to view a activation key with the enviroment name "${enviromentName}" and following values ${table}"
+	macro viewActivatonKey {
+		var RawTable rawTable = new RawTable("${table}");
+
+		for (var row : table "${rawTable}") {
+			var field = "${row[0]}";
+			var option = "${row[1]}";
+			var value = "${row[2]}";
+
+			var key_projectField = "${field}";
+			var key_projectValue = "${value}";
+
+			if ("${option}" == "Select") {
+				if ("${field}" == "Cluster Nodes") {
+					Select(
+						locator1 = "CustomerActivationKey#GENERATE_ACTIVATION_KEYS_FORM_OPTION_CLUSTER",
+						value1 = "${key_projectValue}");				
+				}
+				else {
+					Select(
+						locator1 = "CustomerActivationKey#GENERATE_ACTIVATION_KEYS_FORM_OPTION",
+						value1 = "${key_projectValue}");
+				}
+
+			}
+			else if ("${option}" == "Radio Button") {
+				Click(locator1 = "CustomerActivationKey#GENERATE_ACTIVATION_KEYS_FORM_SUBSCRIPTION");
+			}
+			else if ("${option}" == "Input") {
+				Type(
+					locator1 = "CustomerActivationKey#GENERATE_ACTIVATION_KEYS_FORM_INPUT",
+					value1 = "${key_projectValue}");
+			}
+			else if ("${option}" == "Textarea") {
+				Type(
+					locator1 = "CustomerActivationKey#GENERATE_ACTIVATION_KEYS_FORM_TEXTAREA",
+					value1 = "${key_projectValue}");
+			}
+			else {
+				echo("No such ${field} field found.");
+			}
+		}
 	}
 
 }
