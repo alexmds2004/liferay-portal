@@ -1,0 +1,47 @@
+definition {
+
+	setUp {
+		Utils.launchUatHomePage();
+
+		General.acceptCookies();
+	}
+
+	@description = "Automation ID: PPLUPGD1122-39 | Test Summary: Verify that the user can search for a pickup point on the map and see the point details"
+	@priority = "5"
+	test CanSearchPickUpPoints {
+		task ("When the user navigate to pickup map") {
+			Maps.gotoPickupMap();
+		}
+
+		task ("Then assert that the page is loaded and the control panel is visible") {
+			General.viewPage(partialURL = "/pickup-points-map");
+
+			Maps.viewMapControlPanel();
+		}
+
+		task ("When the user select a country and search for a location") {
+			Maps.selectCountryDropdown(country = "Czechia");
+
+			Maps.searchForLocation(searchInput = "Sokolovská 651/136a, praha");
+		}
+
+		task ("Then the nearest's pickup points should be available in the results") {
+			Maps.viewSearchResult();
+
+			Maps.selectLocation();
+		}
+
+		task ("When the user open the details page") {
+			Maps.gotoDetails();
+
+			Default.SelectWindow.selectPopUp(locator1 = "null");
+		}
+
+		task ("Then the details about the pickup point shoud be displayed on the page") {
+			Maps.viewDetailsPage(detailsType = "Contact");
+
+			Maps.viewDetailsPage(detailsType = "Services");
+		}
+	}
+
+}
