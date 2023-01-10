@@ -1,0 +1,91 @@
+definition {
+
+	setUp {
+		Utils.launchUatHomePage();
+
+		General.acceptCookies();
+	}
+
+	@description = "Automation ID: PPLUPGD1122-54 | Test Summary: Verify that when the user try to submit the form with a required field blank, an error will appear verify the error"
+	@priority = "5"
+	test ValidateFieldRules {
+		task ("Given the Damaged shipment section form is loaded") {
+			Complaints.gotoDamagedShipment();
+		}
+
+		task ("When submit the form without having filled any field") {
+			Complaints.continueForm();
+		}
+
+		task ("Then assert that the required field message appears") {
+			Complaints.viewInputFieldErrorMessage(errorType = "This field is required");
+		}
+
+		task ("When the user fills the form with the correct shipment number but the incorrect zip code") {
+			Complaints.fillComplaintForm(
+				inputLabels = "Shipment number",
+				typeInput = "44122200157");
+
+			Complaints.fillComplaintForm(
+				inputLabels = "Postcode",
+				typeInput = "25102");
+
+			Complaints.continueForm();
+		}
+
+		task ("Then assert that the error message 'Entries are incorrect' appears") {
+			Complaints.viewIncorrectEntriesMessage();
+		}
+
+		task ("When the user fills the form with the incorrect shipment number but the correct zip code") {
+			Complaints.fillComplaintForm(
+				inputLabels = "Shipment number",
+				typeInput = "55233311286");
+
+			Complaints.fillComplaintForm(
+				inputLabels = "Postcode",
+				typeInput = "25101");
+
+			Complaints.continueForm();
+		}
+
+		task ("Then assert that the error message 'Entries are incorrect' appears") {
+			Complaints.viewIncorrectEntriesMessage();
+		}
+
+		task ("When the user fills the form with the incorrect shipment number and also the incorrect zip code") {
+			Complaints.fillComplaintForm(
+				inputLabels = "Shipment number",
+				typeInput = "55233311286");
+
+			Complaints.fillComplaintForm(
+				inputLabels = "Postcode",
+				typeInput = "25102");
+
+			Complaints.continueForm();
+		}
+
+		task ("Then assert that the error message 'Entries are incorrect' appears") {
+			Complaints.viewIncorrectEntriesMessage();
+		}
+
+		task ("When the user fills the form with the incorrect amount of numbers in the shipment number and zip code") {
+			Complaints.fillComplaintForm(
+				inputLabels = "Shipment number",
+				typeInput = "5523331128");
+
+			Complaints.fillComplaintForm(
+				inputLabels = "Postcode",
+				typeInput = "2510");
+
+			Complaints.continueForm();
+		}
+
+		task ("Then assert that the error message 'Minimum number of characters exceeded 11.' and 'The field must contain exactly 5 characters' appears") {
+			Complaints.viewIncorrectEntriesMessage(errorType = "Minimum number of characters exceeded 11");
+
+			Complaints.viewIncorrectEntriesMessage(errorType = "The field must contain exactly 5 characters");
+		}
+	}
+
+}
