@@ -10,23 +10,19 @@ definition {
 	@priority = "5"
 	test CannotSendOnGoingClaim {
 		task ("Given the Damaged shipment section form is loaded") {
-			Complaints.gotoDamagedShipment();
+			General.gotoFooterLink(linkName = "Damaged shipment");
 		}
 
 		task ("When the user fills the form with the data of a claim that is uncompleted") {
 			Complaints.fillComplaintForm(
-				inputLabels = "Shipment number",
-				typeInput = "44122200157");
-
-			Complaints.fillComplaintForm(
-				inputLabels = "Postcode",
-				typeInput = "25101");
+				postCode = "25101",
+				shipmentNumber = "44122200157");
 
 			Complaints.continueForm();
 		}
 
 		task ("Then assert that the error message for uncompleted claim is present") {
-			Complaints.viewUncompletedClaimErrorMessage(errorMessage = "the complaint has already been reported");
+			Complaints.viewIncorrectEntryMessage(errorType = "notification--");
 		}
 	}
 
@@ -34,7 +30,7 @@ definition {
 	@priority = "5"
 	test ValidateFieldRules {
 		task ("Given the Damaged shipment section form is loaded") {
-			Complaints.gotoDamagedShipment();
+			General.gotoFooterLink(linkName = "Damaged shipment");
 		}
 
 		task ("When submit the form without having filled any field") {
@@ -42,73 +38,57 @@ definition {
 		}
 
 		task ("Then assert that the required field message appears") {
-			Complaints.viewFieldRuleMessage(errorMessage = "This field is required");
+			Complaints.viewIncorrectEntryMessage(errorType = "has-");
 		}
 
 		task ("When the user fills the form with the correct shipment number but the incorrect zip code") {
 			Complaints.fillComplaintForm(
-				inputLabel = "Shipment number",
-				inputValue = "44122200157");
-
-			Complaints.fillComplaintForm(
-				inputLabel = "Postcode",
-				inputValue = "25102");
+				postCode = "25102",
+				shipmentNumber = "44122200157");
 
 			Complaints.continueForm();
 		}
 
 		task ("Then assert that the error message 'Entries are incorrect' appears") {
-			Complaints.viewIncorrectEntriesMessage(errorMessage = "Entries are incorrect");
+			Complaints.viewIncorrectEntryMessage(errorType = "notification--");
 		}
 
 		task ("When the user fills the form with the incorrect shipment number but the correct zip code") {
 			Complaints.fillComplaintForm(
-				inputLabel = "Shipment number",
-				inputValue = "55233311286");
-
-			Complaints.fillComplaintForm(
-				inputLabel = "Postcode",
-				inputValue = "25101");
+				postCode = "25101",
+				shipmentNumber = "55233311286");
 
 			Complaints.continueForm();
 		}
 
 		task ("Then assert that the error message 'Entries are incorrect' appears") {
-			Complaints.viewIncorrectEntriesMessage(errorMessage = "Entries are incorrect");
+			Complaints.viewIncorrectEntryMessage(errorType = "notification--");
 		}
 
 		task ("When the user fills the form with the incorrect shipment number and also the incorrect zip code") {
 			Complaints.fillComplaintForm(
-				inputLabel = "Shipment number",
-				inputValue = "55233311286");
-
-			Complaints.fillComplaintForm(
-				inputLabel = "Postcode",
-				inputValue = "25102");
+				postCode = "25102",
+				shipmentNumber = "55233311286");
 
 			Complaints.continueForm();
 		}
 
 		task ("Then assert that the error message 'Entries are incorrect' appears") {
-			Complaints.viewIncorrectEntriesMessage(errorMessage = "Entries are incorrect");
+			Complaints.viewIncorrectEntryMessage(errorType = "notification--");
 		}
 
 		task ("When the user fills the form with the incorrect amount of numbers in the shipment number and zip code") {
 			Complaints.fillComplaintForm(
-				inputLabel = "Shipment number",
-				inputValue = "5523331128");
-
-			Complaints.fillComplaintForm(
-				inputLabel = "Postcode",
-				inputValue = "2510");
+				postCode = "2510",
+				shipmentNumber = "5523331128");
 
 			Complaints.continueForm();
 		}
 
 		task ("Then assert that the error message 'Minimum number of characters exceeded 11.' and 'The field must contain exactly 5 characters' appears") {
-			Complaints.viewFieldRuleMessage(errorMessage = "Minimum number of characters exceeded 11");
+			Complaints.viewIncorrectEntryMessage(errorType = "has-");
 
-			Complaints.viewFieldRuleMessage(errorMessage = "The field must contain exactly 5 characters");
+			Complaints.viewIncorrectEntryMessage(errorType = "has-");
 		}
 	}
 
