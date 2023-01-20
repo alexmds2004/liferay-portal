@@ -71,7 +71,7 @@ definition {
 	macro getCurrentJobBuildNumber {
 		Jenkins.clickJobLink(jobName = "${jobName}");
 
-		AssertElementPresent(locator1 = "Jenkins#CURRENT_JENKINS_JOB_BUILD_NUMBER");
+		WaitForElementPresent(locator1 = "Jenkins#CURRENT_JENKINS_JOB_BUILD_NUMBER");
 
 		AssertVisible(locator1 = "Jenkins#CURRENT_JENKINS_JOB_BUILD_NUMBER");
 
@@ -79,10 +79,11 @@ definition {
 
 		Click(locator1 = "Jenkins#CURRENT_JENKINS_JOB_BUILD_NUMBER");
 
-		var hasFoundTheCorrectJob = "false";
+		var hasFoundTheCorrectBuild = "false";
+		var hasBuildsWainting = "true";
 		var count = "0";
 
-		while (("${hasFoundTheCorrectJob}" == "false") && (maxIterations = "30")) {
+		while (("${hasFoundTheCorrectBuild}" == "false") && ("${hasBuildsWainting}" == "true") && (maxIterations = "30")) {
 			var count = ${count} + 1;
 			var firstJobBuildNumber = selenium.getText("Jenkins#JENKINS_JOB_BREADCRUMBS_BUILD_NUMBER");
 
@@ -101,7 +102,7 @@ definition {
 			}
 
 			if (IsElementPresent(key_content = "${staticGitRevision}", key_parameter = "git.revision", locator1 = "Jenkins#JENKINS_JOB_PARAMETERS_CONTENT")) {
-				var hasFoundTheCorrectJob = "true";
+				var hasFoundTheCorrectBuild = "true";
 			}
 			else {
 				var lastJobBuildNumber = "${firstJobBuildNumber}";
@@ -110,11 +111,15 @@ definition {
 					locator1 = "Jenkins#JENKINS_JOB_SIDE_MENU",
 					menuOption = "Back to Project");
 
+				if(IsElementNotPresent(locator1 = "Jenkins#JENKINS_JOB_BUILD_STATUS_WAINTING")) {
+					var hasBuildsWainting = "false";
+				}
+
 				Click(locator1 = "Jenkins#CURRENT_JENKINS_JOB_BUILD_NUMBER");
 			}
 		}
 
-		if ("${hasFoundTheCorrectJob}" == "false") {
+		if ("${hasFoundTheCorrectBuild}" == "false") {
 			fail("After ${count} attempts the build could not be found!");
 		}
 
