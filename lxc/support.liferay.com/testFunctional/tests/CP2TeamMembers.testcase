@@ -1,0 +1,55 @@
+definition {
+
+	property test.env = "uat";
+	property testray.main.component.name = "Customer Portal 2.0";
+
+	setUp {
+		Utils.launchUatPage();
+
+		Login.loginAsAdminUser();
+	}
+
+	@description = "Automation ID: LRQA-79215 | Test Summary: Verify if the user can invite multiple emails with roles on team members on the same screen."
+	@priority = "4"
+	test MultipleEmailsWithRoleAtOnce {
+		task ("Given team members page is open") {
+			HomePage.searchProject(projectName = "2022 FIFA World Cup Qatar - FAN ID");
+
+			Portal.CustomerPortal.enterOnProject(title = "2022 FIFA World Cup Qatar - FAN ID");
+
+			Portal.CP2NavigationMenu.goToTeamMembers();
+
+			Portal.CustomerPortal.clickAtButton(text = "Invite");
+		}
+
+		task ("When I invite the users to the project") {
+			CP2TeamMembers.addFieldsTeamMembers(
+				rowEmailList = "test1,test2,test3",
+				rowRole = "Administrator",
+				addMembers = "true");
+
+			CP2TeamMembers.sendInvitation();
+		}
+
+		task ("Then the Users should be visible on the table") {
+			Portal.CP2TeamMembers.viewTableValue(
+				email = "test2@liferay.com",
+				name = "test2@liferay.com",
+				role = "Administrator",
+				status = "Invited");
+
+			Portal.CP2TeamMembers.viewTableValue(
+				email = "test1@liferay.com",
+				name = "test1@liferay.com",
+				role = "Administrator",
+				status = "Invited");
+
+			Portal.CP2TeamMembers.viewTableValue(
+				email = "test3@liferay.com",
+				name = "test3@liferay.com",
+				role = "Administrator",
+				status = "Invited");
+		}
+	}
+
+}
