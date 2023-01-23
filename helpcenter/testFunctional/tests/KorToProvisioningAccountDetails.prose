@@ -10993,3 +10993,49 @@ Scenario: Update self provisioning value from unchecked to checked in koroneiki 
 	| Code               | PROKORKORPRO                  | |
 	| Tier               | T4                            | |
 	| Self Provisioning  | true                          | |
+
+Scenario: Update self provisioning value from checked to unchecked in koroneiki via API and view the account in provisioning
+	Testing the ability to update the self provisioning value from checked to unchecked in koroneiki via API and view the account in provisioning frontend
+
+	Given I create an account on koroneiki with the following values
+	| Account Field and Value | allowSelfProvisioning         | true |
+	| Code                    | PROKORKORPRO                  |      |
+	| Name                    | Korpro - ${staticProjectName} |      |
+	| Region                  | United States                 |      |
+	| Status                  | Active                        |      |
+	| Tier                    | T4                            |      |
+	And I create a product purchase for an account with the name "Korpro - ${staticProjectName}" and the product "DXP Production" on koroneiki with the following values
+	| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |
+	And I create a product purchase for an account with the name "Korpro - ${staticProjectName}" and the product "Platinum Subscription" on koroneiki with the following values
+	| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |
+	And I log into the provisioning homepage as "${staticProvisioningAdminEmailAddress}" with password "${staticProvisioningAdminPassword}"
+	And I go to the account index page
+	And I search the accounts page using the keyword "Korpro"
+	And I click on the account with the name "Korpro - ${staticProjectName}" on the provisioning index
+	When I click on the "Details" tab
+	Then I should be able to view the following account values under the account details tab
+	| Account Name       | Korpro - ${staticProjectName} | |
+	| Code               | PROKORKORPRO                  | |
+	| Tier               | T4                            | |
+	| Self Provisioning  | true                          | |
+	And I update a koroneiki account with the name "Korpro - ${staticProjectName}" to have the following values
+	| Account Field and Value | allowSelfProvisioning | false |
+	And I go to the account index page
+	And I search the accounts page using the keyword "Korpro"
+	And I click on the account with the name "Korpro - ${staticProjectName}" on the provisioning index
+	When I click on the "Details" tab
+	Then I should be able to view the following account values under the account details tab
+	| Account Name       | Korpro - ${staticProjectName} | |
+	| Code               | PROKORKORPRO                  | |
+	| Tier               | T4                            | |
+	| Self Provisioning  | false                         | |
