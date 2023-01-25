@@ -4201,29 +4201,6 @@ definition {
 		}
 	}
 
-	@prose = "I should not be able to view the following fields in koroneiki account with the name ${accountName} ${table}"
-	macro _viewNoKoroneikiAccountField {
-		var accountKey = KoroneikiAccountAPI._getAccountKeyViaAccountName(accountName = "${accountName}");
-
-		var curl = '''
-			${koroneikiURL}/o/koroneiki-rest/v1.0/accounts/${accountKey}?nestedFields=assignedTeams,contacts,customerContacts.contactRoles,entitlements,externalLinks,postalAddresses,productPurchases,workerContacts.contactRoles --tlsv1.2
-			--header "API_Token: ${apiToken}"
-			-H "accept: application/json"
-			-H "Content-Type: application/json"
-			''';
-		var RawTable rawTable = new RawTable("${table}");
-
-		for (var row : table "${rawTable}") {
-			var field = "${row[0]}";
-
-			var response = JSONCurlUtil.get("${curl}");
-
-			if (contains("${response}", "${field}")) {
-				fail("The koroneiki account may have the ${field} field");
-			}
-		}
-	}
-
 	@prose = "I should be able to view an audit entry for the summary ${summary} related to the account ${accountName} field ${field} from the old value ${oldValue} to the new value ${newValue} executed by ${agentName}"
 	macro _viewAccountAuditEntry {
 		var accountKey = KoroneikiAccountAPI._getAccountKeyViaAccountName(accountName = "${accountName}");
@@ -6172,6 +6149,29 @@ definition {
 
 		if (contains("${allAccountExternalLinks}", "${entityId}")) {
 			fail("The external link with the entity id ${entityId} is on the account with the name ${accountName}");
+		}
+	}
+
+	@prose = "I should not be able to view the following fields in koroneiki account with the name ${accountName} ${table}"
+	macro _viewNoAccountField {
+		var accountKey = KoroneikiAccountAPI._getAccountKeyViaAccountName(accountName = "${accountName}");
+
+		var curl = '''
+			${koroneikiURL}/o/koroneiki-rest/v1.0/accounts/${accountKey}?nestedFields=assignedTeams,contacts,customerContacts.contactRoles,entitlements,externalLinks,postalAddresses,productPurchases,workerContacts.contactRoles --tlsv1.2
+			--header "API_Token: ${apiToken}"
+			-H "accept: application/json"
+			-H "Content-Type: application/json"
+			''';
+		var RawTable rawTable = new RawTable("${table}");
+
+		for (var row : table "${rawTable}") {
+			var field = "${row[0]}";
+
+			var response = JSONCurlUtil.get("${curl}");
+
+			if (contains("${response}", "${field}")) {
+				fail("The koroneiki account may have the ${field} field");
+			}
 		}
 	}
 
