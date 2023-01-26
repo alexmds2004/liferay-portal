@@ -1,0 +1,40 @@
+definition {
+
+	property test.env = "uat";
+	property testray.main.component.name = "Customer Portal 2.0";
+
+	setUp {
+		Utils.launchUatPage();
+
+		Login.loginAsAdminUser();
+	}
+
+	@description = "Automation ID: LRQA-79272 | Test Summary: Verify if team member administrator can only submit the form after filling out all required fields"
+	@priority = "4"
+	test CanViewTheAdministratorSubmitTheForm {
+		task ("Given the DXP product is selected into the 'product activation section' of a project") {
+			HomePage.searchProject(projectName = "Fong Test");
+
+			Portal.CustomerPortal.enterOnProject(title = "Fong Test");
+
+			Portal.CP2NavigationMenu.goToProductActivation();
+
+			Portal.CP2NavigationMenu.clickOnProductButton(product = "Analytics Cloud");
+		}
+
+		task ("When I click in 'Finish Activation' assert that the button 'Submit' is disabled and fill in all the required fields") {
+			Portal.CustomerPortal.clickOnFinishActivationButton();
+
+			Portal.CustomerPortal.assertButtonIsDisabled(text = "Submit");
+
+			Portal.CP2AnalyticsCloudSetup.typeAllSetupAnalyticsCloudInfoFields();
+		}
+
+		task ("Then The Submit button should be active and the modal is closed") {
+			Portal.CustomerPortal.assertButtonIsActive(text = "Submit");
+
+			Portal.CustomerPortal.clickAtButton(text = "Cancel");
+		}
+	}
+
+}
