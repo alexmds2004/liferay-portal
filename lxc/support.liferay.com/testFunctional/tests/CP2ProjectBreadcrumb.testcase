@@ -1,0 +1,36 @@
+definition {
+
+	property test.env = "uat";
+	property testray.main.component.name = "Customer Portal 2.0";
+
+	setUp {
+		Utils.launchUatPage();
+
+		Login.loginAsAdminUser();
+	}
+
+	@description = "Automation ID: LRQA-79264 | Test Summary: Verify if the user can search for a project in the list using the search bar, the list should be updated based on the search term"
+	@priority = "4"
+	test SearchUpdatedWithSearchTerm {
+		task ("Given the DXP product is selected into the 'product activation section' of a project") {
+			HomePage.searchProject(projectName = "2022 FIFA World Cup Qatar - FAN ID");
+
+			Portal.CustomerPortal.enterOnProject(title = "2022 FIFA World Cup Qatar - FAN ID");
+		}
+
+		task ("When i Search for a project in the BreadCrump") {
+			CP2ProjectBreadcrumb.breadCrumpSearch(project = "2022 FIFA World Cup Qatar - FAN ID");
+		}
+
+		task ("Then the searched term must appear and others must not appear") {
+			Default.AssertElementPresent(
+				key_term = "2022 FIFA World Cup Qatar - FAN ID",
+				locator1 = "CP2ProjectBreadcrumb#BREADCRUMB_SEARCH");
+
+			Default.AssertElementNotPresent(
+				key_term = "Fong Test",
+				locator1 = "CP2ProjectBreadcrumb#BREADCRUMB_SEARCH");
+		}
+	}
+
+}
