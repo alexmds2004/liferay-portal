@@ -1,0 +1,51 @@
+definition {
+
+	property test.env = "uat";
+	property testray.main.component.name = "Customer Portal 2.0";
+
+	setUp {
+		Utils.launchUatPage();
+
+		Login.loginAsAdminUser();
+	}
+
+    @description = "Automation ID: LRQA-79266 | Test Summary: Verify that when the project reaches zero available support seats the administrator and requester roles are disabled in the drop-down list"
+	@priority = "4"
+	test AssertThatTheDropdownOptionsAreDisabled {
+        task ("Given that I go to the 'Team Members' page") {
+			HomePage.searchProject(projectName = "Avangrid Portals");
+
+			Portal.CustomerPortal.enterOnProject(title = "Avangrid Portals");
+
+			Portal.CP2NavigationMenu.goToTeamMembers();
+		}
+
+        task ("Then I assert that when the project reaches zero available support seats, the administrator and requester roles are disabled") {
+           	Portal.CustomerPortal.clickAtButton(text = "Invite");
+
+			Portal.CP2TeamMembers.addFieldsTeamMembersExtra(
+				addMembers = "true",
+				position = "0",
+				positionNumber = "0",
+				rowEmail = "test01@project.com",
+				rowRole = "Administrator");
+
+			Portal.CP2TeamMembers.addFieldsTeamMembersExtra(
+				addMembers = "true",
+				position = "1",
+				positionNumber = "1",
+				rowEmail = "test02@project.com",
+				rowRole = "Requester");
+
+			Portal.CP2TeamMembers.assertThatFunctionIsDisabled(
+				positionNumber = "2",
+				role = "Administrator");
+
+			Portal.CP2TeamMembers.assertThatFunctionIsDisabled(
+				positionNumber = "2",
+				role = "Requester");
+
+			Portal.CustomerPortal.clickAtButton(text = "Cancel");
+        }
+    }
+}
