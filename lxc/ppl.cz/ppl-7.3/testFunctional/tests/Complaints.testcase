@@ -24,6 +24,67 @@ definition {
 		}
 	}
 
+	@description = "Automation ID: PPLUPGD1122-81 | Test Summary: Verify that the user only can add JPEG, JPG and PNG files and cannot add more than 10 files per field"
+	@priority = "5"
+	test CanOnlyAddImageFiles {
+		task ("Given the user is redirected to the	'Attachments' form section") {
+			Complaints.fillForm(
+				postCode = "25101",
+				shipmentNumber = "44122200158");
+
+			Complaints.continueForm();
+
+			Complaints.selectComplaintRadio(radioOption = "recipient");
+
+			Complaints.fillForm(
+				city = "Prague",
+				companyName = "liferay",
+				emailAddress = "test@test.com",
+				phoneNumber = "000000000",
+				postCode = "25101",
+				streetNumber = "Sokolovská 651/136A");
+
+			Complaints.checkPrivacyConditions();
+
+			Complaints.continueForm();
+
+			Complaints.viewClaimStatus(
+				itemName = "Shipment",
+				itemStatus = "active");
+
+			Complaints.selectShipmentCategoryDropdown(shipmentCategoryOption = "Electronics (TV, phones, PC, ntb)");
+
+			Complaints.fillTextareaInput(
+				additionalInformation = "test",
+				describeContent = "test",
+				describeDamage = "test");
+
+			Complaints.selectComplaintRadio(radioOption = "Damaged");
+
+			Complaints.fillForm(priceOfContent = "00");
+
+			Complaints.selectComplaintRadio(radioOption = "Cardboard box");
+
+			Complaints.selectComplaintCheckbox(checkboxLabel = "Polystyrene");
+
+			Complaints.selectComplaintCheckbox(checkboxLabel = "Deformed");
+
+			Complaints.selectComplaintCheckbox(inputId = "HandlingMark_1");
+
+			Complaints.continueForm();
+		}
+
+		task ("When the user fills the 'Attachments' section with a invalid type of document") {
+			Complaints.uploadFile(
+				fileInputOption = "outerPackaging",
+				fileName = "Document_1.txt");
+		}
+
+		task ("Then a error message should appear") {
+			Complaints.viewInvalidDocumentErrorMessage();
+		}
+	}
+
 	@description = "Automation ID: PPLUPGD1122-54 | Test Summary: Verify that when the user tries to submit the form with a required field blank, an error message is displayed"
 	@priority = "5"
 	test ValidateFieldRules {
