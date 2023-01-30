@@ -1,0 +1,158 @@
+definition {
+
+	@summary = "See the links in the list under 'Acesso rápido' and make sure they are redirecting to the page"
+	macro gotoAcessoRapido {
+		var portalURL = PropsUtil.get("portal.url");
+
+		for (var index : list ${acessoRapidoList}) {
+
+			// SSP Refactor: This macro is a workaround, it is needed for 7.2 (due to search issues we are facing) but we can remove on 7.4
+
+			var indexAcessoRapido = selenium.getAttribute("xpath=(//div[contains(@id,'slick-slide')]/a[contains(@class,'ssp-card-acesso-rapido')]/.)[${index}]@href");
+			var acessoRapido = selenium.getText("xpath=(//div[contains(@id,'slick-slide')]/a[contains(@class,'ssp-card-acesso-rapido')]/.)[${index}]");
+			var acessoRapidoURL = StringUtil.extractLast(${indexAcessoRapido}, "8080/");
+
+			Default.Open(locator1 = "${portalURL}/${acessoRapidoURL}");
+
+			Default.AssertElementPresent(
+				key_titlePage = ${index},
+				locator1 = "SSPHomePage#TITLE_PAGE");
+
+			Utils.launchSenacHomePage();
+		}
+	}
+
+	@summary = "See the list of courses in the category and check if they are redirecting to the page"
+	macro gotoCourseCategory {
+		var portalURL = PropsUtil.get("portal.url");
+
+		for (var index : list ${courseIndex}) {
+
+			// SSP Refactor: This macro is a workaround, it is needed for 7.2 (due to search issues we are facing) but we can remove on 7.4
+
+			//Default.Click(
+			//	locator1 = "SSPHomePage#LINKS_URL",
+			//	key_discoverCourses = "${courseName}");
+
+			var indexCategory = selenium.getAttribute("xpath=(//div[contains(@class,'ssp-btns-horizontal-area')]/*[${index}])@href");
+			var categoryName = selenium.getText("xpath=(//div[contains(@class,'ssp-btns-horizontal-area')]//a[contains(@class,'btn-nivel')][${index}])");
+			var courseCategoryURL = StringUtil.extractLast(${indexCategory}, "8080/");
+
+			Default.Open(locator1 = "${portalURL}/${courseCategoryURL}");
+
+			Default.AssertElementPresent(
+				key_titlePage = ${index},
+				locator1 = "SSPHomePage#TITLE_PAGE");
+
+			Utils.launchSenacHomePage();
+		}
+	}
+
+	@summary = "Go to footer option"
+	macro goToFooter {
+		Default.ScrollWebElementIntoView(locator1 = "SSPHomePage#FOOTER");
+	}
+
+	@summary = "See the footer options in the category and make sure they are redirecting to the page"
+	macro gotoFooterOptionPages {
+		var portalURL = PropsUtil.get("portal.url");
+
+		for (var footer : list ${footerOptionList}) {
+
+			// SSP Refactor: This macro is a workaround, it is needed for 7.2 (due to search issues we are facing) but we can remove on 7.4
+
+			var footerOption = selenium.getAttribute("//div[contains(@id,'mainnavigationsspfooter')]//*[contains(text(),'${footer}')]@href");
+
+			var footerOptionURL = StringUtil.extractLast(${footerOption}, "br/");
+
+			Default.Open(locator1 = "${portalURL}/${footerOptionURL}");
+
+			Default.AssertElementPresent(
+				key_titlePage = ${footer},
+				locator1 = "SSPHomePage#TITLE_PAGE_OPTION");
+
+			Utils.launchSenacHomePage();
+		}
+	}
+
+	@summary = "Go to footer section social medias"
+	macro gotoFooterSocialMedia {
+		Default.ScrollWebElementIntoView(locator1 = "SSPHomePage#FOOTER_SOCIAL_MEDIA");
+
+		Default.WaitForVisible(locator1 = "SSPHomePage#FOOTER_SOCIAL_MEDIA");
+	}
+
+	@summary = "Navigating to any menu and submenu option"
+	macro gotoNavigationMenuAndSubmenu {
+		var portalURL = PropsUtil.get("portal.url");
+
+		for (var index : list ${submenuIndex}) {
+
+			// SSP Refactor: This macro is a workaround, it is needed for 7.2 (due to search issues we are facing) but we can remove on 7.4
+
+			var indexSubmenu = selenium.getAttribute("xpath=(//div[contains(@class,'ssp-mega-menu')]//*[contains(text(),'${navigationMenu}')]//following-sibling::div//a)[${index}]@href");
+			var submenuName = selenium.getText("xpath=(//div[contains(@class,'ssp-mega-menu')]//*[contains(text(),'${navigationMenu}')]//following-sibling::div//a)[${index}]");
+			var submenuURL = StringUtil.extractLast(${indexSubmenu}, "br/");
+
+			if (${navigationMenu} == "Unidades") {
+				var portalURL = StringUtil.extractFirst(${portalURL}, "/guest");
+			}
+
+			if (${subMenuURL} == "") {
+				var submenuURL = StringUtil.extractLast(${indexSubmenu}, "8080/");
+			}
+
+			Default.Open(locator1 = "${portalURL}/${submenuURL}");
+
+			Default.AssertElementPresent(
+				key_titlePage = ${index},
+				locator1 = "SSPHomePage#TITLE_PAGE");
+		}
+	}
+
+	@summary = "Go to title section to discover courses"
+	macro gotoSectionTitle {
+		Default.Refresh();
+
+		Default.ScrollWebElementIntoView(
+			key_sectionTitle = ${sectionTitle},
+			locator1 = "SSPHomePage#SECTION_TITLE");
+	}
+
+	@summary = "Open social media links in page footer"
+	macro openSocialMedia {
+		Default.Click.pauseClickAt(
+			key_socialMedia = ${socialMedia},
+			locator1 = "SSPHomePage#SOCIAL_MEDIA");
+	}
+
+	@summary = "See if the carousel has video"
+	macro ViewCarouselVideo {
+		Default.AssertElementPresent(locator1 = "SSPHomePage#MAIN_CAROUSEL");
+
+		Default.AssertElementPresent(locator1 = "SSPHomePage#CAROUSEL_VIDEO");
+	}
+
+	@summary = "View all items are visible in navigation menu"
+	macro viewNavigationMenu {
+		for (var navigationMenu : list "Cursos,Eventos,Unidades,Bolsas e Descontos,Para empresas,O Senac,Serviços") {
+			Default.AssertVisible(
+				key_navigationMenu = ${navigationMenu},
+				locator1 = "SSPHomePage#NAVIGATION_MENU");
+		}
+	}
+
+	@summary = "View if social media is being opened"
+	macro viewSocialMedia {
+		Default.AssertLocation.assertPartialLocation(value1 = ${socialMedia});
+
+		var url = selenium.getLocation();
+
+		var socialMediaURL = StringUtil.toLowerCase(${url});
+
+		Portal.TestUtils.assertPartialEquals(
+			actual = ${socialMediaURL},
+			expected = "senacsaopaulo");
+	}
+
+}

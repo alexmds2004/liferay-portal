@@ -1,0 +1,115 @@
+definition {
+
+	setUp {
+		Utils.launchSenacHomePage();
+	}
+
+	@description = "Automation ID: SSPU-182 | Test Summary: Can filter the course by area"
+	@priority = 5
+	test CanFilterResultsByArea {
+		task ("Given the searched content page is open") {
+			SSPSearchBar.searchInModalSearchField(searchText = "idiomas");
+
+			SSPSearchBar.openSearchPage(searchText = "idiomas");
+		}
+
+		task ("When the 'cursos' section is visible") {
+			SSPSearchBar.gotoSearchSection(pageType = "cursos");
+
+			var beforeFilter = SSPSearchBar.getNumberOfResults();
+		}
+
+		task ("Then apply the selected filter") {
+			SSPSearchBar.selectFilter();
+		}
+
+		task ("Then assert if results changed") {
+			var afterFilter = SSPSearchBar.getNumberOfResults();
+
+			Portal.TestUtils.isLessThan(
+				actual = ${afterFilter},
+				expected = ${beforeFilter});
+		}
+	}
+
+	@description = "Automation ID: SSPU-182 | Test Summary: Can remove the filter and see all results"
+	@priority = 5
+	test CanRemoveFilter {
+		task ("Given the searched content page is open") {
+			SSPSearchBar.searchInModalSearchField(searchText = "Administração");
+
+			SSPSearchBar.openSearchPage(searchText = "Administração");
+		}
+
+		task ("When the 'cursos' section is visible apply filters") {
+			SSPSearchBar.gotoSearchSection(pageType = "cursos");
+
+			SSPSearchBar.selectFilter();
+
+			var beforeFilter = SSPSearchBar.getNumberOfResults();
+		}
+
+		task ("Then remove the selected filters") {
+			SSPSearchBar.removeFilter(pageType = "cursos");
+		}
+
+		task ("Then assert if results changed") {
+			var afterFilter = SSPSearchBar.getNumberOfResults();
+
+			Portal.TestUtils.isGreaterThan(
+				actual = ${afterFilter},
+				expected = ${beforeFilter});
+		}
+	}
+
+	@description = "Automation ID: SSPU-182 | Test Summary: Verify that the search results page is separated by 'Todos', 'Cursos' and 'Páginas' sections"
+	@priority = 5
+	test CanSeeResultsBySection {
+		task ("When I search in the portlet search input") {
+			SSPSearchBar.searchInModalSearchField(searchText = "administracao");
+		}
+
+		task ("Then the search page should be properly loaded") {
+			SSPSearchBar.openSearchPage(searchText = "administracao");
+		}
+
+		task ("Then I should see the results of the Search in all sections") {
+			for (var pageTypes : list "todos,paginas,cursos") {
+				SSPSearchBar.gotoSearchSection(pageType = ${pageTypes});
+			}
+		}
+
+		task ("When the 'cursos' section is visible, apply filters") {
+			SSPSearchBar.setScholarshipFilter();
+		}
+
+		task ("Then I should be able to see if the courses cards are in match with the searched term") {
+			SSPSearchBar.viewSearchedResult(searchTerm = "administracao");
+		}
+	}
+
+	@description = "Automation ID: SSPU-182 | Test Summary: Verify the user is able to see the suggestions list after using the search bar"
+	@priority = 5
+	test CanSeeSuggestionsList {
+		task ("When I type in the main search input") {
+			SSPSearchBar.typeInMainSearchField(searchText = "jovem aprendiz");
+		}
+
+		task ("Then suggestions related to the searched item are displayed") {
+			for (var contentTypes : list "cursos,paginas") {
+				SSPSearchBar.viewSuggestionList(contentType = ${contentTypes});
+			}
+		}
+
+		task ("When I type in the search portlet") {
+			SSPSearchBar.typeInSearchFieldPortlet(searchText = "jovem");
+		}
+
+		task ("Then suggestions related to the searched item are displayed") {
+			for (var contentTypes : list "cursos,paginas") {
+				SSPSearchBar.viewSuggestionList(contentType = ${contentTypes});
+			}
+		}
+	}
+
+}

@@ -1,0 +1,122 @@
+definition {
+
+	@summary = "Getting a category name from 'NOSSO CATÁLOGO' section"
+	macro getCategoryNameFromNossoCatalogoSection {
+		var itemIndex = ${itemNumber} - 1;
+
+		Default.ScrollWebElementIntoView(locator1 = "ESHomePage#NOSSO_CATALOGO_CAROUSEL");
+
+		Default.WaitForVisible(
+			key_index = ${itemIndex},
+			locator1 = "ESHomePage#NOSSO_CATALOGO_CAROUSEL_ACTIVE_ITEM_BY_INDEX");
+
+		var extractedClass = selenium.getAttribute("//div[contains(@data-analytics-asset-title,'NOSSO CATALOGO')]//ancestor::div[contains(@class,'portlet-static-end')]/following-sibling::div[1]//a[contains(@class,'active')][@data-slick-index='${itemIndex}']/div@class");
+
+		var categoryName = StringUtil.extractLast(${extractedClass}, "containerCategoria ");
+
+		return ${categoryName};
+	}
+
+	@summary = "Navigating to a category from 'NOSSO CATÁLOGO' section"
+	macro goToCategoryFromNossoCatalogoSection {
+		var itemIndex = ${itemNumber} - 1;
+
+		Default.Click(
+			key_index = ${itemIndex},
+			locator1 = "ESHomePage#NOSSO_CATALOGO_CAROUSEL_ACTIVE_ITEM_BY_INDEX");
+	}
+
+	@summary = "Navigating to any option from top navigation menu"
+	macro goToNavigationBarOption {
+		if (isSet(navigationSubmenuItem)) {
+			Default.MouseOver(
+				key_navigationMenuItem = ${navigationMenuItem},
+				locator1 = "ESHomePage#NAVIGATION_MENU_ITEM");
+
+			Default.Click(
+				key_navigationMenuItem = ${navigationMenuItem},
+				key_navigationSubmenuItem = ${navigationSubmenuItem},
+				locator1 = "ESHomePage#NAVIGATION_SUBMENU_ITEM");
+		}
+		else {
+			Default.Click(
+				key_navigationMenuItem = ${navigationMenuItem},
+				locator1 = "ESHomePage#NAVIGATION_MENU_ITEM");
+		}
+	}
+
+	@summary = "Changing the active slide in 'LANÇAMENTOS' carousel"
+	macro swipeSlideInLancamentosCarousel {
+		if (${swipeOption} == "previous") {
+			Default.Click.pauseClickAt(locator1 = "ESHomePage#LANCAMENTOS_CAROUSEL_PREVIOUS_BUTTON");
+		}
+		else {
+			Default.Click.pauseClickAt(locator1 = "ESHomePage#LANCAMENTOS_CAROUSEL_NEXT_BUTTON");
+		}
+
+		var itemIndex = ${activeItemNumber} - 1;
+
+		Default.WaitForElementNotPresent(
+			key_index = ${itemIndex},
+			locator1 = "ESHomePage#LANCAMENTOS_CAROUSEL_ACTIVE_ITEM_BY_INDEX");
+	}
+
+	@summary = "Changing the active slide in main carousel"
+	macro swipeSlideInMainCarousel {
+		if (${swipeOption} == "previous") {
+			Default.Click.pauseClickAt(locator1 = "ESHomePage#MAIN_CAROUSEL_PREVIOUS_BUTTON");
+		}
+		else {
+			Default.Click.pauseClickAt(locator1 = "ESHomePage#MAIN_CAROUSEL_NEXT_BUTTON");
+		}
+
+		var slideIndex = ${slideNumber} - 1;
+
+		Default.WaitForElementNotPresent(
+			key_index = ${slideIndex},
+			locator1 = "ESHomePage#MAIN_CAROUSEL_ACTIVE_SLIDE_BY_INDEX");
+	}
+
+	@summary = "Making sure 'LANÇAMENTOS' carousel is showing the correct slide"
+	macro viewActiveItemInLancamentosCarousel {
+		var itemIndex = ${itemNumber} - 1;
+
+		Default.AssertVisible(
+			key_index = ${itemIndex},
+			locator1 = "ESHomePage#LANCAMENTOS_CAROUSEL_ACTIVE_ITEM_BY_INDEX");
+	}
+
+	@summary = "Making sure main carousel is showing the correct slide"
+	macro viewActiveSlideInMainCarousel {
+		var slideIndex = ${slideNumber} - 1;
+
+		Default.AssertVisible(
+			key_index = ${slideIndex},
+			locator1 = "ESHomePage#MAIN_CAROUSEL_ACTIVE_SLIDE_BY_INDEX");
+	}
+
+	@summary = "Making sure 'LANÇAMENTOS' carousel is visible"
+	macro viewLancamentosCarousel {
+		Default.AssertVisible(locator1 = "ESHomePage#LANCAMENTOS_CAROUSEL");
+	}
+
+	@summary = "Making sure main carousel is visible"
+	macro viewMainCarousel {
+		Default.AssertVisible(locator1 = "ESHomePage#MAIN_CAROUSEL");
+	}
+
+	@summary = "Checking all items are visible in navigation menu"
+	macro viewNavigationMenuItems {
+		for (var navigationMenuItem : list "Sobre a editora,Categorias,Fale com a gente,Publique sua obra") {
+			Default.AssertVisible(
+				key_navigationMenuItem = ${navigationMenuItem},
+				locator1 = "ESHomePage#NAVIGATION_MENU_ITEM");
+		}
+	}
+
+	@summary = "Making sure 'NOSSO CATÁLOGO' carousel is visible"
+	macro viewNossoCatalogoCarousel {
+		Default.AssertVisible(locator1 = "ESHomePage#NOSSO_CATALOGO_CAROUSEL");
+	}
+
+}

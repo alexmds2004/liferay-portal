@@ -1,0 +1,73 @@
+definition {
+
+	setUp {
+		Utils.launchEditoraSenacHomePage();
+	}
+
+	@description = "Automation ID: SSPU-190 | Test Summary: Verify that is possible to filter the search results by price"
+	@priority = 5
+	test CanBeSortedByPrice {
+		task ("Given the user searched for a content in the search field") {
+			ESSearch.searchForContent(searchText = "livro");
+		}
+
+		task ("When I set the filter to: Preço: menor para o maior") {
+			ESSearch.selectPriceFilter(dropdownFilter = "low-to-high");
+		}
+
+		task ("Then I can see the first card is priced lower than the second") {
+			ESSearch.compareLowToHighPrice();
+		}
+	}
+
+	@description = "Automation ID: SSPU-190 | Test Summary: Verify that is possible to filter the search results by area"
+	@priority = 5
+	test CanFilterResultsByArea {
+		task ("When I search for a content in the search field") {
+			ESSearch.searchForContent(searchText = "livro");
+		}
+
+		task ("Then I see the cards are present and I get the number of results (before select a area filter)") {
+			ESSearch.viewCards();
+
+			var beforeFilter = ESSearch.getNumberOfResults();
+		}
+
+		task ("When I set the area filter") {
+			ESSearch.selectFiltersArea();
+		}
+
+		task ("Then I see the cards are shown and the number of items after selecting an area filter is less than before") {
+			ESSearch.viewCards();
+
+			var afterFilter = ESSearch.getNumberOfResults();
+
+			Portal.TestUtils.isLessThan(
+				actual = ${afterFilter},
+				expected = ${beforeFilter});
+		}
+	}
+
+	@description = "Automation ID: SSPU-190 | Test Summary: Verify that is possible to Search"
+	@priority = 5
+	test CanSearch {
+		task ("When I search for a content in the search field") {
+			ESSearch.searchForContent(searchText = "livro");
+		}
+
+		task ("Then assert that the redirected page is correct also that the filters area and cards are present and the number of results are bigger than 0") {
+			ESGeneral.viewPage(partialURL = "/busca?q=livro");
+
+			ESSearch.viewCards();
+
+			ESSearch.viewFiltersArea();
+
+			var numberOfResultsFound = ESSearch.getNumberOfResults();
+
+			Portal.TestUtils.isGreaterThan(
+				actual = ${numberOfResultsFound},
+				expected = 0);
+		}
+	}
+
+}

@@ -1,0 +1,113 @@
+definition {
+
+	setUp {
+		Utils.launchSenacHomePage();
+	}
+
+	@description = "Verify that is possible to change the campus and see different courses"
+	@priority = 5
+	test CanSeeDifferentCoursesOnDifferentCampus {
+		task ("Given that I go to a campus page") {
+			SSPHomePage.gotoNavigationMenuAndSubmenu(
+				navigationMenu = "Unidades",
+				submenuIndex = 3);
+		}
+
+		task ("And I get the first course name") {
+			Default.ScrollWebElementIntoView(locator1 = "SSPCourse#COURSE_CARD");
+
+			var cursoName = selenium.getText("SSPCourse#CARD_TITLE_INDEX");
+		}
+
+		task ("When I go to a different Campus") {
+			SSPHomePage.gotoNavigationMenuAndSubmenu(
+				navigationMenu = "Unidades",
+				submenuIndex = 4);
+		}
+
+		task ("Then the course of previous campus is not displayed") {
+			Default.AssertElementNotPresent(
+				key_cursoName = ${cursoName},
+				locator1 = "SSPCourse#CARD_TITLE");
+		}
+	}
+
+	@description = "Verify that is possible to select different campus from dropdown"
+	@priority = 5
+	test CanSelectDifferentCoursesFromDropdown {
+		task ("Given that I go to 'Curso Livres' page") {
+			SSPCourse.gotoCourseCategory(
+				navigationSubmenu = "Livres",
+				pageURL = "cursos-livres");
+		}
+
+		task ("And I go to a course detail") {
+			SSPCourse.gotoCourse();
+		}
+
+		task ("When I select a course unity") {
+			SSPCourse.changeUnity();
+
+			var unityURL = selenium.getAttribute("xpath=(//option[contains(@data-unidade-friendly-url,'senac-')])[1]@data-unidade-friendly-url");
+		}
+
+		task ("Then the URL changes according with the selected unity") {
+			Default.AssertLocation.assertPartialLocation(value1 = ${unityURL});
+		}
+	}
+
+	@description = "Verify the 'Short courses' page structure is: 'title', 'description,' 'know more' and 'new classes'"
+	@priority = 5
+	test VerifyCursosLivresPageStructure {
+		task ("Given that I go to 'Cursos Livres' page") {
+			SSPCourse.gotoCourseCategory(
+				navigationSubmenu = "Livres",
+				pageURL = "cursos-livres");
+		}
+
+		task ("When I enter on course page") {
+			SSPCourse.gotoCourse();
+		}
+
+		task ("Then I can see the page structure is: 'Título', 'Descrição', 'Saiba mais' and 'Novas Turmas'") {
+			SSPCourse.viewPageStructure();
+		}
+	}
+
+	@description = "Verify the 'Postgraduate' page structure is: 'title', 'description,' 'know more' and 'new classes'"
+	@priority = 5
+	test VerifyCursosTecnicosPageStructure {
+		task ("Given that I go to 'Cursos Técnicos' page") {
+			SSPCourse.gotoCourseCategory(
+				navigationSubmenu = "Técnico",
+				pageURL = "cursos-tecnicos");
+		}
+
+		task ("When I enter on course course") {
+			SSPCourse.gotoCourse();
+		}
+
+		task ("Then I can see the page structure is: 'Título', 'Descrição', 'Saiba mais' and 'Novas Turmas'") {
+			SSPCourse.viewPageStructure();
+		}
+	}
+
+	@description = "Verify the 'Graduate' page structure is: 'title', 'description,' 'know more' and 'new classes'"
+	@priority = 5
+	test VerifyGraduacaoPageStructure {
+		task ("Given that I go to 'Graduação' page") {
+			SSPCourse.gotoCourseCategory(
+				navigationSubmenu = "Graduação",
+				pageURL = "graduacao");
+		}
+
+		task ("When I enter on course page") {
+			SSPCourse.gotoCourse();
+		}
+
+		task ("Then I can see the page structure is: 'Título', 'Descrição', 'Saiba mais' and 'Novas Turmas'") {
+			SSPCourse.viewPageStructure();
+		}
+	}
+
+}

@@ -1,0 +1,181 @@
+definition {
+
+	setUp {
+		Utils.launchEditoraSenacHomePage();
+	}
+
+	@description = "Automation ID: SSPU-186 | Test Summary: Verify that there is a 'Nosso catalogo' section which can be navigated"
+	@priority = 5
+	test CanNavigateToDifferentBookCategories {
+		task ("Given 'Nosso Catálogo' section is visible") {
+			ESHomePage.viewNossoCatalogoCarousel();
+		}
+
+		task ("When I go to the first category in 'Nosso Catálogo' section") {
+			var categoryName = ESHomePage.getCategoryNameFromNossoCatalogoSection(itemNumber = 1);
+
+			ESHomePage.goToCategoryFromNossoCatalogoSection(itemNumber = 1);
+		}
+
+		task ("Then I should be redirected to the proper category page") {
+			ESGeneral.viewPage(
+				breadcrumbItem = ${categoryName},
+				partialURL = "/categoria");
+		}
+
+		task ("When I click at the third category in 'Nosso Catálogo' section") {
+			Utils.launchEditoraSenacHomePage();
+
+			var categoryName = ESHomePage.getCategoryNameFromNossoCatalogoSection(itemNumber = 3);
+
+			ESHomePage.goToCategoryFromNossoCatalogoSection(itemNumber = 3);
+		}
+
+		task ("Then I should be redirected to the proper category page") {
+			ESGeneral.viewPage(
+				breadcrumbItem = ${categoryName},
+				partialURL = "/categoria");
+		}
+	}
+
+	@description = "Automation ID: SSPU-186 | Test Summary: Verify that page footer has some social media links"
+	@priority = 5
+	test CanNavigateToSocialMediaLinks {
+		task ("When I go to facebook by clicking at the footer option") {
+			ESGeneral.goToSocialMediaPage(socialMediaName = "facebook");
+		}
+
+		task ("Then I should be redirected to facebook") {
+			Default.SelectWindow.selectPopUp(locator1 = "null");
+
+			ESGeneral.viewPage(
+				partialURL = "facebook",
+				relatedText = "Editora Senac");
+		}
+
+		task ("When I go to instagram by clicking at the footer option") {
+			Default.Close.closeWindow();
+
+			ESGeneral.goToSocialMediaPage(socialMediaName = "instagram");
+		}
+
+		task ("Then I should be redirected to instagram") {
+			Default.SelectWindow.selectPopUp(locator1 = "null");
+
+			ESGeneral.viewPage(
+				partialURL = "instagram",
+				relatedText = "Editora Senac");
+		}
+
+		task ("When I go to youtube by clicking at the footer option") {
+			Default.Close.closeWindow();
+
+			ESGeneral.goToSocialMediaPage(socialMediaName = "youtube");
+		}
+
+		task ("Then I should be redirected to youtube") {
+			Default.SelectWindow.selectPopUp(locator1 = "null");
+
+			ESGeneral.viewPage(
+				partialURL = "youtube",
+				relatedText = "Editora Senac");
+		}
+	}
+
+	@description = "Automation ID: SSPU-186 | Test Summary: Verify that there is a 'Lancamentos' section and the carousel can be navigated"
+	@priority = 5
+	test CanSwipeOnLancamentosCarousel {
+		task ("Given 'LANÇAMENTOS' carousel is visible in home page with some active items") {
+			ESHomePage.viewLancamentosCarousel();
+
+			ESHomePage.viewActiveItemInLancamentosCarousel(itemNumber = 1);
+
+			ESHomePage.viewActiveItemInLancamentosCarousel(itemNumber = 4);
+		}
+
+		task ("When I swipe to the next slide") {
+			ESHomePage.swipeSlideInLancamentosCarousel(
+				activeItemNumber = 1,
+				swipeOption = "next");
+		}
+
+		task ("Then the items from next slide should be visible") {
+			ESHomePage.viewActiveItemInLancamentosCarousel(itemNumber = 5);
+
+			ESHomePage.viewActiveItemInLancamentosCarousel(itemNumber = 8);
+		}
+
+		task ("When I swipe back to the previous slide") {
+			ESHomePage.swipeSlideInLancamentosCarousel(
+				activeItemNumber = 5,
+				swipeOption = "previous");
+		}
+
+		task ("Then the items from previous slide should be visible") {
+			ESHomePage.viewActiveItemInLancamentosCarousel(itemNumber = 1);
+
+			ESHomePage.viewActiveItemInLancamentosCarousel(itemNumber = 4);
+		}
+	}
+
+	@description = "Automation ID: SSPU-186 | Test Summary: Verify that there is a main carousel that can be navigated"
+	@priority = 5
+	test CanSwipeOnMainCarousel {
+		task ("Given main carousel is visible in home page with an active slide") {
+			ESHomePage.viewMainCarousel();
+
+			ESHomePage.viewActiveSlideInMainCarousel(slideNumber = 1);
+		}
+
+		task ("When I swipe to the next slide") {
+			ESHomePage.swipeSlideInMainCarousel(
+				slideNumber = 1,
+				swipeOption = "next");
+		}
+
+		task ("Then the next slide should be visible") {
+			ESHomePage.viewActiveSlideInMainCarousel(slideNumber = 2);
+		}
+
+		task ("When I swipe back to the previous slide") {
+			ESHomePage.swipeSlideInMainCarousel(
+				slideNumber = 2,
+				swipeOption = "previous");
+		}
+
+		task ("Then the previous slide should be visible") {
+			ESHomePage.viewActiveSlideInMainCarousel(slideNumber = 1);
+		}
+	}
+
+	@description = "Automation ID: SSPU-186 | Test Summary: Verify main menu is displayed with the options 'Sobre a editora, Categorias, Fale com a gente, Publique sua obra' and it is possible to navigate through menu options"
+	@priority = 5
+	test MenuCanBeNavigated {
+		task ("Given navigation bar is visible with whe items 'Sobre a editora, Categorias, Fale com a gente, Publique sua obra'") {
+			ESHomePage.viewNavigationMenuItems();
+		}
+
+		task ("When I click at 'Sobre a editora' in the navigation bar") {
+			ESHomePage.goToNavigationBarOption(navigationMenuItem = "Sobre a editora");
+		}
+
+		task ("Then I should be redirected to 'Sobre a editora' page") {
+			ESGeneral.viewPage(
+				breadcrumbItem = "Sobre a editora",
+				partialURL = "/sobre-a-editora");
+		}
+
+		task ("When I click at 'Conferir todos os livros' in the navigation bar") {
+			ESHomePage.goToNavigationBarOption(
+				navigationMenuItem = "Categorias",
+				navigationSubmenuItem = "Conferir todos os livros");
+		}
+
+		task ("Then I should be redirected to 'catalogo' page") {
+			ESGeneral.viewPage(
+				breadcrumbItem = "Nosso Catálogo",
+				partialURL = "/catalogo");
+		}
+	}
+
+}
