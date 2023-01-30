@@ -155,4 +155,113 @@ definition {
 		}
 	}
 
+	@description = "Automation ID: PPLUPGD1122-77 | Test Summary: Verify that the user can report a damaged shipment (electronic)"
+	@priority = "5"
+	test CanReportDamagetShipment {
+		task ("Giving the user is redirected to the	'Shipment' form section") {
+			Complaints.fillForm(
+				postCode = "25101",
+				shipmentNumber = "44122200158");
+
+			Complaints.continueForm();
+
+			Complaints.selectComplaintRadio(radioOption = "recipient");
+
+			Complaints.fillForm(
+				city = "Prague",
+				companyName = "liferay",
+				emailAddress = "test@test.com",
+				phoneNumber = "000000000",
+				postCode = "25101",
+				streetNumber = "Sokolovská 651/136A");
+
+			Complaints.checkPrivacyConditions();
+
+			Complaints.continueForm();
+
+			Complaints.viewClaimStatus(
+				itemName = "Shipment",
+				itemStatus = "active");
+		}
+
+		task ("When the user fills the 'Shipment' form section selecting the 'Damaged' status") {
+			Complaints.selectShipmentCategoryDropdown(shipmentCategoryOption = "Electronics (TV, phones, PC, ntb)");
+
+			Complaints.fillTextareaInput(
+				additionalInformation = "test",
+				describeContent = "test",
+				describeDamage = "test");
+
+			Complaints.selectComplaintRadio(radioOption = "Damaged");
+
+			Complaints.fillForm(priceOfContent = "00");
+
+			Complaints.selectComplaintRadio(radioOption = "Cardboard box");
+
+			Complaints.selectComplaintCheckbox(checkboxLabel = "Polystyrene");
+
+			Complaints.selectComplaintCheckbox(checkboxLabel = "Deformed");
+
+			Complaints.selectComplaintCheckbox(inputId = "HandlingMark_1");
+
+			Complaints.continueForm();
+		}
+
+		task ("Then the the claim status is updated and the user is redirected for the 'Attachements' form section") {
+			Complaints.viewClaimStatus(
+				itemName = "Shipment",
+				itemStatus = "done");
+
+			Complaints.viewClaimStatus(
+				itemName = "Attachments",
+				itemStatus = "active");
+		}
+
+		task ("When the user fills the 'Attachments' form section") {
+			Complaints.uploadFile(
+				fileInputOption = "outerPackaging",
+				fileName = "Commerce_Black.jpg");
+
+			Complaints.uploadFile(
+				fileInputOption = "detailPackaging",
+				fileName = "Commerce_Blue.jpg");
+
+			Complaints.uploadFile(
+				fileInputOption = "addressLabel",
+				fileName = "Commerce_White.jpg");
+
+			Complaints.uploadFile(
+				fileInputOption = "locationOfGoods",
+				fileName = "Document_1.jpg");
+
+			Complaints.uploadFile(
+				fileInputOption = "damageToGoods",
+				fileName = "Document_2.jpg");
+
+			Complaints.uploadFile(
+				fileInputOption = "serialNumberPhoto",
+				fileName = "Document_3.jpg");
+
+			Complaints.uploadFile(
+				fileInputOption = "invoicePhoto",
+				fileName = "Document_4.jpg");
+
+			Complaints.continueForm();
+		}
+
+		task ("Then the claim status is updated and the user is redirected for the 'Summary' form section") {
+			Complaints.viewClaimStatus(
+				itemName = "Attachments",
+				itemStatus = "done");
+
+			Complaints.viewClaimStatus(
+				itemName = "Summary",
+				itemStatus = "active");
+		}
+
+		Complaints.viewInputedData(
+			formField = "Status of the shipment content",
+			inputedData = "Damaged");
+	}
+
 }
