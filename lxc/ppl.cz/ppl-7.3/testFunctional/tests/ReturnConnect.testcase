@@ -6,6 +6,33 @@ definition {
 		General.acceptCookies();
 	}
 
+	@description = "Automation ID: PPLUPGD1122-83 | Test Summary: Verify that a error is displayed when the user enters a incorrect shipment number"
+	@priority = "5"
+	test CannotReturnParcelWithInvalidShippmentNumber {
+		task ("Given that these are the scenario data") {
+			var buttonActivateLabel = "3";
+			var invalidShipmentNuber = "11111111111";
+			var invalidZipCode = "11111";
+		}
+
+		task ("When the customer opens the goods return screen and fills in the fields with incorrect data") {
+			ReturnConnect.gotoReturnShipment(numberButton = "${buttonActivateLabel}");
+
+			ReturnConnect.returningAConsignment(
+				inputName = "shipmentId",
+				inputValue = "${invalidShipmentNuber}");
+
+			ReturnConnect.returningAConsignment(
+				buttonSubmit = "true",
+				inputName = "validationCode",
+				inputValue = "${invalidZipCode}");
+		}
+
+		task ("Then an error message appears") {
+			ReturnConnect.viewErrorMessage(errorMessage = "Shipment not found, contact PPL for further procedure.");
+		}
+	}
+
 	@description = "Automation ID: PPLUPGD1122-82 | Test Summary: Verify that the user is able to return goods via parcelshop or parcelbox"
 	@priority = "5"
 	test CanReturnParcel {
