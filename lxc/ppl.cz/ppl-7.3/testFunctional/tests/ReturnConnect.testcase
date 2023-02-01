@@ -1,0 +1,65 @@
+definition {
+
+	setUp {
+		Utils.launchUatHomePage();
+
+		General.acceptCookies();
+	}
+
+	@description = "Automation ID: PPLUPGD1122-82 | Test Summary: Verify that the user is able to return goods via parcelshop or parcelbox"
+	@priority = "5"
+	test CanReturnParcel {
+		task ("Given that these are the scenario data") {
+			var buttonActivateLabel = "3";
+			var shipmentNumber = "60118633168";
+			var zipCode = "25101";
+			var parcelBox = "1";
+			var parcelShop = "2";
+			var parcelBoxAdress = "Nádražní 1375, 34201 Sušice";
+			var parcelShopAdress = "Elektroslužby Andelt";
+		}
+
+		task ("When the customer opens the goods return screen and fills in the data to return using the parcel box") {
+			ReturnConnect.gotoReturnShipment(numberButton = "${buttonActivateLabel}");
+
+			ReturnConnect.returningAConsignment(
+				inputName = "shipmentId",
+				inputValue = "${shipmentNumber}");
+
+			ReturnConnect.returningAConsignment(
+				buttonSubmit = "true",
+				inputName = "validationCode",
+				inputValue = "${zipCode}");
+
+			ReturnConnect.sendReturnConsignment(
+				mapInput = "${parcelBoxAdress}",
+				methodReturn = "${parcelBox}");
+		}
+
+		task ("Then the page loaded") {
+			ReturnConnect.viewIfThePageHasLoaded();
+		}
+
+		task ("When the customer opens the goods return screen and fills in the data to return using the parcel shop") {
+			ReturnConnect.gotoReturnShipment(numberButton = "${buttonActivateLabel}");
+
+			ReturnConnect.returningAConsignment(
+				inputName = "shipmentId",
+				inputValue = "${shipmentNumber}");
+
+			ReturnConnect.returningAConsignment(
+				buttonSubmit = "true",
+				inputName = "validationCode",
+				inputValue = "${zipCode}");
+
+			ReturnConnect.sendReturnConsignment(
+				mapInput = "${parcelShopAdress}",
+				methodReturn = "${parcelShop}");
+		}
+
+		task ("Then the page loaded") {
+			ReturnConnect.viewIfThePageHasLoaded();
+		}
+	}
+
+}
