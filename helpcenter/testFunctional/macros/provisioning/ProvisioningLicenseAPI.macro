@@ -2426,6 +2426,125 @@ definition {
 		}
 	}
 
+	@prose = "I should be able to view the license on the account ${accountName} with the name ${licenseName} and the following values ${table}"
+	macro _viewLicenseKeyIdViaLicenseNameAndValues {
+		var accountKey = KoroneikiAccountAPI._getAccountKeyViaAccountName(accountName = "${accountName}");
+		var keyword = StringUtil.replace("${licenseName}", " ", "+");
+
+		var curl = '''
+			${provisioningURL}/o/provisioning-rest/v1.0/accounts/${accountKey}/license-keys?search=%22${keyword}%22\&pageSize=100 --tlsv1.2
+			-u ${provisioningAdminEmail}:${provisioningAdminPassword}
+			-H "accept: application/json"
+			-H "Content-Type: application/json"
+			''';
+
+		var RawTable rawTable = new RawTable("${table}");
+
+		for (var row : table "${rawTable}") {
+			var field = "${row[0]}";
+			var value = "${row[1]}";
+
+			if (("${field}" == "Name") || ("${field}" == "Description") || ("${field}" == "Host Name") || ("${field}" == "Product Name") || ("${field}" == "Product Version") || ("${field}" == "License Entry Type") || ("${field}" == "Active") || ("${field}" == "Complimentary") || ("${field}" == "Start Date") || ("${field}" == "Expiration Date")) {
+				var fieldFormatted = ProvisioningLicenseAPI._formatCamelCase(camelCase = "${field}");
+
+				var licenseValueFromAPI = JSONCurlUtil.get("${curl}", "$.items[?(@.name=='${licenseName}')].${fieldFormatted}");
+
+				var licenseValueFromAPI = ProvisioningLicenseAPI._formatApiResponse(valueFormatted = "${licenseValueFromAPI}");
+
+				echo("Expected license key ${field} value: ${value}");
+
+				echo("Actual license key ${field} value: ${licenseValueFromAPI}");
+
+				if ("${value}" != "${licenseValueFromAPI}") {
+					fail("Actual ${field} license field does not has the expected value");
+				}
+			}
+			else if ("${field}" == "IP Addresses") {
+				var fieldFormatted = "ipAddresses";
+
+				var licenseValueFromAPI = JSONCurlUtil.get("${curl}", "$.items[?(@.name=='${licenseName}')].${fieldFormatted}");
+
+				var licenseValueFromAPI = ProvisioningLicenseAPI._formatApiResponse(valueFormatted = "${licenseValueFromAPI}");
+
+				echo("Expected license key ${field} value: ${value}");
+
+				echo("Actual license key ${field} value: ${licenseValueFromAPI}");
+
+				if ("${value}" != "${licenseValueFromAPI}") {
+					fail("Actual ${field} license field does not has the expected value");
+				}
+			}
+			else if ("${field}" == "MAC Addresses") {
+				var fieldFormatted = "macAddresses";
+
+				var licenseValueFromAPI = JSONCurlUtil.get("${curl}", "$.items[?(@.name=='${licenseName}')].${fieldFormatted}");
+
+				var licenseValueFromAPI = ProvisioningLicenseAPI._formatApiResponse(valueFormatted = "${licenseValueFromAPI}");
+
+				echo("Expected license key ${field} value: ${value}");
+
+				echo("Actual license key ${field} value: ${licenseValueFromAPI}");
+
+				if ("${value}" != "${licenseValueFromAPI}") {
+					fail("Actual ${field} license field does not has the expected value");
+				}
+			}
+			else if ("${field}" == "Instance Size") {
+				var fieldFormatted = "sizing";
+
+				var licenseValueFromAPI = JSONCurlUtil.get("${curl}", "$.items[?(@.name=='${licenseName}')].${fieldFormatted}");
+
+				var licenseValueFromAPI = ProvisioningLicenseAPI._formatApiResponse(valueFormatted = "${licenseValueFromAPI}");
+
+				echo("Expected license key ${field} value: Sizing ${value}");
+
+				echo("Actual license key ${field} value: ${licenseValueFromAPI}");
+
+				if ("Sizing ${value}" != "${licenseValueFromAPI}") {
+					fail("Actual ${field} license field does not has the expected value");
+				}
+			}
+			else if ("${field}" == "Maximum Cluster Nodes") {
+				var fieldFormatted = "maxClusterNodes";
+
+				var licenseValueFromAPI = JSONCurlUtil.get("${curl}", "$.items[?(@.name=='${licenseName}')].${fieldFormatted}");
+
+				var licenseValueFromAPI = ProvisioningLicenseAPI._formatApiResponse(valueFormatted = "${licenseValueFromAPI}");
+
+				echo("Expected license key ${field} value: ${value}");
+
+				echo("Actual license key ${field} value: ${licenseValueFromAPI}");
+
+				if ("${value}" != "${licenseValueFromAPI}") {
+					fail("Actual ${field} license field does not has the expected value");
+				}
+			}
+			else {
+				fail("This license field ${field} either does not exist or has not been added to the macro yet for testing.");
+			}
+		}
+	}
+
+	macro _formatCamelCase {
+		var camelCase = StringUtil.replace("${camelCase}", " ", "");
+
+		var camelCase = StringUtil.lowerCaseFirstLetter("${camelCase}");
+
+		return "${camelCase}";
+	}
+
+	macro _formatApiResponse {
+		var valueFormatted = StringUtil.replace("${valueFormatted}", "[", "");
+
+		var valueFormatted = StringUtil.replace("${valueFormatted}", "]", "");
+
+		var valueFormatted = StringUtil.replace("${valueFormatted}", "\"", "");
+
+		var valueFormatted = StringUtil.replace("${valueFormatted}", "+", " ");
+
+		return "${valueFormatted}";
+	}
+
 	@prose = "I should be able to view the license on the account ${accountName} with the name ${licenseName}"
 	macro _viewLicenseKeyIdViaLicenseName {
 		var accountKey = KoroneikiAccountAPI._getAccountKeyViaAccountName(accountName = "${accountName}");
