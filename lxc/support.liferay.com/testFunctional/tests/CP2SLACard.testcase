@@ -1,0 +1,42 @@
+definition {
+
+	property test.env = "uat";
+	property testray.main.component.name = "Customer Portal 2.0";
+
+	setUp {
+		Utils.launchUatPage();
+
+		Login.loginAsAdminUser();
+	}
+
+    @description = "Automation ID: LRQA-79293 | Test Summary: Check if when cards have the same support level the previous deadline date is extended."
+	@priority = "4"
+	test CardsAtTheSameSupportLevelThePreviousDeadlineIsExtended {
+		task ("Given I get the start date of oldest license") {
+			var startDate = CP2Utils.getValueFieldKoroneikiByAccountName(
+				accountName = "2022 FIFA World Cup Qatar - FAN ID",
+				field = "SLA Current Start Date");
+		}
+
+		task ("And I get the end date of the newest license") {
+			var endDate = CP2Utils.getValueFieldKoroneikiByAccountName(
+				accountName = "2022 FIFA World Cup Qatar - FAN ID",
+				field = "SLA Current End Date");
+		}
+
+		task ("And to Customer Portal Site") {
+			Portal.ApplicationsMenu.gotoSite(key_site = "Customer Portal");
+		}
+
+		task ("And I go to the test account") {
+			HomePage.searchProject(projectName = "2022 FIFA World Cup Qatar - FAN ID");
+
+			Portal.CustomerPortal.enterOnProject(title = "2022 FIFA World Cup Qatar - FAN ID");
+		}
+
+		task ("Then I should be able to view SLA Start and End Date of Current") {
+			Portal.CP2Overview.assertSLACardUnicContentIsVisible(cardContent = "06/30/2021 - 03/30/2023");
+		}
+	}
+
+}
