@@ -224,7 +224,7 @@ definition {
 		Marketplace.gotoRelativeURL(url = "${url}");
 	}
 
-	macro viewApplicationImages {
+	macro viewAppImages {
 		var key_positionValue = "1";
 		var imagesRemain = "true";
 
@@ -232,31 +232,34 @@ definition {
 
 		WaitForPageLoad();
 
-		Marketplace.viewNoErrors();
+		Marketplace.countPageApps();
 
-		while (("${imagesRemain}" == "true") && (maxIterations = "100")) {
-			WaitForElementPresent(locator1 = "Marketplace#CARD_IMAGE");
+		if (IsElementPresent(locator1 = "Marketplace#CARD_IMAGE")) {
 
-			while (IsElementPresent(locator1 = "Marketplace#CARD_IMAGE") && (maxIterations = "100")) {
-				if (IsNotVisible(locator1 = "Marketplace#CARD_IMAGE")) {
+			while (("${imagesRemain}" == "true") && (maxIterations = "100")) {
 
-					AssertElementPresent(locator1 = "Marketplace#CARD_IMAGE");
+				if (IsElementPresent(locator1 = "Marketplace#CARD_IMAGE")) {
+					if (IsNotVisible(locator1 = "Marketplace#CARD_IMAGE")) {
 
-					ScrollWebElementIntoView(locator1 = "Marketplace#CARD_IMAGE");
+						AssertElementPresent(locator1 = "Marketplace#CARD_IMAGE");
+
+						ScrollWebElementIntoView(locator1 = "Marketplace#CARD_IMAGE");
+					}
+					else if (IsVisible(locator1 = "Marketplace#CARD_IMAGE")) {
+						AssertVisible(locator1 = "Marketplace#CARD_IMAGE");
+					}
+
+					if (("${key_positionValue}" == "${totalPageApps}") && (IsElementNotPresent(locator1 = "Marketplace#NEXT_LINK_DISABLED"))) {
+						var key_positionValue = "0";
+
+						Click(locator1 = "Marketplace#NEXT_LINK");
+					}
+
+					var key_positionValue = ${key_positionValue} + 1;
 				}
-				else if (IsVisible(locator1 = "Marketplace#CARD_IMAGE")) {
-					AssertVisible(locator1 = "Marketplace#CARD_IMAGE");
+				else {
+					var imagesRemain = "false";
 				}
-
-				var key_positionValue = ${key_positionValue} + 1;
-			}
-			if (IsElementNotPresent(locator1 = "Marketplace#NEXT_LINK_DISABLED") && (IsElementPresent(locator1 = "Marketplace#NEXT_LINK"))) {
-				var key_positionValue = "1";
-
-				Click(locator1 = "Marketplace#NEXT_LINK");
-			}
-			else {
-				var imagesRemain = "false";
 			}
 		}
 
@@ -376,7 +379,7 @@ definition {
 
 		Marketplace.gotoRelativeURL(url = "${url}");
 
-		Marketplace.viewApplicationImages(url = "${url}");
+		Marketplace.viewAppImages(url = "${url}");
 
 		Marketplace.view100AppCards(url = "${url}");
 
