@@ -177,6 +177,53 @@ definition {
 		}
 	}
 
+	macro view100AppCards {
+		var key_positionValue = "1";
+		var cardLinksRemain = "true";
+
+		var pageElementsFound = ${pageElementsFound} + 1;
+
+		WaitForPageLoad();
+
+		Marketplace.viewNoErrors();
+
+		if (IsElementPresent(locator1 = "Marketplace#CARD_LINK")) {
+
+			while (("${cardLinksRemain}" == "true") && (maxIterations = "100")) {
+				if(IsElementPresent(locator1 = "Marketplace#CARD_LINK")) {
+					var applicationCardLink = selenium.getAttribute("xpath=(//a[contains(@class,'search-results-card')])[${key_positionValue}]@href");
+
+					echo("Application Card Link: ${applicationCardLink}");
+
+					Click(locator1 = "Marketplace#CARD_LINK");
+
+					WaitForPageLoad();
+
+					Marketplace.viewNoErrors();
+
+					Marketplace.viewApplicationPageLinks(url = "${url}");
+
+					Marketplace.populateAndSubmitForm(url = "${url}");
+
+					GoBack();
+
+					if (("${key_positionValue}" == "${totalPageApps}") && (IsElementNotPresent(locator1 = "Marketplace#NEXT_LINK_DISABLED"))) {
+						var key_positionValue = "0";
+
+						Click(locator1 = "Marketplace#NEXT_LINK");
+					}
+
+					var key_positionValue = ${key_positionValue} + 1;
+				}
+				else {
+					var cardLinksRemain = "false";
+				}
+			}
+		}
+
+		Marketplace.gotoRelativeURL(url = "${url}");
+	}
+
 	macro viewApplicationImages {
 		var key_positionValue = "1";
 		var imagesRemain = "true";
@@ -330,6 +377,8 @@ definition {
 		Marketplace.gotoRelativeURL(url = "${url}");
 
 		Marketplace.viewApplicationImages(url = "${url}");
+
+		Marketplace.view100AppCards(url = "${url}");
 
 		Marketplace.viewCheckboxFilters();
 
