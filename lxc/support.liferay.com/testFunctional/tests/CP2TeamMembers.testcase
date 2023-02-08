@@ -9,6 +9,45 @@ definition {
 		Login.loginAsAdminUser();
 	}
 
+	@description = "Automation ID: LRQA-79283 | Test Summary: Verify that if the user clicks the Remove confirmation button the staff member is indeed removed"
+	@priority = "5"
+	test CanViewIfTheUserIsRemoved {
+		task ("Given team members page is open") {
+			HomePage.searchProject(projectName = "2022 FIFA World Cup Qatar - FAN ID");
+
+			Portal.CustomerPortal.enterOnProject(title = "2022 FIFA World Cup Qatar - FAN ID");
+
+			Portal.CP2NavigationMenu.goToTeamMembers();
+
+			Portal.CustomerPortal.clickAtButton(text = "Invite");
+		}
+
+		task ("When I invite the users to the project") {
+			CP2TeamMembers.addFieldsTeamMembers(
+				addMembers = "true",
+				rowEmailList = "test1",
+				rowRole = "Administrator");
+
+			CP2TeamMembers.sendInvitation();
+		}
+
+		task ("Then I remove the user from the project") {
+			Portal.CP2Utils.openActionMenu(
+				menuItem = "Remove",
+				openUser = "test1@liferay.com");
+
+			Default.AssertElementPresent(
+				locator1 = "Portal.CP2Utils#MODAL",
+				value = "Are you sure you want to remove this team member from the project?");
+
+			Portal.Button.click(button = "Remove");
+		}
+
+		Default.AssertElementNotPresent(
+			locator1 = "Portal.CP2TeamMembers#TABLE",
+			value = "test1@liferay.com");
+	}
+
 	@description = "Automation ID: LRQA-79218 | Test Summary: Verify if when a Project has reached or is reaching the limit, the ticket requestor role should be disabled in drop down"
 	@priority = 4
 	test IfMaxRequestorDropDisabled {
@@ -22,7 +61,11 @@ definition {
 			Portal.CustomerPortal.clickAtButton(text = "Invite");
 		}
 
+<<<<<<< HEAD
+		task ("When I invite multiple users to the project") {
+=======
 		task ("When I invite the users to the project") {
+>>>>>>> eec8bee (LRQA-79215 Testcase SF)
 			CP2TeamMembers.addFieldsTeamMembers(
 				rowEmailList = "test1,test2,test3,test4,test5,test6,test7",
 				rowRole = "Requester");
