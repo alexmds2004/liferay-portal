@@ -307,11 +307,14 @@ definition {
         }
     }
 
+	@prose = "I should be able to view the checkboxes of the ${url}"
 	macro viewCheckboxFilters {
 		var key_positionValue = "1";
 		var checkboxFiltersRemain = "true";
 
-		var pageElementsFound = ${pageElementsFound} + 1;
+		static var staticErrorCount = "0";
+
+		Marketplace.gotoRelativeURL(url = "${url}");
 
 		WaitForPageLoad();
 
@@ -333,6 +336,10 @@ definition {
 			}
 
 			var checkboxFiltersRemain = "false";
+		}
+
+		if ("${staticErrorCount}" != "0") {
+			fail("A total of ${staticErrorCount} errors were found. Please investigate.");
 		}
 	}
 
@@ -382,8 +389,6 @@ definition {
 		Marketplace.viewAppImages(url = "${url}");
 
 		Marketplace.view100AppCards(url = "${url}");
-
-		Marketplace.viewCheckboxFilters();
 
 		if ("${url}" == "web/marketplace") {
             Marketplace.viewFooterNavigationLinks(url = "${url}");
