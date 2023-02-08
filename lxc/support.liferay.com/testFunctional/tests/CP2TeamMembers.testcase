@@ -9,9 +9,9 @@ definition {
 		Login.loginAsAdminUser();
 	}
 
-	@description = "Automation ID: LRQA-79215 | Test Summary: Verify if the user can invite multiple emails with roles on team members on the same screen."
+	@description = "Automation ID: LRQA-79218 | Test Summary: Verify if when a Project has reached or is reaching the limit, the ticket requestor role should be disabled in drop down"
 	@priority = "4"
-	test MultipleEmailsWithRoleAtOnce {
+	test IfMaxRequestorDropDisabled {
 		task ("Given team members page is open") {
 			HomePage.searchProject(projectName = "2022 FIFA World Cup Qatar - FAN ID");
 
@@ -22,33 +22,14 @@ definition {
 			Portal.CustomerPortal.clickAtButton(text = "Invite");
 		}
 
-		task ("When I invite multiple users to the project") {
+		task ("When I invite the users to the project") {
 			CP2TeamMembers.addFieldsTeamMembers(
-				addMembers = "true",
-				rowEmailList = "test1,test2,test3",
-				rowRole = "Administrator");
-
-			CP2TeamMembers.sendInvitation();
+				rowEmailList = "test1,test2,test3,test4,test5,test6,test7",
+				rowRole = "Requester");
 		}
 
-		task ("Then the users are visible in the table with Invited status") {
-			Portal.CP2TeamMembers.viewTableValue(
-				email = "test2@liferay.com",
-				name = "test2@liferay.com",
-				role = "Administrator",
-				status = "Invited");
-
-			Portal.CP2TeamMembers.viewTableValue(
-				email = "test1@liferay.com",
-				name = "test1@liferay.com",
-				role = "Administrator",
-				status = "Invited");
-
-			Portal.CP2TeamMembers.viewTableValue(
-				email = "test3@liferay.com",
-				name = "test3@liferay.com",
-				role = "Administrator",
-				status = "Invited");
+		task ("Then the dropdown option should be disabled") {
+			Default.AssertElementPresent(locator1 = "CP2TeamMembers#ROLE_INVITE");
 		}
 	}
 
