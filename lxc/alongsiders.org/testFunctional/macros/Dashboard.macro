@@ -16,6 +16,33 @@ definition {
 		}
 	}
 
+	@summary = "View if the slice values are different or the same"
+	macro viewChartDifferentOrEqual {
+		var dataValuesCount = "";
+
+		for (var key_index : list "1,2,3,4,5,6,7,8,9,10,11,12,13") {
+			Default.WaitForPageLoad();
+
+			Default.WaitForVisible(locator1 = "Dashboard#PIE_CHART_INDEX");
+
+			var dataValue1 = selenium.getAttribute("xpath=(//div/*[contains(text(),'LBS School Grade')]//following-sibling::div//div[@id='apexchartsPieChart']//*[name()='g'][contains(@class,'apexcharts-pie')]/*[name()='path'])[${key_index}]@data:value");
+
+			var dataValuesCount = StringUtil.concat(${dataValuesCount}, "${dataValue1},");
+
+			echo(${dataValuesCount});
+		}
+
+		for (var dataValues : list ${dataValuesCount}) {
+			var count = StringUtil.count(${dataValuesCount}, ${dataValues});
+
+			echo(${count});
+
+			if (${count} == 4) {
+				fail("This chart has at least 4 equal values.");
+			}
+		}
+	}
+
 	@summary = "View card numbers 'Movements'"
 	macro viewDashboardsMovements {
 		var count = 0;
