@@ -1,0 +1,60 @@
+definition {
+
+	property test.env = "uat";
+	property testray.main.component.name = "Customer Portal 2.0";
+
+	setUp {
+		Utils.launchUatPage();
+
+		Login.loginAsAdminUser();
+	}
+
+	tearDown {
+		CP2ActivationKeys.deactivateExistingKey(environmentName = "Liferay Test");
+	}
+
+	@description = "Automation ID: LRQA-79353 | Test Summary:  Verify that the new 'Virtual Cluster' key has been generated"
+	@priority = 5
+	test CanViewIfTheNewVirtualClusterKeyHasBeenGenerated {
+		task ("Given that I go to the key generation form for the DXP product in an existing project") {
+			HomePage.searchProject(projectName = "2022 FIFA World Cup Qatar - FAN ID");
+
+			Portal.CustomerPortal.enterOnProject(title = "2022 FIFA World Cup Qatar - FAN ID");
+
+			Portal.CP2NavigationMenu.goToProductActivation();
+
+			Portal.CP2NavigationMenu.clickOnProductButton(product = "DXP");
+
+			Portal.CP2ActivationKeys.generateNewKey();
+		}
+
+		task ("Then I fulfill first phase form for Generate New License") {
+			Portal.CP2ActivationKeys.selectGenerateActivationKeyOptionByField(
+				field = "Key Type",
+				option = "Backup (Virtual Cluster)");
+
+			Portal.CP2ActivationKeys.selectFistActiveSubscriptionInput();
+
+			Portal.CustomerPortal.clickAtButton(text = "Next");
+		}
+
+		task ("And after I fill in the Cluster Nodes field, then the key is generated") {
+			Portal.CP2ActivationKeys.environmentDetails(
+				environmentDetails = "name",
+				value = "Liferay Test");
+
+			Portal.CP2ActivationKeys.selectClusterNodes(key_option = 1);
+
+			Portal.CustomerPortal.clickAtButton(text = "Generate Cluster (1 Keys)");
+
+			Alert.viewSuccessMessage();
+		}
+
+		task ("Then I should be able to see the generated key in the table") {
+			CP2ActivationKeys.viewActivationKeyDetails(environmentName = "Liferay Test");
+
+			Portal.CustomerPortal.clickAtButton(text = "Close");
+		}
+	}
+
+}
