@@ -9,6 +9,58 @@ definition {
 		Login.signIn();
 	}
 
+	tearDown {
+		Portal.ApplicationsMenu.gotoPortlet(
+			category = "Content",
+			panel = "Applications",
+			portlet = "Movements");
+
+		Portal.ObjectPortlet.searchEntry(entryName = "testlxc");
+
+		Portal.CreateObject.deleteObjectViaUI(objectLabel = "testlxc");
+
+		Default.Confirm.acceptAlert();
+	}
+
+	@description = "Automation ID: LRQA-79438 | Test Summary: Verify that Movements data is changing when manipulating data via Objects interaction (adding new data / editing existing data)"
+	@priority = 5
+	test MovementIsUpdatedThroughObjectsManipulation {
+		task ("Given that the user is on the dashboard screen and checks the value in 'Sprouting Movement'") {
+			Portal.Navigator.openWithAppendToBaseURL(urlAppend = "dashboard");
+
+			var beforeValue = Dashboards.getMovementsValue();
+		}
+
+		task ("When the user adds a new movement") {
+			Portal.ApplicationsMenu.gotoPortlet(
+				category = "Content",
+				panel = "Applications",
+				portlet = "Movements");
+
+			Portal.LexiconEntry.gotoAdd();
+
+			Dashboards.typeMovementsForm(
+				inputName = "Movement Phase",
+				itemName = "Sprouting Movement",
+				movementId = 999,
+				name = "testlxc");
+
+			Portal.PortletEntry.save();
+		}
+
+		task ("Given that the user is on the dashboard screen and checks the value in 'Sprouting Movement'") {
+			Portal.Navigator.openWithAppendToBaseURL(urlAppend = "dashboard");
+
+			var afterValue = Dashboards.getMovementsValue();
+		}
+
+		task ("Then the user checks if the added movement is counted in the dashboard") {
+			Portal.TestUtils.assertNotEquals(
+				actual = ${beforeValue},
+				expected = ${afterValue});
+		}
+	}
+
 	@description = "Automation ID: LRQA-79347 | Test Summary: Verify that cards at 'Data' section are loaded"
 	@priority = "5"
 	test ShowsCardsAtDataSection {
