@@ -1,36 +1,36 @@
 definition {
 
 	macro checkServiceReadyStatus {
-		var tries = "0";
-		var maxTries = "${maxTries}";
+		var tries = 0;
+		var maxTries = ${maxTries};
 		var user = PropsUtil.get("test.this.lcp.test.team.user.email");
 		var password = PropsUtil.get("test.this.lcp.test.team.user.password");
 		var baseURL = PropsUtil.get("test.this.lcp.test.base.url.api");
-		var projectID = "${projectID}";
-		var serviceID = "${serviceID}";
+		var projectID = ${projectID};
+		var serviceID = ${serviceID};
 
-		while (("${tries}" != "${maxTries}") && ("${readyStatus}" != "true")) {
+		while ((${tries} != ${maxTries}) && (${readyStatus} != "true")) {
 			var curl = '''
 				https://${baseURL}/projects/${projectID}/services/${serviceID} \
 					-u ${user}:${password} \
 			''';
 
-			var readyStatus = JSONCurlUtil.get("${curl}", "$['ready']");
+			var readyStatus = JSONCurlUtil.get(${curl}, "$['ready']");
 
-			if ("${readyStatus}" != "true") {
+			if (${readyStatus} != "true") {
 				echo("Status for service is ${readyStatus}. Try attempt #${tries}");
 
 				var tries = ${tries} + 1;
 
-				Default.Pause(locator1 = "5000");
+				Default.Pause(locator1 = 5000);
 			}
 			else {
-				return "${readyStatus}";
+				return ${readyStatus};
 
 				echo("Status for service is ${readyStatus}");
 			}
 
-			if ("${tries}" == "${maxTries}") {
+			if (${tries} == ${maxTries}) {
 				fail("Timed out with waiting for ${serviceID} service to be ready.");
 			}
 		}
@@ -39,18 +39,18 @@ definition {
 	macro fetchServiceStatus {
 		var user = PropsUtil.get("test.this.lcp.test.team.user.email");
 		var password = PropsUtil.get("test.this.lcp.test.team.user.password");
-		var serviceID = "${serviceID}";
-		var projectID = "${projectID}";
-		var serviceDomain = "${serviceDomain}";
+		var serviceID = ${serviceID};
+		var projectID = ${projectID};
+		var serviceDomain = ${serviceDomain};
 
 		var curl = '''
 			https://${serviceID}-${projectID}.${serviceDomain} \
 				-u ${user}:${password} \
 		''';
 
-		var serviceStatus = JSONCurlUtil.get("${curl}", "$['status']");
+		var serviceStatus = JSONCurlUtil.get(${curl}, "$['status']");
 
-		return "${serviceStatus}";
+		return ${serviceStatus};
 
 		echo("The service status is: ${serviceStatus}");
 	}
