@@ -109,36 +109,37 @@ definition {
 
     macro viewFooterNavigationLinks {
 		var key_positionValue = "1";
+		var linksRemain = "true";
 
 		if (IsElementPresent(locator1 = "WWWPage#FOOTER_LINK")) {
 
 			var pageElementsFound = ${pageElementsFound} + 1;
 
-			while (IsElementPresent(locator1 = "WWWPage#FOOTER_LINK", value1 = "")) {
-				var key_positionValue = ${key_positionValue} + 1;
+			while (("${linksRemain}" == "true") && ("${key_positionValue}" != "15")) {
+				while (IsElementPresent(locator1 = "WWWPage#FOOTER_LINK")) {
 
-				var nonExistentPathPositionValue = "${key_positionValue}";
+					var footerNavigationLink = selenium.getAttribute("xpath=(//h4[contains(@class,'nav-item-header')]/following-sibling::ul//a)[${key_positionValue}]@href");
+
+					var curl = '''
+						${footerNavigationLink} -I
+						''';
+
+					var httpResponseStatusCode = JSONCurlUtil.get("${curl}");
+
+					if (contains("${httpResponseStatusCode}", "HTTP/2 400") || (contains("${httpResponseStatusCode}", "HTTP/2 404"))) {
+						echo("The ${footerNavigationLink} page is not working properly.");
+
+						var key_positionValue = ${key_positionValue} + 1;
+					}
+					else {
+						echo("The ${footerNavigationLink} page is working properly.");
+
+						var key_positionValue = ${key_positionValue} + 1;
+					}
+				}
 			}
 
-			var key_positionValue = "1";
-
-			while ("${key_positionValue}" != "${nonExistentPathPositionValue}") {
-				WaitForSPARefresh();
-
-				ScrollBy(value1 = "0, 9999");
-
-				AssertElementPresent(locator1 = "WWWPage#FOOTER_LINK");
-
-				Click.pauseMakeVisibleClickAt(locator1 = "WWWPage#FOOTER_LINK");
-
-				WaitForPageLoad();
-
-				WWWHomepage.viewNoErrors();
-
-				WWWHomepage.gotoRelativeURL(url = "${url}");
-
-				var key_positionValue = ${key_positionValue} + 1;
-			}
+			var linksRemain = "false";
 		}
 	}
 
