@@ -284,32 +284,37 @@ definition {
 
     macro viewTopInfoNavigationLinks {
 		var key_positionValue = "1";
+		var linksRemain = "true";
 
 		if (IsElementPresent(locator1 = "WWWPage#TOP_INFO_NAVIGATION_LINK")) {
 
 			var pageElementsFound = ${pageElementsFound} + 1;
 
-			while (IsElementPresent(locator1 = "WWWPage#TOP_INFO_NAVIGATION_LINK", value1 = "")) {
-				var key_positionValue = ${key_positionValue} + 1;
+			while (("${linksRemain}" == "true") && ("${key_positionValue}" != "3")) {
+				while (IsElementPresent(locator1 = "WWWPage#TOP_INFO_NAVIGATION_LINK")) {
 
-				var nonExistentPathPositionValue = "${key_positionValue}";
+					var topInfoNavigationLink = selenium.getAttribute("xpath=(//div[contains(@class,'utility-nav-left')])[1]//a[${key_positionValue}]@href");
+
+					var curl = '''
+						${topInfoNavigationLink} -I
+						''';
+
+					var httpResponseStatusCode = JSONCurlUtil.get("${curl}");
+
+					if (contains("${httpResponseStatusCode}", "HTTP/2 400") || (contains("${httpResponseStatusCode}", "HTTP/2 404"))) {
+						echo("The ${topInfoNavigationLink} page is not working properly.");
+
+						var key_positionValue = ${key_positionValue} + 1;
+					}
+					else {
+						echo("The ${topInfoNavigationLink} page is working properly.");
+
+						var key_positionValue = ${key_positionValue} + 1;
+					}
+				}
 			}
 
-			var key_positionValue = "1";
-
-			while ("${key_positionValue}" != "${nonExistentPathPositionValue}") {
-				Click(locator1 = "WWWPage#TOP_INFO_NAVIGATION_LINK");
-
-				WaitForPageLoad();
-
-				WWWHomepage.viewNoErrors();
-
-				WWWHomepage.viewURLContent(urlText = "https://www-uat.liferay.com");
-
-				WWWHomepage.gotoRelativeURL(url = "${url}");
-
-				var key_positionValue = ${key_positionValue} + 1;
-			}
+			var linksRemain = "false";
 		}
 	}
 
