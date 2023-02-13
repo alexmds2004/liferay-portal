@@ -248,30 +248,37 @@ definition {
 
     macro viewSocialMediaFooterNavigationLinks {
 		var key_positionValue = "1";
+		var linksRemain = "true";
 
 		if (IsElementPresent(locator1 = "WWWPage#FOOTER_SOCIAL_MEDIA_LINK")) {
 
 			var pageElementsFound = ${pageElementsFound} + 1;
 
-			while (IsElementPresent(locator1 = "WWWPage#FOOTER_SOCIAL_MEDIA_LINK", value1 = "")) {
-				var key_positionValue = ${key_positionValue} + 1;
+			while (("${linksRemain}" == "true") && ("${key_positionValue}" != "6")) {
+				while (IsElementPresent(locator1 = "WWWPage#FOOTER_SOCIAL_MEDIA_LINK")) {
 
-				var nonExistentPathPositionValue = "${key_positionValue}";
+					var socialMediaFooterLink = selenium.getAttribute("xpath=(//div[contains(@class,'social-nav')]//li/a)[${key_positionValue}]@href");
+
+					var curl = '''
+						${socialMediaFooterLink} -I
+						''';
+
+					var httpResponseStatusCode = JSONCurlUtil.get("${curl}");
+
+					if (contains("${httpResponseStatusCode}", "HTTP/2 400") || (contains("${httpResponseStatusCode}", "HTTP/2 404"))) {
+						echo("The ${socialMediaFooterLink} page is not working properly.");
+
+						var key_positionValue = ${key_positionValue} + 1;
+					}
+					else {
+						echo("The ${socialMediaFooterLink} page is working properly.");
+
+						var key_positionValue = ${key_positionValue} + 1;
+					}
+				}
 			}
 
-			var key_positionValue = "1";
-
-			while ("${key_positionValue}" != "${nonExistentPathPositionValue}") {
-				WaitForSPARefresh();
-
-				ScrollBy(value1 = "0, 9999");
-
-				AssertVisible(locator1 = "WWWPage#FOOTER_SOCIAL_MEDIA_LINK");
-
-				Click.pauseMakeVisibleClickAt(locator1 = "WWWPage#FOOTER_SOCIAL_MEDIA_LINK");
-
-				var key_positionValue = ${key_positionValue} + 1;
-			}
+			var linksRemain = "false";
 		}
 	}
 
