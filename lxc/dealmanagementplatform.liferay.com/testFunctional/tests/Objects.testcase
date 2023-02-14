@@ -1,0 +1,62 @@
+definition {
+
+	property test.env = "uat";
+	property testray.main.component.name = "Concluder";
+
+	setUp {
+		Utils.launchUatPage();
+
+		Login.loginAsAdminUser();
+	}
+
+	@description = "Automation ID: LRQA-79175 | Test Summary: Verify that a VC_User object can be created"
+	@priority = 5
+	test CanCreateObject {
+		task ("Given a VC_Address and a VC_Contact are created") {
+			Portal.ApplicationsMenu.gotoPortlet(
+				category = "Custom Apps",
+				panel = "Applications",
+				portlet = "VC_Addresses");
+
+			ObjectsAdmin.addVCAddressEntry(
+				address = "Test Address 1",
+				apartmentNumber = "Test Apartment number 1",
+				city = "Test City 1",
+				country = "Test Country 1",
+				postalCode = "Test Postal Code 1");
+
+			Portal.ApplicationsMenu.gotoPortlet(
+				category = "Custom Apps",
+				panel = "Applications",
+				portlet = "VC_Contacts");
+
+			ObjectsAdmin.addVCContactEntry(
+				contactPerson = "Test Contact Person 1",
+				email = "Test E-Mail 1",
+				mobileNumber = "Test Mobile Number 1",
+				officeNumber = "Test Office Number 1");
+		}
+
+		task ("When a VC_User is created using the information from VC_Address and VC_Contact") {
+			Portal.ApplicationsMenu.gotoPortlet(
+				category = "Custom Apps",
+				panel = "Applications",
+				portlet = "VC_Users");
+
+			ObjectsAdmin.addVCUserEntry(
+				complianceState = "Compliance in progress",
+				contact = "Test Contact Person 1",
+				notificationEventsEmail = "NotificationEventsEmail",
+				notificationEventsFirstName = "FirstName",
+				permanentResidenceAddress = "Test Address 1",
+				state = "Basic Information");
+		}
+
+		task ("Then the new VC_User entry should be visible in VC_Users page") {
+			ObjectsAdmin.searchEntry(inputText = "FirstName");
+
+			ObjectsAdmin.assertObjectEntryVisible(rowItem = "FirstName");
+		}
+	}
+
+}
