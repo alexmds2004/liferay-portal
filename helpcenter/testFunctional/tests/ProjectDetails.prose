@@ -269,6 +269,55 @@ Scenario: View project
 	| Provisioned      | 0                                          |
 	| State            | ACTIVE                                     |
 
+Scenario: View an active LXC - Pro Plan project as a customer
+	@ help.center.acceptance = "true"
+	Users with an active LXC - Pro Plan purchases should be able to view environment details as a customer via the Project Details except for the Source Code Access tab
+
+	Given I delete a product purchase on koroneiki made by the account "Pjdzen - ${staticProjectName}" for the product "Commerce Connectors Production"
+	And I delete a product purchase on koroneiki made by the account "Pjdzen - ${staticProjectName}" for the product "Commerce Subscription Production"
+	And I delete a product purchase on koroneiki made by the account "Pjdzen - ${staticProjectName}" for the product "Gold Subscription"
+	And I delete a product purchase on koroneiki made by the account "Pjdzen - ${staticProjectName}" for the product "DXP Production"
+	And I delete a product purchase on koroneiki made by the account "Pjdzen - ${staticProjectName}" for the product "Portal Production"
+	And I delete a product purchase on koroneiki made by the account "Pjdzen - ${staticProjectName}" for the product "Enterprise Search - Production"
+	And I create a product purchase for an account with the name "Pjdzen - ${staticProjectName}" and the product "LXC - Pro Plan" on koroneiki with the following values
+	| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |
+	And I synchronize the contact entitlement definition with the name "Customer"
+	And I synchronize the contact entitlement definition with the name "Customer - LXC"
+	And I synchronize the account entitlement definition with the name "Platinum Subscription"
+	Then the support user with the email address "pjd.customer1@lrcustomer.com.broken" should be synced to the support site
+	When I update the support password for user with the email address "pjd.customer1@lrcustomer.com.broken" to "${staticSupportUserTestPassword}"
+	And I assign the support user with the email address "pjd.customer1@lrcustomer.com.broken" to the support group "Help Center"
+	And I log into the support homepage as "pjd.customer1@lrcustomer.com.broken" with password "${staticSupportUserTestPassword}"
+	And I go to the Project Details page
+	And I should not be able to view the Source Code Access tab
+	Then the team member with the name "PJD Customer1" should be visible with the following values
+	| Name  | PJD Customer1                       |
+	| Role  | Support Requester                   |
+	| Email | pjd.customer1@lrcustomer.com.broken |
+	And the team member with the name "PJD Customer2" should be visible with the following values
+	| Name  | PJD Customer2                       |
+	| Role  | Support User                        |
+	| Email | pjd.customer2@lrcustomer.com.broken |
+	When I go to the Offerings tab
+	Then the offering with the product name "LXC - Pro Plan" should be visible with the following values
+	| Product          | LXC - Pro Plan                             |
+	| Start Date       | ${staticFullNonAbbreviatedStartDate}       |
+	| Support End Date | ${staticFullNonAbbreviatedOriginalEndDate} |
+	| Instance Size    | -                                          |
+	| Quantity         | 1                                          |
+	| Provisioned      | 0                                          |
+	And the offering with the product name "Platinum Subscription" should be visible with the following values
+	| Product          | Platinum Subscription                      |
+	| Start Date       | ${staticFullNonAbbreviatedStartDate}       |
+	| Support End Date | ${staticFullNonAbbreviatedOriginalEndDate} |
+	| Instance Size    | 1                                          |
+	| Quantity         | 1                                          |
+	| Provisioned      | 0                                          |
+
 Scenario: View past project
 	New past projects created in PJD should be visible in the project details page.
 
