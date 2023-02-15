@@ -1995,44 +1995,28 @@ definition {
 			var field = "${row[0]}";
 			var value = "${row[1]}";
 
-			if ("${field}" == "Name") {
-				var field = "name";
+			if (contains("${value}", " ")) {
+				var value = StringUtil.replace("${value}", " ", "+");
+			}
+
+			if (("${field}" == "Name") || ("${field}" == "Description") || ("${field}" == "Host Name") || ("${field}" == "Product Name") || ("${field}" == "Product Version") || ("${field}" == "License Entry Type")) {
+				var fieldFormatted = ProvisioningLicenseAPI._formatCamelCase(camelCase = "${field}");
 
 				if ("${filters}" == "") {
-					var filters = "license-keys?filter=${field}+eq+%27${value}%27";
+					var filters = "license-keys?filter=${fieldFormatted}+eq+%27${value}%27";
 				}
 				else {
-					var filters = "${filters}+and+${field}+eq+%27${value}%27";
+					var filters = "${filters}+and+${fieldFormatted}+eq+%27${value}%27";
 				}
 			}
-			else if ("${field}" == "Description") {
-				var field = "description";
+			else if (("${field}" == "Active") || ("${field}" == "Complimentary") || ("${field}" == "Start Date") || ("${field}" == "Expiration Date")) {
+				var fieldFormatted = ProvisioningLicenseAPI._formatCamelCase(camelCase = "${field}");
 
 				if ("${filters}" == "") {
-					var filters = "license-keys?filter=${field}+eq+%27${value}%27";
+					var filters = "license-keys?filter=${fieldFormatted}+eq+${value}";
 				}
 				else {
-					var filters = "${filters}+and+${field}+eq+%27${value}%27";
-				}
-			}
-			else if ("${field}" == "Active") {
-				var field = "active";
-
-				if ("${filters}" == "") {
-					var filters = "license-keys?filter=${field}+eq+${value}";
-				}
-				else {
-					var filters = "${filters}+and+${field}+eq+${value}";
-				}
-			}
-			else if ("${field}" == "Host Name") {
-				var field = "hostName";
-
-				if ("${filters}" == "") {
-					var filters = "license-keys?filter=${field}+eq+%27${value}%27";
-				}
-				else {
-					var filters = "${filters}+and+${field}+eq+%27${value}%27";
+					var filters = "${filters}+and+${fieldFormatted}+eq+${value}";
 				}
 			}
 			else if ("${field}" == "IP Addresses") {
@@ -2065,16 +2049,6 @@ definition {
 					var filters = "${filters}+and+${field}+eq+%27${value}%27";
 				}
 			}
-			else if ("${field}" == "Start Date") {
-				var field = "startDate";
-
-				if ("${filters}" == "") {
-					var filters = "license-keys?filter=${field}+eq+${value}";
-				}
-				else {
-					var filters = "${filters}+and+${field}+eq+${value}";
-				}
-			}
 			else if ("${field}" == "Maximum Cluster Nodes") {
 				var field = "maxClusterNodes";
 
@@ -2083,65 +2057,6 @@ definition {
 				}
 				else {
 					var filters = "${filters}+and+${field}+eq+${value}";
-				}
-			}
-			else if ("${field}" == "Product Name") {
-				var field = "productName";
-
-				if (contains("${value}", " ")) {
-					var value = StringUtil.replace("${value}", " ", "+");
-				}
-
-				if ("${filters}" == "") {
-					var filters = "license-keys?filter=${field}+eq+%27${value}%27";
-				}
-				else {
-					var filters = "${filters}+and+${field}+eq+%27${value}%27";
-				}
-			}
-			else if ("${field}" == "License Entry Type") {
-				var field = "licenseEntryType";
-				var value = StringUtil.toLowerCase("${value}");
-
-				if (contains("${value}", " ")) {
-					var value = StringUtil.replace("${value}", " ", "+");
-				}
-
-				if ("${filters}" == "") {
-					var filters = "license-keys?filter=${field}+eq+%27${value}%27";
-				}
-				else {
-					var filters = "${filters}+and+${field}+eq+%27${value}%27";
-				}
-			}
-			else if ("${field}" == "Expiration Date") {
-				var field = "expirationDate";
-
-				if ("${filters}" == "") {
-					var filters = "license-keys?filter=${field}+eq+${value}";
-				}
-				else {
-					var filters = "${filters}+and+${field}+eq+${value}";
-				}
-			}
-			else if ("${field}" == "Complimentary") {
-				var field = "complimentary";
-
-				if ("${filters}" == "") {
-					var filters = "license-keys?filter=${field}+eq+${value}";
-				}
-				else {
-					var filters = "${filters}+and+${field}+eq+${value}";
-				}
-			}
-			else if ("${field}" == "Product Version") {
-				var field = "productVersion";
-
-				if ("${filters}" == "") {
-					var filters = "license-keys?filter=${field}+eq+%27${value}%27";
-				}
-				else {
-					var filters = "${filters}+and+${field}+eq+%27${value}%27";
 				}
 			}
 			else {
