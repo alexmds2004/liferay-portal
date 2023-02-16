@@ -11,14 +11,12 @@ definition {
 	@description = "Automation ID: PPLUPGD1122-66 | Test Summary: Verify that is possible go back to the contact page and move forward to each section by editing the report"
 	@priority = 5
 	test canEditSummaryData {
-		task ("Given the Damaged shipment section form is loaded") {
-			Complaints.gotoDamagedShipment();
-		}
+		task ("Given that the user fill the complaints form until 'Summary' section") {
+			Complaints.fillFormPageClaimHome(
+				postCode = 25101,
+				shipmentNumber = 44122200158);
 
-		task ("When the user fills the home form") {
-			Complaints.fillComplaintForm(
-				inputLabels = "Shipment number",
-				typeInput = 44122200157);
+			Complaints.continueForm();
 
 			Complaints.fillFormPageContactDetails(
 				chooseYourRole = "recipient",
@@ -65,46 +63,16 @@ definition {
 			Complaints.continueForm();
 		}
 
-		task ("Then the user is redirected to the 'Contact Details' form") {
-			Complaints.viewClaimStatus(
-				itemName = "Home",
-				itemStatus = "done");
-
-			Complaints.viewClaimStatus(
-				itemName = "Contact",
-				itemStatus = "active");
+		task ("When the user clicks to edit one of the sections") {
+			Complaints.editFormSection(
+				editOption = "Edit data",
+				index = 1);
 		}
 
-		task ("When the user fills the 'Contact Details' form") {
-			Complaints.selectComplaintRadio(radioOption = "I am the sender of the shipment");
-
-			Complaints.fillComplaintForm(
-				inputLabels = "Your e-mail address",
-				typeInput = "test@test.com");
-
-			Complaints.fillComplaintForm(
-				inputLabels = "Phone number",
-				typeInput = 000000000);
-
-			Complaints.fillComplaintForm(
-				inputLabels = "Name and surname or company name",
-				typeInput = "test");
-
-			Complaints.fillComplaintForm(
-				inputLabels = "Street and number",
-				typeInput = "Sokolovská 651/136A");
-
-			Complaints.fillComplaintForm(
-				inputLabels = "City",
-				typeInput = "Praha");
-
-			Complaints.fillComplaintForm(
-				inputLabels = "Postcode",
-				typeInput = 25101);
-
-			Complaints.selectComplaintCheckbox(checkboxName = "privacyConditions");
-
-			Complaints.continueForm();
+		task ("Then the user is redirected to the selected section and the section will be active to edition") {
+			Complaints.viewClaimStatus(
+				itemName = "Contact details",
+				itemStatus = "active");
 		}
 	}
 
