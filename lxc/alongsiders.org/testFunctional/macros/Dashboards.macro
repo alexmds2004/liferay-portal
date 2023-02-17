@@ -13,6 +13,29 @@ definition {
 			locator1 = "Dashboards#COUNTRY_LBS");
 	}
 
+	@summary = "View if the slice values are different or the same"
+	macro viewChartDifferentOrEqual {
+		var dataValuesCount = "";
+
+		for (var key_index : list "1,2,3,4,5,6,7,8,9,10,11,12,13") {
+			Default.WaitForPageLoad();
+
+			Default.WaitForVisible(locator1 = "Dashboard#PIE_CHART_INDEX");
+
+			var dataValue1 = selenium.getAttribute("xpath=(//div/*[contains(text(),'LBS School Grade')]//following-sibling::div//div[@id='apexchartsPieChart']//*[name()='g'][contains(@class,'apexcharts-pie')]/*[name()='path'])[${key_index}]@data:value");
+
+			var dataValuesCount = StringUtil.concat(${dataValuesCount}, "${dataValue1},");
+		}
+
+		for (var dataValues : list ${dataValuesCount}) {
+			var count = StringUtil.count(${dataValuesCount}, ${dataValues});
+
+			if (${count} == 4) {
+				fail("This chart has at least 4 equal values.");
+			}
+		}
+	}
+
 	@summary = "View country added to 'LBS Over Time' chart"
 	macro viewCountryChartsLbs {
 		Default.Click.clickAtNotVisible(
@@ -37,6 +60,33 @@ definition {
 			Default.AssertVisible(
 				key_index = ${index},
 				locator1 = "Dashboards#DATA_SQUARE");
+		}
+	}
+
+	@summary = "View of the five 'Movements' cards are not zero"
+	macro viewDashboardsMovementsAreNotZero {
+		var count = 0;
+
+		for (var key_index : list "1,2,3,4,5") {
+			Default.WaitForPageLoad();
+
+			Default.WaitForVisible(locator1 = "Dashboards#MOVEMENT_CARD");
+
+			var key_index = selenium.getText("Dashboards#MOVEMENT_SINGLE_CARD");
+
+			var numberCard = StringUtil.extractDigits(${key_index});
+
+			Dashboards.greaterOrEqual(
+				actual = ${numberCard},
+				expected = 0);
+
+			if (${numberCard} == 0) {
+				var count = ${count} + 1;
+
+				if (${count} == 5) {
+					Portal.TestUtils.fail(message = "FAILED: All the five cards are zero");
+				}
+			}
 		}
 	}
 
@@ -68,77 +118,6 @@ definition {
 		Default.AssertVisible(
 			key_index = ${index},
 			locator1 = "Dashboards#PIE_CHART");
-
-	}
-
-	@summary = "View of the five 'Movements' cards are not zero"
-	macro viewDashboardsMovementsAreNotZero {
-		var count = 0;
-
-		for (var key_index : list "1,2,3,4,5") {
-			Default.WaitForPageLoad();
-
-			Default.WaitForVisible(locator1 = "Dashboards#MOVEMENT_CARD");
-
-			var key_index = selenium.getText("Dashboards#MOVEMENT_SINGLE_CARD");
-
-			var numberCard = StringUtil.extractDigits(${key_index});
-
-			Dashboards.greaterOrEqual(
-				actual = ${numberCard},
-				expected = 0);
-
-			if (${numberCard} == 0) {
-				var count = ${count} + 1;
-
-				if (${count} == 5) {
-					Portal.TestUtils.fail(message = "FAILED: All the five cards are zero");
-				}
-			}
-		}
-	}
-
-	@summary = "Check if current number is greater than or equal to expected"
-	macro greaterOrEqual {
-		echo(${expected});
-
-		echo(${actual});
-
-		var result = MathUtil.isGreaterThanOrEqualTo(${actual}, ${expected});
-
-		if (${result} == "true") {
-			echo("PASSED");
-		}
-		else {
-			Portal.TestUtils.fail(message = "FAILED: actual '${actual}' is different than expected '${expected}'");
-		}
-	}
-
-	@summary = "View if the slice values are different or the same"
-	macro viewChartDifferentOrEqual {
-		var dataValuesCount = "";
-
-		for (var key_index : list "1,2,3,4,5,6,7,8,9,10,11,12,13") {
-			Default.WaitForPageLoad();
-
-			Default.WaitForVisible(locator1 = "Dashboard#PIE_CHART_INDEX");
-
-			var dataValue1 = selenium.getAttribute("xpath=(//div/*[contains(text(),'LBS School Grade')]//following-sibling::div//div[@id='apexchartsPieChart']//*[name()='g'][contains(@class,'apexcharts-pie')]/*[name()='path'])[${key_index}]@data:value");
-
-			var dataValuesCount = StringUtil.concat(${dataValuesCount}, "${dataValue1},");
-
-			echo(${dataValuesCount});
-		}
-
-		for (var dataValues : list ${dataValuesCount}) {
-			var count = StringUtil.count(${dataValuesCount}, ${dataValues});
-
-			echo(${count});
-
-			if (${count} == 4) {
-				fail("This chart has at least 4 equal values.");
-			}
-		}
 	}
 
 }
