@@ -1,0 +1,64 @@
+definition {
+
+	property test.env = "uat";
+	property testray.main.component.name = "Alongsiders";
+
+	setUp {
+		Utils.launchUatHomePage();
+
+		Login.signIn();
+	}
+
+	tearDown {
+		Portal.ApplicationsMenu.gotoPortlet(
+			category = "Content",
+			panel = "Applications",
+			portlet = "Movements");
+
+		Portal.ObjectPortlet.searchEntry(entryName = "testlxc");
+
+		Portal.CreateObject.deleteObjectViaUI(objectLabel = "testlxc");
+
+		Default.Confirm.acceptAlert();
+	}
+
+	@description = "Automation ID: LRQA-79438 | Test Summary: Verify that Movements data is changing when manipulating data via Objects interaction (adding new data / editing existing data)"
+	@priority = 5
+	test MovementIsUpdatedThroughObjectsManipulation {
+		task ("When the user is on the dashboard screen and checks the value in 'Sprouting Movement'") {
+			Utils.navigateToMenuItem(navBarItem = "Global Dashboard");
+
+			var beforeValue = Movements.getMovementsValue();
+		}
+
+		task ("When the user adds a new movement") {
+			Portal.ApplicationsMenu.gotoPortlet(
+				category = "Content",
+				panel = "Applications",
+				portlet = "Movements");
+
+			Portal.LexiconEntry.gotoAdd();
+
+			Movements.fillMovementsForm(
+				inputName = "Movement Phase",
+				itemName = "Sprouting Movement",
+				movementId = 999,
+				name = "testlxc");
+
+			Portal.PortletEntry.save();
+		}
+
+		task ("When the user is on the dashboard screen and checks the value in 'Sprouting Movement'") {
+			Portal.Navigator.openWithAppendToBaseURL(urlAppend = "dashboard");
+		}
+
+		task ("Then the user checks if the added movement is counted in the dashboard") {
+			var afterValue = Movements.getMovementsValue();
+
+			Portal.TestUtils.assertNotEquals(
+				actual = ${beforeValue},
+				expected = ${afterValue});
+		}
+	}
+
+}
