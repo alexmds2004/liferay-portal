@@ -59,4 +59,38 @@ definition {
 		}
 	}
 
+	@description = "Automation ID: LRQA-79462 | Test Summary: Verify that state manager can be set as its current state"
+	@priority = 5
+	test CanSetSameStateManagerValue {
+		task ("Given a VC_User is created with two states set") {
+			Portal.ApplicationsMenu.gotoPortlet(
+				category = "Custom Apps",
+				panel = "Applications",
+				portlet = "VC_Users");
+
+			ObjectsAdmin.addVCUserEntry(
+				complianceState = "Compliance in progress",
+				notificationEventsEmail = "NotificationEventsEmail",
+				notificationEventsFirstName = "FirstName",
+				state = "Basic Information");
+		}
+
+		task ("When the two states are set to the same values") {
+			ObjectsAdmin.searchEntry(inputText = "FirstName");
+
+			ObjectsAdmin.editVCUserEntry(
+				complianceState = "Compliance in progress",
+				inputText = "FirstName",
+				state = "Basic Information");
+		}
+
+		task ("Then the entry should be visible with the same state values in VC_Users page") {
+			ObjectsAdmin.searchEntry(inputText = "FirstName");
+
+			ObjectsAdmin.assertObjectEntryVisible(rowItem = "Basic Information");
+
+			ObjectsAdmin.assertObjectEntryVisible(rowItem = "Compliance in progress");
+		}
+	}
+
 }
