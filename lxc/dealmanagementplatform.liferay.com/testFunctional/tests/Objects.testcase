@@ -184,6 +184,47 @@ definition {
 		}
 	}
 
+	@description = "Automation ID: LRQA-79461 | Test Summary: Verify that VC_User can have 2 contacts set"
+	@priority = 5
+	test CanHaveMultipleContacts {
+		task ("Given two VC_Contacts entries are created") {
+			Portal.ApplicationsMenu.gotoPortlet(
+				category = "Custom Apps",
+				panel = "Applications",
+				portlet = "VC_Contacts");
+
+			ObjectsAdmin.addVCContactEntry(
+				contactPerson = "Test Contact Person 1",
+				email = "Test E-Mail 1",
+				mobileNumber = "Test Mobile Number 1",
+				officeNumber = "Test Office Number 1");
+
+			ObjectsAdmin.addVCContactEntry(
+				contactPerson = "Test Contact Person 2",
+				email = "Test E-Mail 2",
+				mobileNumber = "Test Mobile Number 2",
+				officeNumber = "Test Office Number 2");
+		}
+
+		task ("When a VC_User is created using both contacts") {
+			Portal.ApplicationsMenu.gotoPortlet(
+				category = "Custom Apps",
+				panel = "Applications",
+				portlet = "VC_Users");
+
+			ObjectsAdmin.addVCUserEntry(
+				contact = "Test Contact Person 1",
+				noticesContact = "Test Contact Person 2",
+				notificationEventsFirstName = "FirstName");
+		}
+
+		task ("Then the new VC_User entry should be visible in VC_Users page") {
+			ObjectsAdmin.searchEntry(inputText = "FirstName");
+
+			ObjectsAdmin.assertObjectEntryVisible(rowItem = "FirstName");
+		}
+	}
+
 	@description = "Automation ID: LRQA-79462 | Test Summary: Verify that state manager can be set as its current state"
 	@priority = 5
 	test CanSetSameStateManagerValue {
