@@ -9,6 +9,36 @@ definition {
 		Login.loginAsAdminUser();
 	}
 
+	@description = "Automation ID: LRQA-79179 | Test Summary: Verify that state manager can be updated"
+	@priority = 5
+	test CanChangeStateManager {
+		task ("Given a VC_User is created with the state set as 'Basic Information'") {
+			Portal.ApplicationsMenu.gotoPortlet(
+				category = "Custom Apps",
+				panel = "Applications",
+				portlet = "VC_Users");
+
+			ObjectsAdmin.addVCUserEntry(
+				notificationEventsEmail = "NotificationEventsEmail",
+				notificationEventsFirstName = "FirstName",
+				state = "Basic Information");
+		}
+
+		task ("When the state is updated to 'Account created'") {
+			ObjectsAdmin.searchEntry(inputText = "FirstName");
+
+			ObjectsAdmin.editVCUserEntry(
+				inputText = "FirstName",
+				state = "Account created");
+		}
+
+		task ("Then the entry should be visible with the updated state value in VC_Users page") {
+			ObjectsAdmin.searchEntry(inputText = "FirstName");
+
+			ObjectsAdmin.assertObjectEntryVisible(rowItem = "Account created");
+		}
+	}
+
 	@description = "Automation ID: LRQA-79175 | Test Summary: Verify that a VC_User object can be created"
 	@priority = 5
 	test CanCreateObject {
