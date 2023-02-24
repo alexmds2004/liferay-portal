@@ -141,6 +141,49 @@ definition {
 		}
 	}
 
+	@description = "Automation ID: LRQA-79180 | Test Summary: Verify that VC_User can have 2 adresses set"
+	@priority = 5
+	test CanHaveMultipleAdresses {
+		task ("Given two VC_Address entries are created") {
+			Portal.ApplicationsMenu.gotoPortlet(
+				category = "Custom Apps",
+				panel = "Applications",
+				portlet = "VC_Addresses");
+
+			ObjectsAdmin.addVCAddressEntry(
+				address = "Test Address 1",
+				apartmentNumber = "Test Apartment number 1",
+				city = "Test City 1",
+				country = "Test Country 1",
+				postalCode = "Test Postal Code 1");
+
+			ObjectsAdmin.addVCAddressEntry(
+				address = "Test Address 2",
+				apartmentNumber = "Test Apartment number 2",
+				city = "Test City 2",
+				country = "Test Country 2",
+				postalCode = "Test Postal Code 2");
+		}
+
+		task ("When a VC_User is created using both addresses") {
+			Portal.ApplicationsMenu.gotoPortlet(
+				category = "Custom Apps",
+				panel = "Applications",
+				portlet = "VC_Users");
+
+			ObjectsAdmin.addVCUserEntry(
+				noticesAddress = "Test Address 2",
+				notificationEventsFirstName = "FirstName",
+				permanentResidenceAddress = "Test Address 1");
+		}
+
+		task ("Then the new VC_User entry should be visible in VC_Users page") {
+			ObjectsAdmin.searchEntry(inputText = "FirstName");
+
+			ObjectsAdmin.assertObjectEntryVisible(rowItem = "FirstName");
+		}
+	}
+
 	@description = "Automation ID: LRQA-79462 | Test Summary: Verify that state manager can be set as its current state"
 	@priority = 5
 	test CanSetSameStateManagerValue {
