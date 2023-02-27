@@ -6,16 +6,20 @@ Feature: OSB to Zendesk Ticket Integration
 
 Setup:
 	* I generate a provisioning project name
+	* I generate static variables for support user
+	* I rename the first support user variables
 	* I create a user with the following parameters
-	| Screen Name   | osb.customer1                       |
-	| Email Address | osb.customer1@lrcustomer.com.broken |
-	| First Name    | OSB                                 |
-	| Last Name     | Customer1                           |
+	| Screen Name   | ${staticScreenNameValue1}       |
+	| Email Address | ${staticEmailValue1}            |
+	| First Name    | ${staticContactFirstNameValue1} |
+	| Last Name     | ${staticContactLastNameValue1}  |
+	* I generate static variables for support user
+	* I rename the second support user variables
 	* I create a user with the following parameters
-	| Screen Name   | osb.customer2                       |
-	| Email Address | osb.customer2@lrcustomer.com.broken |
-	| First Name    | OSB                                 |
-	| Last Name     | Customer2                           |
+	| Screen Name   | ${staticScreenNameValue2}       |
+	| Email Address | ${staticEmailValue2}            |
+	| First Name    | ${staticContactFirstNameValue2} |
+	| Last Name     | ${staticContactLastNameValue2}  |
 	* I create an account on koroneiki with the following values
 	| Code     | OSBZENOSBZEN                  | |
 	| Language | English                       | |
@@ -23,22 +27,24 @@ Setup:
 	| Region   | United States                 | |
 	| Status   | Active                        | |
 	| Tier     | T1                            | |
-	* I assign the contact with the email address "osb.customer1@lrcustomer.com.broken" on the account "Osbzen - ${staticProjectName}" to the following roles
+	* I assign the contact with the email address "${staticEmailValue1}" on the account "Osbzen - ${staticProjectName}" to the following roles
 	| Support Requester |
+	* I generate static variables for support user
+	* I rename the third support user variables
 	* I create a user with the following parameters
-	| Screen Name   | liferay.employee1                    |
-	| Email Address | liferay.employee1@liferay.com.broken |
-	| First Name    | Liferay                              |
-	| Last Name     | Employee1                            |
-	| Group         | Employees                            |
-	* I should be able to view a koroneiki contact with the email address "liferay.employee1@liferay.com.broken" added via automatic sync
-	* the account with the name "Liferay, Inc." should be assigned the contact with the email address "liferay.employee1@liferay.com.broken" via automatic sync
+	| Screen Name   | ${staticScreenNameValue3}       |
+	| Email Address | ${staticEmailValue3}            |
+	| First Name    | ${staticContactFirstNameValue3} |
+	| Last Name     | Employee1                       |
+	| Group         | Employees                       |
+	* I should be able to view a koroneiki contact with the email address "${staticEmailValue3}" added via automatic sync
+	* the account with the name "Liferay, Inc." should be assigned the contact with the email address "${staticEmailValue3}" via automatic sync
 	* I synchronize the contact entitlement definition with the name "Customer"
 	* I synchronize the contact entitlement definition with the name "Customer - DXP"
 	* I synchronize the contact entitlement definition with the name "Customer - Portal"
 	* I synchronize the contact entitlement definition with the name "Customer - Commerce"
 	* I synchronize the contact entitlement definition with the name "Liferay Employee"
-	* I update the user with the email address "liferay.employee1@liferay.com.broken" to have the role "Agent"
+	* I update the user with the email address "${staticEmailValue3}" to have the role "Agent"
 
 Teardown:
 	* I get the ID of the default user belonging to the organization "Osbzen - ${staticProjectName}" from zendesk.liferay.com
@@ -51,29 +57,29 @@ Teardown:
 	| OSBZENOSBZEN |
 	* I synchronize the account entitlement definition with the name "Gold Subscription"
 	* I tear down the users with the following email addresses from web.liferay.com
-	| osb.customer1@lrcustomer.com.broken  |
-	| osb.customer2@lrcustomer.com.broken  |
-	| liferay.employee1@liferay.com.broken |
+	| ${staticEmailValue1} |
+	| ${staticEmailValue2} |
+	| ${staticEmailValue3} |
 	* I tear down the users with the following email addresses from customer.liferay.com
-	| osb.customer1@lrcustomer.com.broken  |
-	| osb.customer2@lrcustomer.com.broken  |
-	| liferay.employee1@liferay.com.broken |
+	| ${staticEmailValue1} |
+	| ${staticEmailValue2} |
+	| ${staticEmailValue3} |
 	* I tear down the users with the following email addresses from koroneiki
-	| osb.customer1@lrcustomer.com.broken  |
-	| osb.customer2@lrcustomer.com.broken  |
-	| liferay.employee1@liferay.com.broken |
+	| ${staticEmailValue1} |
+	| ${staticEmailValue2} |
+	| ${staticEmailValue3} |
 	* I tear down the contacts on koroneiki with the following email addresses
-	| osb.customer1@lrcustomer.com.broken  |
-	| osb.customer2@lrcustomer.com.broken  |
-	| liferay.employee1@liferay.com.broken |
+	| ${staticEmailValue1} |
+	| ${staticEmailValue2} |
+	| ${staticEmailValue3} |
 	* I tear down the users with the following email addresses from okta
-	| osb.customer1@lrcustomer.com.broken  |
-	| osb.customer2@lrcustomer.com.broken  |
-	| liferay.employee1@liferay.com.broken |
+	| ${staticEmailValue1} |
+	| ${staticEmailValue2} |
+	| ${staticEmailValue3} |
 	* I obtain the IDs of the following user email addresses from zendesk.liferay.com
-	| osb.customer1@lrcustomer.com.broken  |
-	| osb.customer2@lrcustomer.com.broken  |
-	| liferay.employee1@liferay.com.broken |
+	| ${staticEmailValue1} |
+	| ${staticEmailValue2} |
+	| ${staticEmailValue3} |
 	* I teardown users with the following userIds "${staticUserIdList}" from zendesk.liferay.com
 	* I obtain the external IDs of the following organizations from zendesk.liferay.com if still present
 	| Osbzen - ${staticProjectName} |
@@ -84,7 +90,7 @@ Teardown:
 Scenario: View ticket after employee deactivation
 	Zendesk tickets should remain assigned to an employee even after the employee has been deactivated
 
-	Given I assign the contact with the email address "osb.customer2@lrcustomer.com.broken" on the account "Osbzen - ${staticProjectName}" to the following roles
+	Given I assign the contact with the email address "${staticEmailValue2}" on the account "Osbzen - ${staticProjectName}" to the following roles
 	| Support Requester |
 	And I generate static start and end dates
 	And I create a product purchase for an account with the name "Osbzen - ${staticProjectName}" and the product "Portal Production" on koroneiki with the following values
@@ -107,13 +113,13 @@ Scenario: View ticket after employee deactivation
 	And I synchronize the account entitlement definition with the name "Gold Subscription"
 	Then the support organization with the code "OSBZENOSBZEN" should be part of the support site
 	And the organization "Osbzen - ${staticProjectName}" should be present on zendesk.liferay.com
-	And the user with the email address "osb.customer1@lrcustomer.com.broken" should be present on zendesk.liferay.com
-	And the user with the email address "osb.customer2@lrcustomer.com.broken" should be present on zendesk.liferay.com
-	And the user with the email address "osb.customer1@lrcustomer.com.broken" should be in the organization "Osbzen - ${staticProjectName}"
-	And the user with the email address "osb.customer2@lrcustomer.com.broken" should be in the organization "Osbzen - ${staticProjectName}"
+	And the user with the email address "${staticEmailValue1}" should be present on zendesk.liferay.com
+	And the user with the email address "${staticEmailValue2}" should be present on zendesk.liferay.com
+	And the user with the email address "${staticEmailValue1}" should be in the organization "Osbzen - ${staticProjectName}"
+	And the user with the email address "${staticEmailValue2}" should be in the organization "Osbzen - ${staticProjectName}"
 	# Necessary pause for tags and zendesk org sync. Analyze if can be taken out or reduced once account index improves
 	And I wait for "1" minutes
-	And I create a request as a user with the email address "osb.customer1@lrcustomer.com.broken" with the following values
+	And I create a request as a user with the email address "${staticEmailValue1}" with the following values
 	| Product           | prd_liferay_portal_6_2                           |
 	| Component         | activation_key_project_administration            |
 	| System Status     | production_functioning_with_limited_capabilities |
@@ -122,9 +128,9 @@ Scenario: View ticket after employee deactivation
 	| Organization Name | Osbzen - ${staticProjectName}                    |
 	# Necessary pause for tags and zendesk org sync. Analyze if can be taken out or reduced once account index improves
 	And I wait for "1" minutes
-	And I assign the ticket with the ID "${staticRequestIdList}" to a user with the email address "liferay.employee1@liferay.com.broken"
-	And I deactivate the user with the email address "liferay.employee1@liferay.com.broken" from okta
-	Then the account with the name "Liferay, Inc." should not be assigned the contact with the email address "liferay.employee1@liferay.com.broken" via automatic sync
+	And I assign the ticket with the ID "${staticRequestIdList}" to a user with the email address "${staticEmailValue3}"
+	And I deactivate the user with the email address "${staticEmailValue3}" from okta
+	Then the account with the name "Liferay, Inc." should not be assigned the contact with the email address "${staticEmailValue3}" via automatic sync
 	When I synchronize the contact entitlement definition with the name "Customer"
 	And I synchronize the contact entitlement definition with the name "Customer - DXP"
 	And I synchronize the contact entitlement definition with the name "Customer - Portal"
@@ -132,23 +138,23 @@ Scenario: View ticket after employee deactivation
 	And I synchronize the contact entitlement definition with the name "Liferay Employee"
 	# Necessary pause for tags and zendesk org sync. Analyze if can be taken out or reduced once account index improves
 	And I wait for "1" minutes
-	Then the user with the email address "liferay.employee1@liferay.com.broken" should be present on zendesk.liferay.com
-	And the user with the email address "liferay.employee1@liferay.com.broken" should not be in the organization "Liferay, Inc."
-	And the user with the email address "liferay.employee1@liferay.com.broken" should have the "osb_kb" tag
-	And the user with the email address "liferay.employee1@liferay.com.broken" should not have the "osb_lr_employee" tag
-	And the user with the email address "liferay.employee1@liferay.com.broken" on zendesk.liferay.com should have the name "Liferay Employee1"	
-	And the user with the email address "liferay.employee1@liferay.com.broken" on zendesk.liferay.com should have the role "Agent"
-	And the ticket with the ticket ID "${staticRequestIdList}" should be assigned to the user with the email address "liferay.employee1@liferay.com.broken"
+	Then the user with the email address "${staticEmailValue3}" should be present on zendesk.liferay.com
+	And the user with the email address "${staticEmailValue3}" should not be in the organization "Liferay, Inc."
+	And the user with the email address "${staticEmailValue3}" should have the "osb_kb" tag
+	And the user with the email address "${staticEmailValue3}" should not have the "osb_lr_employee" tag
+	And the user with the email address "${staticEmailValue3}" on zendesk.liferay.com should have the name "${staticContactFirstNameValue3} ${staticContactLastNameValue3}"	
+	And the user with the email address "${staticEmailValue3}" on zendesk.liferay.com should have the role "Agent"
+	And the ticket with the ticket ID "${staticRequestIdList}" should be assigned to the user with the email address "${staticEmailValue3}"
 	When I go the support email message in MockMock where the sender is "noreply@liferay.com" the recipient is "zendesk-admin@liferay.com" with the email address "zendesk-admin@liferay.com" and the message content contains the text "Reassign Tickets and Downgrade Full Agent"
 	Then I should be able to view the email message containing the following text
-	| Please downgrade Liferay Employee1 liferay.employee1@liferay.com.broken on Zendesk. They have the following non-closed tickets assigned to them. |
+	| Please downgrade ${staticContactFirstNameValue3} ${staticContactLastNameValue3} ${staticEmailValue3} on Zendesk. They have the following non-closed tickets assigned to them. |
 	And I should be able to view the email message containing the following text
 	| ${staticRequestIdList} |
 
 Scenario: View solved ticket after employee deactivation
 	Employees should not be deactivated with zendesk solved tickets assigned to them
 
-	Given I assign the contact with the email address "osb.customer2@lrcustomer.com.broken" on the account "Osbzen - ${staticProjectName}" to the following roles
+	Given I assign the contact with the email address "${staticEmailValue2}" on the account "Osbzen - ${staticProjectName}" to the following roles
 	| Support Requester |
 	And I generate static start and end dates
 	And I create a product purchase for an account with the name "Osbzen - ${staticProjectName}" and the product "Portal Production" on koroneiki with the following values
@@ -171,11 +177,11 @@ Scenario: View solved ticket after employee deactivation
 	And I synchronize the account entitlement definition with the name "Gold Subscription"
 	Then the support organization with the code "OSBZENOSBZEN" should be part of the support site
 	And the organization "Osbzen - ${staticProjectName}" should be present on zendesk.liferay.com
-	And the user with the email address "osb.customer1@lrcustomer.com.broken" should be present on zendesk.liferay.com
-	And the user with the email address "osb.customer2@lrcustomer.com.broken" should be present on zendesk.liferay.com
-	And the user with the email address "osb.customer1@lrcustomer.com.broken" should be in the organization "Osbzen - ${staticProjectName}"
-	And the user with the email address "osb.customer2@lrcustomer.com.broken" should be in the organization "Osbzen - ${staticProjectName}"
-	And I create a request as a user with the email address "osb.customer1@lrcustomer.com.broken" with the following values
+	And the user with the email address "${staticEmailValue1}" should be present on zendesk.liferay.com
+	And the user with the email address "${staticEmailValue2}" should be present on zendesk.liferay.com
+	And the user with the email address "${staticEmailValue1}" should be in the organization "Osbzen - ${staticProjectName}"
+	And the user with the email address "${staticEmailValue2}" should be in the organization "Osbzen - ${staticProjectName}"
+	And I create a request as a user with the email address "${staticEmailValue1}" with the following values
 	| Product           | prd_liferay_portal_6_2                           |
 	| Component         | activation_key_project_administration            |
 	| System Status     | production_functioning_with_limited_capabilities |
@@ -184,7 +190,7 @@ Scenario: View solved ticket after employee deactivation
 	| Organization Name | Osbzen - ${staticProjectName}                    |
 	# Necessary pause for tags and zendesk org sync. Analyze if can be taken out or reduced once account index improves
 	And I wait for "1" minutes
-	And I assign the ticket with the ID "${staticRequestIdList}" to a user with the email address "liferay.employee1@liferay.com.broken"
+	And I assign the ticket with the ID "${staticRequestIdList}" to a user with the email address "${staticEmailValue3}"
 	And I generate past static start and end dates
 	And I update a product purchase on koroneiki made by the account "Osbzen - ${staticProjectName}" for the product "Portal Production" to have the following values
 	| End Date                | ${staticPastEndDate}         | |
@@ -202,8 +208,8 @@ Scenario: View solved ticket after employee deactivation
 	# Necessary pause for tags and zendesk org sync. Analyze if can be taken out or reduced once account index improves
 	And I wait for "1" minutes
 	Then the ticket with ticketId "${staticRequestIdList}" should have the status "solved"
-	When I deactivate the user with the email address "liferay.employee1@liferay.com.broken" from okta
-	Then the account with the name "Liferay, Inc." should not be assigned the contact with the email address "liferay.employee1@liferay.com.broken" via automatic sync
+	When I deactivate the user with the email address "${staticEmailValue3}" from okta
+	Then the account with the name "Liferay, Inc." should not be assigned the contact with the email address "${staticEmailValue3}" via automatic sync
 	When I synchronize the contact entitlement definition with the name "Customer"
 	And I synchronize the contact entitlement definition with the name "Customer - DXP"
 	And I synchronize the contact entitlement definition with the name "Customer - Portal"
@@ -211,22 +217,22 @@ Scenario: View solved ticket after employee deactivation
 	And I synchronize the contact entitlement definition with the name "Liferay Employee"
 	# Necessary pause for tags and zendesk org sync. Analyze if can be taken out or reduced once account index improves
 	And I wait for "1" minutes
-	Then the user with the email address "liferay.employee1@liferay.com.broken" should be present on zendesk.liferay.com
-	And the user with the email address "liferay.employee1@liferay.com.broken" should not be in the organization "Liferay, Inc."
-	And the user with the email address "liferay.employee1@liferay.com.broken" should not have the "osb_lr_employee" tag
-	And the user with the email address "liferay.employee1@liferay.com.broken" on zendesk.liferay.com should have the name "Liferay Employee1"
-	And the user with the email address "liferay.employee1@liferay.com.broken" on zendesk.liferay.com should have the role "Agent"
+	Then the user with the email address "${staticEmailValue3}" should be present on zendesk.liferay.com
+	And the user with the email address "${staticEmailValue3}" should not be in the organization "Liferay, Inc."
+	And the user with the email address "${staticEmailValue3}" should not have the "osb_lr_employee" tag
+	And the user with the email address "${staticEmailValue3}" on zendesk.liferay.com should have the name "${staticContactFirstNameValue3} ${staticContactLastNameValue3}"
+	And the user with the email address "${staticEmailValue3}" on zendesk.liferay.com should have the role "Agent"
 	And the ticket with ticketId "${staticRequestIdList}" should have the default user from the organization with the name "Osbzen - ${staticProjectName}" as the requester
 	When I go the support email message in MockMock where the sender is "noreply@liferay.com" the recipient is "zendesk-admin@liferay.com" with the email address "zendesk-admin@liferay.com" and the message content contains the text "Reassign Tickets and Downgrade Full Agent"
 	Then I should be able to view the email message containing the following text
-	| Please downgrade Liferay Employee1 liferay.employee1@liferay.com.broken on Zendesk. They have the following non-closed tickets assigned to them. |
+	| Please downgrade ${staticContactFirstNameValue3} ${staticContactLastNameValue3} ${staticEmailValue3} on Zendesk. They have the following non-closed tickets assigned to them. |
 	And I should be able to view the email message containing the following text
 	| ${staticRequestIdList} |
 
 Scenario: View closed ticket after employee deactivation
 	Employees should be deactivated even with zendesk closed tickets assigned to them
 
-	Given I assign the contact with the email address "osb.customer2@lrcustomer.com.broken" on the account "Osbzen - ${staticProjectName}" to the following roles
+	Given I assign the contact with the email address "${staticEmailValue2}" on the account "Osbzen - ${staticProjectName}" to the following roles
 	| Support Requester |
 	And I generate static start and end dates
 	And I create a product purchase for an account with the name "Osbzen - ${staticProjectName}" and the product "Portal Production" on koroneiki with the following values
@@ -249,23 +255,23 @@ Scenario: View closed ticket after employee deactivation
 	And I synchronize the account entitlement definition with the name "Gold Subscription"
 	Then the support organization with the code "OSBZENOSBZEN" should be part of the support site
 	And the organization "Osbzen - ${staticProjectName}" should be present on zendesk.liferay.com
-	And the user with the email address "osb.customer1@lrcustomer.com.broken" should be present on zendesk.liferay.com
-	And the user with the email address "osb.customer2@lrcustomer.com.broken" should be present on zendesk.liferay.com
-	And the user with the email address "osb.customer1@lrcustomer.com.broken" should be in the organization "Osbzen - ${staticProjectName}"
-	And the user with the email address "osb.customer2@lrcustomer.com.broken" should be in the organization "Osbzen - ${staticProjectName}"
-	And I create a request as a user with the email address "osb.customer1@lrcustomer.com.broken" with the following values
+	And the user with the email address "${staticEmailValue1}" should be present on zendesk.liferay.com
+	And the user with the email address "${staticEmailValue2}" should be present on zendesk.liferay.com
+	And the user with the email address "${staticEmailValue1}" should be in the organization "Osbzen - ${staticProjectName}"
+	And the user with the email address "${staticEmailValue2}" should be in the organization "Osbzen - ${staticProjectName}"
+	And I create a request as a user with the email address "${staticEmailValue1}" with the following values
 	| Product           | prd_liferay_portal_6_2                           |
 	| Component         | activation_key_project_administration            |
 	| System Status     | production_functioning_with_limited_capabilities |
 	| Subject           | Request Subject                                  |
 	| Description       | Request Description                              |
 	| Organization Name | Osbzen - ${staticProjectName}                    |
-	And I assign the ticket with the ID "${staticRequestIdList}" to a user with the email address "liferay.employee1@liferay.com.broken"
+	And I assign the ticket with the ID "${staticRequestIdList}" to a user with the email address "${staticEmailValue3}"
 	# Necessary pause for tags and zendesk org sync. Analyze if can be taken out or reduced once account index improves
 	And I wait for "1" minutes
 	And I change the status of the ticket with the ID "${staticRequestIdList}" to "closed"
-	And I deactivate the user with the email address "liferay.employee1@liferay.com.broken" from okta
-	Then the account with the name "Liferay, Inc." should not be assigned the contact with the email address "liferay.employee1@liferay.com.broken" via automatic sync
+	And I deactivate the user with the email address "${staticEmailValue3}" from okta
+	Then the account with the name "Liferay, Inc." should not be assigned the contact with the email address "${staticEmailValue3}" via automatic sync
 	When I synchronize the contact entitlement definition with the name "Customer"
 	And I synchronize the contact entitlement definition with the name "Customer - DXP"
 	And I synchronize the contact entitlement definition with the name "Customer - Portal"
@@ -273,8 +279,8 @@ Scenario: View closed ticket after employee deactivation
 	And I synchronize the contact entitlement definition with the name "Liferay Employee"
 	# Necessary pause for tags and zendesk org sync. Analyze if can be taken out or reduced once account index improves
 	And I wait for "1" minutes
-	Then the user with the email address "liferay.employee1@liferay.com.broken" should be present on zendesk.liferay.com
-	And the user with the email address "liferay.employee1@liferay.com.broken" should not be in the organization "Liferay, Inc."
-	And the user with the email address "liferay.employee1@liferay.com.broken" should not have the "osb_lr_employee" tag
-	And the user with the email address "liferay.employee1@liferay.com.broken" on zendesk.liferay.com should have the name "Liferay Employee1"
-	And the user with the email address "liferay.employee1@liferay.com.broken" on zendesk.liferay.com should have the role "End User"
+	Then the user with the email address "${staticEmailValue3}" should be present on zendesk.liferay.com
+	And the user with the email address "${staticEmailValue3}" should not be in the organization "Liferay, Inc."
+	And the user with the email address "${staticEmailValue3}" should not have the "osb_lr_employee" tag
+	And the user with the email address "${staticEmailValue3}" on zendesk.liferay.com should have the name "${staticContactFirstNameValue3} ${staticContactLastNameValue3}"
+	And the user with the email address "${staticEmailValue3}" on zendesk.liferay.com should have the role "End User"
