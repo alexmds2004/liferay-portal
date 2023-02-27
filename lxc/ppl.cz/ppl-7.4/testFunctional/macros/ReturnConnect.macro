@@ -1,0 +1,74 @@
+definition {
+
+	@summary = "Navigates to the 'Returning goods' tab"
+	macro gotoReturnShipment {
+		var key_linkName = "Returning goods";
+		var key_buttonNumber = ${buttonNumber};
+
+		Default.ScrollWebElementIntoView(locator1 = "General#FOOTER_LINKS");
+
+		Default.Click(locator1 = "General#FOOTER_LINKS");
+
+		Default.Click(locator1 = "ReturnConnect#ANY_BUTTON_RETURN_GOODS");
+	}
+
+	@summary = "Enters the shipment number and/or zip code into their respective fields"
+	macro returnConsigment {
+		var key_inputName = ${inputName};
+
+		Default.WaitForPageLoad();
+
+		Default.Type.typePause(
+			locator1 = "ReturnConnect#CONSIGNMENT_INPUT",
+			value1 = ${inputValue});
+
+		if (${buttonSubmit} == "true") {
+			Default.Click(locator1 = "ReturnConnect#RETURN_LABEL_BUTTON");
+		}
+	}
+
+	@summary = "Selects the return method and the desired address from the map"
+	macro sendReturnConsignment {
+		var key_index = ${returnMethod};
+
+		Default.WaitForPageLoad();
+
+		Default.Click.pauseClickAt(
+			key_index = ${returnMethod},
+			locator1 = "ReturnConnect#RETURN_CONSIGNMENT_BUTTON");
+
+		Default.Type.typePause(
+			locator1 = "Maps#MAPS_SEARCH_FIELD",
+			value1 = ${mapAddress});
+
+		Default.KeyPress(
+			locator1 = "Maps#MAPS_SEARCH_FIELD",
+			value1 = "\DOWN");
+
+		Default.KeyPress(
+			locator1 = "Maps#MAPS_SEARCH_FIELD",
+			value1 = "\ENTER");
+
+		// PPLUPGD1122-45 - We need to have an explicit wait (pause) to wait for the map to be fully loaded
+
+		Default.Pause(locator1 = 2000);
+
+		Default.Click.pauseClickAt(locator1 = "Maps#RESULT_ITEM_INDEX");
+
+		Default.Click(locator1 = "Maps#SEE_DETAILS_BUTTON");
+	}
+
+	@summary = "View contact details page of chosen Parcelbox or Parcelshop"
+	macro viewContactPageDetails {
+		Default.SelectWindow.selectPopUp(locator1 = "null");
+
+		for (var elementName : list "Kontaktní informace,Služby") {
+			Default.AssertElementPresent(
+				key_name = ${elementName},
+				locator1 = "ReturnConnect#ZOBRAZIT_SECTION");
+		}
+
+		Default.SelectWindow.selectPopUp(locator1 = "null");
+	}
+
+}

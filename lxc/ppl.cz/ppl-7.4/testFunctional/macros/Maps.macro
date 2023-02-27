@@ -1,0 +1,135 @@
+definition {
+
+	@summary = "Select in which Parcelshop or Parcelbox the item will be delivered"
+	macro findPlaceBoxOrShop {
+		Default.Click(
+			key_deliverShipment = ${deliverShipment},
+			locator1 = "Maps#FIND_PARCELBOX_ICON");
+
+		// PPLUPGD1122-45 - We need to have an explicit wait (pause) to wait for the map to be fully loaded
+
+		while ((Default.IsElementPresent(locator1 = "Maps#LOADING_MAP_INDICATOR")) && (maxIterations = "10")) {
+			Default.Pause(locator1 = 1000);
+		}
+
+		Default.Type(
+			locator1 = "Maps#MAPS_SEARCH_FIELD",
+			value1 = ${mapAddress});
+
+		Default.KeyPress(
+			locator1 = "Maps#MAPS_SEARCH_FIELD",
+			value1 = "\DOWN");
+
+		Default.KeyPress(
+			locator1 = "Maps#MAPS_SEARCH_FIELD",
+			value1 = "\ENTER");
+
+		// PPLUPGD1122-45 - We need to have an explicit wait (pause) to wait for the map to be fully loaded
+
+		Default.Pause(locator1 = 2000);
+
+		Default.Click(locator1 = "Maps#RESULT_ITEM_INDEX");
+
+		Default.Click(locator1 = "Maps#RESULT_PLACE_BUTTON");
+	}
+
+	@summary = "Get the name of the first item in the pickup points list after filter is active"
+	macro getPickUpPointNameAfterFilter {
+		Default.WaitForElementNotPresent(locator1 = "Maps#MAP_SEARCH_RESULTS_OPTION_BEFORE_FILTER");
+
+		var afterFilter = selenium.getText("Maps#MAP_SEARCH_RESULTS_OPTION");
+
+		return ${afterFilter};
+	}
+
+	@summary = "Get the name of the first item in the pickup points list before filter is active"
+	macro getPickUpPointNameBeforeFilter {
+		Default.WaitForVisible(locator1 = "Maps#MAP_SEARCH_RESULTS_OPTION");
+
+		var beforeFilter = selenium.getText("Maps#MAP_SEARCH_RESULTS_OPTION");
+
+		return ${beforeFilter};
+	}
+
+	@summary = "Go to the pickup point details page"
+	macro gotoDetails {
+		Default.Click(locator1 = "Maps#SHOW_DETAIL_BUTTON");
+	}
+
+	@summary = "Go to pickup points map page"
+	macro gotoPickupMap {
+		General.scrollToFooter();
+
+		Default.Click(
+			key_linkName = "Mapa výdejních míst",
+			locator1 = "General#FOOTER_LINKS");
+	}
+
+	@summary = "Open the filter options dropdown"
+	macro openFilterOptions {
+		Default.Click(
+			key_filterLanguageVariation = ${filterLanguageVariation},
+			locator1 = "Maps#MAPS_PICKUP_FILTER");
+	}
+
+	@summary = "Search for a especific location through the input"
+	macro searchForLocation {
+		Default.Type(
+			locator1 = "Maps#MAPS_SEARCH_FIELD",
+			value1 = ${searchInput});
+
+		Default.WaitForVisible(locator1 = "Maps#MAP_SEARCH_SUGGESTIONS");
+
+		Default.Click(locator1 = "Maps#MAP_SEARCH_SUGGESTIONS");
+	}
+
+	@summary = "Select Country in dropdown"
+	macro selectCountryDropdown {
+		Default.Click(
+			key_selectCountryLangVariation = ${selectCountryLangVariation},
+			locator1 = "Maps#SELECT_COUNTRY_DROPDOWN");
+
+		Default.Click(
+			key_country = ${country},
+			locator1 = "Maps#COUNTRY_LIST");
+	}
+
+	@summary = "Select a searched location option"
+	macro selectLocation {
+		Default.Click(locator1 = "Maps#MAP_SEARCH_RESULTS_OPTION");
+	}
+
+	@summary = "Select pickup points filters"
+	macro selectPickupFilters {
+		Default.Click(
+			key_filterOptions = ${filterOptions},
+			locator1 = "Maps#MAP_FILTER_OPTIONS");
+	}
+
+	@summary = "Show results from filter"
+	macro showFilterResults {
+		Default.Click(
+			key_showResultsLangVariation = ${showResultsLangVariation},
+			locator1 = "Maps#SHOW_RESULTS_BUTTON");
+	}
+
+	@summary = "Assert the control panel from pickup map is visible"
+	macro viewControlPanel {
+		Default.AssertVisible(
+			key_selectCountryLangVariation = ${selectCountryLangVariation},
+			locator1 = "Maps#SELECT_COUNTRY_DROPDOWN");
+	}
+
+	@summary = "Assert the details page is present"
+	macro viewDetailsPage {
+		Default.AssertElementPresent(
+			key_detailsType = ${detailsType},
+			locator1 = "Maps#DETAILS_PAGE");
+	}
+
+	@summary = "Assert the search result box is present"
+	macro viewSearchResult {
+		Default.AssertElementPresent(locator1 = "Maps#MAP_SEARCH_RESULTS");
+	}
+
+}

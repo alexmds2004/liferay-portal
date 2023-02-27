@@ -1,0 +1,49 @@
+definition {
+
+	@summary = "Search for shipment number"
+	macro searchShipmentNumber {
+		Default.Click(locator1 = "TrackAndTrace#SHIPMENT_INPUT");
+
+		if (isSet(shipmentId)) {
+			Default.Type(
+				locator1 = "TrackAndTrace#SHIPMENT_INPUT",
+				value1 = ${shipmentId});
+		}
+		else {
+			var shipmentId = "";
+
+			while ((Default.IsElementPresent(locator1 = "TrackAndTrace#SHIPMENT_INPUT")) && (maxIterations = "8")) {
+				var number = MathUtil.randomNumber(9);
+
+				var shipmentId = StringUtil.concat(${shipmentId}, ${number});
+
+				echo(${shipmentId});
+			}
+
+			Default.Type(
+				locator1 = "TrackAndTrace#SHIPMENT_INPUT",
+				value1 = ${shipmentId});
+		}
+
+		General.submit(buttonSubmit = "Track a shipment");
+	}
+
+	@summary = "View if the error message is displayed"
+	macro viewErrorMessage {
+		Default.AssertElementPresent.pauseAssertVisible(
+			key_errorMessage = ${errorMessage},
+			locator1 = "TrackAndTrace#ERROR_MESSAGE");
+	}
+
+	@summary = "View shipment status information"
+	macro viewShipmentStatus {
+		Default.WaitForPageLoad();
+
+		Default.AssertElementPresent.pauseAssertVisible(locator1 = "TrackAndTrace#SHIPMENT_ID_NUMBER");
+
+		Default.AssertElementPresent.pauseAssertVisible(
+			key_textStatus = ${infoStatus},
+			locator1 = "TrackAndTrace#SHIPMENT_STATUS");
+	}
+
+}

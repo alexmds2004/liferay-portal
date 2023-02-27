@@ -1,0 +1,94 @@
+definition {
+
+	setUp {
+		Utils.launchUatHomePage();
+
+		General.acceptCookies();
+	}
+
+	@description = "Automation ID: PPLUPGD1122-83 | Test Summary: Verify that an error is displayed when the user enters an incorrect shipment number"
+	@priority = 5
+	test CannotReturnParcelWithInvalidShippmentNumber {
+		var buttonActivateLabel = 3;
+		var invalidShipmentNuber = 11111111111;
+		var invalidZipCode = 11111;
+
+		task ("Given that I navigate to 'Returning goods'") {
+			ReturnConnect.gotoReturnShipment(buttonNumber = ${buttonActivateLabel});
+		}
+
+		task ("When I fill in the form with an invalid shipping number and zipcode") {
+			ReturnConnect.returnConsigment(
+				inputName = "shipmentId",
+				inputValue = ${invalidShipmentNuber});
+
+			ReturnConnect.returnConsigment(
+				buttonSubmit = "true",
+				inputName = "validationCode",
+				inputValue = ${invalidZipCode});
+		}
+
+		task ("Then the error message is displayed") {
+			TrackAndTrace.viewErrorMessage(errorMessage = "Shipment not found, contact PPL for further procedure.");
+		}
+	}
+
+	@description = "Automation ID: PPLUPGD1122-82 | Test Summary: Verify that the user is able to return goods via parcelshop or parcelbox"
+	@priority = 5
+	test CanReturnParcel {
+		var buttonActivateLabel = 3;
+		var shipmentNumber = 60118633168;
+		var zipCode = 25101;
+		var parcelBox = 1;
+		var parcelShop = 2;
+		var parcelBoxAdress = "Nádražní 1375, 34201 Sušice";
+		var parcelShopAdress = "Elektroslužby Andelt";
+
+		task ("Given that I navigate to 'Returning goods'") {
+			ReturnConnect.gotoReturnShipment(buttonNumber = ${buttonActivateLabel});
+		}
+
+		task ("When I fill the fields to make the return using the Parcelbox") {
+			ReturnConnect.returnConsigment(
+				inputName = "shipmentId",
+				inputValue = ${shipmentNumber});
+
+			ReturnConnect.returnConsigment(
+				buttonSubmit = "true",
+				inputName = "validationCode",
+				inputValue = ${zipCode});
+
+			ReturnConnect.sendReturnConsignment(
+				mapAddress = ${parcelBoxAdress},
+				returnMethod = ${parcelBox});
+		}
+
+		task ("Then the page with the details of the nearest Parcelbox is displayed") {
+			ReturnConnect.viewContactPageDetails();
+		}
+
+		task ("Given that I navigate to 'Returning goods'") {
+			ReturnConnect.gotoReturnShipment(buttonNumber = ${buttonActivateLabel});
+
+			task ("When I fill the fields to make the return using the Parcelshop") {
+				ReturnConnect.returnConsigment(
+					inputName = "shipmentId",
+					inputValue = ${shipmentNumber});
+
+				ReturnConnect.returnConsigment(
+					buttonSubmit = "true",
+					inputName = "validationCode",
+					inputValue = ${zipCode});
+
+				ReturnConnect.sendReturnConsignment(
+					mapAddress = ${parcelShopAdress},
+					returnMethod = ${parcelShop});
+			}
+
+			task ("Then the page with the details of the nearest Parcelshop is displayed") {
+				ReturnConnect.viewContactPageDetails();
+			}
+		}
+	}
+
+}

@@ -1,0 +1,320 @@
+definition {
+
+	setUp {
+		Utils.launchUatHomePage();
+	}
+
+	@description = "Automation ID: PPLUPGD1122-34 | Test Summary: Verify that the user can send a parcel using the the options: Large Parcel, PickUp, Address, Cash on delivery"
+	@priority = 5
+	test CanSendLargeParcelPickUpAddressAndCash {
+		task ("Given that the shipping method is selected and the language is set to English") {
+			var addressCity = "Liferay City";
+			var addressEmail = "test@liferay.com";
+			var addressName = "Test Test";
+			var addressPhone = 123456789;
+			var addressStreet = "Liferay Street, 99";
+			var addresszipCode = 12345;
+			var addressNameRecipient = "Test Test Two";
+			var addressCityRecipient = "Liferay City";
+			var addressZipCodeRecipient = 12345;
+			var addressPhoneRecipient = 123456789;
+			var addressEmailRecipient = "test@liferay.com";
+			var addressStreetRecipient = "Liferay Street,100";
+
+			Menu.gotoMenuItem(menuItem = "Send a parcel");
+
+			ParcelForYou.chooseShippingMethod(index = 1);
+
+			General.acceptCookies();
+
+			General.selectLanguage(language = "en");
+		}
+
+		task ("Given the hand over method is set as 'Pick up by courier' ") {
+			ParcelForYou.selectPackageSize(packageSize = "Large");
+
+			General.acceptConditions();
+
+			General.submit(buttonSubmit = "Continue");
+
+			ParcelForYou.selectHandOverShipment(index = 2);
+
+			ParcelForYou.selectPickupDate();
+		}
+
+		task ("And the sender form is completed and sent") {
+			ParcelForYou.fillSenderShipmentForm(
+				addressCity = ${addressCity},
+				addressEmail = ${addressEmail},
+				addressName = ${addressName},
+				addressPhone = ${addressPhone},
+				addressStreet = ${addressStreet},
+				addresszipCode = ${addresszipCode});
+
+			General.submit(buttonSubmit = "Continue");
+		}
+
+		task ("When 'Cash on delivery' is selected and the forms are filled") {
+			ParcelForYou.selectCashOnDelivery();
+
+			ParcelForYou.selectHandOverShipment(index = 2);
+
+			ParcelForYou.fillFormBankCashOnDelivery(
+				codBankAccount = 123,
+				codeValue = 123);
+
+			ParcelForYou.fillRecipientShipmentForm(
+				addressCityRecipient = ${addressCityRecipient},
+				addressEmailRecipient = ${addressEmailRecipient},
+				addressNameRecipient = ${addressNameRecipient},
+				addressPhoneRecipient = ${addressPhoneRecipient},
+				addressStreetRecipient = ${addressStreetRecipient},
+				addressZipCodeRecipient = ${addressZipCodeRecipient});
+
+			General.submit(buttonSubmit = "Continue");
+		}
+
+		task ("Then the sender and recipient information overview is displayed") {
+			ParcelForYou.viewSenderInformation(
+				addressEmail = ${addressEmail},
+				addressName = ${addressName},
+				addressPhone = ${addressPhone},
+				addressStreet = ${addressStreet},
+				senderOrRecipient = "Sender");
+
+			ParcelForYou.viewRecipientForms(
+				addressEmailRecipient = ${addressEmailRecipient},
+				addressNameRecipient = ${addressNameRecipient},
+				addressPhoneRecipient = ${addressPhoneRecipient},
+				addressStreetRecipient = ${addressStreetRecipient},
+				senderOrRecipient = "Recipient");
+		}
+
+		task ("Then the previously selected options are shown in the overview section") {
+			ParcelForYou.viewItemInOverview(overviewItem = "Large");
+
+			ParcelForYou.viewItemInOverview(overviewItem = "Pick up by courier");
+
+			ParcelForYou.viewItemInOverview(overviewItem = "To the recipient's address");
+
+			ParcelForYou.viewItemInOverview(overviewItem = "Cash on delivery");
+		}
+
+		task ("Then the user can pay for the parcel") {
+			General.acceptTermsAndConditions();
+
+			General.submit(buttonSubmit = "Pay");
+		}
+	}
+
+	@description = "Automation ID: PPLUPGD1122-43 | Test Summary: Verify that the user can send a parcel using the the options: Medium Parcel, Parcelshop, Parcelshop, Cash on delivery"
+	@priority = 5
+	test CanSendMediumParcel2ParcelShopAndCash {
+		task ("Given that the shipping method is selected and the language is set to English") {
+			var addressEmail = "test@liferay.com";
+			var addressName = "Test Test";
+			var addressCity = "Liferay";
+			var addressPhone = 123456789;
+			var addressStreet = "Liferay Street, 99";
+			var addresszipCode = 12345;
+			var addressEmailRecipient = "test@liferay.com";
+			var addressNameRecipient = "Test Test Two";
+			var addressPhoneRecipient = 123456789;
+			var addressStreetRecipient = "Sokolská 0";
+
+			Menu.gotoMenuItem(menuItem = "Send a parcel");
+
+			ParcelForYou.chooseShippingMethod(index = 1);
+
+			General.acceptCookies();
+
+			General.selectLanguage(language = "en");
+		}
+
+		task ("Given the hand over method is set as 'Drop off at Parcelshop'") {
+			ParcelForYou.selectPackageSize(packageSize = "Medium");
+
+			General.acceptConditions();
+
+			General.submit(buttonSubmit = "Continue");
+
+			ParcelForYou.selectHandOverShipment(index = 2);
+		}
+
+		task ("And the sender form is completed and sent") {
+			ParcelForYou.fillSenderShipmentForm(
+				addressCity = ${addressCity},
+				addressEmail = ${addressEmail},
+				addressName = ${addressName},
+				addressPhone = ${addressPhone},
+				addressStreet = ${addressStreet},
+				addresszipCode = ${addresszipCode});
+
+			General.submit(buttonSubmit = "Continue");
+		}
+
+		task ("When 'Cash on delivery' is selected and the where the shipment will be delivered") {
+			ParcelForYou.selectCashOnDelivery();
+
+			ParcelForYou.selectHandOverShipment(index = 2);
+		}
+
+		task ("When selecting the desired Parcelshop") {
+			Maps.findPlaceBoxOrShop(
+				deliverShipment = "Find Parcelshop",
+				mapInput = 1);
+		}
+
+		task ("And the bank details are filled") {
+			ParcelForYou.fillFormBankCashOnDelivery(
+				codBankAccount = 123,
+				codeValue = 84);
+		}
+
+		task ("And the recipient form is completed and sent") {
+			ParcelForYou.fillRecipientShipmentForm(
+				addressEmailRecipient = ${addressEmailRecipient},
+				addressNameRecipient = ${addressNameRecipient},
+				addressPhoneRecipient = ${addressPhoneRecipient});
+
+			General.submit(buttonSubmit = "Continue");
+		}
+
+		task ("Then the sender and recipient information overview is displayed") {
+			ParcelForYou.viewSenderInformation(
+				addressEmail = ${addressEmail},
+				addressName = ${addressName},
+				addressPhone = ${addressPhone},
+				addressStreet = ${addressStreet},
+				senderOrRecipient = "Sender");
+
+			ParcelForYou.viewRecipientForms(
+				addressEmailRecipient = ${addressEmailRecipient},
+				addressNameRecipient = ${addressNameRecipient},
+				addressPhoneRecipient = ${addressPhoneRecipient},
+				addressStreetRecipient = ${addressStreetRecipient},
+				senderOrRecipient = "Recipient");
+		}
+
+		task ("Then the previously selected options are shown in the overview section") {
+			ParcelForYou.viewItemInOverview(overviewItem = "Medium");
+
+			ParcelForYou.viewItemInOverview(overviewItem = "Drop off at Parcelshop");
+
+			ParcelForYou.viewItemInOverview(overviewItem = "To a Parcelshop");
+
+			ParcelForYou.viewItemInOverview(overviewItem = "Cash on delivery");
+		}
+
+		task ("Then the user can pay for the parcel") {
+			General.acceptTermsAndConditions();
+
+			General.submit(buttonSubmit = "Pay");
+		}
+	}
+
+	@description = "Automation ID: PPLUPGD1122-42 | Test Summary: Verify that the user can send a parcel using the the options: Small Parcel, Parcelbox, ParcelBox, Cash on delivery"
+	@priority = 5
+	test CanSendSmallParcel2ParcelBoxAndCash {
+		task ("Given that the shipping method is selected and the language is set to English") {
+			var addressEmail = "test@liferay.com";
+			var addressName = "Test Test";
+			var addressCity = "Liferay";
+			var addressPhone = 123456789;
+			var addressStreet = "Liferay Street, 99";
+			var addresszipCode = 12345;
+			var addressEmailRecipient = "test@liferay.com";
+			var addressNameRecipient = "Test Test Two";
+			var addressPhoneRecipient = 123456789;
+			var addressStreetRecipient = "Víta Nejedlého 1216/2";
+
+			Menu.gotoMenuItem(menuItem = "Send a parcel");
+
+			ParcelForYou.chooseShippingMethod(index = 1);
+
+			General.acceptCookies();
+
+			General.selectLanguage(language = "en");
+		}
+
+		task ("When selecting 'Small' size pack") {
+			ParcelForYou.selectPackageSize(packageSize = "Small");
+
+			General.acceptConditions();
+
+			General.submit(buttonSubmit = "Continue");
+		}
+
+		task ("And 'Put into Parcelbox' is selected as the shipping delivery method") {
+			ParcelForYou.selectHandOverShipment(index = 1);
+		}
+
+		task ("And the sender form is completed and sent") {
+			ParcelForYou.fillSenderShipmentForm(
+				addressCity = ${addressCity},
+				addressEmail = ${addressEmail},
+				addressName = ${addressName},
+				addressPhone = ${addressPhone},
+				addressStreet = ${addressStreet},
+				addresszipCode = ${addresszipCode});
+
+			General.submit(buttonSubmit = "Continue");
+		}
+
+		task ("When selecting the desired Parcelbox") {
+			Maps.findPlaceBoxOrShop(
+				deliverShipment = "Find Parcelbox",
+				mapInput = 1);
+		}
+
+		task ("And 'Cash on delivery' is selected and bank details is filled") {
+			ParcelForYou.selectCashOnDelivery();
+
+			ParcelForYou.fillFormBankCashOnDelivery(
+				codBankAccount = 123,
+				codeValue = 84);
+		}
+
+		task ("When the recipient form is completed and sent") {
+			ParcelForYou.fillRecipientShipmentForm(
+				addressEmailRecipient = ${addressEmailRecipient},
+				addressNameRecipient = ${addressNameRecipient},
+				addressPhoneRecipient = ${addressPhoneRecipient});
+
+			General.submit(buttonSubmit = "Continue");
+		}
+
+		task ("Then the sender and recipient information overview is displayed") {
+			ParcelForYou.viewSenderInformation(
+				addressEmail = ${addressEmail},
+				addressName = ${addressName},
+				addressPhone = ${addressPhone},
+				addressStreet = ${addressStreet},
+				senderOrRecipient = "Sender");
+
+			ParcelForYou.viewRecipientForms(
+				addressEmailRecipient = ${addressEmailRecipient},
+				addressNameRecipient = ${addressNameRecipient},
+				addressPhoneRecipient = ${addressPhoneRecipient},
+				addressStreetRecipient = ${addressStreetRecipient},
+				senderOrRecipient = "Recipient");
+		}
+
+		task ("Then the previously selected options are shown in the overview section") {
+			ParcelForYou.viewItemInOverview(overviewItem = "Small");
+
+			ParcelForYou.viewItemInOverview(overviewItem = "Put into Parcelbox");
+
+			ParcelForYou.viewItemInOverview(overviewItem = "To a Parcelbox");
+
+			ParcelForYou.viewItemInOverview(overviewItem = "Cash on delivery");
+		}
+
+		task ("Then the user can pay for the parcel") {
+			General.acceptTermsAndConditions();
+
+			General.submit(buttonSubmit = "Pay");
+		}
+	}
+
+}

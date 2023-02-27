@@ -1,0 +1,459 @@
+definition {
+
+	setUp {
+		Utils.launchUatHomePage();
+
+		General.acceptCookies();
+
+		General.gotoFooterLink(linkName = "Damaged shipment");
+	}
+
+	@description = "Automation ID: PPLUPGD1122-66 | Test Summary: Verify that is possible go back to the contact page and move forward to each section by editing the report"
+	@priority = 5
+	test canEditSummaryData {
+		task ("Given that the user fill the complaints form until 'Summary' section") {
+			Complaints.fillFormPageClaimHome(
+				postCode = 25101,
+				shipmentNumber = 44122200158);
+
+			Complaints.continueForm();
+
+			Complaints.fillFormPageContactDetails(
+				chooseYourRole = "recipient",
+				city = "prague",
+				companyName = "liferay",
+				emailAddress = "test@test.com",
+				phoneNumber = 000000000,
+				postCode = 25101,
+				streetNumber = "Sokolovská 651/136A");
+
+			Complaints.continueForm();
+
+			Complaints.viewClaimStatus(
+				itemName = "Shipment",
+				itemStatus = "active");
+
+			Complaints.fillFormPageShipments(
+				additionalInformation = "test",
+				describeContent = "test",
+				describeDamage = "test",
+				handilingMarks = "HandlingMark_1",
+				packagingType = "Cardboard box",
+				priceOfContent = 00,
+				shipmentCategoryOption = "Electronics (TV, phones, PC, ntb)",
+				statusOfShipment = "Damaged",
+				typeOfFilling = "Polystyrene",
+				typeOfPackagingDamage = "Deformed");
+
+			Complaints.continueForm();
+
+			Complaints.viewClaimStatus(
+				itemName = "Attachments",
+				itemStatus = "active");
+
+			Complaints.fillFormPageAttachments(
+				fileNameAddressLabel = "Commerce_White.jpg",
+				fileNameDamageToGoods = "Document_2.jpg",
+				fileNameDetailPackging = "Commerce_Blue.jpg",
+				fileNameInvoicePhoto = "Document_4.jpg",
+				fileNameLocationOfGoods = "Document_1.jpg",
+				fileNameOuterPackging = "Commerce_Black.jpg",
+				fileNameSerialNumberPhoto = "Document_3.jpg");
+
+			Complaints.continueForm();
+		}
+
+		task ("When the user clicks to edit one of the sections") {
+			Complaints.editFormSection(
+				editOption = "Edit data",
+				index = 1);
+		}
+
+		task ("Then the user is redirected to the selected section and the section will be active to edition") {
+			Complaints.viewClaimStatus(
+				itemName = "Contact details",
+				itemStatus = "active");
+		}
+	}
+
+	@description = "Automation ID: PPLUPGD1122-68 | Test Summary: Verify that is not possible to create a new claim of an ongoing complaint"
+	@priority = 5
+	test CannotSendOngoingClaim {
+		task ("When the user fills the form with the data of a claim that is uncompleted") {
+			Complaints.fillFormPageClaimHome(
+				postCode = 25101,
+				shipmentNumber = 44122200157);
+
+			Complaints.continueForm();
+		}
+
+		task ("Then assert that the error message for uncompleted claim is present") {
+			Complaints.viewIncorrectEntryMessage();
+		}
+	}
+
+	@description = "Automation ID: PPLUPGD1122-81 | Test Summary: Verify that the user only can add JPEG, JPG and PNG files"
+	@priority = 5
+	test CanOnlyAddImageFiles {
+		task ("Given that the user fill the complaints form until 'Attachments' section") {
+			Complaints.fillFormPageClaimHome(
+				postCode = 25101,
+				shipmentNumber = 44122200158);
+
+			Complaints.continueForm();
+
+			Complaints.fillFormPageContactDetails(
+				chooseYourRole = "recipient",
+				city = "prague",
+				companyName = "liferay",
+				emailAddress = "test@test.com",
+				phoneNumber = 000000000,
+				postCode = 25101,
+				streetNumber = "Sokolovská 651/136A");
+
+			Complaints.continueForm();
+
+			Complaints.viewClaimStatus(
+				itemName = "Shipment",
+				itemStatus = "active");
+
+			Complaints.fillFormPageShipments(
+				additionalInformation = "test",
+				describeContent = "test",
+				describeDamage = "test",
+				handilingMarks = "HandlingMark_1",
+				packagingType = "Cardboard box",
+				priceOfContent = 00,
+				shipmentCategoryOption = "Electronics (TV, phones, PC, ntb)",
+				statusOfShipment = "Damaged",
+				typeOfFilling = "Polystyrene",
+				typeOfPackagingDamage = "Deformed");
+
+			Complaints.continueForm();
+		}
+
+		task ("When the user fills the 'Attachments' section with an invalid type of document") {
+			Complaints.fillFormPageAttachments(fileNameOuterPackging = "Document_1.txt");
+		}
+
+		task ("Then an error message should appear") {
+			Complaints.viewInvalidDocumentErrorMessage();
+		}
+	}
+
+	@description = "Automation ID: PPLUPGD1122-77 | Test Summary: Verify that the user can report a damaged shipment (electronic)"
+	@priority = 5
+	test CanReportDamagedShipment {
+		task ("Given that the user fill the complaints form until 'Shipment' section") {
+			Complaints.fillFormPageClaimHome(
+				postCode = 25101,
+				shipmentNumber = 44122200158);
+
+			Complaints.continueForm();
+
+			Complaints.fillFormPageContactDetails(
+				chooseYourRole = "recipient",
+				city = "prague",
+				companyName = "liferay",
+				emailAddress = "test@test.com",
+				phoneNumber = 000000000,
+				postCode = 25101,
+				streetNumber = "Sokolovská 651/136A");
+
+			Complaints.continueForm();
+		}
+
+		task ("Then the user is redirected to the 'Shipment' form") {
+			Complaints.viewClaimStatus(
+				itemName = "Home",
+				itemStatus = "done");
+
+			Complaints.viewClaimStatus(
+				itemName = "Contact",
+				itemStatus = "done");
+
+			Complaints.viewClaimStatus(
+				itemName = "Shipment",
+				itemStatus = "active");
+		}
+
+		task ("When the user fills the 'Shipment' form section selecting the 'Damaged' status") {
+			Complaints.fillFormPageShipments(
+				additionalInformation = "test",
+				describeContent = "test",
+				describeDamage = "test",
+				handilingMarks = "HandlingMark_1",
+				packagingType = "Cardboard box",
+				priceOfContent = 00,
+				shipmentCategoryOption = "Electronics (TV, phones, PC, ntb)",
+				statusOfShipment = "Damaged",
+				typeOfFilling = "Polystyrene",
+				typeOfPackagingDamage = "Deformed");
+
+			Complaints.continueForm();
+		}
+
+		task ("Then the user is redirected to the 'Attachments' form") {
+			Complaints.viewClaimStatus(
+				itemName = "Home",
+				itemStatus = "done");
+
+			Complaints.viewClaimStatus(
+				itemName = "Contact",
+				itemStatus = "done");
+
+			Complaints.viewClaimStatus(
+				itemName = "Shipment",
+				itemStatus = "done");
+
+			Complaints.viewClaimStatus(
+				itemName = "Attachments",
+				itemStatus = "active");
+		}
+
+		task ("When the user fills the 'Attachments' form section") {
+			Complaints.fillFormPageAttachments(
+				fileNameAddressLabel = "Commerce_White.jpg",
+				fileNameDamageToGoods = "Document_2.jpg",
+				fileNameDetailPackging = "Commerce_Blue.jpg",
+				fileNameInvoicePhoto = "Document_4.jpg",
+				fileNameLocationOfGoods = "Document_1.jpg",
+				fileNameOuterPackging = "Commerce_Black.jpg",
+				fileNameSerialNumberPhoto = "Document_3.jpg");
+
+			Complaints.continueForm();
+		}
+
+		task ("Then the claim status is updated and the user is redirected to the 'Summary' form section") {
+			Complaints.viewClaimStatus(
+				itemName = "Attachments",
+				itemStatus = "done");
+
+			Complaints.viewClaimStatus(
+				itemName = "Summary",
+				itemStatus = "active");
+
+			Complaints.viewContentStatus(
+				contentStatus = "Damaged",
+				formField = "Status of the shipment content");
+		}
+	}
+
+	@description = "Automation ID: PPLUPGD1122-79 | Test Summary: Verify that the user can report a lost shipment (electronic)"
+	@priority = 5
+	test CanReportLostShipment {
+		task ("Given that the user fill the complaints form until 'Shipment' section") {
+			Complaints.fillFormPageClaimHome(
+				postCode = 25101,
+				shipmentNumber = 44122200158);
+
+			Complaints.continueForm();
+
+			Complaints.fillFormPageContactDetails(
+				chooseYourRole = "recipient",
+				city = "prague",
+				companyName = "liferay",
+				emailAddress = "test@test.com",
+				phoneNumber = 000000000,
+				postCode = 25101,
+				streetNumber = "Sokolovská 651/136A");
+
+			Complaints.continueForm();
+
+			Complaints.viewClaimStatus(
+				itemName = "Shipment",
+				itemStatus = "active");
+		}
+
+		task ("When the user fills the 'Shipment' form section selecting the 'Lost' status") {
+			Complaints.fillFormPageShipments(
+				describeContent = "test",
+				describeMissing = "test",
+				handilingMarks = "HandlingMark_1",
+				packagingType = "Cardboard box",
+				priceOfContent = 00,
+				shipmentCategoryOption = "Electronics (TV, phones, PC, ntb)",
+				statusOfShipment = "Lost",
+				typeOfFilling = "Polystyrene");
+
+			Complaints.continueForm();
+		}
+
+		task ("Then the the claim status is updated and the user is redirected to the 'Attachments' form section") {
+			Complaints.viewClaimStatus(
+				itemName = "Shipment",
+				itemStatus = "done");
+
+			Complaints.viewClaimStatus(
+				itemName = "Attachments",
+				itemStatus = "active");
+		}
+
+		task ("When the user fills the 'Attachments' form section") {
+			Complaints.fillFormPageAttachments(fileNameInvoicePhoto = "Document_4.jpg");
+
+			Complaints.continueForm();
+		}
+
+		task ("Then the claim status is updated and the user is redirected to the 'Summary' form section") {
+			Complaints.viewClaimStatus(
+				itemName = "Attachments",
+				itemStatus = "done");
+
+			Complaints.viewClaimStatus(
+				itemName = "Summary",
+				itemStatus = "active");
+
+			Complaints.viewContentStatus(
+				contentStatus = "Lost",
+				formField = "Status of the shipment content");
+		}
+	}
+
+	@description = "Automation ID: PPLUPGD1122-80 | Test Summary: Verify that the user can report a partialy lost shipment (electronic)"
+	@priority = 5
+	test CanReportPartialyLostShipment {
+		task ("Given that the user fill the complaints form until 'Shipment' section") {
+			Complaints.fillFormPageClaimHome(
+				postCode = 25101,
+				shipmentNumber = 44122200158);
+
+			Complaints.continueForm();
+
+			Complaints.fillFormPageContactDetails(
+				chooseYourRole = "recipient",
+				city = "prague",
+				companyName = "liferay",
+				emailAddress = "test@test.com",
+				phoneNumber = 000000000,
+				postCode = 25101,
+				streetNumber = "Sokolovská 651/136A");
+
+			Complaints.continueForm();
+
+			Complaints.viewClaimStatus(
+				itemName = "Shipment",
+				itemStatus = "active");
+		}
+
+		task ("When the user fills the 'Shipment' form section selecting the 'Partially lost' status") {
+			Complaints.fillFormPageShipments(
+				describeContent = "test",
+				describePartialMissing = "test",
+				handilingMarks = "HandlingMark_1",
+				packagingType = "Cardboard box",
+				priceOfContent = 00,
+				shipmentCategoryOption = "Electronics (TV, phones, PC, ntb)",
+				statusOfShipment = "Partially lost",
+				typeOfFilling = "Polystyrene",
+				typeOfPackagingDamage = "Deformed");
+
+			Complaints.continueForm();
+		}
+
+		task ("Then the the claim status is updated and the user is redirected to the 'Attachments' form section") {
+			Complaints.viewClaimStatus(
+				itemName = "Shipment",
+				itemStatus = "done");
+
+			Complaints.viewClaimStatus(
+				itemName = "Attachments",
+				itemStatus = "active");
+		}
+
+		task ("When the user fills the 'Attachments' form section") {
+			Complaints.fillFormPageAttachments(
+				fileNameAddressLabel = "Commerce_White.jpg",
+				fileNameInvoicePhoto = "Document_4.jpg",
+				fileNameLocationOfGoods = "Document_1.jpg",
+				fileNameOuterPackging = "Commerce_Black.jpg");
+
+			Complaints.continueForm();
+		}
+
+		task ("Then the claim status is updated and the user is redirected to the 'Summary' form section") {
+			Complaints.viewClaimStatus(
+				itemName = "Attachments",
+				itemStatus = "done");
+
+			Complaints.viewClaimStatus(
+				itemName = "Summary",
+				itemStatus = "active");
+
+			Complaints.viewContentStatus(
+				contentStatus = "Partially lost",
+				formField = "Status of the shipment content");
+		}
+	}
+
+	@description = "Automation ID: PPLUPGD1122-54 | Test Summary: Verify that when the user tries to submit the form with a required field blank, an error will appear verify the error"
+	@priority = 5
+	test ValidateFieldRules {
+		task ("When submit the form without having filled any field") {
+			Complaints.continueForm();
+		}
+
+		task ("Then assert that the required field message appears") {
+			Complaints.viewIncorrectEntryMessage();
+		}
+
+		task ("When the user fills the form with the correct shipment number but the incorrect zip code") {
+			Complaints.fillFormPageClaimHome(
+				postCode = 25102,
+				shipmentNumber = 44122200158);
+
+			Complaints.continueForm();
+		}
+
+		task ("Then assert that the error message for incorrect entry appears") {
+			Complaints.viewIncorrectEntryMessage();
+		}
+
+		task ("When the user fills the form with the incorrect shipment number but the correct zip code") {
+			Complaints.fillFormPageClaimHome(
+				postCode = 25101,
+				shipmentNumber = 55233311286);
+
+			Complaints.continueForm();
+		}
+
+		task ("Then assert that the error message for incorrect entry appears") {
+			Complaints.viewIncorrectEntryMessage();
+		}
+
+		task ("When the user fills the form with the incorrect shipment number and also the incorrect zip code") {
+			Complaints.fillFormPageClaimHome(
+				postCode = 25102,
+				shipmentNumber = 55233311286);
+
+			Complaints.continueForm();
+		}
+
+		task ("Then assert that the error message for incorrect entry appears") {
+			Complaints.viewIncorrectEntryMessage();
+		}
+
+		task ("When the user fills the form with the incorrect amount of numbers in the shipment number") {
+			Complaints.fillFormPageClaimHome(shipmentNumber = 5523331128);
+
+			Complaints.continueForm();
+		}
+
+		task ("Then assert that the error message for shipment number input rule appears") {
+			Complaints.viewIncorrectEntryMessage();
+		}
+
+		task ("When the user fills the form with the incorrect amount of numbers in the postcode") {
+			Default.Refresh();
+
+			Complaints.fillFormPageClaimHome(postCode = 2510);
+
+			Complaints.continueForm();
+		}
+
+		task ("Then assert that the error message for postcode input rule appears") {
+			Complaints.viewIncorrectEntryMessage();
+		}
+	}
+
+}

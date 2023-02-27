@@ -1,0 +1,55 @@
+definition {
+
+	setUp {
+		Utils.launchUatHomePage();
+
+		General.acceptCookies();
+	}
+
+	@description = "Automation ID: PPLUPGD1122-55 | Test Summary: Verify that an error message is displayed when the user inserts an incorrect shipment number"
+	@priority = 5
+	test CannotTrackParcelWithInvalidShippmentNumber {
+		task ("Given I navigate to 'Track a shipment'") {
+			Menu.gotoMenuItem(menuItem = "Track a shipment");
+		}
+
+		task ("When I search for a shipment without adding any shipment number") {
+			General.submit(buttonSubmit = "Track a shipment");
+		}
+
+		task ("Then the error message is displayed") {
+			TrackAndTrace.viewErrorMessage(errorMessage = "This field is required");
+		}
+
+		task ("When I search for an invalid shipment number") {
+			TrackAndTrace.searchShipmentNumber();
+		}
+
+		task ("Then the error message is displayed") {
+			TrackAndTrace.viewErrorMessage(errorMessage = "Shipment not found");
+		}
+	}
+
+	@description = "Automation ID: PPLUPGD1122-52 | Test Summary: Verify that the user is able to track his parcel using a valid shippment number"
+	@priority = 5
+	test CanTrackParcel {
+		task ("Given I navigate to 'Track a shipment'") {
+			Menu.gotoMenuItem(menuItem = "Track a shipment");
+		}
+
+		task ("When I search for an valid shipment number") {
+			TrackAndTrace.searchShipmentNumber(shipmentId = 40195802300);
+		}
+
+		task ("Then the tracking status information is displayed") {
+			TrackAndTrace.viewShipmentStatus(infoStatus = "Order");
+
+			TrackAndTrace.viewShipmentStatus(infoStatus = "Shipment in transit");
+
+			TrackAndTrace.viewShipmentStatus(infoStatus = "On the way to you");
+
+			TrackAndTrace.viewShipmentStatus(infoStatus = "Delivered to the recipient");
+		}
+	}
+
+}

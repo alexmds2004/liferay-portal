@@ -1,0 +1,356 @@
+definition {
+
+	// PPL Refactor: This macro is a workaround it is needed in the 7.3 (due to a checkbox input issue)
+	// PPL Refactor Ticket: PPLUPGD1122-78
+
+	@summary = "Check the 'Privacy Conditions' checkbox"
+	macro checkPrivacyConditions {
+		Default.KeyPress(
+			key_inputName = "zipCode",
+			locator1 = "Complaints#COMPLAINTS_FORM_INPUT",
+			value1 = "\TAB");
+
+		Default.KeyPress(
+			key_checkboxName = "privacyConditions",
+			locator1 = "Complaints#FORM_CHECKBOX_NAME",
+			value1 = "\SPACE");
+	}
+
+	@summary = "Click on Continue complaint form button"
+	macro continueForm {
+		Portal.Button.click(button = "Continue");
+	}
+
+	@summary = "Edit the form section data"
+	macro editFormSection {
+		Default.Click(
+			key_editOption = ${editOption},
+			key_index = ${index},
+			locator1 = "Complaints#SUMMARY_EDIT_BUTTON");
+	}
+
+	@summary = "Fill the form"
+	macro fillForm {
+		Default.WaitForElementPresent(
+			key_text = "Continue",
+			locator1 = "Portal.Button#ANY");
+
+		if (isSet(shipmentNumber)) {
+			Default.Type(
+				key_inputName = "shipmentId",
+				locator1 = "Complaints#COMPLAINTS_FORM_INPUT",
+				value1 = ${shipmentNumber});
+		}
+
+		if (isSet(phoneNumber)) {
+			Default.Type(
+				key_inputName = "phone",
+				locator1 = "Complaints#COMPLAINTS_FORM_INPUT",
+				value1 = ${phoneNumber});
+		}
+
+		if (isSet(companyName)) {
+			Default.Type(
+				key_inputName = "name",
+				locator1 = "Complaints#COMPLAINTS_FORM_INPUT",
+				value1 = ${companyName});
+		}
+
+		if (isSet(streetNumber)) {
+			Default.Type(
+				key_inputName = "street",
+				locator1 = "Complaints#COMPLAINTS_FORM_INPUT",
+				value1 = ${streetNumber});
+		}
+
+		if (isSet(city)) {
+			Default.Type(
+				key_inputName = "city",
+				locator1 = "Complaints#COMPLAINTS_FORM_INPUT",
+				value1 = ${city});
+		}
+
+		if (isSet(priceOfContent)) {
+			Default.Type(
+				key_inputName = "contentPrice",
+				locator1 = "Complaints#COMPLAINTS_FORM_INPUT",
+				value1 = ${priceOfContent});
+		}
+
+		if (isSet(emailAddress)) {
+			Default.Type(
+				key_inputName = "email",
+				locator1 = "Complaints#COMPLAINTS_FORM_INPUT",
+				value1 = ${emailAddress});
+		}
+
+		if (isSet(postCode)) {
+			Default.Type(
+				key_inputName = "zipCode",
+				locator1 = "Complaints#COMPLAINTS_FORM_INPUT",
+				value1 = ${postCode});
+		}
+	}
+
+	@summary = "Fill the Attachments form section"
+	macro fillFormPageAttachments {
+		if (isSet(fileNameOuterPackging)) {
+			Complaints.uploadFile(
+				fileInputOption = "outerPackaging",
+				fileName = ${fileNameOuterPackging});
+		}
+
+		if (isSet(fileNameDetailPackging)) {
+			Complaints.uploadFile(
+				fileInputOption = "detailPackaging",
+				fileName = ${fileNameDetailPackging});
+		}
+
+		if (isSet(fileNameAddressLabel)) {
+			Complaints.uploadFile(
+				fileInputOption = "addressLabel",
+				fileName = ${fileNameAddressLabel});
+		}
+
+		if (isSet(fileNameLocationOfGoods)) {
+			Complaints.uploadFile(
+				fileInputOption = "locationOfGoods",
+				fileName = ${fileNameLocationOfGoods});
+		}
+
+		if (isSet(fileNameDamageToGoods)) {
+			Complaints.uploadFile(
+				fileInputOption = "damageToGoods",
+				fileName = ${fileNameDamageToGoods});
+		}
+
+		if (isSet(fileNameSerialNumberPhoto)) {
+			Complaints.uploadFile(
+				fileInputOption = "serialNumberPhoto",
+				fileName = ${fileNameSerialNumberPhoto});
+		}
+
+		if (isSet(fileNameInvoicePhoto)) {
+			Complaints.uploadFile(
+				fileInputOption = "invoicePhoto",
+				fileName = ${fileNameInvoicePhoto});
+		}
+	}
+
+	@summary = "Fill the Home form section"
+	macro fillFormPageClaimHome {
+		Complaints.fillForm(
+			postCode = ${postCode},
+			shipmentNumber = ${shipmentNumber});
+	}
+
+	@summary = "Fill the Contact Details form section"
+	macro fillFormPageContactDetails {
+		Complaints.selectTypeOfDamage(radioOption = ${chooseYourRole});
+
+		Complaints.fillForm(
+			city = ${city},
+			companyName = ${companyName},
+			emailAddress = ${emailAddress},
+			phoneNumber = ${phoneNumber},
+			postCode = ${postCode},
+			streetNumber = ${streetNumber});
+
+		Complaints.checkPrivacyConditions();
+	}
+
+	@summary = "Fill the Shipments form section"
+	macro fillFormPageShipments {
+		Complaints.selectShipmentContent(shipmentCategoryOption = ${shipmentCategoryOption});
+
+		Complaints.selectTypeOfDamage(damaged = ${statusOfShipment});
+
+		Complaints.fillForm(priceOfContent = ${priceOfContent});
+
+		Complaints.selectTypeOfDamage(cardboardBox = ${packagingType});
+
+		Complaints.selectComplaintCheckbox(checkboxLabel = ${typeOfFilling});
+
+		Complaints.selectComplaintCheckbox(inputId = ${handilingMarks});
+
+		Complaints.selectComplaintCheckbox(checkboxLabel = ${typeOfPackagingDamage});
+
+		Complaints.fillTextareaField(
+			additionalInformation = ${additionalInformation},
+			describeContent = ${describeContent},
+			describeDamage = ${describeDamage},
+			describeMissing = ${describeMissing},
+			describePartialMissing = ${describePartialMissing});
+	}
+
+	@summary = "Fill textarea field"
+	macro fillTextareaField {
+		if (isSet(describeContent)) {
+			Default.Type(
+				key_text = "contentDescription",
+				locator1 = "Portal.TextArea#ANY",
+				value1 = ${describeContent});
+		}
+
+		if (isSet(describeDamage)) {
+			Default.Type(
+				key_text = "shipmentDamageDescription",
+				locator1 = "Portal.TextArea#ANY",
+				value1 = ${describeDamage});
+		}
+
+		if (isSet(additionalInformation)) {
+			Default.Type(
+				key_text = "damageAdditionalData",
+				locator1 = "Portal.TextArea#ANY",
+				value1 = ${additionalInformation});
+		}
+
+		if (isSet(describePartialMissing)) {
+			Default.Type(
+				key_text = "shipmentPartialMissingDescription",
+				locator1 = "Portal.TextArea#ANY",
+				value1 = ${describePartialMissing});
+		}
+
+		if (isSet(describeMissing)) {
+			Default.Type(
+				key_text = "shipmentMissingDescription",
+				locator1 = "Portal.TextArea#ANY",
+				value1 = ${describeMissing});
+		}
+	}
+
+	@summary = "Fill textarea input"
+	macro fillTextareaInput {
+		Default.Type(
+			key_textareaLabel = ${textareaLabel},
+			locator1 = "Complaints#TEXTAREA_INPUT",
+			value1 = ${textareaInput});
+	}
+
+	@summary = "Go to Damaged shipment section"
+	macro gotoDamagedShipment {
+		General.scrollToFooter();
+
+		Default.Click(
+			key_linkName = "Damaged shipment",
+			locator1 = "General#FOOTER_LINKS");
+	}
+
+	@summary = "Select an option in a checkbox field"
+	macro selectComplaintCheckbox {
+		if (isSet(inputId)) {
+			Default.ScrollWebElementIntoView(
+				key_inputId = ${inputId},
+				locator1 = "Complaints#FORM_CHECKBOX_IMAGE");
+
+			Default.Click(
+				key_inputId = ${inputId},
+				locator1 = "Complaints#FORM_CHECKBOX_IMAGE");
+		}
+
+		if (isSet(checkboxLabel)) {
+			Default.ScrollWebElementIntoView(
+				key_checkboxLabel = ${checkboxLabel},
+				locator1 = "Complaints#FORM_CHECKBOX_LABEL");
+
+			Default.Click(
+				key_checkboxLabel = ${checkboxLabel},
+				locator1 = "Complaints#FORM_CHECKBOX_LABEL");
+		}
+
+		if (isSet(checkboxName)) {
+			Default.ScrollWebElementIntoView(
+				key_checkboxName = ${checkboxName},
+				locator1 = "Complaints#FORM_CHECKBOX_NAME");
+
+			Default.Click(
+				key_checkboxName = ${checkboxName},
+				locator1 = "Complaints#FORM_CHECKBOX_NAME");
+		}
+	}
+
+	@summary = "Selects different fields of radio input options in the 'shipments' section"
+	macro selectComplaintRadio {
+		Default.Click(
+			key_radioOption = ${radioOption},
+			locator1 = "Complaints#FORM_RADIO_BUTTONS");
+	}
+
+	@summary = "Select an option in shipment content category dropdown"
+	macro selectShipmentContent {
+		Default.Select(
+			locator1 = "Complaints#SHIPMENT_CATEGORY_DROPDOWN",
+			value1 = ${shipmentCategoryOption});
+	}
+
+	@summary = "Select an option in the type of damage field"
+	macro selectTypeOfDamage {
+		if (isSet(damaged)) {
+			Default.Click(
+				key_radioOption = ${damaged},
+				locator1 = "Complaints#FORM_RADIO_BUTTON");
+		}
+
+		if (isSet(partiallyLost)) {
+			Default.Click(
+				key_radioOption = ${partiallyLost},
+				locator1 = "Complaints#FORM_RADIO_BUTTON");
+		}
+
+		if (isSet(lost)) {
+			Default.Click(
+				key_radioOption = ${lost},
+				locator1 = "Complaints#FORM_RADIO_BUTTON");
+		}
+
+		if (isSet(cardboardBox)) {
+			Default.Click(
+				key_radioOption = ${cardboardBox},
+				locator1 = "Complaints#FORM_RADIO_BUTTON");
+		}
+	}
+
+	@summary = "Submit complaints Form"
+	macro submitForm {
+		Portal.Button.clickSubmitButton();
+	}
+
+	@summary = "Upload a file to the 'Attachments' Form"
+	macro uploadFile {
+		var filePath = Utils.getFilePath(fileName = ${fileName});
+
+		Default.UploadFile(
+			key_fileInputOption = ${fileInputOption},
+			locator1 = "Complaints#ATTACHMENTS_FILE_INPUT",
+			value1 = ${filePath});
+	}
+
+	@summary = "View the stepper status in claims form"
+	macro viewClaimStatus {
+		Default.AssertElementPresent(
+			key_itemName = ${itemName},
+			key_itemStatus = ${itemStatus},
+			locator1 = "Complaints#CLAIMS_STEPPER");
+	}
+
+	@summary = "Check if the content status, is the one entered by the user, in the summary table"
+	macro viewContentStatus {
+		Default.AssertVisible(
+			key_contentStatus = ${contentStatus},
+			key_formField = ${formField},
+			locator1 = "Complaints#SUMMARY_TABLE_FIELD");
+	}
+
+	@summary = "Validates if an error message appears when the entry is wrong/invalid"
+	macro viewIncorrectEntryMessage {
+		Default.AssertVisible(locator1 = "Complaints#ERROR_NOTIFICATION");
+	}
+
+	@summary = "Check if an invalid type of document was attached"
+	macro viewInvalidDocumentErrorMessage {
+		Default.AssertElementPresent(locator1 = "Complaints#DROP_ZONE_ERROR_MESSAGE");
+	}
+
+}
