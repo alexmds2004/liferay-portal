@@ -8,6 +8,21 @@ Setup:
 	* I generate a provisioning project name
 	* I get all test passwords and admin emails
 	* I generate static start and end dates
+	* I generate static variables for support user
+	* I rename the first support user variables
+	* I create a user with the following parameters
+	| Screen Name   | ${staticScreenNameValue1}       |
+	| Email Address | ${staticEmailValue1}            |
+	| First Name    | ${staticContactFirstNameValue1} |
+	| Last Name     | ${staticContactLastNameValue1}  |
+	* I generate static variables for support user
+	* I rename the second support user variables
+	* I create a user with the following parameters
+	| Screen Name   | ${staticScreenNameValue2}       |
+	| Email Address | ${staticEmailValue2}            |
+	| First Name    | ${staticContactFirstNameValue2} |
+	| Last Name     | ${staticContactLastNameValue2}  |
+	| Group         | Employees                       |
 
 Teardown:
 	* I get the ID of the default user belonging to the organization "Sfpzen - ${staticProjectName}" from zendesk.liferay.com
@@ -18,23 +33,23 @@ Teardown:
 	* I tear down the accounts on koroneiki with the following "Code" values
 	| SFPZENSFPZEN |
 	* I tear down the users with the following email addresses from web.liferay.com
-	| sfp.customer1@lrcustomer.com.broken |
-	| sfp.employee1@liferay.com.broken    |
+	| ${staticEmailValue1} |
+	| ${staticEmailValue2} |
 	* I tear down the users with the following email addresses from customer.liferay.com
-	| sfp.customer1@lrcustomer.com.broken |
-	| sfp.employee1@liferay.com.broken    |
+	| ${staticEmailValue1} |
+	| ${staticEmailValue2} |
 	* I tear down the users with the following email addresses from koroneiki
-	| sfp.customer1@lrcustomer.com.broken |
-	| sfp.employee1@liferay.com.broken    |
+	| ${staticEmailValue1} |
+	| ${staticEmailValue2} |
 	* I tear down the contacts on koroneiki with the following email addresses
-	| sfp.customer1@lrcustomer.com.broken |
-	| sfp.employee1@liferay.com.broken    |
+	| ${staticEmailValue1} |
+	| ${staticEmailValue2} |
 	* I tear down the users with the following email addresses from okta
-	| sfp.customer1@lrcustomer.com.broken |
-	| sfp.employee1@liferay.com.broken    |
+	| ${staticEmailValue1} |
+	| ${staticEmailValue2} |
 	* I obtain the IDs of the following user email addresses from zendesk.liferay.com
-	| sfp.customer1@lrcustomer.com.broken |
-	| sfp.employee1@liferay.com.broken    |
+	| ${staticEmailValue1} |
+	| ${staticEmailValue2} |
 	* I teardown users with the following userIds "${staticUserIdList}" from zendesk.liferay.com
 	* I obtain the external IDs of the following organizations from zendesk.liferay.com if still present
 	| Sfpzen - ${staticProjectName} |
@@ -46,12 +61,7 @@ Scenario: View dxp options
 	@ help.center.acceptance = "true"
 	DXP activation key options should be visible according to the permissions that users have.
 
-	Given I create a user with the following parameters
-	| Screen Name   | sfp.customer1                       |
-	| Email Address | sfp.customer1@lrcustomer.com.broken |
-	| First Name    | SFP                                 |
-	| Last Name     | Customer1                           |
-	And I create an account on koroneiki with the following values
+	Given I create an account on koroneiki with the following values
 	| Code   | SFPZENSFPZEN                  | |
 	| Name   | Sfpzen - ${staticProjectName} | |
 	| Region | United States                 | |
@@ -74,16 +84,16 @@ Scenario: View dxp options
 	| Quantity                | 1                        | |
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |
-	And I assign the contact with the email address "sfp.customer1@lrcustomer.com.broken" on the account "Sfpzen - ${staticProjectName}" to the following roles
+	And I assign the contact with the email address "${staticEmailValue1}" on the account "Sfpzen - ${staticProjectName}" to the following roles
 	| Support Requester |
 	And I synchronize the contact entitlement definition with the name "Customer"
 	And I synchronize the contact entitlement definition with the name "Customer - DXP"
-	Then the support user with the email address "sfp.customer1@lrcustomer.com.broken" should be synced to the support site
-	When I update the support password for user with the email address "sfp.customer1@lrcustomer.com.broken" to "${staticSupportUserTestPassword}"
-	And I assign the support user with the email address "sfp.customer1@lrcustomer.com.broken" to the support group "Help Center"
-	And I assign the support user with the email address "sfp.customer1@lrcustomer.com.broken" to the support role "Customer - DXP"
-	And I assign the support user with the email address "sfp.customer1@lrcustomer.com.broken" to the support user group "customer"
-	And I log out and log into the support homepage as "sfp.customer1@lrcustomer.com.broken" with password "${staticSupportUserTestPassword}"
+	Then the support user with the email address "${staticEmailValue1}" should be synced to the support site
+	When I update the support password for user with the email address "${staticEmailValue1}" to "${staticSupportUserTestPassword}"
+	And I assign the support user with the email address "${staticEmailValue1}" to the support group "Help Center"
+	And I assign the support user with the email address "${staticEmailValue1}" to the support role "Customer - DXP"
+	And I assign the support user with the email address "${staticEmailValue1}" to the support user group "customer"
+	And I log out and log into the support homepage as "${staticEmailValue1}" with password "${staticSupportUserTestPassword}"
 	And I go to the Self Provisioning page
 	Then I should be able to view the following options in the Self Provisioning portlet
 	| Project | Sfpzen - ${staticProjectName} |
@@ -97,12 +107,7 @@ Scenario: View dxp options
 Scenario: View portal options
 	Portal activation key options should be visible according to the permissions that users have.
 
-	Given I create a user with the following parameters
-	| Screen Name   | sfp.customer1                       |
-	| Email Address | sfp.customer1@lrcustomer.com.broken |
-	| First Name    | SFP                                 |
-	| Last Name     | Customer1                           |
-	And I create an account on koroneiki with the following values
+	Given I create an account on koroneiki with the following values
 	| Code   | SFPZENSFPZEN                  | |
 	| Name   | Sfpzen - ${staticProjectName} | |
 	| Region | United States                 | |
@@ -125,16 +130,16 @@ Scenario: View portal options
 	| Quantity                | 1                        | |
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |
-	And I assign the contact with the email address "sfp.customer1@lrcustomer.com.broken" on the account "Sfpzen - ${staticProjectName}" to the following roles
+	And I assign the contact with the email address "${staticEmailValue1}" on the account "Sfpzen - ${staticProjectName}" to the following roles
 	| Support Requester |
 	And I synchronize the contact entitlement definition with the name "Customer"
 	And I synchronize the contact entitlement definition with the name "Customer - Portal"
-	Then the support user with the email address "sfp.customer1@lrcustomer.com.broken" should be synced to the support site
-	When I update the support password for user with the email address "sfp.customer1@lrcustomer.com.broken" to "${staticSupportUserTestPassword}"
-	And I assign the support user with the email address "sfp.customer1@lrcustomer.com.broken" to the support group "Help Center"
-	And I assign the support user with the email address "sfp.customer1@lrcustomer.com.broken" to the support role "Customer - Portal"
-	And I assign the support user with the email address "sfp.customer1@lrcustomer.com.broken" to the support user group "customer"
-	And I log out and log into the support homepage as "sfp.customer1@lrcustomer.com.broken" with password "${staticSupportUserTestPassword}"
+	Then the support user with the email address "${staticEmailValue1}" should be synced to the support site
+	When I update the support password for user with the email address "${staticEmailValue1}" to "${staticSupportUserTestPassword}"
+	And I assign the support user with the email address "${staticEmailValue1}" to the support group "Help Center"
+	And I assign the support user with the email address "${staticEmailValue1}" to the support role "Customer - Portal"
+	And I assign the support user with the email address "${staticEmailValue1}" to the support user group "customer"
+	And I log out and log into the support homepage as "${staticEmailValue1}" with password "${staticSupportUserTestPassword}"
 	And I go to the Self Provisioning page
 	Then I should be able to view the following options in the Self Provisioning portlet
 	| Project | Sfpzen - ${staticProjectName} |
@@ -148,18 +153,13 @@ Scenario: View portal options
 Scenario: View commerce options
 	Commerce activation key options should be visible according to the permissions that users have.
 
-	Given I create a user with the following parameters
-	| Screen Name   | sfp.customer1                       |
-	| Email Address | sfp.customer1@lrcustomer.com.broken |
-	| First Name    | SFP                                 |
-	| Last Name     | Customer1                           |
-	And I create an account on koroneiki with the following values
+	Given I create an account on koroneiki with the following values
 	| Code   | SFPZENSFPZEN                  | |
 	| Name   | Sfpzen - ${staticProjectName} | |
 	| Region | United States                 | |
 	| Status | Active                        | |
 	| Tier   | T1                            | |
-	And I assign the contact with the email address "sfp.customer1@lrcustomer.com.broken" on the account "Sfpzen - ${staticProjectName}" to the following roles
+	And I assign the contact with the email address "${staticEmailValue1}" on the account "Sfpzen - ${staticProjectName}" to the following roles
 	| Support Requester |
 	And I create a product purchase for an account with the name "Sfpzen - ${staticProjectName}" and the product "DXP Production" on koroneiki with the following values
 	| End Date                | ${staticEndDate}         |   |
@@ -191,13 +191,13 @@ Scenario: View commerce options
 	And I synchronize the contact entitlement definition with the name "Customer"
 	And I synchronize the contact entitlement definition with the name "Customer - DXP"
 	And I synchronize the contact entitlement definition with the name "Customer - Commerce"
-	Then the support user with the email address "sfp.customer1@lrcustomer.com.broken" should be synced to the support site
-	When I update the support password for user with the email address "sfp.customer1@lrcustomer.com.broken" to "${staticSupportUserTestPassword}"
-	And I assign the support user with the email address "sfp.customer1@lrcustomer.com.broken" to the support group "Help Center"
-	And I assign the support user with the email address "sfp.customer1@lrcustomer.com.broken" to the support role "Customer - DXP"
-	And I assign the support user with the email address "sfp.customer1@lrcustomer.com.broken" to the support role "Customer - Liferay Commerce"
-	And I assign the support user with the email address "sfp.customer1@lrcustomer.com.broken" to the support user group "customer"
-	And I log out and log into the support homepage as "sfp.customer1@lrcustomer.com.broken" with password "${staticSupportUserTestPassword}"
+	Then the support user with the email address "${staticEmailValue1}" should be synced to the support site
+	When I update the support password for user with the email address "${staticEmailValue1}" to "${staticSupportUserTestPassword}"
+	And I assign the support user with the email address "${staticEmailValue1}" to the support group "Help Center"
+	And I assign the support user with the email address "${staticEmailValue1}" to the support role "Customer - DXP"
+	And I assign the support user with the email address "${staticEmailValue1}" to the support role "Customer - Liferay Commerce"
+	And I assign the support user with the email address "${staticEmailValue1}" to the support user group "customer"
+	And I log out and log into the support homepage as "${staticEmailValue1}" with password "${staticSupportUserTestPassword}"
 	And I go to the Self Provisioning page
 	Then I should be able to view the following options in the Self Provisioning portlet
 	| Project | Sfpzen - ${staticProjectName} |
@@ -207,22 +207,16 @@ Scenario: View commerce options
 Scenario: View employee options
 	Appropriate activation key options should be visible according to the permissions that employees have.
 
-	Given I create a user with the following parameters
-	| Screen Name   | sfp.employee1                    |
-	| Email Address | sfp.employee1@liferay.com.broken |
-	| First Name    | SFP                              |
-	| Last Name     | Employee1                        |
-	| Group         | Employees                        |
-	Then I should be able to view a koroneiki contact with the email address "sfp.employee1@liferay.com.broken" added via automatic sync
-	And the account with the name "Liferay, Inc." should be assigned the contact with the email address "sfp.employee1@liferay.com.broken" via automatic sync
+	Given I should be able to view a koroneiki contact with the email address "${staticEmailValue2}" added via automatic sync
+	And the account with the name "Liferay, Inc." should be assigned the contact with the email address "${staticEmailValue2}" via automatic sync
 	When I synchronize the contact entitlement definition with the name "Customer"
 	And I synchronize the contact entitlement definition with the name "Customer - DXP"
 	And I synchronize the contact entitlement definition with the name "Customer - Portal"
 	And I synchronize the contact entitlement definition with the name "Customer - Commerce"
 	And I synchronize the contact entitlement definition with the name "Liferay Employee"
-	Then the support user with the email address "sfp.employee1@liferay.com.broken" should be synced to the support site
-	When I update the support password for user with the email address "sfp.employee1@liferay.com.broken" to "${staticSupportUserTestPassword}"
-	And I log out and log into the support homepage as "sfp.employee1@liferay.com.broken" with password "${staticSupportUserTestPassword}"
+	Then the support user with the email address "${staticEmailValue2}" should be synced to the support site
+	When I update the support password for user with the email address "${staticEmailValue2}" to "${staticSupportUserTestPassword}"
+	And I log out and log into the support homepage as "${staticEmailValue2}" with password "${staticSupportUserTestPassword}"
 	And I go to the Self Provisioning page
 	Then I should be able to view the following options in the Self Provisioning portlet
 	| Project | Liferay, Inc.         |
@@ -233,12 +227,7 @@ Scenario: View employee options
 Scenario: Download dxp self provisioning license
 	DXP activation key should be downloaded according to the permissions that users have.
 
-	Given I create a user with the following parameters
-	| Screen Name   | sfp.customer1                       |
-	| Email Address | sfp.customer1@lrcustomer.com.broken |
-	| First Name    | SFP                                 |
-	| Last Name     | Customer1                           |
-	And I create an account on koroneiki with the following values
+	Given I create an account on koroneiki with the following values
 	| Code   | SFPZENSFPZEN                  | |
 	| Name   | Sfpzen - ${staticProjectName} | |
 	| Region | United States                 | |
@@ -261,16 +250,16 @@ Scenario: Download dxp self provisioning license
 	| Quantity                | 1                        | |
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |
-	And I assign the contact with the email address "sfp.customer1@lrcustomer.com.broken" on the account "Sfpzen - ${staticProjectName}" to the following roles
+	And I assign the contact with the email address "${staticEmailValue1}" on the account "Sfpzen - ${staticProjectName}" to the following roles
 	| Support Requester |
 	And I synchronize the contact entitlement definition with the name "Customer"
 	And I synchronize the contact entitlement definition with the name "Customer - DXP"
-	Then the support user with the email address "sfp.customer1@lrcustomer.com.broken" should be synced to the support site
-	When I update the support password for user with the email address "sfp.customer1@lrcustomer.com.broken" to "${staticSupportUserTestPassword}"
-	And I assign the support user with the email address "sfp.customer1@lrcustomer.com.broken" to the support group "Help Center"
-	And I assign the support user with the email address "sfp.customer1@lrcustomer.com.broken" to the support role "Customer - DXP"
-	And I assign the support user with the email address "sfp.customer1@lrcustomer.com.broken" to the support user group "customer"
-	And I log out and log into the support homepage as "sfp.customer1@lrcustomer.com.broken" with password "${staticSupportUserTestPassword}"
+	Then the support user with the email address "${staticEmailValue1}" should be synced to the support site
+	When I update the support password for user with the email address "${staticEmailValue1}" to "${staticSupportUserTestPassword}"
+	And I assign the support user with the email address "${staticEmailValue1}" to the support group "Help Center"
+	And I assign the support user with the email address "${staticEmailValue1}" to the support role "Customer - DXP"
+	And I assign the support user with the email address "${staticEmailValue1}" to the support user group "customer"
+	And I log out and log into the support homepage as "${staticEmailValue1}" with password "${staticSupportUserTestPassword}"
 	And I go to the Self Provisioning page
 	And I download a Self Provisioning license with the following options
 	| Project | Sfpzen - ${staticProjectName} |
@@ -316,18 +305,13 @@ Scenario: Download dxp self provisioning license
 Scenario: View commerce options via commerce for LXC SM purchase
 	View commerce options when there is an active commerce for LXC SM subscription on their account.
 
-	Given I create a user with the following parameters
-	| Screen Name   | sfp.customer1                       |
-	| Email Address | sfp.customer1@lrcustomer.com.broken |
-	| First Name    | SFP                                 |
-	| Last Name     | Customer1                           |
-	And I create an account on koroneiki with the following values
+	Given I create an account on koroneiki with the following values
 	| Code   | SFPZENSFPZEN                  | |
 	| Name   | Sfpzen - ${staticProjectName} | |
 	| Region | United States                 | |
 	| Status | Active                        | |
 	| Tier   | T1                            | |
-	And I assign the contact with the email address "sfp.customer1@lrcustomer.com.broken" on the account "Sfpzen - ${staticProjectName}" to the following roles
+	And I assign the contact with the email address "${staticEmailValue1}" on the account "Sfpzen - ${staticProjectName}" to the following roles
 	| Support Requester |
 	And I create a product purchase for an account with the name "Sfpzen - ${staticProjectName}" and the product "DXP Production" on koroneiki with the following values
 	| End Date                | ${staticEndDate}         |   |
@@ -359,13 +343,13 @@ Scenario: View commerce options via commerce for LXC SM purchase
 	And I synchronize the contact entitlement definition with the name "Customer"
 	And I synchronize the contact entitlement definition with the name "Customer - DXP"
 	And I synchronize the contact entitlement definition with the name "Customer - Commerce"
-	Then the support user with the email address "sfp.customer1@lrcustomer.com.broken" should be synced to the support site
-	When I update the support password for user with the email address "sfp.customer1@lrcustomer.com.broken" to "${staticSupportUserTestPassword}"
-	And I assign the support user with the email address "sfp.customer1@lrcustomer.com.broken" to the support group "Help Center"
-	And I assign the support user with the email address "sfp.customer1@lrcustomer.com.broken" to the support role "Customer - DXP"
-	And I assign the support user with the email address "sfp.customer1@lrcustomer.com.broken" to the support role "Customer - Liferay Commerce"
-	And I assign the support user with the email address "sfp.customer1@lrcustomer.com.broken" to the support user group "customer"
-	And I log out and log into the support homepage as "sfp.customer1@lrcustomer.com.broken" with password "${staticSupportUserTestPassword}"
+	Then the support user with the email address "${staticEmailValue1}" should be synced to the support site
+	When I update the support password for user with the email address "${staticEmailValue1}" to "${staticSupportUserTestPassword}"
+	And I assign the support user with the email address "${staticEmailValue1}" to the support group "Help Center"
+	And I assign the support user with the email address "${staticEmailValue1}" to the support role "Customer - DXP"
+	And I assign the support user with the email address "${staticEmailValue1}" to the support role "Customer - Liferay Commerce"
+	And I assign the support user with the email address "${staticEmailValue1}" to the support user group "customer"
+	And I log out and log into the support homepage as "${staticEmailValue1}" with password "${staticSupportUserTestPassword}"
 	And I go to the Self Provisioning page
 	Then I should be able to view the following options in the Self Provisioning portlet
 	| Project | Sfpzen - ${staticProjectName} |
