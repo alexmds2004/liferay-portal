@@ -8,6 +8,22 @@ Setup:
 	* I get all test passwords and admin emails
 	* I generate a provisioning company name
 	* I generate a provisioning project name
+	* I generate static variables for support user
+	* I rename the first support user variables
+	* I create a user with the following parameters
+	| Screen Name   | ${staticScreenNameValue1}       |
+	| Email Address | ${staticEmailValue1}            |
+	| First Name    | ${staticContactFirstNameValue1} |
+	| Last Name     | ${staticContactLastNameValue1}  |
+	| Group         | Employees                       |
+	* I generate static variables for support user
+	* I rename the second support user variables
+	* I create a user with the following parameters
+	| Screen Name   | ${staticScreenNameValue2}       |
+	| Email Address | ${staticEmailValue2}            |
+	| First Name    | ${staticContactFirstNameValue2} |
+	| Last Name     | ${staticContactLastNameValue2}  |
+	| Group         | Employees                       |
 
 Teardown:
 	* I get the ID of the default user belonging to the organization "Korpro - ${staticProjectName}" from zendesk.liferay.com
@@ -15,17 +31,17 @@ Teardown:
 	* I get the ID of the default user belonging to the organization "Prokor - ${staticCompanyName}" from zendesk.liferay.com
 	* I rename the second default user ID variable
 	* I tear down the users with the following email addresses from web.liferay.com
-	| pro.employee1@liferay.com.broken |
-	| pro.employee2@liferay.com.broken |
+	| ${staticEmailValue1} |
+	| ${staticEmailValue2} |
 	* I tear down the users with the following email addresses from customer.liferay.com
-	| pro.employee1@liferay.com.broken |
-	| pro.employee2@liferay.com.broken |
+	| ${staticEmailValue1} |
+	| ${staticEmailValue2} |
 	* I tear down the contacts on koroneiki with the following email addresses
-	| pro.employee1@liferay.com.broken |
-	| pro.employee2@liferay.com.broken |
+	| ${staticEmailValue1} |
+	| ${staticEmailValue2} |
 	* I tear down the users with the following email addresses from okta
-	| pro.employee1@liferay.com.broken |
-	| pro.employee2@liferay.com.broken |
+	| ${staticEmailValue1} |
+	| ${staticEmailValue2} |
 	* I tear down the teams on koroneiki with the following names
 	| Koroneiki Partner |
 	| Updated Partner   |
@@ -44,8 +60,8 @@ Teardown:
 	| New Subscription(s) for Korpro - ${staticProjectName} |
 	| New Subscription(s) for Prokor - ${staticCompanyName} |
 	* I obtain the IDs of the following user email addresses from zendesk.liferay.com
-	| pro.employee1@liferay.com.broken |
-	| pro.employee2@liferay.com.broken |
+	| ${staticEmailValue1} |
+	| ${staticEmailValue2} |
 	* I teardown users with the following userIds "${staticUserIdList}" from zendesk.liferay.com
 	* I obtain the external IDs of the following organizations from zendesk.liferay.com if still present
 	| Korpro - ${staticProjectName} |
@@ -58,14 +74,8 @@ Scenario: View Liferay employee
 	@ help.center.acceptance = "true"
 	New Liferay employees who are added to koroneiki via okta should sync correctly to provisioning.
 
-	Given I create a user with the following parameters
-	| Screen Name   | pro.employee1                    |
-	| Email Address | pro.employee1@liferay.com.broken |
-	| First Name    | PRO                              |
-	| Last Name     | Employee1                        |
-	| Group         | Employees                        |
-	Then I should be able to view a koroneiki contact with the email address "pro.employee1@liferay.com.broken" added via automatic sync
-	And the account with the name "Liferay, Inc." should be assigned the contact with the email address "pro.employee1@liferay.com.broken" via automatic sync
+	Given I should be able to view a koroneiki contact with the email address "${staticEmailValue1}" added via automatic sync
+	And the account with the name "Liferay, Inc." should be assigned the contact with the email address "${staticEmailValue1}" via automatic sync
 	When I synchronize the contact entitlement definition with the name "Customer"
 	And I synchronize the contact entitlement definition with the name "Customer - DXP"
 	And I synchronize the contact entitlement definition with the name "Customer - Portal"
@@ -77,17 +87,17 @@ Scenario: View Liferay employee
 	And I click on the account with the name "Liferay, Inc." on the provisioning index
 	And I click on the "Contacts" tab
 	And I search and filter the accounts details page using the following parameters
-	| Keyword | pro.employee1@liferay.com.broken |
-	Then I should be able to view the contact with the email address "pro.employee1@liferay.com.broken" and the following values
-	| Name          | PRO Employee1                    |
-	| Email Address | pro.employee1@liferay.com.broken |
-	| Role          | Member                           |
-	| User Status   | VERIFIED                         |
+	| Keyword | ${staticEmailValue1} |
+	Then I should be able to view the contact with the email address "${staticEmailValue1}" and the following values
+	| Name          | ${staticContactFirstNameValue1} ${staticContactLastNameValue1} |
+	| Email Address | ${staticEmailValue1}                                           |
+	| Role          | Member                                                         |
+	| User Status   | VERIFIED                                                       |
 	When I go to the user index page
-	And I search the users page using the keyword "pro.employee1"
-	Then I should be able to view a user on the provisioning index with the name "PRO Employee1" and the following values
-	| Name               | PRO Employee1                                                                      |
-	| Email Address      | pro.employee1@liferay.com.broken                                                   |
+	And I search the users page using the keyword "${staticScreenNameValue1}"
+	Then I should be able to view a user on the provisioning index with the name "${staticContactFirstNameValue1} ${staticContactLastNameValue1}" and the following values
+	| Name               | ${staticContactFirstNameValue1} ${staticContactLastNameValue1}                     |
+	| Email Address      | ${staticEmailValue1}                                                               |
 	| Entitlements       | Customer, Customer - Commerce, Customer - DXP, Customer - Portal, Liferay Employee |
 	| Number of Accounts | 1                                                                                  |
 	| Status             | VERIFIED                                                                           |
@@ -96,21 +106,15 @@ Scenario: Remove Liferay employee
 	@ help.center.acceptance = "true"
 	New Liferay employees who are removed from the Liferay Inc org on okta should sync correctly to provisioning.
 
-	Given I create a user with the following parameters
-	| Screen Name   | pro.employee1                    |
-	| Email Address | pro.employee1@liferay.com.broken |
-	| First Name    | PRO                              |
-	| Last Name     | Employee1                        |
-	| Group         | Employees                        |
-	Then I should be able to view a koroneiki contact with the email address "pro.employee1@liferay.com.broken" added via automatic sync
-	And the account with the name "Liferay, Inc." should be assigned the contact with the email address "pro.employee1@liferay.com.broken" via automatic sync
+	Given I should be able to view a koroneiki contact with the email address "${staticEmailValue1}" added via automatic sync
+	And the account with the name "Liferay, Inc." should be assigned the contact with the email address "${staticEmailValue1}" via automatic sync
 	When I synchronize the contact entitlement definition with the name "Customer"
 	And I synchronize the contact entitlement definition with the name "Customer - DXP"
 	And I synchronize the contact entitlement definition with the name "Customer - Portal"
 	And I synchronize the contact entitlement definition with the name "Customer - Commerce"
 	And I synchronize the contact entitlement definition with the name "Liferay Employee"
-	When I remove the okta user with the email address "pro.employee1@liferay.com.broken" from the okta group "Employees"
-	Then the account with the name "Liferay, Inc." should not be assigned the contact with the email address "pro.employee1@liferay.com.broken" via automatic sync
+	When I remove the okta user with the email address "${staticEmailValue1}" from the okta group "Employees"
+	Then the account with the name "Liferay, Inc." should not be assigned the contact with the email address "${staticEmailValue1}" via automatic sync
 	And I synchronize the contact entitlement definition with the name "Customer"
 	And I synchronize the contact entitlement definition with the name "Customer - DXP"
 	And I synchronize the contact entitlement definition with the name "Customer - Portal"
@@ -122,35 +126,29 @@ Scenario: Remove Liferay employee
 	And I click on the account with the name "Liferay, Inc." on the provisioning index
 	And I click on the "Contacts" tab
 	And I search and filter the accounts details page using the following parameters
-	| Keyword | pro.employee1@liferay.com.broken |
-	Then I should not be able to view the contact with the email address "pro.employee1@liferay.com.broken"
+	| Keyword | ${staticEmailValue1} |
+	Then I should not be able to view the contact with the email address "${staticEmailValue1}"
 	When I go to the user index page
-	And I search the users page using the keyword "pro.employee1"
-	Then I should be able to view a user on the provisioning index with the name "PRO Employee1" and the following values
-	| Name               | PRO Employee1                    |
-	| Email Address      | pro.employee1@liferay.com.broken |
-	| Entitlements       |                                  |
-	| Number of Accounts | 0                                |
-	| Status             | VERIFIED                         |
+	And I search the users page using the keyword "${staticScreenNameValue1}"
+	Then I should be able to view a user on the provisioning index with the name "${staticContactFirstNameValue1} ${staticContactLastNameValue1}" and the following values
+	| Name               | ${staticContactFirstNameValue1} ${staticContactLastNameValue1} |
+	| Email Address      | ${staticEmailValue1}                                           |
+	| Entitlements       |                                                                |
+	| Number of Accounts | 0                                                              |
+	| Status             | VERIFIED                                                       |
 
 Scenario: Deactivate Liferay employee
 	New Liferay employees who are deactivated on okta should sync correctly to provisioning.
 
-	Given I create a user with the following parameters
-	| Screen Name   | pro.employee1                    |
-	| Email Address | pro.employee1@liferay.com.broken |
-	| First Name    | PRO                              |
-	| Last Name     | Employee1                        |
-	| Group         | Employees                        |
-	Then I should be able to view a koroneiki contact with the email address "pro.employee1@liferay.com.broken" added via automatic sync
-	And the account with the name "Liferay, Inc." should be assigned the contact with the email address "pro.employee1@liferay.com.broken" via automatic sync
+	Given I should be able to view a koroneiki contact with the email address "${staticEmailValue1}" added via automatic sync
+	And the account with the name "Liferay, Inc." should be assigned the contact with the email address "${staticEmailValue1}" via automatic sync
 	When I synchronize the contact entitlement definition with the name "Customer"
 	And I synchronize the contact entitlement definition with the name "Customer - DXP"
 	And I synchronize the contact entitlement definition with the name "Customer - Portal"
 	And I synchronize the contact entitlement definition with the name "Customer - Commerce"
 	And I synchronize the contact entitlement definition with the name "Liferay Employee"
-	When I deactivate the user with the email address "pro.employee1@liferay.com.broken" from okta
-	Then the account with the name "Liferay, Inc." should not be assigned the contact with the email address "pro.employee1@liferay.com.broken" via automatic sync
+	When I deactivate the user with the email address "${staticEmailValue1}" from okta
+	Then the account with the name "Liferay, Inc." should not be assigned the contact with the email address "${staticEmailValue1}" via automatic sync
 	When I synchronize the contact entitlement definition with the name "Customer"
 	And I synchronize the contact entitlement definition with the name "Customer - DXP"
 	And I synchronize the contact entitlement definition with the name "Customer - Portal"
@@ -162,36 +160,24 @@ Scenario: Deactivate Liferay employee
 	And I click on the account with the name "Liferay, Inc." on the provisioning index
 	And I click on the "Contacts" tab
 	And I search and filter the accounts details page using the following parameters
-	| Keyword | pro.employee1@liferay.com.broken |
-	Then I should not be able to view the contact with the email address "pro.employee1@liferay.com.broken"
+	| Keyword | ${staticEmailValue1} |
+	Then I should not be able to view the contact with the email address "${staticEmailValue1}"
 	When I go to the user index page
-	And I search the users page using the keyword "pro.employee1"
-	Then I should be able to view a user on the provisioning index with the name "PRO Employee1" and the following values
-	| Name               | PRO Employee1                    |
-	| Email Address      | pro.employee1@liferay.com.broken |
-	| Entitlements       |                                  |
-	| Number of Accounts | 0                                |
-	| Status             | VERIFIED                         |
+	And I search the users page using the keyword "${staticScreenNameValue1}"
+	Then I should be able to view a user on the provisioning index with the name "${staticContactFirstNameValue1} ${staticContactLastNameValue1}" and the following values
+	| Name               | ${staticContactFirstNameValue1} ${staticContactLastNameValue1} |
+	| Email Address      | ${staticEmailValue1}                                           |
+	| Entitlements       |                                                                |
+	| Number of Accounts | 0                                                              |
+	| Status             | VERIFIED                                                       |
 
 Scenario: View employee added as a Support Requester to a Professional Services Managed Services account
 	New Liferay employees who are added to koroneiki via okta whose projects have the Professional Services Managed Services purchase should not be counted on the developer counter
 
-	Given I create a user with the following parameters
-	| Screen Name   | pro.employee1                    |
-	| Email Address | pro.employee1@liferay.com.broken |
-	| First Name    | PRO                              |
-	| Last Name     | Employee1                        |
-	| Group         | Employees                        |
-	And I create a user with the following parameters
-	| Screen Name   | pro.employee2                    |
-	| Email Address | pro.employee2@liferay.com.broken |
-	| First Name    | KOR                              |
-	| Last Name     | Employee2                        |
-	| Group         | Employees                        |
-	Then I should be able to view a koroneiki contact with the email address "pro.employee1@liferay.com.broken" added via automatic sync
-	And I should be able to view a koroneiki contact with the email address "pro.employee2@liferay.com.broken" added via automatic sync
-	And the account with the name "Liferay, Inc." should be assigned the contact with the email address "pro.employee1@liferay.com.broken" via automatic sync
-	And the account with the name "Liferay, Inc." should be assigned the contact with the email address "pro.employee2@liferay.com.broken" via automatic sync
+	Given I should be able to view a koroneiki contact with the email address "${staticEmailValue1}" added via automatic sync
+	And I should be able to view a koroneiki contact with the email address "${staticEmailValue2}" added via automatic sync
+	And the account with the name "Liferay, Inc." should be assigned the contact with the email address "${staticEmailValue1}" via automatic sync
+	And the account with the name "Liferay, Inc." should be assigned the contact with the email address "${staticEmailValue2}" via automatic sync
 	When I synchronize the contact entitlement definition with the name "Customer"
 	And I synchronize the contact entitlement definition with the name "Customer - DXP"
 	And I synchronize the contact entitlement definition with the name "Customer - Portal"
@@ -205,9 +191,9 @@ Scenario: View employee added as a Support Requester to a Professional Services 
 	| Address Postal Code                    | 91765                                      |
 	| Address Region                         | California                                 |
 	| Address Street                         | 456 Fake Street                            |
-	| Contact Email Address                  | pro.employee1@liferay.com.broken           |
-	| Contact First Name                     | PRO                                        |
-	| Contact Last Name                      | Employee1                                  |
+	| Contact Email Address                  | ${staticEmailValue1}                       |
+	| Contact First Name                     | ${staticContactFirstNameValue1}            |
+	| Contact Last Name                      | ${staticContactLastNameValue1}             |
 	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
 	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
 	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
@@ -217,9 +203,9 @@ Scenario: View employee added as a Support Requester to a Professional Services 
 	| End Month                              | ${staticEndMonth}                          |
 	| End Year                               | ${staticEndYear}                           |
 	| Industry                               | Automotive                                 |
-	| Owner Email Address                    | pro.employee2@liferay.com.broken           |
-	| Owner First Name                       | KOR                                        |
-	| Owner Last Name                        | Employee2                                  |
+	| Owner Email Address                    | ${staticEmailValue2}                       |
+	| Owner First Name                       | ${staticContactFirstNameValue2}            |
+	| Owner Last Name                        | ${staticContactLastNameValue2}             |
 	| Partner First Line Support             | false                                      |
 	| Product Type                           | New                                        |
 	| Product Name                           | Professional Services- Managed Services    |
@@ -239,7 +225,7 @@ Scenario: View employee added as a Support Requester to a Professional Services 
 	| Start Year                             | ${staticStartYear}                         |
 	| Subscription Level                     | Platinum                                   |
 	| Version Number                         | 7.1                                        |
-	And I assign the contact with the email address "pro.employee1@liferay.com.broken" on the account "Korpro - ${staticProjectName}" to the following roles
+	And I assign the contact with the email address "${staticEmailValue1}" on the account "Korpro - ${staticProjectName}" to the following roles
 	| Support Requester |
 	And I create a team with the name "Koroneiki Partner" for the account "Korpro - ${staticProjectName}"
 	And I assign the team with the name "Koroneiki Partner" on the account "Korpro - ${staticProjectName}" to the following roles
@@ -260,18 +246,18 @@ Scenario: View employee added as a Support Requester to a Professional Services 
 	| FLS Partner    | Koroneiki Partner             |
 	And I click on the "Contacts" tab
 	And I search and filter the accounts details page using the following parameters
-	| Keyword | pro.employee1@liferay.com.broken |
-	Then I should be able to view the contact with the email address "pro.employee1@liferay.com.broken" and the following values
-	| Name          | PRO Employee1                    |
-	| Email Address | pro.employee1@liferay.com.broken |
-	| Role          | Support Requester                |
-	| Role          | Support User                     |
-	| User Status   | VERIFIED                         |
+	| Keyword | ${staticEmailValue1} |
+	Then I should be able to view the contact with the email address "${staticEmailValue1}" and the following values
+	| Name          | ${staticContactFirstNameValue1} ${staticContactLastNameValue1} |
+	| Email Address | ${staticEmailValue1}                                           |
+	| Role          | Support Requester                                              |
+	| Role          | Support User                                                   |
+	| User Status   | VERIFIED                                                       |
 	When I go to the user index page
-	And I search the users page using the keyword "pro.employee1"
-	Then I should be able to view a user on the provisioning index with the name "PRO Employee1" and the following values
-	| Name               | PRO Employee1                                                                      |
-	| Email Address      | pro.employee1@liferay.com.broken                                                   |
+	And I search the users page using the keyword "${staticScreenNameValue1}"
+	Then I should be able to view a user on the provisioning index with the name "${staticContactFirstNameValue1} ${staticContactLastNameValue1}" and the following values
+	| Name               | ${staticContactFirstNameValue1} ${staticContactLastNameValue1}                     |
+	| Email Address      | ${staticEmailValue1}                                                               |
 	| Entitlements       | Customer, Customer - Commerce, Customer - DXP, Customer - Portal, Liferay Employee |
 	| Number of Accounts | 2                                                                                  |
 	| Status             | VERIFIED                                                                           |
