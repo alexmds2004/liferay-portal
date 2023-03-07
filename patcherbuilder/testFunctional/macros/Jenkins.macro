@@ -3,6 +3,30 @@ definition {
 	var jobCompletionPollIntervalInMinutes = PropsUtil.get("job.completion.poll.interval.in.minutes");
 	var jobCompletionPollMaximumIterations = PropsUtil.get("job.completion.poll.maximum.iterations");
 
+	macro _findFailReason {
+		var consoleOutputText = selenium.getText("Jenkins#CONSOLE_OUTPUT_TEXT");
+
+		if (contains("${consoleOutputText}", "compileJava FAILED")) {
+			fail("Build ${jobBuildNumber} for the tag ${staticFixPackBaseCommittish} failed by Java Compile problems.");
+
+		} else if (contains("${consoleOutputText}", "RevertInstalledPatchTest > test portal without patches can be started FAILED")){
+			fail("Build ${jobBuildNumber} for the tag ${staticFixPackBaseCommittish} failed by Java Revert Install problems.");
+
+		} else if (contains("${consoleOutputText}", "@ERROR: Unknown module 'patcher'")) {
+			fail("Build ${jobBuildNumber} for the tag ${staticFixPackBaseCommittish} failed by not finding the build Patcher module.");
+
+		} else if (contains("${consoleOutputText}", "packageRunBuild FAILED")) {
+			fail("Build ${jobBuildNumber} for the tag ${staticFixPackBaseCommittish} failed by Package Run Build.")
+
+		} else if (contains("${consoleOutputText}", "yarnInstall FAILED")) {
+			fail("Build ${jobBuildNumber} for the tag ${staticFixPackBaseCommittish} failed by Yarn Install problems.");
+
+		} else {
+			fail("Build ${jobBuildNumber} for the tag ${staticFixPackBaseCommittish} failed by not mapped reasons.");
+		}
+
+	}
+
 	@prose = "I check the job with the name ${jobName} and build number ${jobBuildNumber} for completion"
 	macro checkForJobCompletion {
 		var currentIteration = "0";
@@ -788,6 +812,17 @@ definition {
 		var key_jobBuildNumber = "${jobBuildNumber}";
 
 		Jenkins.clickJobLink(jobName = "${jobName}");
+
+		if(IsElementPresent(locator1 = "Jenkins#JENKINS_JOB_BUILD_STATUS_SUCCESS")) {
+			echo("The build ${jobBuildNumber} compleated successfully!")
+		}
+		else {
+			Click(
+				locator1 = "Jenkins#JENKINS_JOB_SIDE_MENU",
+				menuOption = "Console Output");
+
+			Jenkins._findFailReason();
+		}
 
 		AssertElementPresent(locator1 = "Jenkins#JENKINS_JOB_BUILD_STATUS_SUCCESS");
 	}
