@@ -1,0 +1,99 @@
+definition {
+
+	setUp {
+		Utils.launchUatHomePage();
+
+		Login.signIn();
+
+		Policy.startNewProposal();
+
+		Policy.makeContactsComeToView();
+	}
+
+	@description = "Automation ID: PUACS2302-29 | Test Summary: Verify that is possible to fill policy form"
+	@priority = 5
+	test CanFillPolicyForm {
+		task ("When the user selects a contact from the contact table") {
+			Policy.selectContact(header = "Insurance");
+		}
+
+		task ("Then the user is redirected to insurence product page") {
+			Policy.viewFormHeader(header = "Insurance");
+		}
+
+		task ("When the user selects a insurance product") {
+			Policy.selectInsuranceProduct(text = "Boats");
+		}
+
+		task ("Then the user is redirected to the roles on policy page") {
+			Policy.viewFormHeader(header = "Roles on Policy");
+		}
+
+		task ("When the user continues with the flow") {
+			Policy.continueForm(button = "CONTINUE");
+		}
+
+		task ("Then the user is redirected to the coverage plan page") {
+			Policy.viewFormHeader(header = "Coverage Plan");
+		}
+
+		task ("When the user selects a coverage plan") {
+			Policy.selectCoveragePlan(text = "Compulsory Liability Only");
+		}
+
+		task ("Then the user is redirected to the lookup vessel page") {
+			Policy.viewFormHeader(header = "Lookup Vessel");
+
+			Policy.makeVesselsComeToView();
+		}
+
+		task ("When the user selects a vessel") {
+			Policy.selectVessel(
+				index = 10,
+				vesselName = "Lady Mary");
+		}
+
+		task ("Then the user is redirected to the Policy options and premium") {
+			Policy.viewFormHeader(header = "Policy Options and Premium");
+		}
+	}
+
+	@description = "Automation ID: PUACS2302-27 | Test Summary: Verify that the contacts can be filtered by city"
+	@priority = 5
+	test CanFilterContactsByCity {
+		task ("When the user selects a city in the city filter") {
+			var selectedCity = Policy.filterContactsByCity();
+		}
+
+		task ("Then the contact list will only shows contacts from the selected city") {
+			Policy.openCityFilter();
+
+			var differentCity = Policy.getCityName(index = 4);
+
+			Policy.viewFilterIsApplied(
+				firstItem = ${selectedCity},
+				index = 6,
+				secondItem = ${differentCity});
+		}
+	}
+
+	@description = "Automation ID: PUACS2302-28 | Test Summary: Verify that the contacts can be filtered by Type"
+	@priority = 5
+	test CanFilterContactsByType {
+		task ("When the user selects a type in the type filter") {
+			var selectedType = Policy.filterContactsByType(contactType = "Individual");
+		}
+
+		task ("Then the contact list will only show contacts from the selected type") {
+			var type = Policy.getTypeName(index = 3);
+
+			var differentType = Policy.replaceContactTypeName(type = ${type});
+
+			Policy.viewFilterIsApplied(
+				firstItem = ${selectedType},
+				index = 7,
+				secondItem = ${differentType});
+		}
+	}
+
+}

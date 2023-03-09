@@ -1,0 +1,161 @@
+definition {
+
+	@summary = "Continue with the form flow"
+	macro continueForm {
+		Portal.Button.click(
+			key_text = ${button},
+			locator1 = "Button#ANY");
+	}
+
+	@summary = "Selects a city filter from the contacts section"
+	macro filterContactsByCity {
+		Policy.openCityFilter();
+
+		var city = Policy.getCityName(index = 3);
+
+		Default.Click.clickAtNotVisible(
+			key_index = 3,
+			locator1 = "Policy#CONTACT_FILTER_CITY_DROPDOWN_ITEM");
+
+		return ${city};
+	}
+
+	@summary = "Selects a type filter from the contacts section"
+	macro filterContactsByType {
+		var type = Policy.getTypeName(index = 2);
+
+		var typeTable = Policy.replaceContactTypeName(type = ${type});
+
+		Default.Click(locator1 = "Policy#CONTACT_FILTER_TYPE_DROPDOWN");
+
+		Default.Select(
+			locator1 = "Policy#CONTACT_FILTER_TYPE_DROPDOWN",
+			value1 = ${contactType});
+
+		return ${typeTable};
+	}
+
+	@summary = "Get the name of the city in the city filter dropdown"
+	macro getCityName {
+		var key_index = ${index};
+		var cityName = selenium.getText("Policy#CONTACT_FILTER_CITY_DROPDOWN_ITEM");
+
+		return ${cityName};
+	}
+
+	@summary = "Get the name of the type in the type filter dropdown"
+	macro getTypeName {
+		var key_index = ${index};
+
+		var typeValue = selenium.getAttribute("xpath=(//select[contains(@id,'TypeFilter') and contains(@class,'type-dropdown')]/option)[${key_index}]@value");
+
+		return ${typeValue};
+	}
+
+	@summary = "Open the contacts table"
+	macro makeContactsComeToView {
+		Default.KeyPress(
+			locator1 = "Policy#SEARCH_FIELD",
+			value1 = "\ENTER");
+	}
+
+	@summary = "Open the vessels table"
+	macro makeVesselsComeToView {
+		Default.KeyPress(
+			locator1 = "Policy#LOOKUP_VESSEL_SEARCH_INPUT",
+			value1 = "\ENTER");
+	}
+
+	@summary = "Open city filter dropdown"
+	macro openCityFilter {
+		Default.Click.clickAtNotVisible(locator1 = "Policy#CONTACT_FILTER_CITY_DROPDOWN");
+
+		Default.WaitForVisible(
+			key_index = 3,
+			locator1 = "Policy#CONTACT_FILTER_CITY_DROPDOWN_ITEM");
+	}
+
+	@summary = "Replace the variable value according to contact table"
+	macro replaceContactTypeName {
+		if (${type} == "Individual") {
+			var typeTable = "F";
+		}
+
+		if (${type} == "Self Employed") {
+			var typeTable = "O";
+		}
+
+		if (${type} == "Legal Entity") {
+			var typeTable = "P";
+		}
+
+		return ${typeTable};
+	}
+
+	@summary = "Select a contact from the contacts table"
+	macro selectContact {
+		Default.MouseOver(
+			key_index = 7,
+			key_item = "F",
+			locator1 = "Policy#CONTACT_TABLE_ITEM");
+
+		Default.Click(locator1 = "Policy#USE_CONTACT_BUTTON");
+
+		Default.WaitForElementPresent(
+			key_header = ${header},
+			locator1 = "Policy#FORM_PAGE_HEADER");
+	}
+
+	@summary = "Select a coverage plan"
+	macro selectCoveragePlan {
+		Default.Click(
+			key_text = ${text},
+			locator1 = "Policy#FORM_PRIMARY_BUTTON_SELECT_BUTTON");
+	}
+
+	@summary = "Select a product from the insurence product page"
+	macro selectInsuranceProduct {
+		Default.Click(
+			key_text = ${text},
+			locator1 = "Policy#FORM_PRIMARY_BUTTON_SELECT_BUTTON");
+	}
+
+	@summary = "Selects a vessel from the lookup vessel page"
+	macro selectVessel {
+		Default.MouseOver(
+			key_index = ${index},
+			locator1 = "Policy#LOOKUP_VESSEL_TABLE_ITEM");
+
+		Default.Click(
+			key_vesselName = ${vesselName},
+			locator1 = "Policy#CHOOSE_VESSEL_BUTTON");
+	}
+
+	@summary = "Start a new proposal"
+	macro startNewProposal {
+		Default.Click.pauseClickAt(locator1 = "Policy#NEW_PROPOSAL_BUTTON");
+
+		Default.WaitForVisible(locator1 = "Policy#SEARCH_FIELD");
+	}
+
+	@summary = "Verify if only contacts from the selected filter appear in the contacts table"
+	macro viewFilterIsApplied {
+		Default.AssertElementPresent(
+			key_index = ${index},
+			key_item = ${firstItem},
+			locator1 = "Policy#CONTACT_TABLE_ITEM");
+
+		Default.AssertElementNotPresent(
+			key_index = ${index},
+			key_item = ${secondItem},
+			locator1 = "Policy#CONTACT_TABLE_ITEM");
+	}
+
+	@summary = "View form page header"
+	macro viewFormHeader {
+		Default.AssertElementPresent(
+			key_header = ${header},
+			locator1 = "Policy#FORM_PAGE_HEADER");
+	}
+
+}
