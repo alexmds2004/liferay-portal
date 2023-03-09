@@ -1005,6 +1005,41 @@ definition {
 		}
 	}
 
+	@prose = "I should be able to view the following dates on the license form ${table}"
+	macro viewDateLicenseForm {
+		var RawTable rawTable = new RawTable("${table}");
+
+		for (var row : table "${rawTable}") {
+			var field = "${row[0]}";
+			var value = "${row[1]}";
+			var section = "${row[2]}";
+			var positionValue = "${row[3]}";
+
+			var key_value = "${value}";
+			var key_section = "${section}";
+
+			if (("${field}" == "Start Date") || ("${field}" == "Expiration Date")) {
+				var key_field = ProvisioningLicenseAPI._formatCamelCase(camelCase = "${field}");
+
+				if(("${section}" == "Detached") || ("${section}" == "Active Subscriptions")) {
+					if ("${positionValue}" == "") {
+						AssertElementPresent(locator1 = "ProvisioningLicenseGenerateLicenseForm#DATE_PRODUCT_PURCHASE_FIELDS_WITHOUT_POSITION_VALUE");
+					}
+					else {
+						var key_positionValue = "${positionValue}";
+						AssertElementPresent(locator1 = "ProvisioningLicenseGenerateLicenseForm#DATE_PRODUCT_PURCHASE_FIELDS");
+					}
+				}
+				else {
+					fail("No such section ${section}. Please use Active Subscriptions or Detached section");
+				}
+			}
+			else {
+				fail("No such date license field ${field}. Please use Start Date or Expiration Date");
+			}
+		}
+	}
+
 	@prose = "I populate the replace license form with the following values ${table}"
 	macro populateReplaceLicenseForm {
 		var RawTable rawTable = new RawTable("${table}");
