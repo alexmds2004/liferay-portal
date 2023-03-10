@@ -12588,3 +12588,86 @@ Scenario: Create future non EWSA renewal for child accounts with current subscri
 	| Provisioned           | 0                                                     |
 	| Approved Purchased    | 1                                                     |
 	| State                 | ACTIVE                                                |
+
+Scenario: View subscription gap product usage
+	Testing the ability to create a platinum subcription gap in Dossiera and viewing the product usage in the provisioning account details page 
+
+	Given I publish a project with no partner RabbitMQ message with routing key "dossiera.provisioning.create" with the following values
+	| Account Name                           | Subkor - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Contact Email Address                  | sub.koroneiki1@lrcustomer.com.broken       |
+	| Contact First Name                     | SUB                                        |
+	| Contact Last Name                      | Koroneiki1                                 |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | sub.koroneiki2@lrcustomer.com.broken       |
+	| Owner First Name                       | SUB                                        |
+	| Owner Last Name                        | Koroneiki2                                 |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Korsub - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |
+	And I generate static start and end dates
+	And I generate static full start and end dates
+	And I generate future static start and end dates
+	And I generate future static full start and end dates
+	And I generate past static start and end dates
+	And I generate past static full start and end dates
+	And I update a product purchase on koroneiki made by the account "Korsub - ${staticProjectName}" for the product "DXP Production" to have the following values
+	| End Date                | ${staticFutureEndDate}         | |
+	| Original End Date       | ${staticFutureOriginalEndDate} | |
+	| Perpetual               | false                          | |
+	| Start Date              | ${staticFutureStartDate}       | |
+	| Status                  | Approved                       | |
+	And I update a product purchase on koroneiki made by the account "Korsub - ${staticProjectName}" for the product "Platinum Subscription" to have the following values
+	| End Date                | ${staticFutureEndDate}         | |
+	| Original End Date       | ${staticFutureOriginalEndDate} | |
+	| Perpetual               | false                          | |
+	| Start Date              | ${staticFutureStartDate}       | |
+	| Status                  | Approved                       | |
+	And I create a product purchase for an account with the name "Korsub - ${staticProjectName}" and the product "DXP Production" on koroneiki with the following values
+	| End Date                | ${staticPastEndDate}         | |
+	| Original End Date       | ${staticPastOriginalEndDate} | |
+	| Perpetual               | false                        | |
+	| Start Date              | ${staticPastStartDate}       | |
+	| Status                  | Approved                     | |
+	And I create a product purchase for an account with the name "Korsub - ${staticProjectName}" and the product "Platinum Subscription" on koroneiki with the following values
+	| End Date                | ${staticPastEndDate}         | |
+	| Original End Date       | ${staticPastOriginalEndDate} | |
+	| Perpetual               | false                        | |
+	| Start Date              | ${staticPastStartDate}       | |
+	| Status                  | Approved                     | |
+	Then I should be able to view product usage for the product "DXP Production" on the account "Korsub - ${staticProjectName}" with the following values
+	| Previous Year      | maxConcurrentQuantity    | 1 |
+	| Previous Year      | maxConcurrentConsumption | 0 |
+	| Current Year       | maxConcurrentQuantity    | 1 |
+	| Current Year       | maxConcurrentConsumption | 0 |
+	| Next Year          | maxConcurrentQuantity    | 1 |
+	| Next Year          | maxConcurrentConsumption | 0 |
+	| currentConsumption |                          | 0 |
