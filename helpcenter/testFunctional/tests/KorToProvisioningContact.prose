@@ -717,7 +717,7 @@ Scenario: View updated contact
 	Then I should be able to view the contact with the email address "usr.koroneiki5@lrcustomer.com.broken" and the following values
 	| Name          | USR Koroneiki5                       |
 	| Email Address | usr.koroneiki5@lrcustomer.com.broken |
-	| Role          | Support Administrator                |
+	| Role          | Support User                         |
 	| User Status   | VERIFIED                             |
 	And I should not be able to view the contact with the email address "usr.koroneiki1@lrcustomer.com.broken" 
 	When I click on the "Liferay Workers" tab
@@ -1424,7 +1424,7 @@ Scenario: Assign contact with multiple roles
 	And I click on the assign contact button
 	And I populate and save the assign contact form with the following values
 	| Email Address | usr.koroneiki2@lrcustomer.com.broken |
-	| Assign Role   | Support Administrator                |
+	| Assign Role   | Support User                         |
 	| Assign Role   | Member                               |
 	Then I should be able to view the contact with the email address "usr.koroneiki1@lrcustomer.com.broken" and the following values
 	| Name          | USR Koroneiki1                       |
@@ -1434,7 +1434,7 @@ Scenario: Assign contact with multiple roles
 	And I should be able to view the contact with the email address "usr.koroneiki2@lrcustomer.com.broken" and the following values
 	| Name          | USR Koroneiki2                       |
 	| Email Address | usr.koroneiki2@lrcustomer.com.broken |
-	| Role          | Support Administrator                |
+	| Role          | Support User                         |
 	| Role          | Member                               |
 	| User Status   | VERIFIED                             |
 	And the account with the name "Korusr - ${staticProjectName}" should be assigned the contact with the email address "usr.koroneiki1@lrcustomer.com.broken" with the customer contact role "Support Administrator"
@@ -1455,7 +1455,7 @@ Scenario: Assign contact with multiple roles
 	| Update Description          | Test Test > Assigned Contact > USR Koroneiki2 |
 	| Update Field Name           | Contact Role                                  |
 	| Update Field Original Value | N/A                                           |
-	| Update Field New Value      | Support Administrator                         |
+	| Update Field New Value      | Support User                                  |
 	And the history entry number "2" with the keyword "Test Test > Assigned Contact" with the field value "Contact Role" should be visible on the account details page with the following values
 	| Update Description          | Test Test > Assigned Contact > USR Koroneiki2 |
 	| Update Field Name           | Contact Role                                  |
@@ -1512,30 +1512,34 @@ Scenario: Unassign contact
 	And I create a team with the name "User Site Partner" for the account "Korusr - ${staticProjectName}"
 	And I assign the team with the name "User Site Partner" on the account "Korusr - ${staticProjectName}" to the following roles
 	| Partner |
+	And I assign customer contacts with the following email addresses to the account "Korusr - ${staticProjectName}"
+	| usr.koroneiki2@lrcustomer.com.broken |
 	And I assign contacts with the following email addresses to the team "User Site Partner"
 	| usr.koroneiki1@lrcustomer.com.broken |
+	| usr.koroneiki2@lrcustomer.com.broken |
 	And I log into the provisioning homepage as "${staticProvisioningAdminEmailAddress}" with password "${staticProvisioningAdminPassword}"
 	And I go to the account index page
 	And I search the accounts page using the keyword "Korusr"
 	And I click on the account with the name "Korusr - ${staticProjectName}" on the provisioning index
 	And I click on the "Contacts" tab
-	And I click on the "Unassign" button in the dropdown menu for the contact with the email address "usr.koroneiki1@lrcustomer.com.broken"
-	Then I should not be able to view the contact with the email address "usr.koroneiki1@lrcustomer.com.broken"
-	And the contact with the email address "usr.koroneiki1@lrcustomer.com.broken" should not be assigned the account "Korusr - ${staticProjectName}"
-	And the contact with the email address "usr.koroneiki1@lrcustomer.com.broken" should not be assigned the team "Korusr - ${staticProjectName}"
-	And the contact with the email address "usr.koroneiki1@lrcustomer.com.broken" should not be assigned the team "User Site Partner"
+	And I click on the "Unassign" button in the dropdown menu for the contact with the email address "usr.koroneiki2@lrcustomer.com.broken"
+	Then I should not be able to view the contact with the email address "usr.koroneiki2@lrcustomer.com.broken"
+	And the contact with the email address "usr.koroneiki2@lrcustomer.com.broken" should not be assigned the account "Korusr - ${staticProjectName}"
+	And the contact with the email address "usr.koroneiki2@lrcustomer.com.broken" should not be assigned the team "Korusr - ${staticProjectName}"
+	And the contact with the email address "usr.koroneiki2@lrcustomer.com.broken" should not be assigned the team "User Site Partner"
 	When I click on the "Liferay Workers" tab
 	Then I should not be able to view the worker with the email address "usr.koroneiki1@lrcustomer.com.broken"
+	And I should not be able to view the worker with the email address "usr.koroneiki2@lrcustomer.com.broken"
 	When I click on the "History" tab
-	Then the history entry with the keywords "Auto > Assigned Contact" and "USR Koroneiki1" with the field value "Contact Role" should be visible on the account details page with the following values
-	| Update Description          | Auto > Assigned Contact > USR Koroneiki1 |
-	| Update Field Name           | Contact Role                             |
-	| Update Field Original Value | N/A                                      |
-	| Update Field New Value      | Support Administrator                    |
+	Then the history entry with the keywords "Koroneiki QA Service Producer > Assigned Contact" and "USR Koroneiki2" with the field value "Contact Role" should be visible on the account details page with the following values
+	| Update Description          | Koroneiki QA Service Producer > Assigned Contact > USR Koroneiki2 |
+	| Update Field Name           | Contact Role                                                      |
+	| Update Field Original Value | N/A                                                               |
+	| Update Field New Value      | Member                                                            |
 	And the history entry with the keyword "Test Test > Unassigned Contact" with the field value "Contact Role" should be visible on the account details page with the following values
-	| Update Description          | Test Test > Unassigned Contact > USR Koroneiki1 |
+	| Update Description          | Test Test > Unassigned Contact > USR Koroneiki2 |
 	| Update Field Name           | Contact Role                                    |
-	| Update Field Original Value | Support Administrator                           |
+	| Update Field Original Value | Member                                          |
 	| Update Field New Value      | N/A                                             |
 	And the koroneiki contact and the okta user with the email address "usr.koroneiki1@lrcustomer.com.broken" should have matching uuid values
 
@@ -1680,11 +1684,6 @@ Scenario: Attempt to unassign lone administrator
 	And I click on the account with the name "Korusr - ${staticProjectName}" on the provisioning index
 	And I click on the "Contacts" tab
 	And I click on the "Unassign" button in the dropdown menu for the contact with the email address "usr.koroneiki1@lrcustomer.com.broken"
-	And I click on the assign contact button
-	And I populate and save the assign contact form with the following values
-	| Email Address | usr.koroneiki1@lrcustomer.com.broken |
-	| Assign Role   | Support Administrator                |
-	And I click on the "Unassign" button in the dropdown menu for the contact with the email address "usr.koroneiki1@lrcustomer.com.broken"
 	Then I should be able to view an error message stating that there are no other remaining team members with the role
 	And I should be able to view the contact with the email address "usr.koroneiki1@lrcustomer.com.broken" and the following values
 	| Name          | USR Koroneiki1                       |
@@ -1697,16 +1696,6 @@ Scenario: Attempt to unassign lone administrator
 	| Update Field Name           | Contact Role                             |
 	| Update Field Original Value | N/A                                      |
 	| Update Field New Value      | Support Administrator                    |
-	And the history entry with the keyword "Test Test > Unassigned Contact" with the field value "Contact Role" should be visible on the account details page with the following values
-	| Update Description          | Test Test > Unassigned Contact > USR Koroneiki1 |
-	| Update Field Name           | Contact Role                                    |
-	| Update Field Original Value | Support Administrator                           |
-	| Update Field New Value      | N/A                                             |
-	And the history entry with the keyword "Test Test > Assigned Contact" with the field value "Contact Role" should be visible on the account details page with the following values
-	| Update Description          | Test Test > Assigned Contact > USR Koroneiki1 |
-	| Update Field Name           | Contact Role                                  |
-	| Update Field Original Value | N/A                                           |
-	| Update Field New Value      | Support Administrator                         |
 	And the koroneiki contact and the okta user with the email address "usr.koroneiki1@lrcustomer.com.broken" should have matching uuid values
 	And the contact with the email address "usr.koroneiki1@lrcustomer.com.broken" should be assigned the account "Korusr - ${staticProjectName}"
 
@@ -1759,11 +1748,6 @@ Scenario: Unassign multiple administrators
 	And I search the accounts page using the keyword "Korusr"
 	And I click on the account with the name "Korusr - ${staticProjectName}" on the provisioning index
 	And I click on the "Contacts" tab
-	And I click on the "Unassign" button in the dropdown menu for the contact with the email address "usr.koroneiki1@lrcustomer.com.broken"
-	And I click on the assign contact button
-	And I populate and save the assign contact form with the following values
-	| Email Address | usr.koroneiki1@lrcustomer.com.broken |
-	| Assign Role   | Support Administrator                |
 	And I click on the assign contact button
 	And I populate and save the assign contact form with the following values
 	| Email Address | usr.koroneiki4@lrcustomer.com.broken |
@@ -1784,16 +1768,6 @@ Scenario: Unassign multiple administrators
 	| Update Field Name           | Contact Role                             |
 	| Update Field Original Value | N/A                                      |
 	| Update Field New Value      | Support Administrator                    |
-	And the history entry with the keyword "Test Test > Unassigned Contact" with the field value "Contact Role" should be visible on the account details page with the following values
-	| Update Description          | Test Test > Unassigned Contact > USR Koroneiki1 |
-	| Update Field Name           | Contact Role                                    |
-	| Update Field Original Value | Support Administrator                           |
-	| Update Field New Value      | N/A                                             |
-	And the history entry with the keyword "Test Test > Assigned Contact" with the field value "Contact Role" should be visible on the account details page with the following values
-	| Update Description          | Test Test > Assigned Contact > USR Koroneiki1 |
-	| Update Field Name           | Contact Role                                  |
-	| Update Field Original Value | N/A                                           |
-	| Update Field New Value      | Support Administrator                         |
 	And the history entry with the keyword "Test Test > Assigned Contact" with the field value "Contact Role" should be visible on the account details page with the following values
 	| Update Description          | Test Test > Assigned Contact > USR Koroneiki4 |
 	| Update Field Name           | Contact Role                                  |
@@ -1856,11 +1830,10 @@ Scenario: Attempt to unassign lone partner manager
 	And I search the accounts page using the keyword "Korusr"
 	And I click on the account with the name "Korusr - ${staticProjectName}" on the provisioning index
 	And I click on the "Contacts" tab
-	And I click on the "Unassign" button in the dropdown menu for the contact with the email address "usr.koroneiki1@lrcustomer.com.broken"
-	And I click on the assign contact button
+	And I click on the "Edit" button in the dropdown menu for the contact with the email address "usr.koroneiki1@lrcustomer.com.broken"
 	And I populate and save the assign contact form with the following values
-	| Email Address | usr.koroneiki1@lrcustomer.com.broken |
-	| Assign Role   | Partner Manager                      |
+	| Assign Role   | Partner Manager       |
+	| Unassign Role | Support Administrator |
 	And I click on the "Unassign" button in the dropdown menu for the contact with the email address "usr.koroneiki1@lrcustomer.com.broken"
 	And I should be able to view an error message stating that there are no other remaining team members with the role
 	Then I should be able to view the contact with the email address "usr.koroneiki1@lrcustomer.com.broken" and the following values
@@ -1936,11 +1909,10 @@ Scenario: Unassign multiple partner managers
 	And I search the accounts page using the keyword "Korusr"
 	And I click on the account with the name "Korusr - ${staticProjectName}" on the provisioning index
 	And I click on the "Contacts" tab
-	And I click on the "Unassign" button in the dropdown menu for the contact with the email address "usr.koroneiki1@lrcustomer.com.broken"
-	And I click on the assign contact button
+	And I click on the "Edit" button in the dropdown menu for the contact with the email address "usr.koroneiki1@lrcustomer.com.broken"
 	And I populate and save the assign contact form with the following values
-	| Email Address | usr.koroneiki1@lrcustomer.com.broken |
-	| Assign Role   | Partner Manager                      |
+	| Assign Role   | Partner Manager       |
+	| Unassign Role | Support Administrator |
 	And I click on the assign contact button
 	And I populate and save the assign contact form with the following values
 	| Email Address | usr.koroneiki4@lrcustomer.com.broken |
@@ -2033,19 +2005,14 @@ Scenario: Unassign administrator followed by unassign attempt of partner manager
 	And I click on the "Liferay Workers" tab
 	And I click on the "Unassign" button in the dropdown menu for the worker with the email address "usr.koroneiki4@lrcustomer.com.broken"
 	And I click on the "Contacts" tab
-	And I click on the "Unassign" button in the dropdown menu for the contact with the email address "usr.koroneiki1@lrcustomer.com.broken"
-	And I click on the assign contact button
-	And I populate and save the assign contact form with the following values
-	| Email Address | usr.koroneiki1@lrcustomer.com.broken |
-	| Assign Role   | Support Administrator                |
 	And I click on the assign contact button
 	And I populate and save the assign contact form with the following values
 	| Email Address | usr.koroneiki4@lrcustomer.com.broken |
 	| Assign Role   | Partner Manager                      |
 	And I click on the "Unassign" button in the dropdown menu for the contact with the email address "usr.koroneiki1@lrcustomer.com.broken"
 	And I click on the "Unassign" button in the dropdown menu for the contact with the email address "usr.koroneiki4@lrcustomer.com.broken"
-	And I should be able to view an error message stating that there are no other remaining team members with the role
-	Then I should be able to view the contact with the email address "usr.koroneiki4@lrcustomer.com.broken" and the following values
+	Then I should be able to view an error message stating that there are no other remaining team members with the role
+	And I should be able to view the contact with the email address "usr.koroneiki4@lrcustomer.com.broken" and the following values
 	| Name          | USR Koroneiki4                       |
 	| Email Address | usr.koroneiki4@lrcustomer.com.broken |
 	| Role          | Partner Manager                      |
@@ -2066,16 +2033,6 @@ Scenario: Unassign administrator followed by unassign attempt of partner manager
 	| Update Field Name           | Contact Role                                    |
 	| Update Field Original Value | Secondary Contact                               |
 	| Update Field New Value      | N/A                                             |
-	And the history entry with the keyword "Test Test > Unassigned Contact" with the field value "Contact Role" should be visible on the account details page with the following values
-	| Update Description          | Test Test > Unassigned Contact > USR Koroneiki1 |
-	| Update Field Name           | Contact Role                                    |
-	| Update Field Original Value | Support Administrator                           |
-	| Update Field New Value      | N/A                                             |
-	And the history entry with the keyword "Test Test > Assigned Contact" with the field value "Contact Role" should be visible on the account details page with the following values
-	| Update Description          | Test Test > Assigned Contact > USR Koroneiki1 |
-	| Update Field Name           | Contact Role                                  |
-	| Update Field Original Value | N/A                                           |
-	| Update Field New Value      | Support Administrator                         |
 	And the history entry with the keyword "Test Test > Assigned Contact" with the field value "Contact Role" should be visible on the account details page with the following values
 	| Update Description          | Test Test > Assigned Contact > USR Koroneiki4 |
 	| Update Field Name           | Contact Role                                  |
@@ -2140,19 +2097,14 @@ Scenario: Unassign partner manager followed by unassign attempt of administrator
 	And I click on the "Liferay Workers" tab
 	And I click on the "Unassign" button in the dropdown menu for the worker with the email address "usr.koroneiki4@lrcustomer.com.broken"
 	And I click on the "Contacts" tab
-	And I click on the "Unassign" button in the dropdown menu for the contact with the email address "usr.koroneiki1@lrcustomer.com.broken"
-	And I click on the assign contact button
-	And I populate and save the assign contact form with the following values
-	| Email Address | usr.koroneiki1@lrcustomer.com.broken |
-	| Assign Role   | Support Administrator                |
 	And I click on the assign contact button
 	And I populate and save the assign contact form with the following values
 	| Email Address | usr.koroneiki4@lrcustomer.com.broken |
 	| Assign Role   | Partner Manager                      |
 	And I click on the "Unassign" button in the dropdown menu for the contact with the email address "usr.koroneiki4@lrcustomer.com.broken"
 	And I click on the "Unassign" button in the dropdown menu for the contact with the email address "usr.koroneiki1@lrcustomer.com.broken"
-	And I should be able to view an error message stating that there are no other remaining team members with the role
-	Then I should be able to view the contact with the email address "usr.koroneiki1@lrcustomer.com.broken" and the following values
+	Then I should be able to view an error message stating that there are no other remaining team members with the role
+	And I should be able to view the contact with the email address "usr.koroneiki1@lrcustomer.com.broken" and the following values
 	| Name          | USR Koroneiki1                       |
 	| Email Address | usr.koroneiki1@lrcustomer.com.broken |
 	| Role          | Support Administrator                |
@@ -2173,16 +2125,6 @@ Scenario: Unassign partner manager followed by unassign attempt of administrator
 	| Update Field Name           | Contact Role                                    |
 	| Update Field Original Value | Secondary Contact                               |
 	| Update Field New Value      | N/A                                             |
-	And the history entry with the keyword "Test Test > Unassigned Contact" with the field value "Contact Role" should be visible on the account details page with the following values
-	| Update Description          | Test Test > Unassigned Contact > USR Koroneiki1 |
-	| Update Field Name           | Contact Role                                    |
-	| Update Field Original Value | Support Administrator                           |
-	| Update Field New Value      | N/A                                             |
-	And the history entry with the keyword "Test Test > Assigned Contact" with the field value "Contact Role" should be visible on the account details page with the following values
-	| Update Description          | Test Test > Assigned Contact > USR Koroneiki1 |
-	| Update Field Name           | Contact Role                                  |
-	| Update Field Original Value | N/A                                           |
-	| Update Field New Value      | Support Administrator                         |
 	And the history entry with the keyword "Test Test > Assigned Contact" with the field value "Contact Role" should be visible on the account details page with the following values
 	| Update Description          | Test Test > Assigned Contact > USR Koroneiki4 |
 	| Update Field Name           | Contact Role                                  |
@@ -2247,11 +2189,6 @@ Scenario: Attempt to update lone administrator on account with other non partner
 	And I click on the "Liferay Workers" tab
 	And I click on the "Unassign" button in the dropdown menu for the worker with the email address "usr.koroneiki4@lrcustomer.com.broken"
 	And I click on the "Contacts" tab
-	And I click on the "Unassign" button in the dropdown menu for the contact with the email address "usr.koroneiki1@lrcustomer.com.broken"
-	And I click on the assign contact button
-	And I populate and save the assign contact form with the following values
-	| Email Address | usr.koroneiki1@lrcustomer.com.broken |
-	| Assign Role   | Support Administrator                |
 	And I click on the assign contact button
 	And I populate and save the assign contact form with the following values
 	| Email Address | usr.koroneiki4@lrcustomer.com.broken |
@@ -2261,8 +2198,8 @@ Scenario: Attempt to update lone administrator on account with other non partner
 	When I populate and save the assign contact form with the following values
 	| Unassign Role | Support Administrator |
 	| Assign Role   | Member                |
-	And I should be able to view an error message stating that there are no other remaining team members with the role
-	And I click on the back button in the edit roles section
+	Then I should be able to view an error message stating that there are no other remaining team members with the role
+	When I click on the back button in the edit roles section
 	Then I should be able to view the contact with the email address "usr.koroneiki1@lrcustomer.com.broken" and the following values
 	| Name          | USR Koroneiki1                       |
 	| Email Address | usr.koroneiki1@lrcustomer.com.broken |
@@ -2289,16 +2226,6 @@ Scenario: Attempt to update lone administrator on account with other non partner
 	| Update Field Name           | Contact Role                                    |
 	| Update Field Original Value | Secondary Contact                               |
 	| Update Field New Value      | N/A                                             |
-	And the history entry with the keyword "Test Test > Unassigned Contact" with the field value "Contact Role" should be visible on the account details page with the following values
-	| Update Description          | Test Test > Unassigned Contact > USR Koroneiki1 |
-	| Update Field Name           | Contact Role                                    |
-	| Update Field Original Value | Support Administrator                           |
-	| Update Field New Value      | N/A                                             |
-	And the history entry with the keyword "Test Test > Assigned Contact" with the field value "Contact Role" should be visible on the account details page with the following values
-	| Update Description          | Test Test > Assigned Contact > USR Koroneiki1 |
-	| Update Field Name           | Contact Role                                  |
-	| Update Field Original Value | N/A                                           |
-	| Update Field New Value      | Support Administrator                         |
 	And the history entry with the keyword "Test Test > Assigned Contact" with the field value "Contact Role" should be visible on the account details page with the following values
 	| Update Description          | Test Test > Assigned Contact > USR Koroneiki4 |
 	| Update Field Name           | Contact Role                                  |
@@ -2360,11 +2287,10 @@ Scenario: Attempt to update lone partner manager on account with other non partn
 	And I click on the "Liferay Workers" tab
 	And I click on the "Unassign" button in the dropdown menu for the worker with the email address "usr.koroneiki4@lrcustomer.com.broken"
 	And I click on the "Contacts" tab
-	And I click on the "Unassign" button in the dropdown menu for the contact with the email address "usr.koroneiki1@lrcustomer.com.broken"
-	And I click on the assign contact button
+	And I click on the "Edit" button in the dropdown menu for the contact with the email address "usr.koroneiki1@lrcustomer.com.broken"
 	And I populate and save the assign contact form with the following values
-	| Email Address | usr.koroneiki1@lrcustomer.com.broken |
-	| Assign Role   | Partner Manager                      |
+	| Assign Role   | Partner Manager       |
+	| Unassign Role | Support Administrator |
 	And I click on the assign contact button
 	And I populate and save the assign contact form with the following values
 	| Email Address | usr.koroneiki4@lrcustomer.com.broken |
@@ -2473,18 +2399,13 @@ Scenario: Attempt to unassign lone administrator on account with other non partn
 	And I click on the "Liferay Workers" tab
 	And I click on the "Unassign" button in the dropdown menu for the worker with the email address "usr.koroneiki4@lrcustomer.com.broken"
 	And I click on the "Contacts" tab
-	And I click on the "Unassign" button in the dropdown menu for the contact with the email address "usr.koroneiki1@lrcustomer.com.broken"
-	And I click on the assign contact button
-	And I populate and save the assign contact form with the following values
-	| Email Address | usr.koroneiki1@lrcustomer.com.broken |
-	| Assign Role   | Support Administrator                |
 	And I click on the assign contact button
 	And I populate and save the assign contact form with the following values
 	| Email Address | usr.koroneiki4@lrcustomer.com.broken |
 	| Assign Role   | Member                               |
 	And I click on the "Unassign" button in the dropdown menu for the contact with the email address "usr.koroneiki1@lrcustomer.com.broken"
-	And I should be able to view an error message stating that there are no other remaining team members with the role
-	Then I should be able to view the contact with the email address "usr.koroneiki1@lrcustomer.com.broken" and the following values
+	Then I should be able to view an error message stating that there are no other remaining team members with the role
+	And I should be able to view the contact with the email address "usr.koroneiki1@lrcustomer.com.broken" and the following values
 	| Name          | USR Koroneiki1                       |
 	| Email Address | usr.koroneiki1@lrcustomer.com.broken |
 	| Role          | Support Administrator                |
@@ -2510,16 +2431,6 @@ Scenario: Attempt to unassign lone administrator on account with other non partn
 	| Update Field Name           | Contact Role                                    |
 	| Update Field Original Value | Secondary Contact                               |
 	| Update Field New Value      | N/A                                             |
-	And the history entry with the keyword "Test Test > Unassigned Contact" with the field value "Contact Role" should be visible on the account details page with the following values
-	| Update Description          | Test Test > Unassigned Contact > USR Koroneiki1 |
-	| Update Field Name           | Contact Role                                    |
-	| Update Field Original Value | Support Administrator                           |
-	| Update Field New Value      | N/A                                             |
-	And the history entry with the keyword "Test Test > Assigned Contact" with the field value "Contact Role" should be visible on the account details page with the following values
-	| Update Description          | Test Test > Assigned Contact > USR Koroneiki1 |
-	| Update Field Name           | Contact Role                                  |
-	| Update Field Original Value | N/A                                           |
-	| Update Field New Value      | Support Administrator                         |
 	And the history entry with the keyword "Test Test > Assigned Contact" with the field value "Contact Role" should be visible on the account details page with the following values
 	| Update Description          | Test Test > Assigned Contact > USR Koroneiki4 |
 	| Update Field Name           | Contact Role                                  |
@@ -2581,18 +2492,17 @@ Scenario: Attempt to unassign lone partner manager on account with other non par
 	And I click on the "Liferay Workers" tab
 	And I click on the "Unassign" button in the dropdown menu for the worker with the email address "usr.koroneiki4@lrcustomer.com.broken"
 	And I click on the "Contacts" tab
-	And I click on the "Unassign" button in the dropdown menu for the contact with the email address "usr.koroneiki1@lrcustomer.com.broken"
-	And I click on the assign contact button
+	And I click on the "Edit" button in the dropdown menu for the contact with the email address "usr.koroneiki1@lrcustomer.com.broken"
 	And I populate and save the assign contact form with the following values
-	| Email Address | usr.koroneiki1@lrcustomer.com.broken |
-	| Assign Role   | Partner Manager                      |
+	| Assign Role   | Partner Manager       |
+	| Unassign Role | Support Administrator |
 	And I click on the assign contact button
 	And I populate and save the assign contact form with the following values
 	| Email Address | usr.koroneiki4@lrcustomer.com.broken |
 	| Assign Role   | Member                               |
 	And I click on the "Unassign" button in the dropdown menu for the contact with the email address "usr.koroneiki1@lrcustomer.com.broken"
-	And I should be able to view an error message stating that there are no other remaining team members with the role
-	Then I should be able to view the contact with the email address "usr.koroneiki1@lrcustomer.com.broken" and the following values
+	Then I should be able to view an error message stating that there are no other remaining team members with the role
+	And I should be able to view the contact with the email address "usr.koroneiki1@lrcustomer.com.broken" and the following values
 	| Name          | USR Koroneiki1                       |
 	| Email Address | usr.koroneiki1@lrcustomer.com.broken |
 	| Role          | Partner Manager                      |
@@ -2689,11 +2599,6 @@ Scenario: Update second administrator to other non partner manager or non admini
 	And I click on the "Liferay Workers" tab
 	And I click on the "Unassign" button in the dropdown menu for the worker with the email address "usr.koroneiki4@lrcustomer.com.broken"
 	And I click on the "Contacts" tab
-	And I click on the "Unassign" button in the dropdown menu for the contact with the email address "usr.koroneiki1@lrcustomer.com.broken"
-	And I click on the assign contact button
-	And I populate and save the assign contact form with the following values
-	| Email Address | usr.koroneiki1@lrcustomer.com.broken |
-	| Assign Role   | Support Administrator                |
 	And I click on the assign contact button
 	And I populate and save the assign contact form with the following values
 	| Email Address | usr.koroneiki4@lrcustomer.com.broken |
@@ -2718,8 +2623,8 @@ Scenario: Update second administrator to other non partner manager or non admini
 	When I populate and save the assign contact form with the following values
 	| Unassign Role | Support Administrator |
 	| Assign Role   | Member                |
-	And I should be able to view an error message stating that there are no other remaining team members with the role
-	And I click on the back button in the edit roles section
+	Then I should be able to view an error message stating that there are no other remaining team members with the role
+	When I click on the back button in the edit roles section
 	Then I should be able to view the contact with the email address "usr.koroneiki1@lrcustomer.com.broken" and the following values
 	| Name          | USR Koroneiki1                       |
 	| Email Address | usr.koroneiki1@lrcustomer.com.broken |
@@ -2746,16 +2651,6 @@ Scenario: Update second administrator to other non partner manager or non admini
 	| Update Field Name           | Contact Role                                    |
 	| Update Field Original Value | Secondary Contact                               |
 	| Update Field New Value      | N/A                                             |
-	And the history entry with the keyword "Test Test > Unassigned Contact" with the field value "Contact Role" should be visible on the account details page with the following values
-	| Update Description          | Test Test > Unassigned Contact > USR Koroneiki1 |
-	| Update Field Name           | Contact Role                                    |
-	| Update Field Original Value | Support Administrator                           |
-	| Update Field New Value      | N/A                                             |
-	And the history entry with the keyword "Test Test > Assigned Contact" with the field value "Contact Role" should be visible on the account details page with the following values
-	| Update Description          | Test Test > Assigned Contact > USR Koroneiki1 |
-	| Update Field Name           | Contact Role                                  |
-	| Update Field Original Value | N/A                                           |
-	| Update Field New Value      | Support Administrator                         |
 	And the history entry with the keyword "Test Test > Assigned Contact" with the field value "Contact Role" should be visible on the account details page with the following values
 	| Update Description          | Test Test > Assigned Contact > USR Koroneiki4 |
 	| Update Field Name           | Contact Role                                  |
@@ -2822,11 +2717,10 @@ Scenario: Update second partner manager to other non partner manager or non admi
 	And I click on the "Liferay Workers" tab
 	And I click on the "Unassign" button in the dropdown menu for the worker with the email address "usr.koroneiki4@lrcustomer.com.broken"
 	And I click on the "Contacts" tab
-	And I click on the "Unassign" button in the dropdown menu for the contact with the email address "usr.koroneiki1@lrcustomer.com.broken"
-	And I click on the assign contact button
+	And I click on the "Edit" button in the dropdown menu for the contact with the email address "usr.koroneiki1@lrcustomer.com.broken"
 	And I populate and save the assign contact form with the following values
-	| Email Address | usr.koroneiki1@lrcustomer.com.broken |
-	| Assign Role   | Partner Manager                      |
+	| Assign Role   | Partner Manager       |
+	| Unassign Role | Support Administrator |
 	And I click on the assign contact button
 	And I populate and save the assign contact form with the following values
 	| Email Address | usr.koroneiki4@lrcustomer.com.broken |
@@ -2955,17 +2849,7 @@ Scenario: Attempt to update lone administrator to other non administrator or non
 	And I click on the "Liferay Workers" tab
 	And I click on the "Unassign" button in the dropdown menu for the worker with the email address "usr.koroneiki4@lrcustomer.com.broken"
 	And I click on the "Contacts" tab
-	And I click on the "Unassign" button in the dropdown menu for the contact with the email address "usr.koroneiki1@lrcustomer.com.broken"
-	And I click on the assign contact button
-	And I populate and save the assign contact form with the following values
-	| Email Address | usr.koroneiki1@lrcustomer.com.broken |
-	| Assign Role   | Support Administrator                |
-	Then I should be able to view the contact with the email address "usr.koroneiki1@lrcustomer.com.broken" and the following values
-	| Name          | USR Koroneiki1                       |
-	| Email Address | usr.koroneiki1@lrcustomer.com.broken |
-	| Role          | Support Administrator                |
-	| User Status   | VERIFIED                             |
-	When I click on the "Edit" button in the dropdown menu for the contact with the email address "usr.koroneiki1@lrcustomer.com.broken"
+	And I click on the "Edit" button in the dropdown menu for the contact with the email address "usr.koroneiki1@lrcustomer.com.broken"
 	Then the email address field should be read only
 	When I populate and save the assign contact form with the following values
 	| Unassign Role | Support Administrator |
@@ -2993,16 +2877,6 @@ Scenario: Attempt to update lone administrator to other non administrator or non
 	| Update Field Name           | Contact Role                                    |
 	| Update Field Original Value | Secondary Contact                               |
 	| Update Field New Value      | N/A                                             |
-	And the history entry with the keyword "Test Test > Unassigned Contact" with the field value "Contact Role" should be visible on the account details page with the following values
-	| Update Description          | Test Test > Unassigned Contact > USR Koroneiki1 |
-	| Update Field Name           | Contact Role                                    |
-	| Update Field Original Value | Support Administrator                           |
-	| Update Field New Value      | N/A                                             |
-	And the history entry with the keyword "Test Test > Assigned Contact" with the field value "Contact Role" should be visible on the account details page with the following values
-	| Update Description          | Test Test > Assigned Contact > USR Koroneiki1 |
-	| Update Field Name           | Contact Role                                  |
-	| Update Field Original Value | N/A                                           |
-	| Update Field New Value      | Support Administrator                         |
 	And the koroneiki contact and the okta user with the email address "usr.koroneiki1@lrcustomer.com.broken" should have matching uuid values
 	And the contact with the email address "usr.koroneiki1@lrcustomer.com.broken" should be assigned the account "Korusr - ${staticProjectName}"
 
@@ -3057,17 +2931,16 @@ Scenario: Attempt to update lone partner manager to other non administrator or n
 	And I click on the "Liferay Workers" tab
 	And I click on the "Unassign" button in the dropdown menu for the worker with the email address "usr.koroneiki4@lrcustomer.com.broken"
 	And I click on the "Contacts" tab
-	And I click on the "Unassign" button in the dropdown menu for the contact with the email address "usr.koroneiki1@lrcustomer.com.broken"
-	And I click on the assign contact button
+	And I click on the "Edit" button in the dropdown menu for the contact with the email address "usr.koroneiki1@lrcustomer.com.broken"
 	And I populate and save the assign contact form with the following values
-	| Email Address | usr.koroneiki1@lrcustomer.com.broken |
-	| Assign Role   | Partner Manager                      |
+	| Assign Role   | Partner Manager       |
+	| Unassign Role | Support Administrator |
 	Then I should be able to view the contact with the email address "usr.koroneiki1@lrcustomer.com.broken" and the following values
 	| Name          | USR Koroneiki1                       |
 	| Email Address | usr.koroneiki1@lrcustomer.com.broken |
 	| Role          | Partner Manager                      |
 	| User Status   | VERIFIED                             |
-	When I click on the "Edit" button in the dropdown menu for the contact with the email address "usr.koroneiki1@lrcustomer.com.broken"
+	And I click on the "Edit" button in the dropdown menu for the contact with the email address "usr.koroneiki1@lrcustomer.com.broken"
 	Then the email address field should be read only
 	When I populate and save the assign contact form with the following values
 	| Unassign Role | Partner Manager       |
@@ -3159,17 +3032,7 @@ Scenario: Add and remove non administrator or non partner manager roles to lone 
 	And I click on the "Liferay Workers" tab
 	And I click on the "Unassign" button in the dropdown menu for the worker with the email address "usr.koroneiki4@lrcustomer.com.broken"
 	And I click on the "Contacts" tab
-	And I click on the "Unassign" button in the dropdown menu for the contact with the email address "usr.koroneiki1@lrcustomer.com.broken"
-	And I click on the assign contact button
-	And I populate and save the assign contact form with the following values
-	| Email Address | usr.koroneiki1@lrcustomer.com.broken |
-	| Assign Role   | Support Administrator                |
-	Then I should be able to view the contact with the email address "usr.koroneiki1@lrcustomer.com.broken" and the following values
-	| Name          | USR Koroneiki1                       |
-	| Email Address | usr.koroneiki1@lrcustomer.com.broken |
-	| Role          | Support Administrator                |
-	| User Status   | VERIFIED                             |
-	When I click on the "Edit" button in the dropdown menu for the contact with the email address "usr.koroneiki1@lrcustomer.com.broken"
+	And I click on the "Edit" button in the dropdown menu for the contact with the email address "usr.koroneiki1@lrcustomer.com.broken"
 	Then the email address field should be read only
 	When I populate and save the assign contact form with the following values
 	| Assign Role | Critical Incident Contact |
@@ -3207,16 +3070,6 @@ Scenario: Add and remove non administrator or non partner manager roles to lone 
 	| Update Field Name           | Contact Role                                    |
 	| Update Field Original Value | Secondary Contact                               |
 	| Update Field New Value      | N/A                                             |
-	And the history entry with the keyword "Test Test > Unassigned Contact" with the field value "Contact Role" should be visible on the account details page with the following values
-	| Update Description          | Test Test > Unassigned Contact > USR Koroneiki1 |
-	| Update Field Name           | Contact Role                                    |
-	| Update Field Original Value | Support Administrator                           |
-	| Update Field New Value      | N/A                                             |
-	And the history entry with the keyword "Test Test > Assigned Contact" with the field value "Contact Role" should be visible on the account details page with the following values
-	| Update Description          | Test Test > Assigned Contact > USR Koroneiki1 |
-	| Update Field Name           | Contact Role                                  |
-	| Update Field Original Value | N/A                                           |
-	| Update Field New Value      | Support Administrator                         |
 	And the history entry with the keyword "Test Test > Assigned Contact" with the field value "Contact Role" should be visible on the account details page with the following values
 	| Update Description          | Test Test > Assigned Contact > USR Koroneiki1 |
 	| Update Field Name           | Contact Role                                  |
@@ -3291,11 +3144,10 @@ Scenario: Add and remove non administrator or non partner manager roles to lone 
 	And I click on the "Liferay Workers" tab
 	And I click on the "Unassign" button in the dropdown menu for the worker with the email address "usr.koroneiki4@lrcustomer.com.broken"
 	And I click on the "Contacts" tab
-	And I click on the "Unassign" button in the dropdown menu for the contact with the email address "usr.koroneiki1@lrcustomer.com.broken"
-	And I click on the assign contact button
+	And I click on the "Edit" button in the dropdown menu for the contact with the email address "usr.koroneiki1@lrcustomer.com.broken"
 	And I populate and save the assign contact form with the following values
-	| Email Address | usr.koroneiki1@lrcustomer.com.broken |
-	| Assign Role   | Partner Manager                      |
+	| Assign Role   | Partner Manager       |
+	| Unassign Role | Support Administrator |
 	Then I should be able to view the contact with the email address "usr.koroneiki1@lrcustomer.com.broken" and the following values
 	| Name          | USR Koroneiki1                       |
 	| Email Address | usr.koroneiki1@lrcustomer.com.broken |
@@ -3532,13 +3384,13 @@ Scenario: Update contact role
 	Then the email address field should be read only
 	When I populate and save the assign contact form with the following values
 	| Unassign Role | Support Administrator |
-	| Assign Role   | Support Requester |
+	| Assign Role   | Partner Manager       |
 	Then I should be able to view the contact with the email address "usr.koroneiki1@lrcustomer.com.broken" and the following values
 	| Name          | USR Koroneiki1                       |
 	| Email Address | usr.koroneiki1@lrcustomer.com.broken |
-	| Role          | Support Requester                    |
+	| Role          | Partner Manager                      |
 	| User Status   | VERIFIED                             |
-	And the account with the name "Korusr - ${staticProjectName}" should be assigned the contact with the email address "usr.koroneiki1@lrcustomer.com.broken" with the customer contact role "Support Requester"
+	And the account with the name "Korusr - ${staticProjectName}" should be assigned the contact with the email address "usr.koroneiki1@lrcustomer.com.broken" with the customer contact role "Partner Manager"
 	And the contact with the email address "usr.koroneiki1@lrcustomer.com.broken" assigned the account "Korusr - ${staticProjectName}" should not have the contact role "Support Administrator"
 	And the contact with the email address "usr.koroneiki1@lrcustomer.com.broken" should be assigned the team "Korusr - ${staticProjectName}"
 	When I click on the "Liferay Workers" tab
@@ -3553,7 +3405,7 @@ Scenario: Update contact role
 	| Update Description          | Test Test > Assigned Contact > USR Koroneiki1 |
 	| Update Field Name           | Contact Role                                  |
 	| Update Field Original Value | N/A                                           |
-	| Update Field New Value      | Support Requester                             |
+	| Update Field New Value      | Partner Manager                               |
 	And the history entry with the keyword "Test Test > Unassigned Contact" with the field value "Contact Role" should be visible on the account details page with the following values
 	| Update Description          | Test Test > Unassigned Contact > USR Koroneiki1 |
 	| Update Field Name           | Contact Role                                    |
@@ -3704,7 +3556,7 @@ Scenario: Update contact role for contact assigned via provisioning
 	Then the email address field should be read only
 	When I populate and save the assign contact form with the following values
 	| Unassign Role | Support Requester |
-	| Assign Role   | Support Administrator |
+	| Assign Role   | Support User      |
 	Then I should be able to view the contact with the email address "usr.koroneiki1@lrcustomer.com.broken" and the following values
 	| Name          | USR Koroneiki1                       |
 	| Email Address | usr.koroneiki1@lrcustomer.com.broken |
@@ -3713,10 +3565,10 @@ Scenario: Update contact role for contact assigned via provisioning
 	And I should be able to view the contact with the email address "usr.koroneiki2@lrcustomer.com.broken" and the following values
 	| Name          | USR Koroneiki2                       |
 	| Email Address | usr.koroneiki2@lrcustomer.com.broken |
-	| Role          | Support Administrator                |
+	| Role          | Support User                         |
 	| User Status   | VERIFIED                             |
 	And the account with the name "Korusr - ${staticProjectName}" should be assigned the contact with the email address "usr.koroneiki1@lrcustomer.com.broken" with the customer contact role "Support Administrator"
-	And the account with the name "Korusr - ${staticProjectName}" should be assigned the contact with the email address "usr.koroneiki2@lrcustomer.com.broken" with the customer contact role "Support Administrator"
+	And the account with the name "Korusr - ${staticProjectName}" should be assigned the contact with the email address "usr.koroneiki2@lrcustomer.com.broken" with the customer contact role "Support User"
 	And the contact with the email address "usr.koroneiki2@lrcustomer.com.broken" assigned the account "Korusr - ${staticProjectName}" should not have the contact role "Support Requester"
 	And the contact with the email address "usr.koroneiki1@lrcustomer.com.broken" should be assigned the team "Korusr - ${staticProjectName}"
 	And the contact with the email address "usr.koroneiki2@lrcustomer.com.broken" should be assigned the team "Korusr - ${staticProjectName}"
@@ -3738,7 +3590,7 @@ Scenario: Update contact role for contact assigned via provisioning
 	| Update Description          | Test Test > Assigned Contact > USR Koroneiki2 |
 	| Update Field Name           | Contact Role                                  |
 	| Update Field Original Value | N/A                                           |
-	| Update Field New Value      | Support Administrator                         |
+	| Update Field New Value      | Support User                                  |
 	And the history entry with the keyword "Test Test > Unassigned Contact" with the field value "Contact Role" should be visible on the account details page with the following values
 	| Update Description          | Test Test > Unassigned Contact > USR Koroneiki2 |
 	| Update Field Name           | Contact Role                                    |
@@ -4123,13 +3975,13 @@ Scenario: Assign contact with overlapping support roles
 	And I click on the assign contact button
 	And I populate the assign contact form with the following values
 	| Email Address | usr.koroneiki2@lrcustomer.com.broken |
-	| Assign Role   | Support Administrator                |
+	| Assign Role   | Support User                         |
 	| Assign Role   | Support Requester                    |
 	| Assign Role   | Support Administrator                |
 	Then I should be able to view the error message for overlapping roles
 	And the save button on the assign contact form should be disabled
 	When I populate the assign contact form with the following values
-	| Unassign Role | Support Administrator |
+	| Unassign Role | Support User |
 	Then I should be able to view the error message for overlapping roles
 	And the save button on the assign contact form should be disabled
 	When I populate the assign contact form with the following values
@@ -4150,7 +4002,7 @@ Scenario: Assign contact with overlapping support roles
 	And the save button on the assign contact form should be disabled
 	When I populate the assign contact form with the following values
 	| Unassign Role | Support Administrator |
-	| Assign Role   | Support Administrator |
+	| Assign Role   | Support User          |
 	Then I should be able to view the error message for overlapping roles
 	And the save button on the assign contact form should be disabled
 	When I populate the assign contact form with the following values
@@ -4159,12 +4011,12 @@ Scenario: Assign contact with overlapping support roles
 	Then I should be able to view the error message for overlapping roles
 	And the save button on the assign contact form should be disabled
 	When I populate the assign contact form with the following values
-	| Unassign Role | Support Administrator |
+	| Unassign Role | Support User |
 	Then I should not be able to view an error message
 	And the save button on the assign contact form should not be disabled
 	When I populate the assign contact form with the following values
 	| Unassign Role | Support Administrator |
-	| Assign Role   | Support Administrator |
+	| Assign Role   | Support User          |
 	Then I should not be able to view an error message
 	And the save button on the assign contact form should not be disabled
 	When I click on the cancel button in the contact form
@@ -4230,7 +4082,7 @@ Scenario: Update support requester with additional overlapping support user role
 	| Assign Role   | Support Requester                    |
 	And I click on the "Edit" button in the dropdown menu for the contact with the email address "usr.koroneiki2@lrcustomer.com.broken"
 	And I populate the assign contact form with the following values
-	| Assign Role | Support Administrator |
+	| Assign Role | Support User |
 	Then I should be able to view the error message for overlapping roles
 	And the save button on the assign contact form should be disabled
 	When I click on the cancel button in the contact form
@@ -4245,7 +4097,7 @@ Scenario: Update support requester with additional overlapping support user role
 	| Role          | Support Requester                    |
 	| User Status   | VERIFIED                             |
 	And the account with the name "Korusr - ${staticProjectName}" should be assigned the contact with the email address "usr.koroneiki1@lrcustomer.com.broken" with the customer contact role "Support Administrator"
-	And the account with the name "Korusr - ${staticProjectName}" should be assigned the contact with the email address "usr.koroneiki2@lrcustomer.com.broken" without the customer contact role "Support Administrator"
+	And the account with the name "Korusr - ${staticProjectName}" should be assigned the contact with the email address "usr.koroneiki2@lrcustomer.com.broken" without the customer contact role "Support User"
 	And the account with the name "Korusr - ${staticProjectName}" should be assigned the contact with the email address "usr.koroneiki2@lrcustomer.com.broken" with the customer contact role "Support Requester"
 	And the contact with the email address "usr.koroneiki1@lrcustomer.com.broken" should be assigned the team "Korusr - ${staticProjectName}"
 	And the contact with the email address "usr.koroneiki2@lrcustomer.com.broken" should be assigned the team "Korusr - ${staticProjectName}"
@@ -4310,7 +4162,7 @@ Scenario: Update support user with additional overlapping support requester role
 	And I click on the assign contact button
 	And I populate and save the assign contact form with the following values
 	| Email Address | usr.koroneiki2@lrcustomer.com.broken |
-	| Assign Role   | Support Administrator              |
+	| Assign Role   | Support User                       |
 	And I click on the "Edit" button in the dropdown menu for the contact with the email address "usr.koroneiki2@lrcustomer.com.broken"
 	And I populate the assign contact form with the following values
 	| Assign Role | Support Requester |
@@ -4325,11 +4177,11 @@ Scenario: Update support user with additional overlapping support requester role
 	And I should be able to view the contact with the email address "usr.koroneiki2@lrcustomer.com.broken" and the following values
 	| Name          | USR Koroneiki2                       |
 	| Email Address | usr.koroneiki2@lrcustomer.com.broken |
-	| Role          | Support Administrator                |
+	| Role          | Support User                         |
 	| User Status   | VERIFIED                             |
 	And the account with the name "Korusr - ${staticProjectName}" should be assigned the contact with the email address "usr.koroneiki1@lrcustomer.com.broken" with the customer contact role "Support Administrator"
 	And the account with the name "Korusr - ${staticProjectName}" should be assigned the contact with the email address "usr.koroneiki2@lrcustomer.com.broken" without the customer contact role "Support Requester"
-	And the account with the name "Korusr - ${staticProjectName}" should be assigned the contact with the email address "usr.koroneiki2@lrcustomer.com.broken" with the customer contact role "Support Administrator"
+	And the account with the name "Korusr - ${staticProjectName}" should be assigned the contact with the email address "usr.koroneiki2@lrcustomer.com.broken" with the customer contact role "Support User"
 	And the contact with the email address "usr.koroneiki1@lrcustomer.com.broken" should be assigned the team "Korusr - ${staticProjectName}"
 	And the contact with the email address "usr.koroneiki2@lrcustomer.com.broken" should be assigned the team "Korusr - ${staticProjectName}"
 	When I click on the "Liferay Workers" tab
@@ -4476,7 +4328,7 @@ Scenario: Update support user with additional overlapping support administrator 
 	And I click on the assign contact button
 	And I populate and save the assign contact form with the following values
 	| Email Address | usr.koroneiki2@lrcustomer.com.broken |
-	| Assign Role   | Support Administrator                |
+	| Assign Role   | Support User                         |
 	And I click on the "Edit" button in the dropdown menu for the contact with the email address "usr.koroneiki2@lrcustomer.com.broken"
 	And I populate the assign contact form with the following values
 	| Assign Role | Support Administrator |
@@ -4491,11 +4343,11 @@ Scenario: Update support user with additional overlapping support administrator 
 	And I should be able to view the contact with the email address "usr.koroneiki2@lrcustomer.com.broken" and the following values
 	| Name          | USR Koroneiki2                       |
 	| Email Address | usr.koroneiki2@lrcustomer.com.broken |
-	| Role          | Support Administrator                |
+	| Role          | Support User                         |
 	| User Status   | VERIFIED                             |
 	And the account with the name "Korusr - ${staticProjectName}" should be assigned the contact with the email address "usr.koroneiki1@lrcustomer.com.broken" with the customer contact role "Support Administrator"
 	And the account with the name "Korusr - ${staticProjectName}" should be assigned the contact with the email address "usr.koroneiki2@lrcustomer.com.broken" without the customer contact role "Support Administrator"
-	And the account with the name "Korusr - ${staticProjectName}" should be assigned the contact with the email address "usr.koroneiki2@lrcustomer.com.broken" with the customer contact role "Support Administrator"
+	And the account with the name "Korusr - ${staticProjectName}" should be assigned the contact with the email address "usr.koroneiki2@lrcustomer.com.broken" with the customer contact role "Support User"
 	And the contact with the email address "usr.koroneiki1@lrcustomer.com.broken" should be assigned the team "Korusr - ${staticProjectName}"
 	And the contact with the email address "usr.koroneiki2@lrcustomer.com.broken" should be assigned the team "Korusr - ${staticProjectName}"
 	When I click on the "Liferay Workers" tab
@@ -4645,7 +4497,7 @@ Scenario: Update support administrator with additional overlapping support user 
 	| Assign Role   | Support Administrator                |
 	And I click on the "Edit" button in the dropdown menu for the contact with the email address "usr.koroneiki2@lrcustomer.com.broken"
 	And I populate the assign contact form with the following values
-	| Assign Role | Support Administrator |
+	| Assign Role | Support User |
 	Then I should be able to view the error message for overlapping roles
 	And the save button on the assign contact form should be disabled
 	When I click on the cancel button in the contact form
