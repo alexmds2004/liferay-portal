@@ -1,5 +1,20 @@
 definition {
 
+	@summary = "Add contact with a role to a policy"
+	macro addContactWithRole {
+		Default.MouseOver(
+			key_index = 11,
+			key_item = "F",
+			locator1 = "Policy#CONTACT_TABLE_ITEM");
+
+		Default.Click(locator1 = "Policy#USE_CONTACT_BUTTON");
+
+		Default.Click.clickAtNotVisible(
+			key_index = ${index},
+			key_role = ${role},
+			locator1 = "Policy#CONTACT_LOOKUP_SELECT_ROLE_BUTTON");
+	}
+
 	@summary = "Continue with the form flow"
 	macro continueForm {
 		Portal.Button.click(
@@ -35,6 +50,14 @@ definition {
 		return ${typeTable};
 	}
 
+	@summary = "Get the name of the contact added to the policy"
+	macro getAddedContactName {
+		var key_index = ${index};
+		var contact = selenium.getText("Policy#CONTACT_TABLE_NAME");
+
+		return ${contact};
+	}
+
 	@summary = "Get the name of the city in the city filter dropdown"
 	macro getCityName {
 		var key_index = ${index};
@@ -47,18 +70,30 @@ definition {
 	macro getTypeName {
 		var key_index = ${index};
 
-		Default.WaitForVisible(locator1 = "Policy#TABLE_SECTION_TITLE");
-
-		var typeValue = selenium.getAttribute("xpath=(//select[contains(@id,'TypeFilter')]/option)[${key_index}]@value");
+		var typeValue = selenium.getAttribute("xpath=(//select[contains(@id,'TypeFilter') and contains(@class,'type-dropdown')]/option)[${key_index}]@value");
 
 		return ${typeValue};
 	}
 
 	@summary = "Open the contacts table"
 	macro makeContactsComeToView {
-		Default.KeyPress(
-			locator1 = "Policy#SEARCH_FIELD",
-			value1 = "\ENTER");
+		if (Default.IsElementPresent(key_header = "Contact Lookup", locator1 = "Policy#FORM_PAGE_HEADER")) {
+			Default.KeyPress(
+				locator1 = "Policy#SEARCH_FIELD",
+				value1 = "\ENTER");
+		}
+
+		if (Default.IsElementPresent(key_header = "Roles on Policy", locator1 = "Policy#FORM_PAGE_HEADER")) {
+			Default.Click(locator1 = "Policy#CONTACT_LOOKUP_ADD_ROLE_BUTTON");
+
+			Default.Type(
+				locator1 = "Policy#CONTACT_LOOKUP_TEXT_INPUT_FIELD",
+				value1 = "test");
+
+			Default.Click(locator1 = "Policy#CONTACT_LOOKUP_SEARCH_BUTTON");
+
+			Default.WaitForVisible(locator1 = "Policy#SEARCH_TABLE_RESULT");
+		}
 	}
 
 	@summary = "Open the vessels table"
@@ -138,6 +173,13 @@ definition {
 		Default.Click.pauseClickAt(locator1 = "Policy#NEW_PROPOSAL_BUTTON");
 
 		Default.WaitForVisible(locator1 = "Policy#SEARCH_FIELD");
+	}
+
+	@summary = "View if a new contact was added to the policy"
+	macro viewAddedContact {
+		Default.AssertElementPresent(
+			key_addedContactName = ${addedContactName},
+			locator1 = "Policy#CONTACT_POLICY_TABLE");
 	}
 
 	@summary = "Verify if only contacts from the selected filter appear in the contacts table"
