@@ -198,6 +198,79 @@ Scenario: View license with Provisioning API and okta authentication using a val
 	| Label | 7.3 | | |
 	| Label | 7.4 | | |
 
+Scenario: View perpetual license with Provisioning API and okta authentication using a valid user
+	Testing the ability to view a perpetual license form options with Provisioning API and okta authentication
+
+	Given I publish a project with no partner RabbitMQ message with routing key "dossiera.provisioning.create" with the following values
+	| Account Name                           | Misper - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Contact Email Address                  | pro.okta1@lrcustomer.com.broken            |
+	| Contact First Name                     | PRO                                        |
+	| Contact Last Name                      | Okta1                                      |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | pro.okta1@lrcustomer.com.broken            |
+	| Owner First Name                       | PRO                                        |
+	| Owner Last Name                        | Okta1                                      |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Permis - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |
+	And I update a product purchase on koroneiki made by the account "Permis - ${staticProjectName}" for the product "DXP Production" to have the following values
+	| Perpetual | true | |
+	And I log into the provisioning homepage as "${staticProvisioningAdminEmailAddress}" with password "${staticProvisioningAdminPassword}"
+	And I go to the license index page
+	And I click on the generate license button on the license index
+	And I populate the generate license form with the following values
+	| Account | Select Entity | Permis - ${staticProjectName} | |
+	| Product | Select        | DXP Production                | |
+	| Version | Select        | 7.2                           | |
+	| Type    | Select        | DXP Production                | |
+	And I click on the choose button for the product purchase in position "1" on the license form
+	And I populate the generate license form with the following values
+	| Host Name     | Input    | localhost         | |
+	| IP Addresses  | Textarea | 123.45.67.89      | |
+	| MAC Addresses | Textarea | 0A-1B-2C-3D-4E-5F | |
+	And I click on the generate button on the license form
+	Then I should be able to view the following license values on the license page
+	| Header  | Permis - ${staticProjectName} | |
+	| Product | DXP Production                | |
+	When I log into the dev domain as "pro.okta1@lrcustomer.com.broken" with password "${staticOktaUserPassword}"
+	And I obtain the okta session ID value from the dev domain page
+	Then I should be able to view the license on the account "Permis - ${staticProjectName}" with the name "Permis - ${staticProjectName}" using okta session id
+	And I should be able to view the following generate license form options for the account "Permis - ${staticProjectName}" with the product group "DXP" using okta session id
+	| Label | 7.0 | | |
+	| Label | 7.1 | | |
+	| Label | 7.2 | | |
+	| Label | 7.3 | | |
+	| Label | 7.4 | | |
+
 Scenario: Create license with Provisioning API and okta authentication using a Partner Manager user
 	Testing the ability to view a license form options via Provisioning API and a okta Session ID from a Partner Manager user
 
@@ -613,6 +686,74 @@ Scenario: View license attempt with Provisioning API and okta authentication usi
 	| Start Year                             | ${staticStartYear}                         |
 	| Subscription Level                     | Platinum                                   |
 	| Version Number                         | 7.1                                        |
+	And I log into the provisioning homepage as "${staticProvisioningAdminEmailAddress}" with password "${staticProvisioningAdminPassword}"
+	And I go to the license index page
+	And I click on the generate license button on the license index
+	And I populate the generate license form with the following values
+	| Account | Select Entity | Permis - ${staticProjectName} | |
+	| Product | Select        | DXP Production                | |
+	| Version | Select        | 7.2                           | |
+	| Type    | Select        | DXP Production                | |
+	And I click on the choose button for the product purchase in position "1" on the license form
+	And I populate the generate license form with the following values
+	| Host Name     | Input    | localhost         | |
+	| IP Addresses  | Textarea | 123.45.67.89      | |
+	| MAC Addresses | Textarea | 0A-1B-2C-3D-4E-5F | |
+	And I click on the generate button on the license form
+	Then I should be able to view the following license values on the license page
+	| Header  | Permis - ${staticProjectName} | |
+	| Product | DXP Production                | |
+	When I log into the dev domain as "pro.okta1@lrcustomer.com.broken" with password "${staticOktaUserPassword}"
+	And I obtain the okta session ID value from the dev domain page
+	Then I should not be able to view the license on the account "Permis - ${staticProjectName}" with the name "Permis - ${staticProjectName}" using okta session id
+	And I should be able to view a license search error when searching for a license with the name "Permis - ${staticProjectName}" on the account "Permis - ${staticProjectName}" using okta session id
+
+Scenario: View perpetual license attempt with Provisioning API and okta authentication using a non permissioned user
+	Testing the attempt to view a perpetual license form options with a invalid okta Session Id
+
+	Given I publish a project with no partner RabbitMQ message with routing key "dossiera.provisioning.create" with the following values
+	| Account Name                           | Misper - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Contact Email Address                  | pro.okta2@lrcustomer.com.broken            |
+	| Contact First Name                     | PRO                                        |
+	| Contact Last Name                      | Okta1                                      |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | pro.okta2@lrcustomer.com.broken            |
+	| Owner First Name                       | PRO                                        |
+	| Owner Last Name                        | Okta2                                      |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Permis - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |
+	And I update a product purchase on koroneiki made by the account "Permis - ${staticProjectName}" for the product "DXP Production" to have the following values
+	| Perpetual | true | |
 	And I log into the provisioning homepage as "${staticProvisioningAdminEmailAddress}" with password "${staticProvisioningAdminPassword}"
 	And I go to the license index page
 	And I click on the generate license button on the license index
