@@ -281,10 +281,6 @@ definition {
 					var key_positionValue = ${key_positionValue} + 1;
 				}
 				else {
-					if (contains("${pageLink}", "&")) {
-							var pageLink = StringUtil.replace("${pageLink}", "&", "%26");
-						}
-
 					var curl = '''
 						${pageLink} -I
 						''';
@@ -394,6 +390,8 @@ definition {
 
 		Marketplace.view100AppCards(url = "${url}");
 
+		echo("${staticListApplicationNameErros}");
+
 		if ("${url}" == "web/marketplace") {
             Marketplace.viewFooterNavigationLinks(url = "${url}");
         }
@@ -403,6 +401,7 @@ definition {
         }
 
 		echo("Total page elements found: ${pageElementsFound}");
+		
 
 		if ("${pageElementsFound}" == "0") {
 			fail("No page elements were found on the page with the relative url ${url}. This could mean that the page element paths need to be updated or it could indicate a problem with the site page. Please investigate.");
@@ -416,33 +415,69 @@ definition {
 	macro viewNoErrors {
 		if (IsElementPresent(locator1 = "Marketplace#ERROR_BLOCK")) {
 			static var staticErrorCount = ${staticErrorCount} + 1;
-
+			var ApplicationName = selenium.getText(//div[@id="fragment-0-nptc"]);
+			if ("${staticErrorCount}" != "0") {
+			echo("The application ${ApplicationName} displays the Error Block");
+		}
 			echo("An unexpected error has occurred.");
+			Marketplace.ListAppsWithErrors(ApplicationNameWithError = "${ApplicationName}");
 		}
 
 		if (IsElementPresent(locator1 = "Marketplace#PAGE_DOES_NOT_EXIST_MESSAGE_1")) {
 			static var staticErrorCount = ${staticErrorCount} + 1;
-
-			echo("An unexpected error has occurred.");
+			var ApplicationName = selenium.getText(//div[@id="fragment-0-nptc"]);
+			if ("${staticErrorCount}" != "0") {
+			echo("The application ${ApplicationName} displays the error Page Does Not Exist Message 1");
 		}
-
+			echo("An unexpected error has occurred.");
+			Marketplace.ListAppsWithErrors(ApplicationNameWithError = "${ApplicationName}");
+		}
+		
 		if (IsElementPresent(locator1 = "Marketplace#PAGE_DOES_NOT_EXIST_MESSAGE_2")) {
 			static var staticErrorCount = ${staticErrorCount} + 1;
-
+			var ApplicationName = selenium.getText(//div[@id="fragment-0-nptc"]);
+			if ("${staticErrorCount}" != "0") {
+			echo("The application ${ApplicationName} displays the error Page Does Not Exist Message 2");
+			}
 			echo("An unexpected error has occurred.");
+			Marketplace.ListAppsWithErrors(ApplicationNameWithError = "${ApplicationName}");
 		}
 
 		if (IsElementPresent(locator1 = "Marketplace#ERROR_MESSAGE_1")) {
 			static var staticErrorCount = ${staticErrorCount} + 1;
-
+			var ApplicationName = selenium.getText(//div[@id="fragment-0-nptc"]);
+			if ("${staticErrorCount}" != "0") {
+				echo("The application ${ApplicationName} displays the Error Message 1.");
+			}
 			echo("An unexpected error has occurred.");
+			Marketplace.ListAppsWithErrors(ApplicationNameWithError = "${ApplicationName}");
 		}
 
 		if (IsElementPresent(locator1 = "Marketplace#ERROR_MESSAGE_2")) {
 			static var staticErrorCount = ${staticErrorCount} + 1;
-
+			var ApplicationName = selenium.getText(//div[@id="fragment-0-nptc"]);
+			if ("${staticErrorCount}" != "0") {
+				echo("The application ${ApplicationName} displays the Error Message 2.");
+			}
 			echo("An unexpected error has occurred.");
+			Marketplace.ListAppsWithErrors(ApplicationNameWithError = "${ApplicationName}");
 		}
+	}
+
+	macro ListAppsWithErrors {
+
+		if(isSet(staticListApplicationNameErros)) {			
+				
+			var NamesThatWereOnTheList = "${staticListApplicationNameErros}";
+			
+			static var staticListApplicationNameErros = "${NamesThatWereOnTheList},${ApplicationNameWithError}";
+			
+		}
+		else{
+			static var staticListApplicationNameErros = "${ApplicationNameWithError}";
+		
+		}
+		return "${staticListApplicationNameErros}";
 	}
 
 	macro viewSocialMediaFooterNavigationLinks {
