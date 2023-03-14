@@ -1,10 +1,18 @@
 definition {
 
-	macro assertApiResponse {
-		var key_response = ${response};
+	macro checkApiResponseAndContinue {
+		var statusCode = RegexUtil.replace(${response}, "(Code:2)", 1);
 
-		if (contains(${key_response}, "errors")) {
-			fail("The API response: ${key_response}");
+		if (!(contains(${statusCode}, "Code:2"))) {
+			echo("${message} - ${response}");
+		}
+	}
+
+	macro failIfApiErrorResponse {
+		var statusCode = RegexUtil.replace(${response}, "(Code:2)", 1);
+
+		if (!(contains(${statusCode}, "Code:2"))) {
+			fail("${message} - ${response}");
 		}
 	}
 
@@ -15,10 +23,17 @@ definition {
 
 		var curl = '''
 			${baseURL}/projects/${projectId} \
+				-w "Status Code:%{http_code}" \
 				-u ${user}:${password} \
 		''';
 
-		var cluster = JSONCurlUtil.get(${curl}, "cluster");
+		var response = JSONCurlUtil.get(${curl});
+
+		UtilsAPI.failIfApiErrorResponse(
+			message = "getCluster failure message: Unable to get cluster for ${projectId}.",
+			response = ${response});
+
+		var cluster = JSONUtil.getWithJSONPath(${response}, "cluster");
 
 		return ${cluster};
 	}
@@ -28,16 +43,25 @@ definition {
 		var clusterName = UtilsAPI.getCluster(projectId = ${projectId});
 		var curl = '''
 			${baseURL}/clusters \
+				-w "Status Code:%{http_code}" \
 		''';
 
-		var location = JSONCurlUtil.get(${curl}, "$.[?(@.name=='${clusterName}')].location");
+		var response = JSONCurlUtil.get(${curl});
+
+		UtilsAPI.failIfApiErrorResponse(
+			message = "getClusterLocation failure message: Unable to fetch cluster location for ${projectId}.",
+			response = ${response});
+
+		var location = JSONUtil.getWithJSONPath(${response}, "$.[?(@.name=='${clusterName}')].location");
 
 		return ${location};
 	}
 
 	macro tearDownProjects {
 		for (var projectId : list ${staticProjectIdTearDowns}) {
-			ProjectsAPI.deleteProject(projectId = ${projectId});
+			ProjectsAPI.deleteProject(
+				isTearDown = "true",
+				projectId = ${projectId});
 		}
 	}
 
