@@ -15,7 +15,13 @@ definition {
 					-u ${user}:${password} \
 			''';
 
-			var readyStatus = JSONCurlUtil.get(${curl}, "$['ready']");
+			var response = JSONCurlUtil.get(${curl});
+
+			UtilsAPI.failIfApiErrorResponse(
+				message = "checkServiceReadyStatus: Unable to check services are ready.",
+				response = ${response});
+
+			var readyStatus = JSONUtil.getWithJSONPath(${response}, "$['ready']");
 
 			if (${readyStatus} != "true") {
 				echo("Status for service is ${readyStatus}. Try attempt #${tries}");
@@ -45,10 +51,17 @@ definition {
 
 		var curl = '''
 			https://${serviceID}-${projectID}.${serviceDomain} \
+				-w "Status Code:%{http_code}" \
 				-u ${user}:${password} \
 		''';
 
-		var serviceStatus = JSONCurlUtil.get(${curl}, "$['status']");
+		var response = JSONCurlUtil.get(${curl});
+
+		UtilsAPI.failIfApiErrorResponse(
+			message = "fetchServiceStatus: Unable to fetch service status.",
+			response = ${response});
+
+		var serviceStatus = JSONUtil.getWithJSONPath(${response}, "$['status']");
 
 		return ${serviceStatus};
 

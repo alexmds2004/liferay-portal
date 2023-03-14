@@ -26,6 +26,7 @@ definition {
 
 		var curl = '''
 			${baseURL}/projects \
+				-w "Status Code:%{http_code}" \
 				-u ${user}:${password} \
 				-H "accept: application/json" \
 				-H "Content-Type: application/json" \
@@ -37,13 +38,15 @@ definition {
 				}
 		''';
 
-		var apiResponse = JSONCurlUtil.post(${curl});
+		var response = JSONCurlUtil.post(${curl});
 
 		if (${environment} == "false") {
 			ListUtil.add(${staticProjectIdTearDowns}, ${projectId});
 		}
 
-		UtilsAPI.assertApiResponse(response = ${apiResponse});
+		UtilsAPI.failIfApiErrorResponse(
+			message = "createProject: failed to create ${projectId}.",
+			response = ${response});
 
 		return ${projectId};
 	}
@@ -53,12 +56,22 @@ definition {
 
 		var curl = '''
 			${baseURL}/projects/${projectId} \
+				-w "Status Code:%{http_code}" \
 				-u ${user}:${password} \
 		''';
 
-		var apiResponse = JSONCurlUtil.delete(${curl});
+		var response = JSONCurlUtil.delete(${curl});
 
-		UtilsAPI.assertApiResponse(response = ${apiResponse});
+		if (${isTearDown} == "true") {
+			UtilsAPI.checkApiResponseAndContinue(
+				message = "deleteProject: failed to delete ${projectId}.",
+				response = ${response});
+		}
+		else {
+			UtilsAPI.failIfApiErrorResponse(
+				message = "deleteProject: failed to delete ${projectId}.",
+				response = ${response});
+		}
 	}
 
 	macro fetchProjectUid {
@@ -66,13 +79,19 @@ definition {
 
 		var curl = '''
 			${baseURL}/projects/${projectId} \
+				-w "Status Code:%{http_code}" \
+				-u ${user}:${password} \
 				-H "accept: application/json" \
 				-H "Content-Type: application/json"
 		''';
 
-		var projectUid = JSONCurlUtil.get(${curl}, "$['id']");
+		var response = JSONCurlUtil.get(${curl});
 
-		UtilsAPI.assertApiResponse(response = "Failed to fetch projectUid.\n${apiResponse}");
+		UtilsAPI.failIfApiErrorResponse(
+			message = "fetchProjectUid: Unable to fetch ProjectUid for ${projectId}.",
+			response = ${response});
+
+		var projectUid = JSONUtil.getWithJSONPath(${response}, "$['id']");
 
 		return ${projectUid};
 	}

@@ -7,13 +7,16 @@ definition {
 		var password = PropsUtil.get("test.this.lcp.test.team.user.password");
 		var curl = '''
 			${baseURL}/projects/${projectId}/invite?email=${email}\&invitationToken=${token} \
+				-w "Status Code:%{http_code}" \
 				-H "accept: application/json" \
 				-H "Content-Type: application/json"
 		''';
 
-		var apiResponse = JSONCurlUtil.get(${curl});
+		var response = JSONCurlUtil.get(${curl});
 
-		UtilsAPI.assertApiResponse(response = "Failed to accept invitation.\n${apiResponse}");
+		UtilsAPI.failIfApiErrorResponse(
+			message = "acceptInvitation: failed to accept invitation.",
+			response = ${response});
 	}
 
 	macro addTeamMember {
@@ -34,6 +37,7 @@ definition {
 
 		var curl = '''
 			${baseURL}/projects/${projectId}/invite \
+				-w "Status Code:%{http_code}" \
 				-u ${user}:${password} \
 				-H "accept: application/json" \
 				-H "Content-Type: application/json" \
@@ -43,9 +47,11 @@ definition {
 				}'
 		''';
 
-		var apiResponse = JSONCurlUtil.post(${curl});
+		var response = JSONCurlUtil.post(${curl});
 
-		UtilsAPI.assertApiResponse(response = ${apiResponse});
+		UtilsAPI.failIfApiErrorResponse(
+			message = "sendInvitation: failed to send invitation.",
+			response = ${response});
 	}
 
 }

@@ -9,6 +9,7 @@ definition {
 
 		var curl = '''
 			https://${baseURL}/projects/${projectID}/build \
+				-w "Status Code:%{http_code}" \
 				-u ${user}:${password} \
 				-H "Content-Type: application/json" \
 				-d '{
@@ -18,9 +19,11 @@ definition {
 				}'
 		''';
 
-		var apiResponse = JSONCurlUtil.post(${curl});
+		var response = JSONCurlUtil.post(${curl});
 
-		UtilsAPI.assertApiResponse(response = ${apiResponse});
+		UtilsAPI.failIfApiErrorResponse(
+			message = "deployFromRepo: Unable to deploy.",
+			response = ${response});
 	}
 
 }
