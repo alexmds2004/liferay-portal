@@ -24,7 +24,6 @@ definition {
 
 		task ("When I invite the users to the project") {
 			CP2TeamMembers.addFieldsTeamMembers(
-				addMembers = "true",
 				rowEmailList = "test1",
 				rowRole = "Administrator");
 
@@ -51,40 +50,29 @@ definition {
 	@description = "Automation ID: LRQA-79218 | Test Summary: Verify if when a Project has reached or is reaching the limit, the ticket requestor role should be disabled in drop down"
 	@priority = 4
 	test IfMaxRequestorDropDisabled {
-		task ("Given team members page is open") {
-			HomePage.searchProject(projectName = "2022 FIFA World Cup Qatar - FAN ID");
+		task ("Given I go to the Invite modal on the Team Members page") {
+			HomePage.searchProject(projectName = "Fong Test");
 
-			Portal.CustomerPortal.enterOnProject(title = "2022 FIFA World Cup Qatar - FAN ID");
+			Portal.CustomerPortal.enterOnProject(
+				status = "Active",
+				title = "Fong Test");
 
 			Portal.CP2NavigationMenu.goToTeamMembers();
 
 			Portal.CustomerPortal.clickAtButton(text = "Invite");
 		}
 
-		task ("When I invite multiple users to the project") {
-			CP2TeamMembers.addFieldsTeamMembers(
-				rowEmailList = "test1,test2,test3,test4,test5,test6,test7",
+		task ("When I open the role dropdown") {
+			Portal.CP2TeamMembers.addFieldsTeamMembersExtra(
+				addMembers = "true",
+				rowEmailList = "test1",
 				rowRole = "Requester");
 		}
 
-		task ("Then the users are visible in the table with Invited status") {
-			Portal.CP2TeamMembers.viewTableValue(
-				email = "test2@liferay.com",
-				name = "test2@liferay.com",
-				role = "Administrator",
-				status = "Invited");
-
-			Portal.CP2TeamMembers.viewTableValue(
-				email = "test1@liferay.com",
-				name = "test1@liferay.com",
-				role = "Administrator",
-				status = "Invited");
-
-			Portal.CP2TeamMembers.viewTableValue(
-				email = "test3@liferay.com",
-				name = "test3@liferay.com",
-				role = "Administrator",
-				status = "Invited");
+		task ("The I assert that the Requester and Administrator options are disabled") {
+			CP2TeamMembers.assertThatRoleIsDisabled(
+				position = 1,
+				role = "Requester");
 		}
 	}
 

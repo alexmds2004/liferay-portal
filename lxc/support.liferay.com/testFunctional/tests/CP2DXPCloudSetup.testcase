@@ -9,10 +9,24 @@ definition {
 		Login.loginAsAdminUser();
 	}
 
-	@description = "Automation ID: LRQA-79265 | Test Summary: Verify a success message is shown after finishing setting DXP Cloud up"
+	tearDown {
+		CP2Utils.clearActivationStatus(
+			position = 1,
+			status = "In-Progress");
+
+		Portal.CP2Utils.deleteSpecificObjectEntry(
+			email = "001",
+			portlet = "DXP Cloud Environments");
+
+		Portal.CP2Utils.deleteSpecificObjectEntry(
+			email = "test@liferay.com",
+			portlet = "Admins DXP Cloud");
+	}
+
+	@description = "Automation ID: LRQA-79265 | Test Summary: Verify if the activation status of the card changes to (In Progress) after filling out the DXP Cloud Set up"
 	@priority = 5
-	test CanViewDXPCloudSetupSuccessMessage {
-		task ("Given that I go to the card activation modal") {
+	test SeeIfTheCardActivationStatusChanges {
+		task ("Given that I go to the modal Set up LXC - SM") {
 			HomePage.searchProject(projectName = "2022 FIFA World Cup Qatar - FAN ID");
 
 			Portal.CustomerPortal.enterOnProject(title = "2022 FIFA World Cup Qatar - FAN ID");
@@ -24,12 +38,14 @@ definition {
 			Portal.CustomerPortal.clickOnFinishActivationButton();
 		}
 
-		task ("Then I fill in all the required fields and submit the form") {
+		task ("When I submit the card activation form") {
 			Portal.CP2DXPCloudSetup.typeAllSetupDXPCloudInfoFields();
 
 			Portal.CustomerPortal.clickAtButton(text = "Submit");
+		}
 
-			Portal.Alert.viewSuccessMessage();
+		task ("Then I should be able to state that the card status is In-Progress") {
+			Portal.CP2DXPCloudSetup.assertCardStatusChanged(status = "In Progress");
 		}
 	}
 
