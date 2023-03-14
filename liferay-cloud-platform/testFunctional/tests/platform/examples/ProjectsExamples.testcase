@@ -22,6 +22,19 @@ definition {
 		Topbar.logout();
 	}
 
+	@description = "Test Teardown continues if project deletion runs into a failure. Should pass."
+	@ignore = "Test example"
+	@priority = 4
+	test ContinueTeardownDeleteProjectId {
+		task ("When: The test adds a non-existing project to teardown deletion list") {
+			ListUtil.add(${staticProjectIdTearDowns}, "qanotreal");
+		}
+
+		task ("And: The test adds another real project to teardown deletion list") {
+			ProjectsAPI.createProject();
+		}
+	}
+
 	@description = "Test create custom name and random gen"
 	@ignore = "Test example"
 	@priority = 4
@@ -69,6 +82,35 @@ definition {
 			var projectIdAEnv = ProjectsAPI.createProject(
 				environment = "true",
 				projectId = "qacustomid-dev");
+		}
+	}
+
+	@description = "Test fetching a projectUid for a non-existing project. Should fail and throw an error response."
+	@ignore = "Test example"
+	@priority = 4
+	test FailFetchProjectId {
+		task ("When: User fetches the projectUid") {
+			var token = ProjectsAPI.fetchProjectUid(projectId = "qafakeproject");
+		}
+	}
+
+	@description = "Test Teardown continues if project deletion runs into a failure. Expected to fail. Best ran with setup ProjectsAPI.createProject commented"
+	@ignore = "Test example"
+	@priority = 4
+	test FailToDeleteProjectId {
+		task ("When: The test adds a non-existing project to teardown") {
+			var token = ProjectsAPI.deleteProject(projectId = "qanotreal");
+		}
+	}
+
+	@description = "Test fetch projectUid"
+	@ignore = "Test example"
+	@priority = 4
+	test FetchProjectId {
+		task ("When: User fetches the projectUid") {
+			var token = ProjectsAPI.fetchProjectUid(projectId = ${staticProjectId});
+
+			echo("Project Uid: ${token}");
 		}
 	}
 
