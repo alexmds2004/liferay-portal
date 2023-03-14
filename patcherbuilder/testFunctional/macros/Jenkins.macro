@@ -6,23 +6,45 @@ definition {
 	macro _findFailReason {
 		var consoleOutputText = selenium.getText("Jenkins#CONSOLE_OUTPUT_TEXT");
 
-		if (contains("${consoleOutputText}", "compileJava FAILED")) {
-			fail("Build ${jobBuildNumber} for the tag ${staticFixPackBaseCommittish} failed by Java Compile problems.");
-		}
-		else if (contains("${consoleOutputText}", "RevertInstalledPatchTest > test portal without patches can be started FAILED")){
-			fail("Build ${jobBuildNumber} for the tag ${staticFixPackBaseCommittish} failed by Java Revert Install problems.");
-		}
-		else if (contains("${consoleOutputText}", "@ERROR: Unknown module 'patcher'")) {
-			fail("Build ${jobBuildNumber} for the tag ${staticFixPackBaseCommittish} failed by not finding the build Patcher module.");
-		}
-		else if (contains("${consoleOutputText}", "packageRunBuild FAILED")) {
-			fail("Build ${jobBuildNumber} for the tag ${staticFixPackBaseCommittish} failed by Package Run Build.");
-		}
-		else if (contains("${consoleOutputText}", "yarnInstall FAILED")) {
-			fail("Build ${jobBuildNumber} for the tag ${staticFixPackBaseCommittish} failed by Yarn Install problems.");
-		}
+		if (isSet(staticFixPackBaseCommittish)) {
+			if (contains("${consoleOutputText}", "compileJava FAILED")) {
+				fail("Build ${jobBuildNumber} for the tag ${staticFixPackBaseCommittish} failed by Java Compile problems at the ${jobName} job.");
+			}
+			else if (contains("${consoleOutputText}", "RevertInstalledPatchTest > test portal without patches can be started FAILED")) {
+				fail("Build ${jobBuildNumber} for the tag ${staticFixPackBaseCommittish} failed by Java Revert Install problems at the ${jobName} job.");
+			}
+			else if (contains("${consoleOutputText}", "@ERROR: Unknown module 'patcher'")) {
+				fail("Build ${jobBuildNumber} for the tag ${staticFixPackBaseCommittish} failed by not finding the build Patcher module at the ${jobName} job.");
+			}
+			else if (contains("${consoleOutputText}", "packageRunBuild FAILED")) {
+				fail("Build ${jobBuildNumber} for the tag ${staticFixPackBaseCommittish} failed by Package Run Build at the ${jobName} job.");
+			}
+			else if (contains("${consoleOutputText}", "yarnInstall FAILED")) {
+				fail("Build ${jobBuildNumber} for the tag ${staticFixPackBaseCommittish} failed by Yarn Install problems at the ${jobName} job.");
+			}
+			else {
+				fail("Build ${jobBuildNumber} for the tag ${staticFixPackBaseCommittish} failed by not mapped reasons at the ${jobName} job.");
+			}
+		} 
 		else {
-			fail("Build ${jobBuildNumber} for the tag ${staticFixPackBaseCommittish} failed by not mapped reasons.");
+			if (contains("${consoleOutputText}", "compileJava FAILED")) {
+				fail("Build ${jobBuildNumber} failed by Java Compile problems at the ${jobName} job.");
+			}
+			else if (contains("${consoleOutputText}", "RevertInstalledPatchTest > test portal without patches can be started FAILED")) {
+				fail("Build ${jobBuildNumber} failed by Java Revert Install problems at the ${jobName} job.");
+			}
+			else if (contains("${consoleOutputText}", "@ERROR: Unknown module 'patcher'")) {
+				fail("Build ${jobBuildNumber} failed by not finding the build Patcher module at the ${jobName} job.");
+			}
+			else if (contains("${consoleOutputText}", "packageRunBuild FAILED")) {
+				fail("Build ${jobBuildNumber} failed by Package Run Build at the ${jobName} job.");
+			}
+			else if (contains("${consoleOutputText}", "yarnInstall FAILED")) {
+				fail("Build ${jobBuildNumber} failed by Yarn Install problems at the ${jobName} job.");
+			}
+			else {
+				fail("Build ${jobBuildNumber} failed by not mapped reasons at the ${jobName} job.");
+			}
 		}
 	}
 
@@ -130,7 +152,11 @@ definition {
 			if (IsElementPresent(key_content = "${staticGitRevision}", key_parameter = "git.revision", locator1 = "Jenkins#JENKINS_JOB_PARAMETERS_CONTENT")) {
 				var hasFoundTheCorrectBuild = "true";
 
-				static var staticFixPackBaseCommittish = selenium.getAttribute("//td[contains(text(),'fix.pack.baseCommittish')]/..//input@value");
+				if(IsElementPresent(key_parameter = "fix.pack.baseCommittish", locator1 = "Jenkins#JENKINS_JOB_PARAMETERS")) {
+					var fixPackBaseCommittish = selenium.getAttribute("//td[contains(text(),'fix.pack.baseCommittish')]/..//input@value");
+				}
+
+				static var staticFixPackBaseCommittish = "${fixPackBaseCommittish}";
 			}
 			else {
 				var lastJobBuildNumber = "${firstJobBuildNumber}";
@@ -822,7 +848,9 @@ definition {
 				locator1 = "Jenkins#JENKINS_JOB_SIDE_MENU",
 				menuOption = "Console Output");
 
-			Jenkins._findFailReason(jobBuildNumber = "${jobBuildNumber}");
+			Jenkins._findFailReason(
+				jobName = "${jobName}",
+				jobBuildNumber = "${jobBuildNumber}");
 		}
 	}
 
