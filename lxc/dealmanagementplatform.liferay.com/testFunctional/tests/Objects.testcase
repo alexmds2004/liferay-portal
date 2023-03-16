@@ -32,6 +32,8 @@ definition {
 	@description = "Automation ID: LRQA-79179 | Test Summary: Verify that state manager can be updated"
 	@priority = 5
 	test CanChangeStateManager {
+		var firstName = "FirstName - ${dateAndTime}";
+
 		task ("Given a VC_User is created with the state set as 'Basic Information'") {
 			Portal.ApplicationsMenu.gotoPortlet(
 				category = "Custom Apps",
@@ -40,20 +42,20 @@ definition {
 
 			ObjectsAdmin.addVCUserEntry(
 				notificationEventsEmail = "NotificationEventsEmail",
-				notificationEventsFirstName = "FirstName - ${dateAndTime}",
+				notificationEventsFirstName = ${firstName},
 				state = "Basic Information");
 		}
 
 		task ("When the state is updated to 'Account created'") {
-			ObjectsAdmin.searchEntry(inputText = "FirstName - ${dateAndTime}");
+			ObjectsAdmin.searchEntry(inputText = ${firstName});
 
 			ObjectsAdmin.editVCUserEntry(
-				inputText = "FirstName - ${dateAndTime}",
+				inputText = ${firstName},
 				state = "Account created");
 		}
 
 		task ("Then the entry should be visible with the updated state value in VC_Users page") {
-			ObjectsAdmin.searchEntry(inputText = "FirstName - ${dateAndTime}");
+			ObjectsAdmin.searchEntry(inputText = ${firstName});
 
 			ObjectsAdmin.assertObjectEntryVisible(rowItem = "Account created");
 		}
@@ -62,6 +64,11 @@ definition {
 	@description = "Automation ID: LRQA-79175 | Test Summary: Verify that a VC_User object can be created"
 	@priority = 5
 	test CanCreateObject {
+		var address1 = "Test Address 1 - ${dateAndTime}";
+		var email1 = "Test E-Mail 1 - ${dateAndTime}";
+		var firstName = "FirstName - ${dateAndTime}";
+		var person1 = "Test Contact Person 1 - ${dateAndTime}";
+
 		task ("Given a VC_Address and a VC_Contact are created") {
 			Portal.ApplicationsMenu.gotoPortlet(
 				category = "Custom Apps",
@@ -69,11 +76,11 @@ definition {
 				portlet = "VC_Addresses");
 
 			ObjectsAdmin.addVCAddressEntry(
-				address = "Test Address 1 - ${dateAndTime}",
+				address = ${address1},
 				apartmentNumber = "Test Apartment number 1 - ${dateAndTime}",
-				city = "Test City 1 - ${dateAndTime}",
-				country = "Test Country 1 - ${dateAndTime}",
-				postalCode = "Test Postal Code 1 - ${dateAndTime}");
+				city = "Test City 1",
+				country = "Test Country 1",
+				postalCode = "Test Postal Code 1");
 
 			Portal.ApplicationsMenu.gotoPortlet(
 				category = "Custom Apps",
@@ -81,10 +88,10 @@ definition {
 				portlet = "VC_Contacts");
 
 			ObjectsAdmin.addVCContactEntry(
-				contactPerson = "Test Contact Person 1 - ${dateAndTime}",
-				email = "Test E-Mail 1 - ${dateAndTime}",
-				mobileNumber = "Test Mobile Number 1 - ${dateAndTime}",
-				officeNumber = "Test Office Number 1 - ${dateAndTime}");
+				contactPerson = ${person1},
+				email = ${email1},
+				mobileNumber = "Test Mobile Number 1",
+				officeNumber = "Test Office Number 1");
 		}
 
 		task ("When a VC_User is created using the information from VC_Address and VC_Contact") {
@@ -95,40 +102,42 @@ definition {
 
 			ObjectsAdmin.addVCUserEntry(
 				complianceState = "Compliance in progress",
-				contact = "Test Contact Person 1 - ${dateAndTime}",
+				contact = ${person1},
 				notificationEventsEmail = "NotificationEventsEmail",
-				notificationEventsFirstName = "FirstName - ${dateAndTime}",
-				permanentResidenceAddress = "Test Address 1 - ${dateAndTime}",
+				notificationEventsFirstName = ${firstName},
+				permanentResidenceAddress = ${address1},
 				state = "Basic Information");
 		}
 
 		task ("Then the new VC_User entry should be visible in VC_Users page") {
-			ObjectsAdmin.searchEntry(inputText = "FirstName - ${dateAndTime}");
+			ObjectsAdmin.searchEntry(inputText = ${firstName});
 
-			ObjectsAdmin.assertObjectEntryVisible(rowItem = "FirstName - ${dateAndTime}");
+			ObjectsAdmin.assertObjectEntryVisible(rowItem = ${firstName});
 		}
 	}
 
 	@description = "Automation ID: LRQA-79177 | Test Summary: Verify that a VC_User object can be deleted"
 	@priority = 5
 	test CanDeletObject {
+		var firstName = "FirstName - ${dateAndTime}";
+
 		task ("Given a VC_User is created") {
 			Portal.ApplicationsMenu.gotoPortlet(
 				category = "Custom Apps",
 				panel = "Applications",
 				portlet = "VC_Users");
 
-			ObjectsAdmin.addVCUserEntry(notificationEventsFirstName = "FirstName - ${dateAndTime}");
+			ObjectsAdmin.addVCUserEntry(notificationEventsFirstName = ${firstName});
 		}
 
 		task ("When the VC_User entry is deleted") {
-			ObjectsAdmin.searchEntry(inputText = "FirstName - ${dateAndTime}");
+			ObjectsAdmin.searchEntry(inputText = ${firstName});
 
-			ObjectsAdmin.deleteEntry(inputText = "FirstName - ${dateAndTime}");
+			ObjectsAdmin.deleteEntry(inputText = ${firstName});
 		}
 
 		task ("Then the entry should not be visible in VC_Users page") {
-			ObjectsAdmin.searchEntry(inputText = "FirstName - ${dateAndTime}");
+			ObjectsAdmin.searchEntry(inputText = ${firstName});
 
 			Portal.ObjectAdmin.assertNoResultsWereFound();
 		}
@@ -137,33 +146,40 @@ definition {
 	@description = "Automation ID: LRQA-79176 | Test Summary: Verify that a VC_User object can be edited"
 	@priority = 5
 	test CanEditObject {
+		var editedName = "EditedName - ${dateAndTime}";
+		var firstName = "FirstName - ${dateAndTime}";
+
 		task ("Given a VC_User is created") {
 			Portal.ApplicationsMenu.gotoPortlet(
 				category = "Custom Apps",
 				panel = "Applications",
 				portlet = "VC_Users");
 
-			ObjectsAdmin.addVCUserEntry(notificationEventsFirstName = "FirstName - ${dateAndTime}");
+			ObjectsAdmin.addVCUserEntry(notificationEventsFirstName = ${firstName});
 		}
 
 		task ("When the 'Notification Events First Name' is changed") {
-			ObjectsAdmin.searchEntry(inputText = "FirstName - ${dateAndTime}");
+			ObjectsAdmin.searchEntry(inputText = ${firstName});
 
 			ObjectsAdmin.editVCUserEntry(
-				inputText = "FirstName - ${dateAndTime}",
-				notificationEventsFirstName = "EditedName - ${dateAndTime}");
+				inputText = ${firstName},
+				notificationEventsFirstName = ${editedName});
 		}
 
 		task ("Then the entry should be visible with the updated 'Notification Events First Name' value in VC_Users page") {
-			ObjectsAdmin.searchEntry(inputText = "EditedName - ${dateAndTime}");
+			ObjectsAdmin.searchEntry(inputText = ${editedName});
 
-			ObjectsAdmin.assertObjectEntryVisible(rowItem = "EditedName - ${dateAndTime}");
+			ObjectsAdmin.assertObjectEntryVisible(rowItem = ${editedName});
 		}
 	}
 
 	@description = "Automation ID: LRQA-79180 | Test Summary: Verify that VC_User can have 2 adresses set"
 	@priority = 5
 	test CanHaveMultipleAdresses {
+		var address1 = "Test Address 1 - ${dateAndTime}";
+		var address2 = "Test Address 2 - ${dateAndTime}";
+		var firstName = "FirstName - ${dateAndTime}";
+
 		task ("Given two VC_Address entries are created") {
 			Portal.ApplicationsMenu.gotoPortlet(
 				category = "Custom Apps",
@@ -171,18 +187,18 @@ definition {
 				portlet = "VC_Addresses");
 
 			ObjectsAdmin.addVCAddressEntry(
-				address = "Test Address 1 - ${dateAndTime}",
+				address = ${address1},
 				apartmentNumber = "Test Apartment number 1 - ${dateAndTime}",
-				city = "Test City 1 - ${dateAndTime}",
-				country = "Test Country 1 - ${dateAndTime}",
-				postalCode = "Test Postal Code 1 - ${dateAndTime}");
+				city = "Test City 1",
+				country = "Test Country 1",
+				postalCode = "Test Postal Code 1");
 
 			ObjectsAdmin.addVCAddressEntry(
-				address = "Test Address 2 - ${dateAndTime}",
+				address = ${address2},
 				apartmentNumber = "Test Apartment number 2 - ${dateAndTime}",
-				city = "Test City 2 - ${dateAndTime}",
-				country = "Test Country 2 - ${dateAndTime}",
-				postalCode = "Test Postal Code 2 - ${dateAndTime}");
+				city = "Test City 2",
+				country = "Test Country 2",
+				postalCode = "Test Postal Code 2");
 		}
 
 		task ("When a VC_User is created using both addresses") {
@@ -192,21 +208,25 @@ definition {
 				portlet = "VC_Users");
 
 			ObjectsAdmin.addVCUserEntry(
-				noticesAddress = "Test Address 2 - ${dateAndTime}",
-				notificationEventsFirstName = "FirstName - ${dateAndTime}",
-				permanentResidenceAddress = "Test Address 1 - ${dateAndTime}");
+				noticesAddress = ${address2},
+				notificationEventsFirstName = ${firstName},
+				permanentResidenceAddress = ${address1});
 		}
 
 		task ("Then the new VC_User entry should be visible in VC_Users page") {
-			ObjectsAdmin.searchEntry(inputText = "FirstName - ${dateAndTime}");
+			ObjectsAdmin.searchEntry(inputText = ${firstName});
 
-			ObjectsAdmin.assertObjectEntryVisible(rowItem = "FirstName - ${dateAndTime}");
+			ObjectsAdmin.assertObjectEntryVisible(rowItem = ${firstName});
 		}
 	}
 
 	@description = "Automation ID: LRQA-79461 | Test Summary: Verify that VC_User can have 2 contacts set"
 	@priority = 5
 	test CanHaveMultipleContacts {
+		var firstName = "FirstName - ${dateAndTime}";
+		var person1 = "Test Contact Person 1 - ${dateAndTime}";
+		var person2 = "Test Contact Person 2 - ${dateAndTime}";
+
 		task ("Given two VC_Contacts entries are created") {
 			Portal.ApplicationsMenu.gotoPortlet(
 				category = "Custom Apps",
@@ -214,16 +234,16 @@ definition {
 				portlet = "VC_Contacts");
 
 			ObjectsAdmin.addVCContactEntry(
-				contactPerson = "Test Contact Person 1 - ${dateAndTime}",
+				contactPerson = ${person1},
 				email = "Test E-Mail 1 - ${dateAndTime}",
-				mobileNumber = "Test Mobile Number 1 - ${dateAndTime}",
-				officeNumber = "Test Office Number 1 - ${dateAndTime}");
+				mobileNumber = "Test Mobile Number 1",
+				officeNumber = "Test Office Number 1");
 
 			ObjectsAdmin.addVCContactEntry(
-				contactPerson = "Test Contact Person 2 - ${dateAndTime}",
+				contactPerson = ${person2},
 				email = "Test E-Mail 2 - ${dateAndTime}",
-				mobileNumber = "Test Mobile Number 2 - ${dateAndTime}",
-				officeNumber = "Test Office Number 2 - ${dateAndTime}");
+				mobileNumber = "Test Mobile Number 2",
+				officeNumber = "Test Office Number 2");
 		}
 
 		task ("When a VC_User is created using both contacts") {
@@ -233,21 +253,23 @@ definition {
 				portlet = "VC_Users");
 
 			ObjectsAdmin.addVCUserEntry(
-				contact = "Test Contact Person 1 - ${dateAndTime}",
-				noticesContact = "Test Contact Person 2 - ${dateAndTime}",
-				notificationEventsFirstName = "FirstName - ${dateAndTime}");
+				contact = ${person1},
+				noticesContact = ${person2},
+				notificationEventsFirstName = ${firstName});
 		}
 
 		task ("Then the new VC_User entry should be visible in VC_Users page") {
-			ObjectsAdmin.searchEntry(inputText = "FirstName - ${dateAndTime}");
+			ObjectsAdmin.searchEntry(inputText = ${firstName});
 
-			ObjectsAdmin.assertObjectEntryVisible(rowItem = "FirstName - ${dateAndTime}");
+			ObjectsAdmin.assertObjectEntryVisible(rowItem = ${firstName});
 		}
 	}
 
 	@description = "Automation ID: LRQA-79462 | Test Summary: Verify that state manager can be set as its current state"
 	@priority = 5
 	test CanSetSameStateManagerValue {
+		var firstName = "FirstName - ${dateAndTime}";
+
 		task ("Given a VC_User is created with two states set") {
 			Portal.ApplicationsMenu.gotoPortlet(
 				category = "Custom Apps",
@@ -257,21 +279,21 @@ definition {
 			ObjectsAdmin.addVCUserEntry(
 				complianceState = "Compliance in progress",
 				notificationEventsEmail = "NotificationEventsEmail",
-				notificationEventsFirstName = "FirstName - ${dateAndTime}",
+				notificationEventsFirstName = ${firstName},
 				state = "Basic Information");
 		}
 
 		task ("When the two states are set to the same values") {
-			ObjectsAdmin.searchEntry(inputText = "FirstName - ${dateAndTime}");
+			ObjectsAdmin.searchEntry(inputText = ${firstName});
 
 			ObjectsAdmin.editVCUserEntry(
 				complianceState = "Compliance in progress",
-				inputText = "FirstName - ${dateAndTime}",
+				inputText = ${firstName},
 				state = "Basic Information");
 		}
 
 		task ("Then the entry should be visible with the same state values in VC_Users page") {
-			ObjectsAdmin.searchEntry(inputText = "FirstName - ${dateAndTime}");
+			ObjectsAdmin.searchEntry(inputText = ${firstName});
 
 			ObjectsAdmin.assertObjectEntryVisible(rowItem = "Basic Information");
 
