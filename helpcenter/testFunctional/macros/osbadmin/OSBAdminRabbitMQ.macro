@@ -1943,6 +1943,7 @@ definition {
 	macro createUpdateMessage {
 		var message = '''
 		{
+			"currentLiferayVersion": "${currentLiferayVersion}",
 			"salesforceProjectKey": "${salesforceProjectKey}",
 			"projectSolution": "${projectSolution}",
 			"extendedPatchPolicy": ${extendedPatchPolicy}
@@ -1962,7 +1963,18 @@ definition {
 			var field = "${row[0]}";
 			var value = "${row[1]}";
 
-			if ("${field}" == "Extended Patch Policy") {
+			if ("${field}" == "Current Version Number") {
+				if (contains("${value}", "7")) {
+					var currentLiferayVersion = "DXP ${value}";
+				}
+				else if (contains("${value}", "6")) {
+					var currentLiferayVersion = "${value} EE";
+				}
+				else {
+					var currentLiferayVersion = "${value}";
+				}
+			}
+			else if ("${field}" == "Extended Patch Policy") {
 				var extendedPatchPolicy = "${value}";
 			}
 			else if ("${field}" == "Project Solution") {
@@ -1974,6 +1986,10 @@ definition {
 			else {
 				fail("No such project field ${field}");
 			}
+		}
+
+		if (!(isSet(currentLiferayVersion))) {
+			var currentLiferayVersion = "";
 		}
 
 		if (!(isSet(extendedPatchPolicy))) {
@@ -1989,6 +2005,7 @@ definition {
 		}
 
 		var message = OSBAdminRabbitMQ.createUpdateMessage(
+			currentLiferayVersion = "${currentLiferayVersion}",
 			extendedPatchPolicy = "${extendedPatchPolicy}",
 			projectSolution = "${projectSolution}",
 			salesforceProjectKey = "${salesforceProjectKey}");
