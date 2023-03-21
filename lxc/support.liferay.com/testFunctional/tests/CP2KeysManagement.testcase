@@ -24,12 +24,21 @@ definition {
 			Portal.CP2NavigationMenu.clickOnProductButton(product = "DXP");
 		}
 
-		task ("When I click on the download button at the Activation Keys Table") {
-			Portal.CP2ActivationKeys.clickAtDownloadButton(entitlementName = "NASA ICE");
+		task ("And I get the formated name for the activation key file") {
+			var expectedDownloadedFileName = Portal.CP2ActivationKeys.formatLicenseFileName(
+				fileType = "xml",
+				licenseName = "nasaice",
+				licenseType = "activation-key",
+				product = "dxpproduction",
+				version = "7.3");
 		}
 
-		task ("Then the activation key file should be properly downloaded") {
-			Portal.ImportExport.assertDownloadedFileName(downloadedFile = "activation-key-dxpproduction-7.4-nasaice.xml");
+		task ("When I click on the download button at the Activation Keys Table") {
+			CP2ActivationKeys.clickAtDownloadButton(entitlementName = "NASA ICE");
+		}
+
+		task ("Then I should see the downloaded file") {
+			CP2ActivationKeys.viewDownloadedLicenseFile(downloadedFileName = ${expectedDownloadedFileName});
 		}
 	}
 
