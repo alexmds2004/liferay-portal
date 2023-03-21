@@ -7,4 +7,30 @@ definition {
 		Default.Open(locator1 = "${portal}/en/web/customer-portal");
 	}
 
+	@summary = "Clear the card status"
+	macro clearStatus {
+		var key_status = ${status};
+
+		Portal.ApplicationsMenu.gotoPortlet(
+			category = "Object",
+			panel = "Control Panel",
+			portlet = "Account Subscription Groups");
+
+		Portal.Search.searchCP(searchTerm = ${key_status});
+
+		if (Default.IsElementPresent(locator1 = "Utils#KORONEIKI_ACCOUNT_ELLIPSIS_BUTTON", key_accountName = ${key_status})) {
+			Default.Click(
+				key_accountName = ${key_status},
+				locator1 = "Utils#KORONEIKI_ACCOUNT_ELLIPSIS_BUTTON");
+
+			Portal.MenuItem.click(menuItem = "View");
+
+			Portal.CP2DXPCloudSetup.typeSetupDXPCloudInfoFields(
+				label = "activationStatus",
+				value = "");
+
+			Default.Click(locator1 = "Portal.Button#SAVE");
+		}
+	}
+
 }
