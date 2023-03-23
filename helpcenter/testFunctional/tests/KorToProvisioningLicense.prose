@@ -1369,7 +1369,8 @@ Scenario: Generate three new DXP licenses with warning messages
 	| Version | Select | 7.2            | |
 	| Type    | Select | DXP Production | |
 	And I click on the choose button for the product purchase in position "1" on the license form
-	And I populate the generate license form with the following values
+	Then I should not be able to view a warning message related to provisioned keys count
+	When I populate the generate license form with the following values
 	| Name          | Input    | Korlic - ${staticProjectName} License1 Name        | |
 	| Description   | Input    | Korlic - ${staticProjectName} License1 Description | |
 	| Host Name     | Input    | localhost                                          | |
@@ -1470,7 +1471,8 @@ Scenario: Generate two new DXP licenses with warning messages and a detached lic
 	| Version | Select | 7.2            | |
 	| Type    | Select | DXP Production | |
 	And I click on the choose button for the product purchase in position "1" on the license form
-	And I populate the generate license form with the following values
+	Then I should not be able to view a warning message related to provisioned keys count
+	When I populate the generate license form with the following values
 	| Name          | Input    | Korlic - ${staticProjectName} License1 Name        | |
 	| Description   | Input    | Korlic - ${staticProjectName} License1 Description | |
 	| Host Name     | Input    | localhost                                          | |
@@ -1518,6 +1520,168 @@ Scenario: Generate two new DXP licenses with warning messages and a detached lic
 	Then I should be able to view the following license values on the license page
 	| Header  | Korlic - ${staticProjectName} | |
 	| Product | DXP Production                | |
+
+Scenario: Generate new DXP licenses with different hosts with warning messages
+	Testing the ability to generate a new license with multiple hosts for a T4 DXP project from koroneiki on provisioning and view the warning messages
+
+	Given I generate a provisioning project name
+	And I create an account on koroneiki with the following values
+	| Code                  | KORLICKORLIC                         | |
+	| Contact Email Address | lic.koroneiki1@lrcustomer.com.broken | |
+	| Description           | Test osb account on koroneiki        | |
+	| Fax Number            | 555-555-1234                         | |
+	| Name                  | Korlic - ${staticProjectName}        | |
+	| Phone Number          | 555-555-5678                         | |
+	| Profile Email Address | lic.koroneiki1@lrcustomer.com.broken | |
+	| Region                | United States                        | |
+	| Status                | Active                               | |
+	| Tier                  | T4                                   | |
+	| Website               | www.koroneikicorporation.com         | |
+	And I generate the account key value for "Korlic - ${staticProjectName}"
+	And I generate static start and end dates
+	And I generate static full start and end dates
+	And I generate future static start and end dates
+	And I generate future static full start and end dates
+	And I create a product purchase for an account with the name "Korlic - ${staticProjectName}" and the product "DXP Production" on koroneiki with the following values
+	| End Date                | ${staticEndDate}         |   |
+	| Original End Date       | ${staticOriginalEndDate} |   |
+	| Perpetual               | false                    |   |
+	| Product Field and Value | sizing                   | 2 |
+	| Product Field and Value | licenses                 | 2 |
+	| Product Field and Value | version                  | 7 |
+	| Quantity                | 1                        |   |
+	| Start Date              | ${staticStartDate}       |   |
+	| Status                  | Approved                 |   |
+	And I generate the product purchase ID value for the product purchase made by "Korlic - ${staticProjectName}" for "DXP Production"
+	And I create a product purchase for an account with the name "Korlic - ${staticProjectName}" and the product "Platinum Subscription" on koroneiki with the following values
+	| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |
+	And I log into the provisioning homepage as "${staticProvisioningAdminEmailAddress}" with password "${staticProvisioningAdminPassword}"
+	And I go to the license index page
+	And I click on the generate license button on the license index
+	And I populate the generate license form with the following values
+	| Account | Select Entity | Korlic - ${staticProjectName} | |
+	| Product | Select        | DXP Production                | |
+	| Version | Select        | 7.2                           | |
+	| Type    | Select        | DXP Production                | |
+	And I click on the choose button for the product purchase in position "1" on the license form
+	Then I should not be able to view a warning message related to provisioned keys count
+	When I populate the generate license form with the following values
+	| Host Name     | Input    | localhost1        | |
+	| IP Addresses  | Textarea | 123.45.67.89      | |
+	| MAC Addresses | Textarea | 0A-1B-2C-3D-4E-5F | |
+	And I click on the add fields button in position "1" on the license form
+	Then I should be able to view a warning message related to provisioned keys count
+	When I populate the generate license form with the following values
+	| Host Name     | Input    | localhost2        | 2 |
+	| IP Addresses  | Textarea | 132.54.76.98      | 2 |
+	| MAC Addresses | Textarea | 0F-1E-2D-3C-4B-5A | 2 |
+	And I click on the generate button on the license form
+	Then I should be able to view a popup warning message related to provisioned keys count
+	And I should be able to view the license with the keyword "localhost1" and the following values on the account details page
+	| Name          | Korlic - ${staticProjectName}  |
+	| Description   | Korlic - ${staticProjectName}  |
+	| Product       | DXP Production                 |
+	| Type          | Production                     |
+	| Details       | Host Name: localhost1          |
+	| Details       | IP Address: 123.45.67.89       |
+	| Details       | MAC Address: 0A-1B-2C-3D-4E-5F |
+	| Status        | ACTIVE                         |
+	| Complimentary | false                          |
+	And I should be able to view the license with the keyword "localhost2" and the following values on the account details page
+	| Name        	| Korlic - ${staticProjectName}  |
+	| Description 	| Korlic - ${staticProjectName}  |
+	| Product     	| DXP Production                 |
+	| Type        	| Production                     |
+	| Details     	| Host Name: localhost2          |
+	| Details     	| IP Address: 132.54.76.98       |
+	| Details     	| MAC Address: 0F-1E-2D-3C-4B-5A |
+	| Status        | ACTIVE                         |
+	| Complimentary | false                          |
+
+Scenario: Generate new DXP license with removed host with warning messages
+	Testing the ability to generate a new license with an added and removed host for a T4 DXP project from koroneiki on provisioning and view the warning messages
+
+	Given I generate a provisioning project name
+	And I create an account on koroneiki with the following values
+	| Code                  | KORLICKORLIC                         | |
+	| Contact Email Address | lic.koroneiki1@lrcustomer.com.broken | |
+	| Description           | Test osb account on koroneiki        | |
+	| Fax Number            | 555-555-1234                         | |
+	| Name                  | Korlic - ${staticProjectName}        | |
+	| Phone Number          | 555-555-5678                         | |
+	| Profile Email Address | lic.koroneiki1@lrcustomer.com.broken | |
+	| Region                | United States                        | |
+	| Status                | Active                               | |
+	| Tier                  | T4                                   | |
+	| Website               | www.koroneikicorporation.com         | |
+	And I generate the account key value for "Korlic - ${staticProjectName}"
+	And I generate static start and end dates
+	And I generate static full start and end dates
+	And I generate future static start and end dates
+	And I generate future static full start and end dates
+	And I create a product purchase for an account with the name "Korlic - ${staticProjectName}" and the product "DXP Production" on koroneiki with the following values
+	| End Date                | ${staticEndDate}         |   |
+	| Original End Date       | ${staticOriginalEndDate} |   |
+	| Perpetual               | false                    |   |
+	| Product Field and Value | sizing                   | 1 |
+	| Product Field and Value | licenses                 | 1 |
+	| Product Field and Value | version                  | 7 |
+	| Quantity                | 1                        |   |
+	| Start Date              | ${staticStartDate}       |   |
+	| Status                  | Approved                 |   |
+	And I generate the product purchase ID value for the product purchase made by "Korlic - ${staticProjectName}" for "DXP Production"
+	And I create a product purchase for an account with the name "Korlic - ${staticProjectName}" and the product "Platinum Subscription" on koroneiki with the following values
+	| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |
+	And I log into the provisioning homepage as "${staticProvisioningAdminEmailAddress}" with password "${staticProvisioningAdminPassword}"
+	And I go to the license index page
+	And I click on the generate license button on the license index
+	And I populate the generate license form with the following values
+	| Account | Select Entity | Korlic - ${staticProjectName} | |
+	| Product | Select        | DXP Production                | |
+	| Version | Select        | 7.2                           | |
+	| Type    | Select        | DXP Production                | |
+	And I click on the choose button for the product purchase in position "1" on the license form
+	Then I should not be able to view a warning message related to provisioned keys count
+	When I populate the generate license form with the following values
+	| Host Name     | Input    | localhost1        | |
+	| IP Addresses  | Textarea | 123.45.67.89      | |
+	| MAC Addresses | Textarea | 0A-1B-2C-3D-4E-5F | |
+	And I click on the add fields button in position "1" on the license form
+	Then I should be able to view a warning message related to provisioned keys count
+	When I populate the generate license form with the following values
+	| Host Name     | Input    | localhost2        | 2 |
+	| IP Addresses  | Textarea | 132.54.76.98      | 2 |
+	| MAC Addresses | Textarea | 0F-1E-2D-3C-4B-5A | 2 |
+	And I click on the delete fields button in position "2" on the license form
+	Then I should not be able to view a warning message related to provisioned keys count
+	When I click on the generate button on the license form
+	Then I should be able to view the following license values on the license page
+	| Header  | Korlic - ${staticProjectName} | |
+	| Product | DXP Production                | |
+	When I go to the license index page
+	And I search the licenses page using the keyword "${staticAccountKey}"
+	Then I should be able to view a license on the provisioning index with the keyword "Korlic - ${staticProjectName}" and the following values
+	| Name          | Korlic - ${staticProjectName}  |
+	| Description   | Korlic - ${staticProjectName}  |
+	| Account       | Korlic - ${staticProjectName}  |
+	| Product       | DXP Production                 |
+	| Type          | Production                     |
+	| Details       | Host Name: localhost1          |
+	| Details       | IP Address: 123.45.67.89       |
+	| Details       | MAC Address: 0A-1B-2C-3D-4E-5F |
+	| Status        | ACTIVE                         |
+	| Complimentary | false                          |
+	And I should not be able to view a license on the provisioning index with the keyword "localhost2"
 
 Scenario: Generate new expired DXP license
 	Testing the ability to generate a new expired license for a T4 DXP project from koroneiki on provisioning
