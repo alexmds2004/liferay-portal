@@ -1321,8 +1321,8 @@ Scenario: Generate new DXP license for perpetual subscription with permanent lic
 	| Status        | ACTIVE                         |
 	| Complimentary | false                          |
 
-Scenario: Generate two new DXP license with a warning message
-	Testing the ability to generate two new licenses for a T4 DXP project from koroneiki on provisioning and assert the warning message
+Scenario: Generate three new DXP licenses with warning messages
+	Testing the ability to generate new licenses for a T4 DXP project from koroneiki on provisioning and assert various warning messages
 
 	Given I generate a provisioning project name
 	And I create an account on koroneiki with the following values
@@ -1349,27 +1349,37 @@ Scenario: Generate two new DXP license with a warning message
 	| Product Field and Value | sizing                   | 1 |
 	| Product Field and Value | licenses                 | 1 |
 	| Product Field and Value | version                  | 7 |
-	| Quantity                | 3                        |   |
+	| Quantity                | 1                        |   |
 	| Start Date              | ${staticStartDate}       |   |
 	| Status                  | Approved                 |   |
+	And I generate the product purchase ID value for the product purchase made by "Korlic - ${staticProjectName}" for "DXP Production"
+	And I create a product purchase for an account with the name "Korlic - ${staticProjectName}" and the product "Platinum Subscription" on koroneiki with the following values
+	| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |
 	And I log into the provisioning homepage as "${staticProvisioningAdminEmailAddress}" with password "${staticProvisioningAdminPassword}"
 	And I search the accounts page using the keyword "Korlic"
 	And I click on the account with the name "Korlic - ${staticProjectName}" on the provisioning index
 	And I click on the "DXP Production" subscription link
 	And I click on generate license button on the subscription details page
 	And I populate the generate license form with the following values
-	| Version | Select | 7.2                         | |
-	| Type    | Select | DXP Production              | |
+	| Version | Select | 7.2            | |
+	| Type    | Select | DXP Production | |
 	And I click on the choose button for the product purchase in position "1" on the license form
 	And I populate the generate license form with the following values
-	| Host Name     | Input    | localhost         | |
-	| IP Addresses  | Textarea | 123.45.67.89      | |
-	| MAC Addresses | Textarea | 0A-1B-2C-3D-4E-5F | |
+	| Name          | Input    | Korlic - ${staticProjectName} License1 Name        | |
+	| Description   | Input    | Korlic - ${staticProjectName} License1 Description | |
+	| Host Name     | Input    | localhost                                          | |
+	| IP Addresses  | Textarea | 123.45.67.89                                       | |
+	| MAC Addresses | Textarea | 0A-1B-2C-3D-4E-5F                                  | |
 	And I click on the generate button on the license form
 	Then I should be able to view the following license values on the license page
 	| Header  | Korlic - ${staticProjectName} | |
 	| Product | DXP Production                | |
-	And I go to the license index page
+	When I go to the license index page
 	And I click on the generate license button on the license index
 	And I populate the generate license form with the following values
 	| Account        | Select Entity | Korlic - ${staticProjectName} | |
@@ -1378,44 +1388,42 @@ Scenario: Generate two new DXP license with a warning message
 	| Type           | Select        | DXP Production                | |
 	| Instance Size  | Select        | 1                             | |
 	And I click on the choose button for the product purchase in position "1" on the license form
-	And I should be able to view a warning message related to provisioned keys count
-	And I populate the generate license form with the following values
-	| Host Name     | Input    | localhost         | |
-	| IP Addresses  | Textarea | 123.45.67.89      | |
-	| MAC Addresses | Textarea | 0A-1B-2C-3D-4E-5F | |
+	Then I should be able to view a warning message related to provisioned keys count
+	When I populate the generate license form with the following values
+	| Name          | Input    | Korlic - ${staticProjectName} License2 Name        | |
+	| Description   | Input    | Korlic - ${staticProjectName} License2 Description | |
+	| Host Name     | Input    | localhost                                          | |
+	| IP Addresses  | Textarea | 123.45.67.89                                       | |
+	| MAC Addresses | Textarea | 0A-1B-2C-3D-4E-5F                                  | |
 	And I click on the generate button on the license form
-	And I should be able to view a popup warning message related to provisioned keys count
-	Then I should be able to view the following license values on the license page
+	Then I should be able to view a popup warning message related to provisioned keys count
+	And I should be able to view the following license values on the license page
 	| Header  | Korlic - ${staticProjectName} | |
 	| Product | DXP Production                | |
 	When I go to the license index page
-	And I search the licenses page using the keyword "${staticAccountKey}"
-	Then I should be able to view a license on the provisioning index with the keyword "Korlic - ${staticProjectName}" and the following values
-	| Name        | Korlic - ${staticProjectName}  |
-	| Description | Korlic - ${staticProjectName}  |
-	| Account     | Korlic - ${staticProjectName}  |
-	| Product     | DXP Production                 |
-	| Type        | Production                     |
-	| Details     | Host Name: localhost           |
-	| Details     | IP Address: 123.45.67.89       |
-	| Details     | MAC Address: 0A-1B-2C-3D-4E-5F |
-	When I click on the license with the keyword "Korlic - ${staticProjectName}" on the provisioning index
-	Then I should be able to view the following license values on the license page
-	| Header        | Korlic - ${staticProjectName} | |
-	| Product       | DXP Production                | |
-	| Version       | 7.2                           | |
-	| Type          | Production                    | |
-	| Host Name     | localhost                     | |
-	| IP Addresses  | 123.45.67.89                  | |
-	| MAC Addresses | 0A-1B-2C-3D-4E-5F             | |
-	| Owner         | Korlic - ${staticProjectName} | |
-	| Description   | Korlic - ${staticProjectName} | |
-	| Complimentary | No                            | |
-	| Status        | ACTIVE                        | |
-	| Created By    | Test Test                     | |
+	And I click on the generate license button on the license index
+	And I populate the generate license form with the following values
+	| Account        | Select Entity | Korlic - ${staticProjectName} | |
+	| Product        | Select        | DXP Production                | |
+	| Version        | Select        | 7.2                           | |
+	| Type           | Select        | DXP Production                | |
+	| Instance Size  | Select        | 1                             | |
+	And I click on the choose button for the product purchase in position "1" on the license form
+	Then I should be able to view a warning message related to provisioned keys count
+	When I populate the generate license form with the following values
+	| Name          | Input    | Korlic - ${staticProjectName} License3 Name        | |
+	| Description   | Input    | Korlic - ${staticProjectName} License3 Description | |
+	| Host Name     | Input    | localhost                                          | |
+	| IP Addresses  | Textarea | 123.45.67.89                                       | |
+	| MAC Addresses | Textarea | 0A-1B-2C-3D-4E-5F                                  | |
+	And I click on the generate button on the license form
+	Then I should be able to view a popup warning message related to provisioned keys count
+	And I should be able to view the following license values on the license page
+	| Header  | Korlic - ${staticProjectName} | |
+	| Product | DXP Production                | |
 
-Scenario: Generate two new DXP license and a detached license with a warning message
-	Testing the ability to generate two new DXP licenses and one detached license for a T4 DXP project from koroneiki on provisioning and assert the warning message
+Scenario: Generate two new DXP licenses with warning messages and a detached license 
+	Testing the ability to generate two new DXP licenses and one detached license for a T4 DXP project from koroneiki on provisioning and assert the warning message only appears where appropriate
 
 	Given I generate a provisioning project name
 	And I create an account on koroneiki with the following values
@@ -1442,27 +1450,37 @@ Scenario: Generate two new DXP license and a detached license with a warning mes
 	| Product Field and Value | sizing                   | 1 |
 	| Product Field and Value | licenses                 | 1 |
 	| Product Field and Value | version                  | 7 |
-	| Quantity                | 5                        |   |
+	| Quantity                | 1                        |   |
 	| Start Date              | ${staticStartDate}       |   |
 	| Status                  | Approved                 |   |
+	And I generate the product purchase ID value for the product purchase made by "Korlic - ${staticProjectName}" for "DXP Production"
+	And I create a product purchase for an account with the name "Korlic - ${staticProjectName}" and the product "Platinum Subscription" on koroneiki with the following values
+	| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |
 	And I log into the provisioning homepage as "${staticProvisioningAdminEmailAddress}" with password "${staticProvisioningAdminPassword}"
 	And I search the accounts page using the keyword "Korlic"
 	And I click on the account with the name "Korlic - ${staticProjectName}" on the provisioning index
 	And I click on the "DXP Production" subscription link
 	And I click on generate license button on the subscription details page
 	And I populate the generate license form with the following values
-	| Version | Select | 7.2                         | |
-	| Type    | Select | DXP Production              | |
+	| Version | Select | 7.2            | |
+	| Type    | Select | DXP Production | |
 	And I click on the choose button for the product purchase in position "1" on the license form
 	And I populate the generate license form with the following values
-	| Host Name     | Input    | localhost         | |
-	| IP Addresses  | Textarea | 123.45.67.89      | |
-	| MAC Addresses | Textarea | 0A-1B-2C-3D-4E-5F | |
+	| Name          | Input    | Korlic - ${staticProjectName} License1 Name        | |
+	| Description   | Input    | Korlic - ${staticProjectName} License1 Description | |
+	| Host Name     | Input    | localhost                                          | |
+	| IP Addresses  | Textarea | 123.45.67.89                                       | |
+	| MAC Addresses | Textarea | 0A-1B-2C-3D-4E-5F                                  | |
 	And I click on the generate button on the license form
 	Then I should be able to view the following license values on the license page
 	| Header  | Korlic - ${staticProjectName} | |
 	| Product | DXP Production                | |
-	And I go to the license index page
+	When I go to the license index page
 	And I click on the generate license button on the license index
 	And I populate the generate license form with the following values
 	| Account        | Select Entity | Korlic - ${staticProjectName} | |
@@ -1471,42 +1489,19 @@ Scenario: Generate two new DXP license and a detached license with a warning mes
 	| Type           | Select        | DXP Production                | |
 	| Instance Size  | Select        | 1                             | |
 	And I click on the choose button for the product purchase in position "1" on the license form
-	And I should be able to view a warning message related to provisioned keys count
-	And I populate the generate license form with the following values
-	| Host Name     | Input    | localhost         | |
-	| IP Addresses  | Textarea | 123.45.67.89      | |
-	| MAC Addresses | Textarea | 0A-1B-2C-3D-4E-5F | |
+	Then I should be able to view a warning message related to provisioned keys count
+	When I populate the generate license form with the following values
+	| Name          | Input    | Korlic - ${staticProjectName} License2 Name        | |
+	| Description   | Input    | Korlic - ${staticProjectName} License2 Description | |
+	| Host Name     | Input    | localhost                                          | |
+	| IP Addresses  | Textarea | 123.45.67.89                                       | |
+	| MAC Addresses | Textarea | 0A-1B-2C-3D-4E-5F                                  | |
 	And I click on the generate button on the license form
-	And I should be able to view a popup warning message related to provisioned keys count
-	Then I should be able to view the following license values on the license page
+	Then I should be able to view a popup warning message related to provisioned keys count
+	And I should be able to view the following license values on the license page
 	| Header  | Korlic - ${staticProjectName} | |
 	| Product | DXP Production                | |
 	When I go to the license index page
-	And I search the licenses page using the keyword "${staticAccountKey}"
-	Then I should be able to view a license on the provisioning index with the keyword "Korlic - ${staticProjectName}" and the following values
-	| Name        | Korlic - ${staticProjectName}  |
-	| Description | Korlic - ${staticProjectName}  |
-	| Account     | Korlic - ${staticProjectName}  |
-	| Product     | DXP Production                 |
-	| Type        | Production                     |
-	| Details     | Host Name: localhost           |
-	| Details     | IP Address: 123.45.67.89       |
-	| Details     | MAC Address: 0A-1B-2C-3D-4E-5F |
-	When I click on the license with the keyword "Korlic - ${staticProjectName}" on the provisioning index
-	Then I should be able to view the following license values on the license page
-	| Header        | Korlic - ${staticProjectName} | |
-	| Product       | DXP Production                | |
-	| Version       | 7.2                           | |
-	| Type          | Production                    | |
-	| Host Name     | localhost                     | |
-	| IP Addresses  | 123.45.67.89                  | |
-	| MAC Addresses | 0A-1B-2C-3D-4E-5F             | |
-	| Owner         | Korlic - ${staticProjectName} | |
-	| Description   | Korlic - ${staticProjectName} | |
-	| Complimentary | No                            | |
-	| Status        | ACTIVE                        | |
-	| Created By    | Test Test                     | |
-	And I go to the license index page
 	And I click on the generate license button on the license index
 	And I populate the generate license form with the following values
 	| Account        | Select Entity | Korlic - ${staticProjectName} | |
@@ -1523,33 +1518,6 @@ Scenario: Generate two new DXP license and a detached license with a warning mes
 	Then I should be able to view the following license values on the license page
 	| Header  | Korlic - ${staticProjectName} | |
 	| Product | DXP Production                | |
-	When I go to the license index page
-	And I search the licenses page using the keyword "${staticAccountKey}"
-	Then I should be able to view a license on the provisioning index with the keyword "Korlic - ${staticProjectName}" and the following values
-	| Name          | Korlic - ${staticProjectName}  |
-	| Description   | Korlic - ${staticProjectName}  |
-	| Account       | Korlic - ${staticProjectName}  |
-	| Product       | DXP Production                 |
-	| Type          | Production                     |
-	| Details       | Host Name: localhost           |
-	| Details       | IP Address: 123.45.67.89       |
-	| Details       | MAC Address: 0A-1B-2C-3D-4E-5F |
-	| Status        | ACTIVE                         |
-	| Complimentary | false                          |
-	When I click on the license with the keyword "Korlic - ${staticProjectName}" on the provisioning index
-	Then I should be able to view the following license values on the license page
-	| Header        | Korlic - ${staticProjectName} | |
-	| Product       | DXP Production                | |
-	| Version       | 7.2                           | |
-	| Type          | Production                    | |
-	| Host Name     | localhost                     | |
-	| IP Addresses  | 123.45.67.89                  | |
-	| MAC Addresses | 0A-1B-2C-3D-4E-5F             | |
-	| Owner         | Korlic - ${staticProjectName} | |
-	| Description   | Korlic - ${staticProjectName} | |
-	| Complimentary | No                            | |
-	| Status        | ACTIVE                        | |
-	| Created By    | Test Test                     | |
 
 Scenario: Generate new expired DXP license
 	Testing the ability to generate a new expired license for a T4 DXP project from koroneiki on provisioning
@@ -2222,7 +2190,7 @@ Scenario: Generate new DXP virtual cluster license
 	| Product Field and Value | sizing                   | 1 |
 	| Product Field and Value | licenses                 | 1 |
 	| Product Field and Value | version                  | 7 |
-	| Quantity                | 1                        |   |
+	| Quantity                | 2                        |   |
 	| Start Date              | ${staticStartDate}       |   |
 	| Status                  | Approved                 |   |
 	And I generate the product purchase ID value for the product purchase made by "Korlic - ${staticProjectName}" for "DXP Production"
@@ -2364,7 +2332,7 @@ Scenario: Generate new DXP virtual cluster license for perpetual subscription
 	| Product Field and Value | sizing   | 1 |
 	| Product Field and Value | licenses | 1 |
 	| Product Field and Value | version  | 7 |
-	| Quantity                | 1        |   |
+	| Quantity                | 10       |   |
 	| Status                  | Approved |   |
 	And I generate the product purchase ID value for the product purchase made by "Korlic - ${staticProjectName}" for "DXP Production"
 	And I create a product purchase for an account with the name "Korlic - ${staticProjectName}" and the product "Platinum Subscription" on koroneiki with the following values
@@ -2484,7 +2452,7 @@ Scenario: Generate new DXP virtual cluster complimentary license
 	| Product Field and Value | sizing                   | 1 |
 	| Product Field and Value | licenses                 | 1 |
 	| Product Field and Value | version                  | 7 |
-	| Quantity                | 1                        |   |
+	| Quantity                | 10                       |   |
 	| Start Date              | ${staticStartDate}       |   |
 	| Status                  | Approved                 |   |
 	And I generate the product purchase ID value for the product purchase made by "Korlic - ${staticProjectName}" for "DXP Production"
@@ -3655,7 +3623,7 @@ Scenario: Replace DXP virtual cluster license
 	| Product Field and Value | sizing                   | 1 |
 	| Product Field and Value | licenses                 | 1 |
 	| Product Field and Value | version                  | 7 |
-	| Quantity                | 1                        |   |
+	| Quantity                | 10                       |   |
 	| Start Date              | ${staticStartDate}       |   |
 	| Status                  | Approved                 |   |
 	And I generate the product purchase ID value for the product purchase made by "Korlic - ${staticProjectName}" for "DXP Production"
@@ -3826,7 +3794,7 @@ Scenario: Replace complimentary DXP virtual cluster license
 	| Product Field and Value | sizing                   | 1 |
 	| Product Field and Value | licenses                 | 1 |
 	| Product Field and Value | version                  | 7 |
-	| Quantity                | 1                        |   |
+	| Quantity                | 10                       |   |
 	| Start Date              | ${staticStartDate}       |   |
 	| Status                  | Approved                 |   |
 	And I generate the product purchase ID value for the product purchase made by "Korlic - ${staticProjectName}" for "DXP Production"
@@ -3998,7 +3966,7 @@ Scenario: Replace deactivated DXP virtual cluster license
 	| Product Field and Value | sizing                   | 1 |
 	| Product Field and Value | licenses                 | 1 |
 	| Product Field and Value | version                  | 7 |
-	| Quantity                | 1                        |   |
+	| Quantity                | 10                       |   |
 	| Start Date              | ${staticStartDate}       |   |
 	| Status                  | Approved                 |   |
 	And I generate the product purchase ID value for the product purchase made by "Korlic - ${staticProjectName}" for "DXP Production"
@@ -5629,7 +5597,7 @@ Scenario: Bulk extend single DXP license
 	| Product Field and Value | sizing                   | 1 |
 	| Product Field and Value | licenses                 | 1 |
 	| Product Field and Value | version                  | 7 |
-	| Quantity                | 6                        |   |
+	| Quantity                | 15                       |   |
 	| Start Date              | ${staticStartDate}       |   |
 	| Status                  | Approved                 |   |
 	And I generate the product purchase ID value for the product purchase made by "Korlic - ${staticProjectName}" for "DXP Production"
@@ -5773,7 +5741,7 @@ Scenario: Bulk extend DXP licenses
 	| Product Field and Value | sizing                   | 1 |
 	| Product Field and Value | licenses                 | 1 |
 	| Product Field and Value | version                  | 7 |
-	| Quantity                | 10                       |   |
+	| Quantity                | 25                       |   |
 	| Start Date              | ${staticStartDate}       |   |
 	| Status                  | Approved                 |   |
 	And I generate the product purchase ID value for the product purchase made by "Korlic - ${staticProjectName}" for "DXP Production"
@@ -5972,7 +5940,7 @@ Scenario: Bulk extend DXP licenses via extend button
 	| Product Field and Value | sizing                   | 1 |
 	| Product Field and Value | licenses                 | 1 |
 	| Product Field and Value | version                  | 7 |
-	| Quantity                | 10                       |   |
+	| Quantity                | 25                       |   |
 	| Start Date              | ${staticStartDate}       |   |
 	| Status                  | Approved                 |   |
 	And I generate the product purchase ID value for the product purchase made by "Korlic - ${staticProjectName}" for "DXP Production"
@@ -6171,7 +6139,7 @@ Scenario: Bulk extend DXP licenses via subscription details
 	| Product Field and Value | sizing                   | 1 |
 	| Product Field and Value | licenses                 | 1 |
 	| Product Field and Value | version                  | 7 |
-	| Quantity                | 10                       |   |
+	| Quantity                | 25                       |   |
 	| Start Date              | ${staticStartDate}       |   |
 	| Status                  | Approved                 |   |
 	And I generate the product purchase ID value for the product purchase made by "Korlic - ${staticProjectName}" for "DXP Production"
@@ -6337,7 +6305,7 @@ Scenario: Bulk extend DXP licenses via extend button via subscription details
 	| Product Field and Value | sizing                   | 1 |
 	| Product Field and Value | licenses                 | 1 |
 	| Product Field and Value | version                  | 7 |
-	| Quantity                | 10                       |   |
+	| Quantity                | 25                       |   |
 	| Start Date              | ${staticStartDate}       |   |
 	| Status                  | Approved                 |   |
 	And I generate the product purchase ID value for the product purchase made by "Korlic - ${staticProjectName}" for "DXP Production"
@@ -6503,7 +6471,7 @@ Scenario: View DXP license extend form validation
 	| Product Field and Value | sizing                   | 1 |
 	| Product Field and Value | licenses                 | 1 |
 	| Product Field and Value | version                  | 7 |
-	| Quantity                | 5                        |   |
+	| Quantity                | 10                       |   |
 	| Start Date              | ${staticStartDate}       |   |
 	| Status                  | Approved                 |   |
 	And I generate the product purchase ID value for the product purchase made by "Korlic - ${staticProjectName}" for "DXP Production"
@@ -6675,7 +6643,7 @@ Scenario: View DXP detached license extend form validation
 	| Product Field and Value | sizing                   | 1 |
 	| Product Field and Value | licenses                 | 1 |
 	| Product Field and Value | version                  | 7 |
-	| Quantity                | 5                        |   |
+	| Quantity                | 10                       |   |
 	| Start Date              | ${staticStartDate}       |   |
 	| Status                  | Approved                 |   |
 	And I generate the product purchase ID value for the product purchase made by "Korlic - ${staticProjectName}" for "DXP Production"
@@ -8908,7 +8876,7 @@ Scenario: Deactivate DXP virtual cluster license
 	| Product Field and Value | sizing                   | 1 |
 	| Product Field and Value | licenses                 | 1 |
 	| Product Field and Value | version                  | 7 |
-	| Quantity                | 1                        |   |
+	| Quantity                | 10                       |   |
 	| Start Date              | ${staticStartDate}       |   |
 	| Status                  | Approved                 |   |
 	And I generate the product purchase ID value for the product purchase made by "Korlic - ${staticProjectName}" for "DXP Production"
@@ -10328,7 +10296,7 @@ Scenario: Generate new commerce virtual cluster license
 	| Product Field and Value | sizing                   | 1 |
 	| Product Field and Value | licenses                 | 1 |
 	| Product Field and Value | version                  | 0 |
-	| Quantity                | 1                        |   |
+	| Quantity                | 10                       |   |
 	| Start Date              | ${staticStartDate}       |   |
 	| Status                  | Approved                 |   |
 	And I generate the product purchase ID value for the product purchase made by "Korlic - ${staticProjectName}" for "Commerce Subscription Production"
@@ -10446,7 +10414,7 @@ Scenario: Generate new commerce virtual cluster license for perpetual subscripti
 	| Product Field and Value | sizing   | 1 |
 	| Product Field and Value | licenses | 1 |
 	| Product Field and Value | version  | 0 |
-	| Quantity                | 1        |   |
+	| Quantity                | 10       |   |
 	| Status                  | Approved |   |
 	And I generate the product purchase ID value for the product purchase made by "Korlic - ${staticProjectName}" for "Commerce Subscription Production"
 	And I create a product purchase for an account with the name "Korlic - ${staticProjectName}" and the product "Platinum Subscription" on koroneiki with the following values
@@ -13259,7 +13227,7 @@ Scenario: Extend DXP virtual cluster license
 	| Product Field and Value | sizing                   | 1 |
 	| Product Field and Value | licenses                 | 1 |
 	| Product Field and Value | version                  | 7 |
-	| Quantity                | 1                        |   |
+	| Quantity                | 15                       |   |
 	| Start Date              | ${staticStartDate}       |   |
 	| Status                  | Approved                 |   |
 	And I generate the product purchase ID value for the product purchase made by "Korlic - ${staticProjectName}" for "DXP Production"
@@ -13450,7 +13418,7 @@ Scenario: Extend DXP virtual cluster license via calendar dropdown
 	| Product Field and Value | sizing                   | 1 |
 	| Product Field and Value | licenses                 | 1 |
 	| Product Field and Value | version                  | 7 |
-	| Quantity                | 1                        |   |
+	| Quantity                | 15                       |   |
 	| Start Date              | ${staticStartDate}       |   |
 	| Status                  | Approved                 |   |
 	And I generate the product purchase ID value for the product purchase made by "Korlic - ${staticProjectName}" for "DXP Production"
@@ -13627,7 +13595,7 @@ Scenario: Extend DXP virtual cluster license with an active and cancelled purcha
 	| Product Field and Value | sizing                   | 1 |
 	| Product Field and Value | licenses                 | 1 |
 	| Product Field and Value | version                  | 7 |
-	| Quantity                | 1                        |   |
+	| Quantity                | 10                       |   |
 	| Start Date              | ${staticStartDate}       |   |
 	| Status                  | Approved                 |   |
   	And I generate the product purchase ID value for the product purchase made by "Korlic - ${staticProjectName}" for "DXP Production"
@@ -13638,7 +13606,7 @@ Scenario: Extend DXP virtual cluster license with an active and cancelled purcha
 	| Product Field and Value | sizing                         | 1 |
 	| Product Field and Value | licenses                       | 1 |
 	| Product Field and Value | version                        | 7 |
-	| Quantity                | 1                              |   |
+	| Quantity                | 10                             |   |
 	| Start Date              | ${staticFutureStartDate}       |   |
 	| Status                  | Cancelled                      |   |
 	And I create a product purchase for an account with the name "Korlic - ${staticProjectName}" and the product "Platinum Subscription" on koroneiki with the following values
@@ -13815,7 +13783,7 @@ Scenario: Extend DXP virtual license and move to future subscription
 	| Product Field and Value | sizing                   | 1 |
 	| Product Field and Value | licenses                 | 1 |
 	| Product Field and Value | version                  | 7 |
-	| Quantity                | 1                        |   |
+	| Quantity                | 10                       |   |
 	| Start Date              | ${staticStartDate}       |   |
 	| Status                  | Approved                 |   |
 	And I generate the product purchase ID value for the product purchase made by "Korlic - ${staticProjectName}" for "DXP Production" with the "startDate" "${staticStartDate}"
@@ -13834,7 +13802,7 @@ Scenario: Extend DXP virtual license and move to future subscription
 	| Product Field and Value | sizing                         | 1 |
 	| Product Field and Value | licenses                       | 1 |
 	| Product Field and Value | version                        | 7 |
-	| Quantity                | 1                              |   |
+	| Quantity                | 10                             |   |
 	| Start Date              | ${staticFutureStartDate}       |   |
 	| Status                  | Approved                       |   |
 	And I generate the product purchase ID value for the product purchase made by "Korlic - ${staticProjectName}" for "DXP Production" with the "startDate" "${staticFutureStartDate}"
@@ -14312,7 +14280,7 @@ Scenario: View bulk extend license form date field validation
 	| Product Field and Value | sizing                   | 1 |
 	| Product Field and Value | licenses                 | 1 |
 	| Product Field and Value | version                  | 7 |
-	| Quantity                | 8                        |   |
+	| Quantity                | 10                       |   |
 	| Start Date              | ${staticStartDate}       |   |
 	| Status                  | Approved                 |   |
 	And I generate the product purchase ID value for the product purchase made by "Korlic - ${staticProjectName}" for "DXP Production"
@@ -14320,7 +14288,7 @@ Scenario: View bulk extend license form date field validation
 	| End Date                | ${staticEndDate}         | |
 	| Original End Date       | ${staticOriginalEndDate} | |
 	| Perpetual               | false                    | |
-	| Quantity                | 8                        | |
+	| Quantity                | 1                        | |
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |
 	And I log into the provisioning homepage as "${staticProvisioningAdminEmailAddress}" with password "${staticProvisioningAdminPassword}"
@@ -14443,7 +14411,7 @@ Scenario: View no bulk extend license row for licenses with different products
     | Product Field and Value | sizing                   | 1 |
     | Product Field and Value | licenses                 | 1 |
     | Product Field and Value | version                  | 7 |
-    | Quantity                | 1                        |   |
+    | Quantity                | 5                        |   |
     | Start Date              | ${staticStartDate}       |   |
     | Status                  | Approved                 |   |
 	And I log into the provisioning homepage as "${staticProvisioningAdminEmailAddress}" with password "${staticProvisioningAdminPassword}"
@@ -14520,7 +14488,7 @@ Scenario: Extend license for account with multiple subscriptions for similar pro
 	| Product Field and Value | sizing                   | 1 |
 	| Product Field and Value | licenses                 | 1 |
 	| Product Field and Value | version                  | 7 |
-	| Quantity                | 1                        |   |
+	| Quantity                | 10                       |   |
 	| Start Date              | ${staticStartDate}       |   |
 	| Status                  | Approved                 |   |
 	And I generate the product purchase ID value for the product purchase made by "Korlic - ${staticProjectName}" for "DXP Production"
@@ -14863,7 +14831,7 @@ Scenario: Generate DXP Production virtual cluster license after selecting DXP Pr
 	| Product Field and Value | sizing                   | 1 |
 	| Product Field and Value | licenses                 | 1 |
 	| Product Field and Value | version                  | 7 |
-	| Quantity                | 1                        |   |
+	| Quantity                | 2                        |   |
 	| Start Date              | ${staticStartDate}       |   |
 	| Status                  | Approved                 |   |
 	And I generate the product purchase ID value for the product purchase made by "Korlic - ${staticProjectName}" for "DXP Production"
@@ -14994,7 +14962,7 @@ Scenario: Bulk extend DXP licenses via bulk extend
 	| Product Field and Value | sizing                   | 1 |
 	| Product Field and Value | licenses                 | 1 |
 	| Product Field and Value | version                  | 7 |
-	| Quantity                | 8                        |   |
+	| Quantity                | 25                       |   |
 	| Start Date              | ${staticStartDate}       |   |
 	| Status                  | Approved                 |   |
 	And I generate the product purchase ID value for the product purchase made by "Korlic - ${staticProjectName}" for "DXP Production"
@@ -15002,7 +14970,7 @@ Scenario: Bulk extend DXP licenses via bulk extend
 	| End Date                | ${staticEndDate}         | |
 	| Original End Date       | ${staticOriginalEndDate} | |
 	| Perpetual               | false                    | |
-	| Quantity                | 8                        | |
+	| Quantity                | 1                        | |
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |
 	And I log into the provisioning homepage as "${staticProvisioningAdminEmailAddress}" with password "${staticProvisioningAdminPassword}"
@@ -15166,7 +15134,7 @@ Scenario: Bulk extend different DXP licenses via bulk extend
 	| Product Field and Value | sizing                   | 1 |
 	| Product Field and Value | licenses                 | 1 |
 	| Product Field and Value | version                  | 7 |
-	| Quantity                | 8                        |   |
+	| Quantity                | 25                       |   |
 	| Start Date              | ${staticStartDate}       |   |
 	| Status                  | Approved                 |   |
 	And I generate the product purchase ID value for the product purchase made by "Korlic - ${staticProjectName}" for "DXP Production"
@@ -15174,7 +15142,7 @@ Scenario: Bulk extend different DXP licenses via bulk extend
 	| End Date                | ${staticEndDate}         | |
 	| Original End Date       | ${staticOriginalEndDate} | |
 	| Perpetual               | false                    | |
-	| Quantity                | 8                        | |
+	| Quantity                | 1                        | |
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |
 	And I log into the provisioning homepage as "${staticProvisioningAdminEmailAddress}" with password "${staticProvisioningAdminPassword}"
