@@ -11269,3 +11269,348 @@ Scenario: Update self provisioning value from checked to unchecked in provisioni
 	| Account Field and Value | allowSelfProvisioning | false |
 	| Code                    | PROKORKORPRO          |       |
 	| Tier                    | T4                    |       |
+
+Scenario: Update liferay version to DXP values via API and view in provisioning
+	Testing the ability to create a project in Dossiera and sending an update message with DXP current liferay version
+
+	Given I publish a project with no partner RabbitMQ message with routing key "dossiera.provisioning.create" with the following values
+	| Account Name                           | Prokor - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Contact Email Address                  | pro.koroneiki1@lrcustomer.com.broken       |
+	| Contact First Name                     | PRO                                        |
+	| Contact Last Name                      | Koroneiki1                                 |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | pro.koroneiki2@lrcustomer.com.broken       |
+	| Owner First Name                       | PRO                                        |
+	| Owner Last Name                        | Koroneiki2                                 |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Korpro - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | 000000e5f6e7fa1b2c3d4                      |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.0                                        |
+	And I log into the provisioning homepage as "${staticProvisioningAdminEmailAddress}" with password "${staticProvisioningAdminPassword}"
+	And I go to the account index page
+	And I search the accounts page using the keyword "Korpro"
+	And I click on the account with the name "Korpro - ${staticProjectName}" on the provisioning index
+	Then I should be able to view the following account values in the account details page
+	| Name           | Korpro - ${staticProjectName} |
+	| Code           | PROKORKORPRO                  |
+	| State          | ACTIVE                        |
+	| Support Region | United States                 |
+	| Country        | United States                 |
+	| SLA            | Platinum                      |
+	| Support Seats  | 1 / 3 Filled                  |
+	| Tier           | T4                            |
+	| FLS Partner    | -                             |
+	When I click on the "Details" tab
+	Then I should be able to view the following account values under the account details tab
+	| Account Name       | Korpro - ${staticProjectName} | |
+	| State              | ACTIVE                        | |
+	| Code               | PROKORKORPRO                  | |
+	| Tier               | T4                            | |
+	| Parent             | Prokor - ${staticCompanyName} | |
+	| Data Region        | United States                 | |
+	| First Line Support | -                             | |
+	| Liferay Version    | DXP 7.0                       | |
+	| Street 1           | 456 Fake Street               | |
+	| Country            | United States                 | |
+	| City               | Diamond Bar                   | |
+	| State/Province     | California                    | |
+	| Postal Code        | 91765                         | |
+	| Primary            | true                          | |
+	| Dossiera Project   | ${staticDossieraProjectKey}   | |
+	| Salesforce Project | ${staticSalesforceProjectKey} | |
+	| Self Provisioning  | true                          | |
+	| Permanent Licenses | true                          | |
+	When I publish an update RabbitMQ message with routing key "dossiera.provisioning.project.update" with the following values
+	| Current Version Number | 7.4                           |
+	| Salesforce Project Key | ${staticSalesforceProjectKey} |
+	# Necessary pause to allow updates to take place since it follows a RabbitMQ message that does not get verified
+	And I wait for "10" seconds
+	And I go to the account index page
+	And I search the accounts page using the keyword "Korpro"
+	And I click on the account with the name "Korpro - ${staticProjectName}" on the provisioning index
+	Then I should be able to view a koroneiki account with the name "Korpro - ${staticProjectName}" and the following values
+	| Account Field and Value | liferayVersion                       | DXP 7.4 | |
+	| Code                    | PROKORKORPRO                         |         | |
+	| Parent Account Name     | Prokor - ${staticCompanyName}        |         | |
+	| Contact Email Address   | pro.koroneiki2@lrcustomer.com.broken |         | |
+	| Name                    | Korpro - ${staticProjectName}        |         | |
+	| Region                  | United States                        |         | |
+	| Status                  | Active                               |         | |
+	When I click on the "Details" tab
+	Then I should be able to view the following account values under the account details tab
+	| Account Name       | Korpro - ${staticProjectName} | |
+	| State              | ACTIVE                        | |
+	| Code               | PROKORKORPRO                  | |
+	| Tier               | T4                            | |
+	| Parent             | Prokor - ${staticCompanyName} | |
+	| Data Region        | United States                 | |
+	| First Line Support | -                             | |
+	| Liferay Version    | DXP 7.4                       | |
+	| Street 1           | 456 Fake Street               | |
+	| Country            | United States                 | |
+	| City               | Diamond Bar                   | |
+	| State/Province     | California                    | |
+	| Postal Code        | 91765                         | |
+	| Primary            | true                          | |
+	| Dossiera Project   | ${staticDossieraProjectKey}   | |
+	| Salesforce Project | ${staticSalesforceProjectKey} | |
+	| Self Provisioning  | true                          | |
+	| Permanent Licenses | true                          | |
+
+Scenario: Update liferay version to EE values via API and view in provisioning
+	Testing the ability to create a project in Dossiera and sending an update message with EE current liferay version
+
+	Given I publish a project with no partner RabbitMQ message with routing key "dossiera.provisioning.create" with the following values
+	| Account Name                           | Prokor - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Contact Email Address                  | pro.koroneiki1@lrcustomer.com.broken       |
+	| Contact First Name                     | PRO                                        |
+	| Contact Last Name                      | Koroneiki1                                 |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | pro.koroneiki2@lrcustomer.com.broken       |
+	| Owner First Name                       | PRO                                        |
+	| Owner Last Name                        | Koroneiki2                                 |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Korpro - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | 000000e5f6e7fa1b2c3d4                      |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.0                                        |
+	And I log into the provisioning homepage as "${staticProvisioningAdminEmailAddress}" with password "${staticProvisioningAdminPassword}"
+	And I go to the account index page
+	And I search the accounts page using the keyword "Korpro"
+	And I click on the account with the name "Korpro - ${staticProjectName}" on the provisioning index
+	Then I should be able to view the following account values in the account details page
+	| Name           | Korpro - ${staticProjectName} |
+	| Code           | PROKORKORPRO                  |
+	| State          | ACTIVE                        |
+	| Support Region | United States                 |
+	| Country        | United States                 |
+	| SLA            | Platinum                      |
+	| Support Seats  | 1 / 3 Filled                  |
+	| Tier           | T4                            |
+	| FLS Partner    | -                             |
+	When I click on the "Details" tab
+	Then I should be able to view the following account values under the account details tab
+	| Account Name       | Korpro - ${staticProjectName} | |
+	| State              | ACTIVE                        | |
+	| Code               | PROKORKORPRO                  | |
+	| Tier               | T4                            | |
+	| Parent             | Prokor - ${staticCompanyName} | |
+	| Data Region        | United States                 | |
+	| First Line Support | -                             | |
+	| Liferay Version    | DXP 7.0                       | |
+	| Street 1           | 456 Fake Street               | |
+	| Country            | United States                 | |
+	| City               | Diamond Bar                   | |
+	| State/Province     | California                    | |
+	| Postal Code        | 91765                         | |
+	| Primary            | true                          | |
+	| Dossiera Project   | ${staticDossieraProjectKey}   | |
+	| Salesforce Project | ${staticSalesforceProjectKey} | |
+	| Self Provisioning  | true                          | |
+	| Permanent Licenses | true                          | |
+	When I publish an update RabbitMQ message with routing key "dossiera.provisioning.project.update" with the following values
+	| Current Version Number | 6.2                           |
+	| Salesforce Project Key | ${staticSalesforceProjectKey} |
+	# Necessary pause to allow updates to take place since it follows a RabbitMQ message that does not get verified
+	And I wait for "10" seconds
+	And I go to the account index page
+	And I search the accounts page using the keyword "Korpro"
+	And I click on the account with the name "Korpro - ${staticProjectName}" on the provisioning index
+	Then I should be able to view a koroneiki account with the name "Korpro - ${staticProjectName}" and the following values
+	| Account Field and Value | liferayVersion                       | 6.2 EE | |
+	| Code                    | PROKORKORPRO                         |        | |
+	| Parent Account Name     | Prokor - ${staticCompanyName}        |        | |
+	| Contact Email Address   | pro.koroneiki2@lrcustomer.com.broken |        | |
+	| Name                    | Korpro - ${staticProjectName}        |        | |
+	| Region                  | United States                        |        | |
+	| Status                  | Active                               |        | |
+	When I click on the "Details" tab
+	Then I should be able to view the following account values under the account details tab
+	| Account Name       | Korpro - ${staticProjectName} | |
+	| State              | ACTIVE                        | |
+	| Code               | PROKORKORPRO                  | |
+	| Tier               | T4                            | |
+	| Parent             | Prokor - ${staticCompanyName} | |
+	| Data Region        | United States                 | |
+	| First Line Support | -                             | |
+	| Liferay Version    | 6.2 EE                        | |
+	| Street 1           | 456 Fake Street               | |
+	| Country            | United States                 | |
+	| City               | Diamond Bar                   | |
+	| State/Province     | California                    | |
+	| Postal Code        | 91765                         | |
+	| Primary            | true                          | |
+	| Dossiera Project   | ${staticDossieraProjectKey}   | |
+	| Salesforce Project | ${staticSalesforceProjectKey} | |
+	| Self Provisioning  | true                          | |
+	| Permanent Licenses | true                          | |
+
+Scenario: Update liferay version to LXC values via API and view in provisioning
+	Testing the ability to create a project in Dossiera and sending an update message with LXC current liferay version
+
+	Given I publish a project with no partner RabbitMQ message with routing key "dossiera.provisioning.create" with the following values
+	| Account Name                           | Prokor - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Contact Email Address                  | pro.koroneiki1@lrcustomer.com.broken       |
+	| Contact First Name                     | PRO                                        |
+	| Contact Last Name                      | Koroneiki1                                 |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | pro.koroneiki2@lrcustomer.com.broken       |
+	| Owner First Name                       | PRO                                        |
+	| Owner Last Name                        | Koroneiki2                                 |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Korpro - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | 000000e5f6e7fa1b2c3d4                      |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.0                                        |
+	And I log into the provisioning homepage as "${staticProvisioningAdminEmailAddress}" with password "${staticProvisioningAdminPassword}"
+	And I go to the account index page
+	And I search the accounts page using the keyword "Korpro"
+	And I click on the account with the name "Korpro - ${staticProjectName}" on the provisioning index
+	Then I should be able to view the following account values in the account details page
+	| Name           | Korpro - ${staticProjectName} |
+	| Code           | PROKORKORPRO                  |
+	| State          | ACTIVE                        |
+	| Support Region | United States                 |
+	| Country        | United States                 |
+	| SLA            | Platinum                      |
+	| Support Seats  | 1 / 3 Filled                  |
+	| Tier           | T4                            |
+	| FLS Partner    | -                             |
+	When I click on the "Details" tab
+	Then I should be able to view the following account values under the account details tab
+	| Account Name       | Korpro - ${staticProjectName} | |
+	| State              | ACTIVE                        | |
+	| Code               | PROKORKORPRO                  | |
+	| Tier               | T4                            | |
+	| Parent             | Prokor - ${staticCompanyName} | |
+	| Data Region        | United States                 | |
+	| First Line Support | -                             | |
+	| Liferay Version    | DXP 7.0                       | |
+	| Street 1           | 456 Fake Street               | |
+	| Country            | United States                 | |
+	| City               | Diamond Bar                   | |
+	| State/Province     | California                    | |
+	| Postal Code        | 91765                         | |
+	| Primary            | true                          | |
+	| Dossiera Project   | ${staticDossieraProjectKey}   | |
+	| Salesforce Project | ${staticSalesforceProjectKey} | |
+	| Self Provisioning  | true                          | |
+	| Permanent Licenses | true                          | |
+	When I publish an update RabbitMQ message with routing key "dossiera.provisioning.project.update" with the following values
+	| Current Version Number | LXC                           |
+	| Salesforce Project Key | ${staticSalesforceProjectKey} |
+	# Necessary pause to allow updates to take place since it follows a RabbitMQ message that does not get verified
+	And I wait for "10" seconds
+	And I go to the account index page
+	And I search the accounts page using the keyword "Korpro"
+	And I click on the account with the name "Korpro - ${staticProjectName}" on the provisioning index
+	Then I should be able to view a koroneiki account with the name "Korpro - ${staticProjectName}" and the following values
+	| Account Field and Value | liferayVersion                       | LXC | |
+	| Code                    | PROKORKORPRO                         |     | |
+	| Parent Account Name     | Prokor - ${staticCompanyName}        |     | |
+	| Contact Email Address   | pro.koroneiki2@lrcustomer.com.broken |     | |
+	| Name                    | Korpro - ${staticProjectName}        |     | |
+	| Region                  | United States                        |     | |
+	| Status                  | Active                               |     | |
+	When I click on the "Details" tab
+	Then I should be able to view the following account values under the account details tab
+	| Account Name       | Korpro - ${staticProjectName} | |
+	| State              | ACTIVE                        | |
+	| Code               | PROKORKORPRO                  | |
+	| Tier               | T4                            | |
+	| Parent             | Prokor - ${staticCompanyName} | |
+	| Data Region        | United States                 | |
+	| First Line Support | -                             | |
+	| Liferay Version    | LXC                           | |
+	| Street 1           | 456 Fake Street               | |
+	| Country            | United States                 | |
+	| City               | Diamond Bar                   | |
+	| State/Province     | California                    | |
+	| Postal Code        | 91765                         | |
+	| Primary            | true                          | |
+	| Dossiera Project   | ${staticDossieraProjectKey}   | |
+	| Salesforce Project | ${staticSalesforceProjectKey} | |
+	| Self Provisioning  | true                          | |
+	| Permanent Licenses | true                          | |
