@@ -86,6 +86,117 @@ definition {
 		}
 	}
 
+	macro _groupFilters {
+		var filters = "";
+
+		var rawTable = new RawTable("${table}");
+
+		for (var row : table "${rawTable}") {
+			var field = "${row[0]}";
+			var value = "${row[1]}";
+
+			if (("${field}" == "Name") || ("${field}" == "Description") || ("${field}" == "Host Name") || ("${field}" == "Product Version") || ("${field}" == "License Entry Type")) {
+				var fieldFormatted = ProvisioningLicenseAPI._formatCamelCase(camelCase = "${field}");
+
+				if ("${filters}" == "") {
+					if (contains("${value}"," ")) {
+						var valueFormatted = StringUtil.extractFirst("${value}", " ");
+						var valueFormatted = "startswith\(${fieldFormatted},%27${valueFormatted}%27\)";
+
+						var filters = "license-keys?filter=${valueFormatted}";
+
+					}
+					else {
+						var filters = "license-keys?filter=${fieldFormatted}+eq+%27${value}%27";
+					}
+				}
+				else {
+					if (contains("${value}"," ")) {
+						var valueFormatted = StringUtil.extractFirst("${value}", " ");
+						var valueFormatted = "startswith\(${fieldFormatted},%27${valueFormatted}%27\)";
+
+						var filters = "${filters}+and+${valueFormatted}";
+					}
+					else {
+						var filters = "${filters}+and+${fieldFormatted}+eq+%27${value}%27";
+					}
+				}
+			}
+			else if ("${field}" == "Product Name") {
+				var fieldFormatted = ProvisioningLicenseAPI._formatCamelCase(camelCase = "${field}");
+
+				if (contains("${value}", " ")) {
+					var value = StringUtil.replace("${value}", " ", "+");
+				}
+
+				if ("${filters}" == "") {
+					var filters = "license-keys?filter=${fieldFormatted}+eq+%27${value}%27";
+				}
+				else {
+					var filters = "${filters}+and+${fieldFormatted}+eq+%27${value}%27";
+				}
+			}
+			else if (("${field}" == "Active") || ("${field}" == "Complimentary") || ("${field}" == "Start Date") || ("${field}" == "Expiration Date")) {
+				var fieldFormatted = ProvisioningLicenseAPI._formatCamelCase(camelCase = "${field}");
+
+				if ("${filters}" == "") {
+					var filters = "license-keys?filter=${fieldFormatted}+eq+${value}";
+				}
+				else {
+					var filters = "${filters}+and+${fieldFormatted}+eq+${value}";
+				}
+			}
+			else if ("${field}" == "IP Addresses") {
+				var field = "ipAddresses";
+
+				if ("${filters}" == "") {
+					var filters = "license-keys?filter=${field}/any%28s:s+eq+%27${value}%27%29";
+				}
+				else {
+					var filters = "${filters}+and+${field}/any%28s:s+eq+%27${value}%27%29";
+				}
+			}
+			else if ("${field}" == "MAC Addresses") {
+				var field = "macAddresses";
+
+				if ("${filters}" == "") {
+					var filters = "license-keys?filter=${field}/any%28s:s+eq+%27${value}%27%29";
+				}
+				else {
+					var filters = "${filters}+and+${field}/any%28s:s+eq+%27${value}%27%29";
+				}
+			}
+			else if ("${field}" == "Instance Size") {
+				var field = "sizing";
+
+				if ("${filters}" == "") {
+					var filters = "license-keys?filter=${field}+eq+%27${value}%27";
+				}
+				else {
+					var filters = "${filters}+and+${field}+eq+%27${value}%27";
+				}
+			}
+			else if ("${field}" == "Maximum Cluster Nodes") {
+				var field = "maxClusterNodes";
+
+				if ("${filters}" == "") {
+					var filters = "license-keys?filter=${field}+eq+${value}";
+				}
+				else {
+					var filters = "${filters}+and+${field}+eq+${value}";
+				}
+			}
+			else if (("${field}" == "License Version")) {
+				echo("licenseVersion filter will be implemented in future.");
+			}
+			else {
+				fail("This license field ${field} either does not exist or has not been added to the macro yet for testing.");
+			}
+		}
+
+		return "${filters}";
+	}
+
 	@prose = "the API response should have the exception message ${apiResponseMessage}"
 	macro assertApiResponse {
 		if (contains("${staticApiResponse}", "${apiResponseMessage}")) {
@@ -1299,6 +1410,13 @@ definition {
 		return "${licenseKeyId}";
 	}
 
+	@prose = "I use the session id to make API calls"
+	macro _setSessionIdUsingAsTrue {
+		static var staticSessionIdUsingFlag = "true";
+
+		return "${staticSessionIdUsingFlag}";
+	}
+
 	@prose = "I subscribe the license on provisioning with the name ${licenseName} on the account ${accountName} using okta session id"
 	macro _subscribeToLicenseViaSessionId {
 		var licenseKeyId = ProvisioningLicenseAPI._getLicenseKeyIdViaLicenseName(
@@ -1382,756 +1500,42 @@ definition {
 		}
 	}
 
-	@prose = "I should be able to view the active license on the account ${accountName} with the name ${licenseName} and the following values ${table}"
-	macro _viewActiveLicense {
+	macro _getLicense {
 		var accountKey = KoroneikiAccountAPI._getAccountKeyViaAccountName(accountName = "${accountName}");
 
-		var curl = '''
-			${provisioningURL}/o/provisioning-rest/v1.0/accounts/${accountKey}/license-keys?filter=active+eq+true --tlsv1.2
-			-u ${provisioningAdminEmail}:${provisioningAdminPassword}
-			-H "accept: application/*"
-			-H 'Content-Type: application/*'
-			''';
-		var RawTable rawTable = new RawTable("${table}");
+		var filters = ProvisioningLicenseAPI._groupFilters(table = "${table}");
 
-		for (var row : table "${rawTable}") {
-			var field = "${row[0]}";
-			var value = "${row[1]}";
-
-			if ("${field}" == "Name") {
-				var valueFromAPI = JSONCurlUtil.get("${curl}", "$.items[?(@.name=='${value}')].name");
-
-				var valueFromAPI = StringUtil.replace("${valueFromAPI}", "[", "");
-
-				var valueFromAPI = StringUtil.replace("${valueFromAPI}", "]", "");
-
-				var valueFromAPI = StringUtil.replace("${valueFromAPI}", "\"", "");
-
-				if (!(contains("${valueFromAPI}", "${value}"))) {
-					fail("The expected value ${value} does not match the actual value ${valueFromAPI} at the api assert check");
-				}
-			}
-			else if ("${field}" == "License Entry Type") {
-				var value = StringUtil.lowerCaseFirstLetter("${value}");
-
-				var valueFromAPI = JSONCurlUtil.get("${curl}", "$.items[?(@.licenseEntryType=='${value}' && @.name=='${licenseName}')].licenseEntryType");
-
-				var valueFromAPI = StringUtil.replace("${valueFromAPI}", "[", "");
-
-				var valueFromAPI = StringUtil.replace("${valueFromAPI}", "]", "");
-
-				var valueFromAPI = StringUtil.replace("${valueFromAPI}", "\"", "");
-
-				if (!(contains("${valueFromAPI}", "${value}"))) {
-					fail("The expected value ${value} does not match the actual value ${valueFromAPI} at the api assert check");
-				}
-			}
-			else if ("${field}" == "License Version") {
-				var value = StringUtil.lowerCaseFirstLetter("${value}");
-
-				var valueFromAPI = JSONCurlUtil.get("${curl}", "$.items[?(@.licenseVersion==${value} && @.name=='${licenseName}')].licenseVersion");
-
-				var valueFromAPI = StringUtil.replace("${valueFromAPI}", "[", "");
-
-				var valueFromAPI = StringUtil.replace("${valueFromAPI}", "]", "");
-
-				var valueFromAPI = StringUtil.replace("${valueFromAPI}", "\"", "");
-
-				if (!(contains("${valueFromAPI}", "${value}"))) {
-					fail("The expected value ${value} does not match the actual value ${valueFromAPI} at the api assert check");
-				}
-			}
-			else if ("${field}" == "Product Version") {
-				var value = StringUtil.lowerCaseFirstLetter("${value}");
-
-				var valueFromAPI = JSONCurlUtil.get("${curl}", "$.items[?(@.productVersion=='${value}' && @.name=='${licenseName}')].productVersion");
-
-				var valueFromAPI = StringUtil.replace("${valueFromAPI}", "[", "");
-
-				var valueFromAPI = StringUtil.replace("${valueFromAPI}", "]", "");
-
-				var valueFromAPI = StringUtil.replace("${valueFromAPI}", "\"", "");
-
-				if (!(contains("${valueFromAPI}", "${value}"))) {
-					fail("The expected value ${value} does not match the actual value ${valueFromAPI} at the api assert check");
-				}
-			}
-			else if ("${field}" == "Host Name") {
-				var value = StringUtil.lowerCaseFirstLetter("${value}");
-
-				var valueFromAPI = JSONCurlUtil.get("${curl}", "$.items[?(@.hostName=='${value}' && @.name=='${licenseName}')].hostName");
-
-				var valueFromAPI = StringUtil.replace("${valueFromAPI}", "[", "");
-
-				var valueFromAPI = StringUtil.replace("${valueFromAPI}", "]", "");
-
-				var valueFromAPI = StringUtil.replace("${valueFromAPI}", "\"", "");
-
-				if (!(contains("${valueFromAPI}", "${value}"))) {
-					fail("The expected value ${value} does not match the actual value ${valueFromAPI} at the api assert check");
-				}
-			}
-			else if ("${field}" == "IP Address") {
-				var value = StringUtil.lowerCaseFirstLetter("${value}");
-
-				var valueFromAPI = JSONCurlUtil.get("${curl}", "$.items[?(@.ipAddresses=='${value}' && @.name=='${licenseName}')].ipAddresses");
-
-				var valueFromAPI = StringUtil.replace("${valueFromAPI}", "[", "");
-
-				var valueFromAPI = StringUtil.replace("${valueFromAPI}", "]", "");
-
-				var valueFromAPI = StringUtil.replace("${valueFromAPI}", "\"", "");
-
-				if (!(contains("${valueFromAPI}", "${value}"))) {
-					fail("The expected value ${value} does not match the actual value ${valueFromAPI} at the api assert check");
-				}
-			}
-			else if ("${field}" == "MAC Address") {
-				var value = StringUtil.lowerCaseFirstLetter("${value}");
-
-				var valueFromAPI = JSONCurlUtil.get("${curl}", "$.items[?(@.macAddresses=='${value}' && @.name=='${licenseName}')].macAddresses");
-
-				var valueFromAPI = StringUtil.replace("${valueFromAPI}", "[", "");
-
-				var valueFromAPI = StringUtil.replace("${valueFromAPI}", "]", "");
-
-				var valueFromAPI = StringUtil.replace("${valueFromAPI}", "\"", "");
-
-				if (!(contains("${valueFromAPI}", "${value}"))) {
-					fail("The expected value ${value} does not match the actual value ${valueFromAPI} at the api assert check");
-				}
-			}
-			else {
-				fail("This license field ${field} either does not exist or has not been added to the macro yet for testing. Please update test or macro accordingly.");
-			}
+		if("${staticSessionIdUsingFlag}" == "true") {
+			var curl = '''
+				${provisioningURL}/o/provisioning-rest/v1.0/accounts/${accountKey}/${filters} --tlsv1.2
+				-H "Okta-Session-ID: ${staticOktaSessionId}"
+				-H "accept: application/*"
+				-H 'Content-Type: application/*'
+				''';
+		} else {
+			var curl = '''
+				${provisioningURL}/o/provisioning-rest/v1.0/accounts/${accountKey}/${filters} --tlsv1.2
+				-u ${provisioningAdminEmail}:${provisioningAdminPassword}
+				-H "accept: application/*"
+				-H 'Content-Type: application/*'
+				''';
 		}
-	}
 
-	@prose = "I should be able to view the active license on the account ${accountName} with the name ${licenseName} using okta session id and the following values ${table}"
-	macro _viewActiveLicenseSessionId {
-		var accountKey = KoroneikiAccountAPI._getAccountKeyViaAccountName(accountName = "${accountName}");
+		var valueFromAPI = JSONCurlUtil.get("${curl}", "$.items[?(@.name=='${licenseName}')].name");
 
-		var curl = '''
-			${provisioningURL}/o/provisioning-rest/v1.0/accounts/${accountKey}/license-keys?filter=active+eq+true --tlsv1.2
-			-H "Okta-Session-ID: ${staticOktaSessionId}"
-			-H "accept: application/*"
-			-H 'Content-Type: application/*'
-			''';
-		var RawTable rawTable = new RawTable("${table}");
+		var valueFromAPI = StringUtil.replace("${valueFromAPI}", "[", "");
 
-		for (var row : table "${rawTable}") {
-			var field = "${row[0]}";
-			var value = "${row[1]}";
+		var valueFromAPI = StringUtil.replace("${valueFromAPI}", "]", "");
 
-			if ("${field}" == "Name") {
-				var valueFromAPI = JSONCurlUtil.get("${curl}", "$.items[?(@.name=='${value}')].name");
+		var valueFromAPI = StringUtil.replace("${valueFromAPI}", "\"", "");
 
-				var valueFromAPI = StringUtil.replace("${valueFromAPI}", "[", "");
-
-				var valueFromAPI = StringUtil.replace("${valueFromAPI}", "]", "");
-
-				var valueFromAPI = StringUtil.replace("${valueFromAPI}", "\"", "");
-
-				if (!(contains("${valueFromAPI}", "${value}"))) {
-					fail("The expected value ${value} does not match the actual value ${valueFromAPI} at the api assert check");
-				}
-			}
-			else if ("${field}" == "License Entry Type") {
-				var value = StringUtil.lowerCaseFirstLetter("${value}");
-
-				var valueFromAPI = JSONCurlUtil.get("${curl}", "$.items[?(@.licenseEntryType=='${value}' && @.name=='${licenseName}')].licenseEntryType");
-
-				var valueFromAPI = StringUtil.replace("${valueFromAPI}", "[", "");
-
-				var valueFromAPI = StringUtil.replace("${valueFromAPI}", "]", "");
-
-				var valueFromAPI = StringUtil.replace("${valueFromAPI}", "\"", "");
-
-				if (!(contains("${valueFromAPI}", "${value}"))) {
-					fail("The expected value ${value} does not match the actual value ${valueFromAPI} at the api assert check");
-				}
-			}
-			else if ("${field}" == "License Version") {
-				var value = StringUtil.lowerCaseFirstLetter("${value}");
-
-				var valueFromAPI = JSONCurlUtil.get("${curl}", "$.items[?(@.licenseVersion==${value} && @.name=='${licenseName}')].licenseVersion");
-
-				var valueFromAPI = StringUtil.replace("${valueFromAPI}", "[", "");
-
-				var valueFromAPI = StringUtil.replace("${valueFromAPI}", "]", "");
-
-				var valueFromAPI = StringUtil.replace("${valueFromAPI}", "\"", "");
-
-				if (!(contains("${valueFromAPI}", "${value}"))) {
-					fail("The expected value ${value} does not match the actual value ${valueFromAPI} at the api assert check");
-				}
-			}
-			else if ("${field}" == "Product Version") {
-				var value = StringUtil.lowerCaseFirstLetter("${value}");
-
-				var valueFromAPI = JSONCurlUtil.get("${curl}", "$.items[?(@.productVersion=='${value}' && @.name=='${licenseName}')].productVersion");
-
-				var valueFromAPI = StringUtil.replace("${valueFromAPI}", "[", "");
-
-				var valueFromAPI = StringUtil.replace("${valueFromAPI}", "]", "");
-
-				var valueFromAPI = StringUtil.replace("${valueFromAPI}", "\"", "");
-
-				if (!(contains("${valueFromAPI}", "${value}"))) {
-					fail("The expected value ${value} does not match the actual value ${valueFromAPI} at the api assert check");
-				}
-			}
-			else if ("${field}" == "Host Name") {
-				var value = StringUtil.lowerCaseFirstLetter("${value}");
-
-				var valueFromAPI = JSONCurlUtil.get("${curl}", "$.items[?(@.hostName=='${value}' && @.name=='${licenseName}')].hostName");
-
-				var valueFromAPI = StringUtil.replace("${valueFromAPI}", "[", "");
-
-				var valueFromAPI = StringUtil.replace("${valueFromAPI}", "]", "");
-
-				var valueFromAPI = StringUtil.replace("${valueFromAPI}", "\"", "");
-
-				if (!(contains("${valueFromAPI}", "${value}"))) {
-					fail("The expected value ${value} does not match the actual value ${valueFromAPI} at the api assert check");
-				}
-			}
-			else if ("${field}" == "IP Address") {
-				var value = StringUtil.lowerCaseFirstLetter("${value}");
-
-				var valueFromAPI = JSONCurlUtil.get("${curl}", "$.items[?(@.ipAddresses=='${value}' && @.name=='${licenseName}')].ipAddresses");
-
-				var valueFromAPI = StringUtil.replace("${valueFromAPI}", "[", "");
-
-				var valueFromAPI = StringUtil.replace("${valueFromAPI}", "]", "");
-
-				var valueFromAPI = StringUtil.replace("${valueFromAPI}", "\"", "");
-
-				if (!(contains("${valueFromAPI}", "${value}"))) {
-					fail("The expected value ${value} does not match the actual value ${valueFromAPI} at the api assert check");
-				}
-			}
-			else if ("${field}" == "MAC Address") {
-				var value = StringUtil.lowerCaseFirstLetter("${value}");
-
-				var valueFromAPI = JSONCurlUtil.get("${curl}", "$.items[?(@.macAddresses=='${value}' && @.name=='${licenseName}')].macAddresses");
-
-				var valueFromAPI = StringUtil.replace("${valueFromAPI}", "[", "");
-
-				var valueFromAPI = StringUtil.replace("${valueFromAPI}", "]", "");
-
-				var valueFromAPI = StringUtil.replace("${valueFromAPI}", "\"", "");
-
-				if (!(contains("${valueFromAPI}", "${value}"))) {
-					fail("The expected value ${value} does not match the actual value ${valueFromAPI} at the api assert check");
-				}
-			}
-			else {
-				fail("This license field ${field} either does not exist or has not been added to the macro yet for testing. Please update test or macro accordingly.");
-			}
-		}
-	}
-
-	@prose = "I should be able to view the deactivated license on the account ${accountName} with the name ${licenseName} and the following values ${table}"
-	macro _viewDeactivatedLicense {
-		var accountKey = KoroneikiAccountAPI._getAccountKeyViaAccountName(accountName = "${accountName}");
-
-		var curl = '''
-			${provisioningURL}/o/provisioning-rest/v1.0/accounts/${accountKey}/license-keys?filter=active+eq+false --tlsv1.2
-			-u ${provisioningAdminEmail}:${provisioningAdminPassword}
-			-H "accept: application/*"
-			-H 'Content-Type: application/*'
-			''';
-		var RawTable rawTable = new RawTable("${table}");
-
-		for (var row : table "${rawTable}") {
-			var field = "${row[0]}";
-			var value = "${row[1]}";
-
-			if ("${field}" == "Name") {
-				var valueFromAPI = JSONCurlUtil.get("${curl}", "$.items[?(@.name=='${value}')].name");
-
-				var valueFromAPI = StringUtil.replace("${valueFromAPI}", "[", "");
-
-				var valueFromAPI = StringUtil.replace("${valueFromAPI}", "]", "");
-
-				var valueFromAPI = StringUtil.replace("${valueFromAPI}", "\"", "");
-
-				if (!(contains("${valueFromAPI}", "${value}"))) {
-					fail("The expected value ${value} does not match the actual value ${valueFromAPI} at the api assert check");
-				}
-			}
-			else if ("${field}" == "License Entry Type") {
-				var value = StringUtil.lowerCaseFirstLetter("${value}");
-
-				var valueFromAPI = JSONCurlUtil.get("${curl}", "$.items[?(@.licenseEntryType=='${value}' && @.name=='${licenseName}')].licenseEntryType");
-
-				var valueFromAPI = StringUtil.replace("${valueFromAPI}", "[", "");
-
-				var valueFromAPI = StringUtil.replace("${valueFromAPI}", "]", "");
-
-				var valueFromAPI = StringUtil.replace("${valueFromAPI}", "\"", "");
-
-				if (!(contains("${valueFromAPI}", "${value}"))) {
-					fail("The expected value ${value} does not match the actual value ${valueFromAPI} at the api assert check");
-				}
-			}
-			else if ("${field}" == "License Version") {
-				var value = StringUtil.lowerCaseFirstLetter("${value}");
-
-				var valueFromAPI = JSONCurlUtil.get("${curl}", "$.items[?(@.licenseVersion==${value} && @.name=='${licenseName}')].licenseVersion");
-
-				var valueFromAPI = StringUtil.replace("${valueFromAPI}", "[", "");
-
-				var valueFromAPI = StringUtil.replace("${valueFromAPI}", "]", "");
-
-				var valueFromAPI = StringUtil.replace("${valueFromAPI}", "\"", "");
-
-				if (!(contains("${valueFromAPI}", "${value}"))) {
-					fail("The expected value ${value} does not match the actual value ${valueFromAPI} at the api assert check");
-				}
-			}
-			else if ("${field}" == "Product Version") {
-				var value = StringUtil.lowerCaseFirstLetter("${value}");
-
-				var valueFromAPI = JSONCurlUtil.get("${curl}", "$.items[?(@.productVersion=='${value}' && @.name=='${licenseName}')].productVersion");
-
-				var valueFromAPI = StringUtil.replace("${valueFromAPI}", "[", "");
-
-				var valueFromAPI = StringUtil.replace("${valueFromAPI}", "]", "");
-
-				var valueFromAPI = StringUtil.replace("${valueFromAPI}", "\"", "");
-
-				if (!(contains("${valueFromAPI}", "${value}"))) {
-					fail("The expected value ${value} does not match the actual value ${valueFromAPI} at the api assert check");
-				}
-			}
-			else if ("${field}" == "Host Name") {
-				var value = StringUtil.lowerCaseFirstLetter("${value}");
-
-				var valueFromAPI = JSONCurlUtil.get("${curl}", "$.items[?(@.hostName=='${value}' && @.name=='${licenseName}')].hostName");
-
-				var valueFromAPI = StringUtil.replace("${valueFromAPI}", "[", "");
-
-				var valueFromAPI = StringUtil.replace("${valueFromAPI}", "]", "");
-
-				var valueFromAPI = StringUtil.replace("${valueFromAPI}", "\"", "");
-
-				if (!(contains("${valueFromAPI}", "${value}"))) {
-					fail("The expected value ${value} does not match the actual value ${valueFromAPI} at the api assert check");
-				}
-			}
-			else if ("${field}" == "IP Address") {
-				var value = StringUtil.lowerCaseFirstLetter("${value}");
-
-				var valueFromAPI = JSONCurlUtil.get("${curl}", "$.items[?(@.ipAddresses=='${value}' && @.name=='${licenseName}')].ipAddresses");
-
-				var valueFromAPI = StringUtil.replace("${valueFromAPI}", "[", "");
-
-				var valueFromAPI = StringUtil.replace("${valueFromAPI}", "]", "");
-
-				var valueFromAPI = StringUtil.replace("${valueFromAPI}", "\"", "");
-
-				if (!(contains("${valueFromAPI}", "${value}"))) {
-					fail("The expected value ${value} does not match the actual value ${valueFromAPI} at the api assert check");
-				}
-			}
-			else if ("${field}" == "MAC Address") {
-				var value = StringUtil.lowerCaseFirstLetter("${value}");
-
-				var valueFromAPI = JSONCurlUtil.get("${curl}", "$.items[?(@.macAddresses=='${value}' && @.name=='${licenseName}')].macAddresses");
-
-				var valueFromAPI = StringUtil.replace("${valueFromAPI}", "[", "");
-
-				var valueFromAPI = StringUtil.replace("${valueFromAPI}", "]", "");
-
-				var valueFromAPI = StringUtil.replace("${valueFromAPI}", "\"", "");
-
-				if (!(contains("${valueFromAPI}", "${value}"))) {
-					fail("The expected value ${value} does not match the actual value ${valueFromAPI} at the api assert check");
-				}
-			}
-			else {
-				fail("This license field ${field} either does not exist or has not been added to the macro yet for testing. Please update test or macro accordingly.");
-			}
-		}
-	}
-
-	@prose = "I should be able to view the deactivated license on the account ${accountName} with the name ${licenseName} using okta session id and the following values ${table}"
-	macro _viewDeactivatedLicenseSessionId {
-		var accountKey = KoroneikiAccountAPI._getAccountKeyViaAccountName(accountName = "${accountName}");
-
-		var curl = '''
-			${provisioningURL}/o/provisioning-rest/v1.0/accounts/${accountKey}/license-keys?filter=active+eq+false --tlsv1.2
-			-H "Okta-Session-ID: ${staticOktaSessionId}"
-			-H "accept: application/*"
-			-H 'Content-Type: application/*'
-			''';
-		var RawTable rawTable = new RawTable("${table}");
-
-		for (var row : table "${rawTable}") {
-			var field = "${row[0]}";
-			var value = "${row[1]}";
-
-			if ("${field}" == "Name") {
-				var valueFromAPI = JSONCurlUtil.get("${curl}", "$.items[?(@.name=='${value}')].name");
-
-				var valueFromAPI = StringUtil.replace("${valueFromAPI}", "[", "");
-
-				var valueFromAPI = StringUtil.replace("${valueFromAPI}", "]", "");
-
-				var valueFromAPI = StringUtil.replace("${valueFromAPI}", "\"", "");
-
-				if (!(contains("${valueFromAPI}", "${value}"))) {
-					fail("The expected value ${value} does not match the actual value ${valueFromAPI} at the api assert check");
-				}
-			}
-			else if ("${field}" == "License Entry Type") {
-				var value = StringUtil.lowerCaseFirstLetter("${value}");
-
-				var valueFromAPI = JSONCurlUtil.get("${curl}", "$.items[?(@.licenseEntryType=='${value}' && @.name=='${licenseName}')].licenseEntryType");
-
-				var valueFromAPI = StringUtil.replace("${valueFromAPI}", "[", "");
-
-				var valueFromAPI = StringUtil.replace("${valueFromAPI}", "]", "");
-
-				var valueFromAPI = StringUtil.replace("${valueFromAPI}", "\"", "");
-
-				if (!(contains("${valueFromAPI}", "${value}"))) {
-					fail("The expected value ${value} does not match the actual value ${valueFromAPI} at the api assert check");
-				}
-			}
-			else if ("${field}" == "License Version") {
-				var value = StringUtil.lowerCaseFirstLetter("${value}");
-
-				var valueFromAPI = JSONCurlUtil.get("${curl}", "$.items[?(@.licenseVersion==${value} && @.name=='${licenseName}')].licenseVersion");
-
-				var valueFromAPI = StringUtil.replace("${valueFromAPI}", "[", "");
-
-				var valueFromAPI = StringUtil.replace("${valueFromAPI}", "]", "");
-
-				var valueFromAPI = StringUtil.replace("${valueFromAPI}", "\"", "");
-
-				if (!(contains("${valueFromAPI}", "${value}"))) {
-					fail("The expected value ${value} does not match the actual value ${valueFromAPI} at the api assert check");
-				}
-			}
-			else if ("${field}" == "Product Version") {
-				var value = StringUtil.lowerCaseFirstLetter("${value}");
-
-				var valueFromAPI = JSONCurlUtil.get("${curl}", "$.items[?(@.productVersion=='${value}'' && @.name=='${licenseName}')].productVersion");
-
-				var valueFromAPI = StringUtil.replace("${valueFromAPI}", "[", "");
-
-				var valueFromAPI = StringUtil.replace("${valueFromAPI}", "]", "");
-
-				var valueFromAPI = StringUtil.replace("${valueFromAPI}", "\"", "");
-
-				if (!(contains("${valueFromAPI}", "${value}"))) {
-					fail("The expected value ${value} does not match the actual value ${valueFromAPI} at the api assert check");
-				}
-			}
-			else if ("${field}" == "Host Name") {
-				var value = StringUtil.lowerCaseFirstLetter("${value}");
-
-				var valueFromAPI = JSONCurlUtil.get("${curl}", "$.items[?(@.hostName=='${value}' && @.name=='${licenseName}')].hostName");
-
-				var valueFromAPI = StringUtil.replace("${valueFromAPI}", "[", "");
-
-				var valueFromAPI = StringUtil.replace("${valueFromAPI}", "]", "");
-
-				var valueFromAPI = StringUtil.replace("${valueFromAPI}", "\"", "");
-
-				if (!(contains("${valueFromAPI}", "${value}"))) {
-					fail("The expected value ${value} does not match the actual value ${valueFromAPI} at the api assert check");
-				}
-			}
-			else if ("${field}" == "IP Address") {
-				var value = StringUtil.lowerCaseFirstLetter("${value}");
-
-				var valueFromAPI = JSONCurlUtil.get("${curl}", "$.items[?(@.ipAddresses=='${value}' && @.name=='${licenseName}')].ipAddresses");
-
-				var valueFromAPI = StringUtil.replace("${valueFromAPI}", "[", "");
-
-				var valueFromAPI = StringUtil.replace("${valueFromAPI}", "]", "");
-
-				var valueFromAPI = StringUtil.replace("${valueFromAPI}", "\"", "");
-
-				if (!(contains("${valueFromAPI}", "${value}"))) {
-					fail("The expected value ${value} does not match the actual value ${valueFromAPI} at the api assert check");
-				}
-			}
-			else if ("${field}" == "MAC Address") {
-				var value = StringUtil.lowerCaseFirstLetter("${value}");
-
-				var valueFromAPI = JSONCurlUtil.get("${curl}", "$.items[?(@.macAddresses=='${value}' && @.name=='${licenseName}')].macAddresses");
-
-				var valueFromAPI = StringUtil.replace("${valueFromAPI}", "[", "");
-
-				var valueFromAPI = StringUtil.replace("${valueFromAPI}", "]", "");
-
-				var valueFromAPI = StringUtil.replace("${valueFromAPI}", "\"", "");
-
-				if (!(contains("${valueFromAPI}", "${value}"))) {
-					fail("The expected value ${value} does not match the actual value ${valueFromAPI} at the api assert check");
-				}
-			}
-			else {
-				fail("This license field ${field} either does not exist or has not been added to the macro yet for testing. Please update test or macro accordingly.");
-			}
-		}
+		return "${valueFromAPI}";
 	}
 
 	@prose = "I should be able to view the license on the account ${accountName} with the name ${licenseName} and the following filters ${table}"
-	macro _viewFilteredLicense {
-		var accountKey = KoroneikiAccountAPI._getAccountKeyViaAccountName(accountName = "${accountName}");
-		var filters = "";
-		var RawTable rawTable = new RawTable("${table}");
+	macro _viewLicense {
 
-		for (var row : table "${rawTable}") {
-			var field = "${row[0]}";
-			var value = "${row[1]}";
-
-			if (("${field}" == "Name") || ("${field}" == "Description") || ("${field}" == "Host Name") || ("${field}" == "Product Version") || ("${field}" == "License Entry Type")) {
-				var fieldFormatted = ProvisioningLicenseAPI._formatCamelCase(camelCase = "${field}");
-
-				if ("${filters}" == "") {
-					if (contains("${value}"," ")) {
-						var valueFormatted = StringUtil.extractFirst("${value}", " ");
-						var valueFormatted = "startswith\(${fieldFormatted},%27${valueFormatted}%27\)";
-
-						var filters = "license-keys?filter=${valueFormatted}";
-
-					}
-					else {
-						var filters = "license-keys?filter=${fieldFormatted}+eq+%27${value}%27";
-					}
-				}
-				else {
-					if (contains("${value}"," ")) {
-						var valueFormatted = StringUtil.extractFirst("${value}", " ");
-						var valueFormatted = "startswith\(${fieldFormatted},%27${valueFormatted}%27\)";
-
-						var filters = "${filters}+and+${valueFormatted}";
-					}
-					else {
-						var filters = "${filters}+and+${fieldFormatted}+eq+%27${value}%27";
-					}
-				}
-			}
-			else if ("${field}" == "Product Name") {
-				var fieldFormatted = ProvisioningLicenseAPI._formatCamelCase(camelCase = "${field}");
-
-				if (contains("${value}", " ")) {
-					var value = StringUtil.replace("${value}", " ", "+");
-				}
-
-				if ("${filters}" == "") {
-					var filters = "license-keys?filter=${fieldFormatted}+eq+%27${value}%27";
-				}
-				else {
-					var filters = "${filters}+and+${fieldFormatted}+eq+%27${value}%27";
-				}
-			}
-			else if (("${field}" == "Active") || ("${field}" == "Complimentary") || ("${field}" == "Start Date") || ("${field}" == "Expiration Date")) {
-				var fieldFormatted = ProvisioningLicenseAPI._formatCamelCase(camelCase = "${field}");
-
-				if ("${filters}" == "") {
-					var filters = "license-keys?filter=${fieldFormatted}+eq+${value}";
-				}
-				else {
-					var filters = "${filters}+and+${fieldFormatted}+eq+${value}";
-				}
-			}
-			else if ("${field}" == "IP Addresses") {
-				var field = "ipAddresses";
-
-				if ("${filters}" == "") {
-					var filters = "license-keys?filter=${field}/any%28s:s+eq+%27${value}%27%29";
-				}
-				else {
-					var filters = "${filters}+and+${field}/any%28s:s+eq+%27${value}%27%29";
-				}
-			}
-			else if ("${field}" == "MAC Addresses") {
-				var field = "macAddresses";
-
-				if ("${filters}" == "") {
-					var filters = "license-keys?filter=${field}/any%28s:s+eq+%27${value}%27%29";
-				}
-				else {
-					var filters = "${filters}+and+${field}/any%28s:s+eq+%27${value}%27%29";
-				}
-			}
-			else if ("${field}" == "Instance Size") {
-				var field = "sizing";
-
-				if ("${filters}" == "") {
-					var filters = "license-keys?filter=${field}+eq+%27${value}%27";
-				}
-				else {
-					var filters = "${filters}+and+${field}+eq+%27${value}%27";
-				}
-			}
-			else if ("${field}" == "Maximum Cluster Nodes") {
-				var field = "maxClusterNodes";
-
-				if ("${filters}" == "") {
-					var filters = "license-keys?filter=${field}+eq+${value}";
-				}
-				else {
-					var filters = "${filters}+and+${field}+eq+${value}";
-				}
-			}
-			else {
-				fail("This license field ${field} either does not exist or has not been added to the macro yet for testing.");
-			}
-		}
-
-		var curl = '''
-			${provisioningURL}/o/provisioning-rest/v1.0/accounts/${accountKey}/${filters} --tlsv1.2
-			-u ${provisioningAdminEmail}:${provisioningAdminPassword}
-			-H "accept: application/*"
-			-H 'Content-Type: application/*'
-			''';
-
-		var valueFromAPI = JSONCurlUtil.get("${curl}", "$.items[?(@.name=='${licenseName}')].name");
-
-		var valueFromAPI = StringUtil.replace("${valueFromAPI}", "[", "");
-
-		var valueFromAPI = StringUtil.replace("${valueFromAPI}", "]", "");
-
-		var valueFromAPI = StringUtil.replace("${valueFromAPI}", "\"", "");
-
-		echo("Expected License Name Value: ${licenseName}");
-
-		echo("Actual License Name Value: ${valueFromAPI}");
-
-		if ("${licenseName}" != "${valueFromAPI}") {
-			fail("The license search filters did not return the expected license with the name ${licenseName}");
-		}
-	}
-
-	@prose = "I should be able to view the license on the account ${accountName} with the name ${licenseName} using okta session id and the following filters ${table}"
-	macro _viewFilteredLicenseSessionId {
-		var accountKey = KoroneikiAccountAPI._getAccountKeyViaAccountName(accountName = "${accountName}");
-		var filters = "";
-		var RawTable rawTable = new RawTable("${table}");
-
-		for (var row : table "${rawTable}") {
-			var field = "${row[0]}";
-			var value = "${row[1]}";
-
-			if (("${field}" == "Name") || ("${field}" == "Description") || ("${field}" == "Host Name") || ("${field}" == "Product Version") || ("${field}" == "License Entry Type")) {
-				var fieldFormatted = ProvisioningLicenseAPI._formatCamelCase(camelCase = "${field}");
-
-				if ("${filters}" == "") {
-					if (contains("${value}"," ")) {
-						var valueFormatted = StringUtil.extractFirst("${value}", " ");
-						var valueFormatted = "startswith\(${fieldFormatted},%27${valueFormatted}%27\)";
-
-						var filters = "license-keys?filter=${valueFormatted}";
-
-					}
-					else {
-						var filters = "license-keys?filter=${fieldFormatted}+eq+%27${value}%27";
-					}
-				}
-				else {
-					if (contains("${value}"," ")) {
-						var valueFormatted = StringUtil.extractFirst("${value}", " ");
-						var valueFormatted = "startswith\(${fieldFormatted},%27${valueFormatted}%27\)";
-
-						var filters = "${filters}+and+${valueFormatted}";
-					}
-					else {
-						var filters = "${filters}+and+${fieldFormatted}+eq+%27${value}%27";
-					}
-				}
-			}
-			else if ("${field}" == "Product Name") {
-				var fieldFormatted = ProvisioningLicenseAPI._formatCamelCase(camelCase = "${field}");
-
-				if (contains("${value}", " ")) {
-					var value = StringUtil.replace("${value}", " ", "+");
-				}
-
-				if ("${filters}" == "") {
-					var filters = "license-keys?filter=${fieldFormatted}+eq+%27${value}%27";
-				}
-				else {
-					var filters = "${filters}+and+${fieldFormatted}+eq+%27${value}%27";
-				}
-			}
-			else if (("${field}" == "Active") || ("${field}" == "Complimentary") || ("${field}" == "Start Date") || ("${field}" == "Expiration Date")) {
-				var fieldFormatted = ProvisioningLicenseAPI._formatCamelCase(camelCase = "${field}");
-
-				if ("${filters}" == "") {
-					var filters = "license-keys?filter=${fieldFormatted}+eq+${value}";
-				}
-				else {
-					var filters = "${filters}+and+${fieldFormatted}+eq+${value}";
-				}
-			}
-			else if ("${field}" == "IP Addresses") {
-				var field = "ipAddresses";
-
-				if ("${filters}" == "") {
-					var filters = "license-keys?filter=${field}/any%28s:s+eq+%27${value}%27%29";
-				}
-				else {
-					var filters = "${filters}+and+${field}/any%28s:s+eq+%27${value}%27%29";
-				}
-			}
-			else if ("${field}" == "MAC Addresses") {
-				var field = "macAddresses";
-
-				if ("${filters}" == "") {
-					var filters = "license-keys?filter=${field}/any%28s:s+eq+%27${value}%27%29";
-				}
-				else {
-					var filters = "${filters}+and+${field}/any%28s:s+eq+%27${value}%27%29";
-				}
-			}
-			else if ("${field}" == "Instance Size") {
-				var field = "sizing";
-
-				if ("${filters}" == "") {
-					var filters = "license-keys?filter=${field}+eq+%27${value}%27";
-				}
-				else {
-					var filters = "${filters}+and+${field}+eq+%27${value}%27";
-				}
-			}
-			else if ("${field}" == "Maximum Cluster Nodes") {
-				var field = "maxClusterNodes";
-
-				if ("${filters}" == "") {
-					var filters = "license-keys?filter=${field}+eq+${value}";
-				}
-				else {
-					var filters = "${filters}+and+${field}+eq+${value}";
-				}
-			}
-			else {
-				fail("This license field ${field} either does not exist or has not been added to the macro yet for testing.");
-			}
-		}
-
-		var curl = '''
-			${provisioningURL}/o/provisioning-rest/v1.0/accounts/${accountKey}/${filters} --tlsv1.2
-			-H "Okta-Session-ID: ${staticOktaSessionId}"
-			-H "accept: application/*"
-			-H 'Content-Type: application/*'
-			''';
-
-		var valueFromAPI = JSONCurlUtil.get("${curl}", "$.items[?(@.name=='${licenseName}')].name");
-
-		var valueFromAPI = StringUtil.replace("${valueFromAPI}", "[", "");
-
-		var valueFromAPI = StringUtil.replace("${valueFromAPI}", "]", "");
-
-		var valueFromAPI = StringUtil.replace("${valueFromAPI}", "\"", "");
+		var valueFromAPI = ProvisioningLicenseAPI._getLicense(accountName = "${accountName}", licenseName = "${licenseName}", table = "${table}");
 
 		echo("Expected License Name Value: ${licenseName}");
 
@@ -2434,43 +1838,21 @@ definition {
 		var accountKey = KoroneikiAccountAPI._getAccountKeyViaAccountName(accountName = "${accountName}");
 		var keyword = StringUtil.replace("${licenseName}", " ", "+");
 
-		var curl = '''
-			${provisioningURL}/o/provisioning-rest/v1.0/accounts/${accountKey}/license-keys?search=%22${keyword}%22\&pageSize=100 --tlsv1.2
-			-u ${provisioningAdminEmail}:${provisioningAdminPassword}
-			-H "accept: application/json"
-			-H "Content-Type: application/json"
-			''';
-
-		var licenseNameFromAPI = JSONCurlUtil.get("${curl}", "$.items[?(@.name=='${licenseName}')].name");
-
-		var licenseNameFromAPI = StringUtil.replace("${licenseNameFromAPI}", "[", "");
-
-		var licenseNameFromAPI = StringUtil.replace("${licenseNameFromAPI}", "]", "");
-
-		var licenseNameFromAPI = StringUtil.replace("${licenseNameFromAPI}", "\"", "");
-
-		var licenseNameFromAPI = StringUtil.replace("${licenseNameFromAPI}", "+", " ");
-
-		echo("Expected license key name value: ${licenseName}");
-
-		echo("Actual license key name value: ${licenseNameFromAPI}");
-
-		if ("${licenseNameFromAPI}" != "${licenseName}") {
-			fail("Actual license name ${licenseNameFromAPI} does not match expected license name value ${licenseName}");
+		if ("${staticSessionIdUsingFlag}" == "true") {
+			var curl = '''
+				${provisioningURL}/o/provisioning-rest/v1.0/accounts/${accountKey}/license-keys?search=%22${keyword}%22\&pageSize=100 --tlsv1.2
+				-H "Okta-Session-ID: ${staticOktaSessionId}"
+				-H "accept: application/json"
+				-H "Content-Type: application/json"
+				''';
+		} else {
+			var curl = '''
+				${provisioningURL}/o/provisioning-rest/v1.0/accounts/${accountKey}/license-keys?search=%22${keyword}%22\&pageSize=100 --tlsv1.2
+				-u ${provisioningAdminEmail}:${provisioningAdminPassword}
+				-H "accept: application/json"
+				-H "Content-Type: application/json"
+				''';
 		}
-	}
-
-	@prose = "I should be able to view the license on the account ${accountName} with the name ${licenseName} using okta session id"
-	macro _viewLicenseKeyIdViaLicenseNameSessionId {
-		var accountKey = KoroneikiAccountAPI._getAccountKeyViaAccountName(accountName = "${accountName}");
-		var keyword = StringUtil.replace("${licenseName}", " ", "+");
-
-		var curl = '''
-			${provisioningURL}/o/provisioning-rest/v1.0/accounts/${accountKey}/license-keys?search=%22${keyword}%22\&pageSize=100 --tlsv1.2
-			-H "Okta-Session-ID: ${staticOktaSessionId}"
-			-H "accept: application/json"
-			-H "Content-Type: application/json"
-			''';
 
 		var licenseNameFromAPI = JSONCurlUtil.get("${curl}", "$.items[?(@.name=='${licenseName}')].name");
 
@@ -2535,75 +1917,17 @@ definition {
 		}
 	}
 
-	@prose = "I should not be able to view the active license on the account ${accountName} with the name ${licenseName}"
-	macro _viewNoActiveLicense {
-		var accountKey = KoroneikiAccountAPI._getAccountKeyViaAccountName(accountName = "${accountName}");
+	@prose = "I should not be able to view the license on the account ${accountName} with the name ${licenseName} and the following filters ${table}"
+	macro _viewNoLicense {
 
-		var curl = '''
-			${provisioningURL}/o/provisioning-rest/v1.0/accounts/${accountKey}/license-keys?filter=active+eq+true --tlsv1.2
-			-u ${provisioningAdminEmail}:${provisioningAdminPassword}
-			-H "accept: application/*"
-			-H 'Content-Type: application/*'
-			''';
+		var valueFromAPI = ProvisioningLicenseAPI._getLicense(accountName = "${accountName}", licenseName = "${licenseName}", table = "${table}");
 
-		var allActiveLicenses = JSONCurlUtil.get("${curl}", "$");
+		echo("Not Expected License Name Value: ${licenseName}");
 
-		if (contains("${allActiveLicenses}", "${licenseName}")) {
-			fail("The license with the name ${licenseName} is returning as active unexpectedly on ${accountName}");
-		}
-	}
+		echo("Actual License Name Value: ${valueFromAPI}");
 
-	@prose = "I should not be able to view the active license on the account ${accountName} with the name ${licenseName} using okta session id"
-	macro _viewNoActiveLicenseSessionId {
-		var accountKey = KoroneikiAccountAPI._getAccountKeyViaAccountName(accountName = "${accountName}");
-
-		var curl = '''
-			${provisioningURL}/o/provisioning-rest/v1.0/accounts/${accountKey}/license-keys?filter=active+eq+true --tlsv1.2
-			-H "Okta-Session-ID: ${staticOktaSessionId}"
-			-H "accept: application/*"
-			-H 'Content-Type: application/*'
-			''';
-
-		var allActiveLicenses = JSONCurlUtil.get("${curl}", "$");
-
-		if (contains("${allActiveLicenses}", "${licenseName}")) {
-			fail("The license with the name ${licenseName} is returning as active unexpectedly on ${accountName}");
-		}
-	}
-
-	@prose = "I should not be able to view the deactivated license on the account ${accountName} with the name ${licenseName}"
-	macro _viewNoDeactivatedLicense {
-		var accountKey = KoroneikiAccountAPI._getAccountKeyViaAccountName(accountName = "${accountName}");
-
-		var curl = '''
-			${provisioningURL}/o/provisioning-rest/v1.0/accounts/${accountKey}/license-keys?filter=active+eq+false --tlsv1.2
-			-u ${provisioningAdminEmail}:${provisioningAdminPassword}
-			-H "accept: application/*"
-			-H 'Content-Type: application/*'
-			''';
-
-		var allDeactivatedLicenses = JSONCurlUtil.get("${curl}", "$");
-
-		if (contains("${allDeactivatedLicenses}", "${licenseName}")) {
-			fail("The license with the name ${licenseName} is returning as deactivated unexpectedly on ${accountName}");
-		}
-	}
-
-	@prose = "I should not be able to view the deactivated license on the account ${accountName} with the name ${licenseName} using okta session id"
-	macro _viewNoDeactivatedLicenseSessionId {
-		var accountKey = KoroneikiAccountAPI._getAccountKeyViaAccountName(accountName = "${accountName}");
-
-		var curl = '''
-			${provisioningURL}/o/provisioning-rest/v1.0/accounts/${accountKey}/license-keys?filter=active+eq+false --tlsv1.2
-			-H "Okta-Session-ID: ${staticOktaSessionId}"
-			-H "accept: application/*"
-			-H 'Content-Type: application/*'
-			''';
-
-		var allDeactivatedLicenses = JSONCurlUtil.get("${curl}", "$");
-
-		if (contains("${allDeactivatedLicenses}", "${licenseName}")) {
-			fail("The license with the name ${licenseName} is returning as deactivated unexpectedly on ${accountName}");
+		if ("${licenseName}" == "${valueFromAPI}") {
+			fail("The license search filters did return the expected license with the name ${licenseName}");
 		}
 	}
 
