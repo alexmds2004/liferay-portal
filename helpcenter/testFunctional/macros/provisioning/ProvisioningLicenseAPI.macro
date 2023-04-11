@@ -1368,6 +1368,38 @@ definition {
 		return "${valueFormatted}";
 	}
 
+	macro _getLicense {
+		var accountKey = KoroneikiAccountAPI._getAccountKeyViaAccountName(accountName = "${accountName}");
+
+		var filters = ProvisioningLicenseAPI._groupFilters(table = "${table}");
+
+		if("${staticUseSessionId}" == "true") {
+			var curl = '''
+				${provisioningURL}/o/provisioning-rest/v1.0/accounts/${accountKey}/${filters} --tlsv1.2
+				-H "Okta-Session-ID: ${staticOktaSessionId}"
+				-H "accept: application/*"
+				-H 'Content-Type: application/*'
+				''';
+		} else {
+			var curl = '''
+				${provisioningURL}/o/provisioning-rest/v1.0/accounts/${accountKey}/${filters} --tlsv1.2
+				-u ${provisioningAdminEmail}:${provisioningAdminPassword}
+				-H "accept: application/*"
+				-H 'Content-Type: application/*'
+				''';
+		}
+
+		var valueFromAPI = JSONCurlUtil.get("${curl}", "$.items[?(@.name=='${licenseName}')].name");
+
+		var valueFromAPI = StringUtil.replace("${valueFromAPI}", "[", "");
+
+		var valueFromAPI = StringUtil.replace("${valueFromAPI}", "]", "");
+
+		var valueFromAPI = StringUtil.replace("${valueFromAPI}", "\"", "");
+
+		return "${valueFromAPI}";
+	}
+
 	@prose = "I check that the fields below are present at the account with the name ${accountName} the provisioning license ${table}"
 	macro getLicenseFields {
 		var accountKey = KoroneikiAccountAPI._getAccountKeyViaAccountName(accountName = "${accountName}");
@@ -1408,13 +1440,6 @@ definition {
 		echo("License Key ID value for ${licenseName}: ${licenseKeyId}");
 
 		return "${licenseKeyId}";
-	}
-
-	@prose = "I use the session id to make API calls"
-	macro _setSessionIdUsingAsTrue {
-		static var staticSessionIdUsingFlag = "true";
-
-		return "${staticSessionIdUsingFlag}";
 	}
 
 	@prose = "I subscribe the license on provisioning with the name ${licenseName} on the account ${accountName} using okta session id"
@@ -1500,42 +1525,19 @@ definition {
 		}
 	}
 
-	macro _getLicense {
-		var accountKey = KoroneikiAccountAPI._getAccountKeyViaAccountName(accountName = "${accountName}");
+	@prose = "I use the session id to make API calls"
+	macro _useSessionIdForAPIs {
+		static var staticUseSessionId = "true";
 
-		var filters = ProvisioningLicenseAPI._groupFilters(table = "${table}");
-
-		if("${staticSessionIdUsingFlag}" == "true") {
-			var curl = '''
-				${provisioningURL}/o/provisioning-rest/v1.0/accounts/${accountKey}/${filters} --tlsv1.2
-				-H "Okta-Session-ID: ${staticOktaSessionId}"
-				-H "accept: application/*"
-				-H 'Content-Type: application/*'
-				''';
-		} else {
-			var curl = '''
-				${provisioningURL}/o/provisioning-rest/v1.0/accounts/${accountKey}/${filters} --tlsv1.2
-				-u ${provisioningAdminEmail}:${provisioningAdminPassword}
-				-H "accept: application/*"
-				-H 'Content-Type: application/*'
-				''';
-		}
-
-		var valueFromAPI = JSONCurlUtil.get("${curl}", "$.items[?(@.name=='${licenseName}')].name");
-
-		var valueFromAPI = StringUtil.replace("${valueFromAPI}", "[", "");
-
-		var valueFromAPI = StringUtil.replace("${valueFromAPI}", "]", "");
-
-		var valueFromAPI = StringUtil.replace("${valueFromAPI}", "\"", "");
-
-		return "${valueFromAPI}";
+		return "${staticUseSessionId}";
 	}
 
 	@prose = "I should be able to view the license on the account ${accountName} with the name ${licenseName} and the following filters ${table}"
 	macro _viewLicense {
-
-		var valueFromAPI = ProvisioningLicenseAPI._getLicense(accountName = "${accountName}", licenseName = "${licenseName}", table = "${table}");
+		var valueFromAPI = ProvisioningLicenseAPI._getLicense(
+			accountName = "${accountName}",
+			licenseName = "${licenseName}",
+			table = "${table}");
 
 		echo("Expected License Name Value: ${licenseName}");
 
@@ -1838,7 +1840,7 @@ definition {
 		var accountKey = KoroneikiAccountAPI._getAccountKeyViaAccountName(accountName = "${accountName}");
 		var keyword = StringUtil.replace("${licenseName}", " ", "+");
 
-		if ("${staticSessionIdUsingFlag}" == "true") {
+		if ("${staticUseSessionId}" == "true") {
 			var curl = '''
 				${provisioningURL}/o/provisioning-rest/v1.0/accounts/${accountKey}/license-keys?search=%22${keyword}%22\&pageSize=100 --tlsv1.2
 				-H "Okta-Session-ID: ${staticOktaSessionId}"
@@ -1919,8 +1921,10 @@ definition {
 
 	@prose = "I should not be able to view the license on the account ${accountName} with the name ${licenseName} and the following filters ${table}"
 	macro _viewNoLicense {
-
-		var valueFromAPI = ProvisioningLicenseAPI._getLicense(accountName = "${accountName}", licenseName = "${licenseName}", table = "${table}");
+		var valueFromAPI = ProvisioningLicenseAPI._getLicense(
+			accountName = "${accountName}",
+			licenseName = "${licenseName}",
+			table = "${table}");
 
 		echo("Not Expected License Name Value: ${licenseName}");
 
