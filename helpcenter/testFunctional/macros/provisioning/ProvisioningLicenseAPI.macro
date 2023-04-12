@@ -1373,21 +1373,35 @@ definition {
 
 		var filters = ProvisioningLicenseAPI._groupFilters(table = "${table}");
 
-		if("${staticUseSessionId}" == "true") {
-			var curl = '''
-				${provisioningURL}/o/provisioning-rest/v1.0/accounts/${accountKey}/${filters} --tlsv1.2
-				-H "Okta-Session-ID: ${staticOktaSessionId}"
-				-H "accept: application/*"
-				-H 'Content-Type: application/*'
-				''';
-		} else {
-			var curl = '''
-				${provisioningURL}/o/provisioning-rest/v1.0/accounts/${accountKey}/${filters} --tlsv1.2
-				-u ${provisioningAdminEmail}:${provisioningAdminPassword}
-				-H "accept: application/*"
-				-H 'Content-Type: application/*'
-				''';
-		}
+		var curl = '''
+			${provisioningURL}/o/provisioning-rest/v1.0/accounts/${accountKey}/${filters} --tlsv1.2
+			-u ${provisioningAdminEmail}:${provisioningAdminPassword}
+			-H "accept: application/*"
+			-H 'Content-Type: application/*'
+			''';
+
+		var valueFromAPI = JSONCurlUtil.get("${curl}", "$.items[?(@.name=='${licenseName}')].name");
+
+		var valueFromAPI = StringUtil.replace("${valueFromAPI}", "[", "");
+
+		var valueFromAPI = StringUtil.replace("${valueFromAPI}", "]", "");
+
+		var valueFromAPI = StringUtil.replace("${valueFromAPI}", "\"", "");
+
+		return "${valueFromAPI}";
+	}
+
+	macro _getLicenseUsingOktaSessionID {
+		var accountKey = KoroneikiAccountAPI._getAccountKeyViaAccountName(accountName = "${accountName}");
+
+		var filters = ProvisioningLicenseAPI._groupFilters(table = "${table}");
+		
+		var curl = '''
+			${provisioningURL}/o/provisioning-rest/v1.0/accounts/${accountKey}/${filters} --tlsv1.2
+			-H "Okta-Session-ID: ${staticOktaSessionId}"
+			-H "accept: application/*"
+			-H 'Content-Type: application/*'
+			''';
 
 		var valueFromAPI = JSONCurlUtil.get("${curl}", "$.items[?(@.name=='${licenseName}')].name");
 
@@ -1525,16 +1539,25 @@ definition {
 		}
 	}
 
-	@prose = "I use the session id to make API calls"
-	macro _useSessionIdForAPIs {
-		static var staticUseSessionId = "true";
-
-		return "${staticUseSessionId}";
-	}
-
 	@prose = "I should be able to view the license on the account ${accountName} with the name ${licenseName} and the following filters ${table}"
 	macro _viewLicense {
 		var valueFromAPI = ProvisioningLicenseAPI._getLicense(
+			accountName = "${accountName}",
+			licenseName = "${licenseName}",
+			table = "${table}");
+
+		echo("Expected License Name Value: ${licenseName}");
+
+		echo("Actual License Name Value: ${valueFromAPI}");
+
+		if ("${licenseName}" != "${valueFromAPI}") {
+			fail("The license search filters did not return the expected license with the name ${licenseName}");
+		}
+	}
+
+	@prose = "I should be able to view the license on the account ${accountName} with the name ${licenseName} using okta session id and the following filters ${table}"
+	macro _viewLicenseUsingOktaSessionID {
+		var valueFromAPI = ProvisioningLicenseAPI._getLicenseUsingOktaSessionID(
 			accountName = "${accountName}",
 			licenseName = "${licenseName}",
 			table = "${table}");
@@ -1840,21 +1863,43 @@ definition {
 		var accountKey = KoroneikiAccountAPI._getAccountKeyViaAccountName(accountName = "${accountName}");
 		var keyword = StringUtil.replace("${licenseName}", " ", "+");
 
-		if ("${staticUseSessionId}" == "true") {
-			var curl = '''
-				${provisioningURL}/o/provisioning-rest/v1.0/accounts/${accountKey}/license-keys?search=%22${keyword}%22\&pageSize=100 --tlsv1.2
-				-H "Okta-Session-ID: ${staticOktaSessionId}"
-				-H "accept: application/json"
-				-H "Content-Type: application/json"
-				''';
-		} else {
-			var curl = '''
-				${provisioningURL}/o/provisioning-rest/v1.0/accounts/${accountKey}/license-keys?search=%22${keyword}%22\&pageSize=100 --tlsv1.2
-				-u ${provisioningAdminEmail}:${provisioningAdminPassword}
-				-H "accept: application/json"
-				-H "Content-Type: application/json"
-				''';
+		var curl = '''
+			${provisioningURL}/o/provisioning-rest/v1.0/accounts/${accountKey}/license-keys?search=%22${keyword}%22\&pageSize=100 --tlsv1.2
+			-u ${provisioningAdminEmail}:${provisioningAdminPassword}
+			-H "accept: application/json"
+			-H "Content-Type: application/json"
+			''';
+
+		var licenseNameFromAPI = JSONCurlUtil.get("${curl}", "$.items[?(@.name=='${licenseName}')].name");
+
+		var licenseNameFromAPI = StringUtil.replace("${licenseNameFromAPI}", "[", "");
+
+		var licenseNameFromAPI = StringUtil.replace("${licenseNameFromAPI}", "]", "");
+
+		var licenseNameFromAPI = StringUtil.replace("${licenseNameFromAPI}", "\"", "");
+
+		var licenseNameFromAPI = StringUtil.replace("${licenseNameFromAPI}", "+", " ");
+
+		echo("Expected license key name value: ${licenseName}");
+
+		echo("Actual license key name value: ${licenseNameFromAPI}");
+
+		if ("${licenseNameFromAPI}" != "${licenseName}") {
+			fail("Actual license name ${licenseNameFromAPI} does not match expected license name value ${licenseName}");
 		}
+	}
+
+	@prose = "I should be able to view the license on the account ${accountName} with the name ${licenseName} using okta session id"
+	macro _viewLicenseKeyIdViaLicenseNameUsingSessionOktaID {
+		var accountKey = KoroneikiAccountAPI._getAccountKeyViaAccountName(accountName = "${accountName}");
+		var keyword = StringUtil.replace("${licenseName}", " ", "+");
+
+		var curl = '''
+			${provisioningURL}/o/provisioning-rest/v1.0/accounts/${accountKey}/license-keys?search=%22${keyword}%22\&pageSize=100 --tlsv1.2
+			-H "Okta-Session-ID: ${staticOktaSessionId}"
+			-H "accept: application/json"
+			-H "Content-Type: application/json"
+			''';
 
 		var licenseNameFromAPI = JSONCurlUtil.get("${curl}", "$.items[?(@.name=='${licenseName}')].name");
 
@@ -1922,6 +1967,22 @@ definition {
 	@prose = "I should not be able to view the license on the account ${accountName} with the name ${licenseName} and the following filters ${table}"
 	macro _viewNoLicense {
 		var valueFromAPI = ProvisioningLicenseAPI._getLicense(
+			accountName = "${accountName}",
+			licenseName = "${licenseName}",
+			table = "${table}");
+
+		echo("Not Expected License Name Value: ${licenseName}");
+
+		echo("Actual License Name Value: ${valueFromAPI}");
+
+		if ("${licenseName}" == "${valueFromAPI}") {
+			fail("The license search filters did return the expected license with the name ${licenseName}");
+		}
+	}
+
+	@prose = "I should not be able to view the license on the account ${accountName} with the name ${licenseName} using okta session id and the following filters ${table}"
+	macro _viewNoLicenseUsingOktaSessionID {
+		var valueFromAPI = ProvisioningLicenseAPI._getLicenseUsingOktaSessionID(
 			accountName = "${accountName}",
 			licenseName = "${licenseName}",
 			table = "${table}");
