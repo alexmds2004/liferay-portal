@@ -13,46 +13,55 @@ definition {
 		CustomerProject.clickSearchCustomerProjectButton();
 	}
 
-	@prose = "I should be able to view a customer team member and the following values ${table}"
+	@prose = "I should be able to view the customer team member ${member} and the following values ${table}"
 	macro _viewCustomerTeamMember {
 		var RawTable rawTable = new RawTable("${table}");
+		var key_userName = "${member}";
 
 		for (var row : table "${rawTable}") {
 			var field = "${row[0]}";
 			var value = "${row[1]}";
 
 			if ("${field}" == "Name") {
-				key_teamMemberValue = "${value}";
 				AssertTextEquals(
-					locator1 = "CustomerUser#TEAM_MEMBER_VALUE",
+					locator1 = "CustomerUser#TEAM_MEMBER_NAME",
 					value1 = "${value}");
 			}
 			else if ("${field}" == "Email") {
-				key_teamMemberValue = "${value}";
+				key_userEmailAddress = "${value}";
 				AssertTextEquals(
-					locator1 = "CustomerUser#TEAM_MEMBER_VALUE",
+					locator1 = "CustomerUser#TEAM_MEMBER_EMAIL_ADDRESS",
 					value1 = "${value}");
 			}
 			else if ("${field}" == "Support Seat") {
-				key_teamMemberValue = "${value}";
-				AssertTextEquals(
-					locator1 = "CustomerUser#TEAM_MEMBER_VALUE",
-					value1 = "${value}");
+				if ("${value}" == "true") {
+				IsElementPresent(
+					locator1 = "CustomerUser#TEAM_MEMBER_SUPPORT_SEAT"
+					);
+				}
+				else if ("${value}" == "false") {
+					IsElementNotPresent(
+					locator1 = "CustomerUser#TEAM_MEMBER_SUPPORT_SEAT"
+					);
+				} 
+				else {
+					fail("No such value ${value} is valid");
+				}
 			}
 			else if ("${field}" == "Role") {
-				key_teamMemberValue = "${value}";
+				key_userRoles = "${value}";
 				AssertTextEquals(
-					locator1 = "CustomerUser#TEAM_MEMBER_VALUE",
+					locator1 = "CustomerUser#TEAM_MEMBER_ROLE",
 					value1 = "${value}");
 			}
 			else if ("${field}" == "Status") {
-				key_teamMemberValue = "${value}";
+				key_userMemberStatus = "${value}";
 				AssertTextEquals(
-					locator1 = "CustomerUser#TEAM_MEMBER_VALUE",
+					locator1 = "CustomerUser#TEAM_MEMBER_STATUS",
 					value1 = "${value}");
 			}
 			else {
-				fail("No such subscription detail field ${field}");
+				fail("No such team member detail field ${field}");
 			}
 		}
 	}
@@ -68,19 +77,19 @@ definition {
 
 			if ("${field}" == "Name") {
 				AssertTextEquals.assertPartialText(
-					locator1 = "CustomerUser#USER_NAME",
+					locator1 = "CustomerUser#TEAM_MEMBER_NAME",
 					value1 = "${value}");
 			}
 			else if ("${field}" == "Email Address") {
 				var key_userEmailAddress = "${value}";
 				AssertTextEquals(
-					locator1 = "CustomerUser#USER_EMAIL_ADDRESS",
+					locator1 = "CustomerUser#TEAM_MEMBER_EMAIL_ADDRESS",
 					value1 = "${value}");
 			}
 			else if ("${field}" == "Role") {
 				var key_userRoles = "${value}";
 				AssertTextEquals(
-					locator1 = "CustomerUser#USER_ROLES",
+					locator1 = "CustomerUser#TEAM_MEMBER_ROLE",
 					value1 = "${value}");
 			}
 			else {
@@ -93,7 +102,7 @@ definition {
 	macro _viewNoCustomerUserViaIndex {
 		var key_userName = "${userName}";
 
-		AssertElementNotPresent(locator1 = "CustomerUser#USER_NAME");
+		AssertElementNotPresent(locator1 = "CustomerUser#TEAM_MEMBER_NAME");
 	}
 
 }
