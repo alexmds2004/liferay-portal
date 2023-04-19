@@ -38,19 +38,34 @@ definition {
 	}
 
 	macro _getActiveTriggerIdByNameWithoutNameVerification {
-		var triggerNameEditNoSpace = StringUtil.replace("${triggerName}", " ", "+");
+		if (contains("${triggerName}", "Set Priority to High LXC/LXC-SM")) {
+			var triggerSearchName = "Set Priority to High LXC/LXC-SM";
+
+			var triggerNameEditNoSpace = StringUtil.replace("${triggerSearchName}", " ", "+");
+		}
+		else {
+			var triggerNameEditNoSpace = StringUtil.replace("${triggerName}", " ", "+");
+		}
 
 		var curl = '''
 			${zendeskURL}/api/v2/triggers/search.json?query=${triggerNameEditNoSpace} --tlsv1.2
 			-u ${zendeskAdminEmail}/token:${apiToken}
 			''';
 
-		var triggerId = JSONCurlUtil.get("${curl}", "$.triggers[?(@.active==true)].id");
+		if ("${triggerName}" == "Set Priority to High LXC/LXC-SM One") {
+			var triggerId = JSONCurlUtil.get("${curl}", "$.triggers[0].id");
+		}
+		else if ("${triggerName}" == "Set Priority to High LXC/LXC-SM Two") {
+			var triggerId = JSONCurlUtil.get("${curl}", "$.triggers[1].id");
+		}
+		else {
+			var triggerId = JSONCurlUtil.get("${curl}", "$.triggers[?(@.active==true)].id");
 
-		while (contains("${triggerId}", ",")) {
-			var extraTrigger = StringUtil.extractLast("${triggerId}", ",");
+			while (contains("${triggerId}", ",")) {
+				var extraTrigger = StringUtil.extractLast("${triggerId}", ",");
 
-			var triggerId = StringUtil.replace("${triggerId}", ",${extraTrigger}", "");
+				var triggerId = StringUtil.replace("${triggerId}", ",${extraTrigger}", "");
+			}
 		}
 
 		var triggerId = StringUtil.replace("${triggerId}", "[", "");
