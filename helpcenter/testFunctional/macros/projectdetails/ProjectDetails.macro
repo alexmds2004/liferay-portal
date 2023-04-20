@@ -6,7 +6,7 @@ definition {
 	macro addEnvironmentConfiguration {
 		Click(locator1 = "ProjectDetailsProject#ADD_ENVIRONMENT_CONFIGURATION_BUTTON");
 
-		var RawTable rawTable = new RawTable("${table}");
+		var  rawTable = TableUtil.newTable(${table});
 
 		for (var row : table "${rawTable}") {
 			var field = "${row[0]}";
@@ -81,7 +81,7 @@ definition {
 	macro addSourceCodeAccessUser {
 		Click(locator1 = "ProjectDetailsProject#SOURCE_CODE_ACCESS_ADD_BUTTON");
 
-		var RawTable rawTable = new RawTable("${table}");
+		var  rawTable = TableUtil.newTable(${table});
 
 		for (var row : table "${rawTable}") {
 			var field = "${row[0]}";
@@ -128,7 +128,7 @@ definition {
 	macro addSourceCodeAccessUserOnClosedProject {
 		Click(locator1 = "ProjectDetailsProject#SOURCE_CODE_ACCESS_ADD_BUTTON");
 
-		var RawTable rawTable = new RawTable("${table}");
+		var  rawTable = TableUtil.newTable(${table});
 
 		for (var row : table "${rawTable}") {
 			var field = "${row[0]}";
@@ -323,7 +323,7 @@ definition {
 
 		Click(locator1 = "ProjectDetailsProject#ENVIRONMENT_EDIT_BUTTON");
 
-		var RawTable rawTable = new RawTable("${table}");
+		var  rawTable = TableUtil.newTable(${table});
 
 		for (var row : table "${rawTable}") {
 			var field = "${row[0]}";
@@ -481,7 +481,7 @@ definition {
 
 	@prose = "I populate the Source Code Access user form with the following values ${table}"
 	macro populateSourceCodeAccessUserForm {
-		var RawTable rawTable = new RawTable("${table}");
+		var  rawTable = TableUtil.newTable(${table});
 
 		for (var row : table "${rawTable}") {
 			var field = "${row[0]}";
@@ -533,7 +533,7 @@ definition {
 	@prose = "the attachment with the keyword ${fileKeyword} should be visible with the following values ${table}"
 	macro viewAttachment {
 		var key_fileKeyword = "${fileKeyword}";
-		var RawTable rawTable = new RawTable("${table}");
+		var  rawTable = TableUtil.newTable(${table});
 
 		for (var row : table "${rawTable}") {
 			var field = "${row[0]}";
@@ -601,7 +601,7 @@ definition {
 
 	@prose = "the project details with the following values should be visible ${table}"
 	macro viewDetails {
-		var RawTable rawTable = new RawTable("${table}");
+		var  rawTable = TableUtil.newTable(${table});
 
 		for (var row : table "${rawTable}") {
 			var field = "${row[0]}";
@@ -701,7 +701,7 @@ definition {
 	@prose = "the environment configuration with the name ${environmentName} should be visible with the following values ${table}"
 	macro viewEnvironmentConfiguration {
 		var key_environmentName = "${environmentName}";
-		var RawTable rawTable = new RawTable("${table}");
+		var  rawTable = TableUtil.newTable(${table});
 
 		for (var row : table "${rawTable}") {
 			var field = "${row[0]}";
@@ -812,11 +812,92 @@ definition {
 		AssertElementPresent(locator1 = "ProjectDetailsProject#ENVIRONMENT_CONFIGURATIONS");
 	}
 
+	@prose = "the history entry in position number ${positionValue} with the field value ${fieldName} should be visible with the following values ${table}"
+	macro viewHistoryEntry {
+		var key_positionValue = "${positionValue}";
+		var key_fieldName = "${fieldName}";
+		var  rawTable = TableUtil.newTable(${table});
+
+		for (var row : table "${rawTable}") {
+			var field = "${row[0]}";
+			var value = "${row[1]}";
+
+			if ("${field}" == "Updater Name") {
+				AssertTextEquals(
+					locator1 = "ProjectDetailsProject#HISTORY_UPDATER_NAME",
+					value1 = "${value}");
+			}
+			else if ("${field}" == "Update Summary") {
+				AssertTextEquals(
+					locator1 = "ProjectDetailsProject#HISTORY_UPDATE_SUMMARY",
+					value1 = "${value}");
+			}
+			else if ("${field}" == "Update Description") {
+				AssertTextEquals(
+					locator1 = "ProjectDetailsProject#HISTORY_UPDATE_DESCRIPTION",
+					value1 = "${value}");
+			}
+			else if ("${field}" == "Update Date") {
+				if ("${value}" == "Today") {
+					var day = DateUtil.getCurrentDate();
+					var month = DateUtil.getCurrentMonth();
+					var year = DateUtil.getCurrentYear();
+
+					var yearEdit = StringUtil.replaceFirst("${year}", "20", "");
+
+					var startDate = "${month}/${day}/${yearEdit}";
+
+					if (IsTextNotEqual.isNotPartialText(locator1 = "ProjectDetailsProject#HISTORY_UPDATE_DATE", value1 = "${startDate}")) {
+						var day = DateUtil.getDate("1");
+						var month = DateUtil.getMonth("1");
+						var year = DateUtil.getYear("1");
+
+						var yearEdit = StringUtil.replaceFirst("${year}", "20", "");
+
+						var startDate = "${month}/${day}/${yearEdit}";
+
+						AssertTextEquals.assertPartialText(
+							locator1 = "ProjectDetailsProject#HISTORY_UPDATE_DATE",
+							value1 = "${startDate}");
+					}
+					else {
+						AssertTextEquals.assertPartialText(
+							locator1 = "ProjectDetailsProject#HISTORY_UPDATE_DATE",
+							value1 = "${startDate}");
+					}
+				}
+				else {
+					AssertTextEquals.assertPartialText(
+						locator1 = "ProjectDetailsProject#HISTORY_UPDATE_DATE",
+						value1 = "${value}");
+				}
+			}
+			else if ("${field}" == "Update Field Name") {
+				AssertTextEquals(
+					locator1 = "ProjectDetailsProject#HISTORY_UPDATE_FIELD_NAME",
+					value1 = "${value}");
+			}
+			else if ("${field}" == "Update Field Original Value") {
+				AssertTextEquals(
+					locator1 = "ProjectDetailsProject#HISTORY_UPDATE_FIELD_ORIGINAL_VALUE",
+					value1 = "${value}");
+			}
+			else if ("${field}" == "Update Field New Value") {
+				AssertTextEquals(
+					locator1 = "ProjectDetailsProject#HISTORY_UPDATE_FIELD_NEW_VALUE",
+					value1 = "${value}");
+			}
+			else {
+				fail("No such history entry field ${field}");
+			}
+		}
+	}
+
 	@prose = "the history entry with the keyword ${keyword} with the field value ${fieldName} should be visible with the following values ${table}"
 	macro viewHistoryEntryByKeyword {
 		var key_keyword = "${keyword}";
 		var key_fieldName = "${fieldName}";
-		var RawTable rawTable = new RawTable("${table}");
+		var  rawTable = TableUtil.newTable(${table});
 
 		for (var row : table "${rawTable}") {
 			var field = "${row[0]}";
@@ -898,7 +979,7 @@ definition {
 		var key_keyword1 = "${keyword1}";
 		var key_keyword2 = "${keyword2}";
 		var key_fieldName = "${fieldName}";
-		var RawTable rawTable = new RawTable("${table}");
+		var  rawTable = TableUtil.newTable(${table});
 
 		for (var row : table "${rawTable}") {
 			var field = "${row[0]}";
@@ -981,7 +1062,7 @@ definition {
 		var key_keyword2 = "${keyword2}";
 		var key_keyword3 = "${keyword3}";
 		var key_fieldName = "${fieldName}";
-		var RawTable rawTable = new RawTable("${table}");
+		var  rawTable = TableUtil.newTable(${table});
 
 		for (var row : table "${rawTable}") {
 			var field = "${row[0]}";
@@ -1065,7 +1146,7 @@ definition {
 		var key_keyword2 = "${keyword2}";
 		var key_keyword3 = "${keyword3}";
 		var key_fieldName = "${fieldName}";
-		var RawTable rawTable = new RawTable("${table}");
+		var  rawTable = TableUtil.newTable(${table});
 
 		for (var row : table "${rawTable}") {
 			var field = "${row[0]}";
@@ -1245,7 +1326,7 @@ definition {
 
 	@prose = "I should be able to view the Source Code Access user form errors with the following values ${table}"
 	macro viewSourceCodeAccessFormErrors {
-		var RawTable rawTable = new RawTable("${table}");
+		var  rawTable = TableUtil.newTable(${table});
 
 		for (var row : table "${rawTable}") {
 			var field = "${row[0]}";
@@ -1283,7 +1364,7 @@ definition {
 
 		ProjectDetails.expandSourceCodeAccessUserPanel(userEmailAddress = "${userEmailAddress}");
 
-		var RawTable rawTable = new RawTable("${table}");
+		var  rawTable = TableUtil.newTable(${table});
 
 		for (var row : table "${rawTable}") {
 			var field = "${row[0]}";
@@ -1313,7 +1394,7 @@ definition {
 	@prose = "the Source Code Access user panel for a user with the email address ${userEmailAddress} should be visible with the following values ${table}"
 	macro viewSourceCodeAccessUserPanel {
 		var key_userEmailAddress = "${userEmailAddress}";
-		var RawTable rawTable = new RawTable("${table}");
+		var  rawTable = TableUtil.newTable(${table});
 
 		for (var row : table "${rawTable}") {
 			var field = "${row[0]}";
