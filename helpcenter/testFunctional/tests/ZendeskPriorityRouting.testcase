@@ -54,7 +54,7 @@ definition {
 			ticketIdList = ${staticRequestIdList});
 	}
 
-	@help.center.acceptance = "true"
+	property help.center.acceptance = "true";
 	test HighPriorityRoutingLXC {
 		LocalFile.ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved            |
 	| Name             | Organization Name 1 |
@@ -93,7 +93,7 @@ definition {
 			ticketIdList = ${staticRequestIdList});
 	}
 
-	@help.center.acceptance = "true"
+	property help.center.acceptance = "true";
 	test HighPriorityRoutingLXCSM {
 		LocalFile.ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved            |
 	| Name             | Organization Name 1 |
@@ -229,7 +229,7 @@ definition {
 			ticketIdList = ${staticRequestIdList});
 	}
 
-	@help.center.acceptance = "true"
+	property help.center.acceptance = "true";
 	test NormalPriorityRouting {
 		LocalFile.ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved            |
 	| Name             | Organization Name 1 |
@@ -364,7 +364,43 @@ definition {
 	| prd_lxc_sm | system_availability | production_completely_shutdown |
 	| prd_lxc_sm | vpn                 | production_completely_shutdown |''');
 
-		LocalFile.ZendeskTicketAPI._viewMultipleTicketPriorities(
+		ZendeskTicketAPI._viewMultipleTicketPriorities(
+			priority = "urgent",
+			ticketIdList = ${staticRequestIdList});
+	}
+
+	test UrgentPriorityRoutingLXC {
+		property help.center.acceptance = "true";
+		ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved            |
+	| Name             | Organization Name 1 |
+	| Tags             | lxc_sm              |
+	| Shared Tickets   | true                |
+	| Shared Comments  | true                |
+	| SLA              | Gold                |
+	| Tier             | T4                  |
+	| Support Region   | US                  |
+	| Support Language | English             | 
+	| External ID      | 12345678            |''');
+
+		ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
+	| Tags             | osb_customer,osb_kb              |
+	| Password         | ${staticZendeskAdminPassword}    |
+	| Role             | End-user                         |
+	| Access           | Organization                     |
+	| Email            | zendesk.user1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                |
+	| Organization     | Organization Name 1              |
+	| Language         | Portuguese                       |
+	| Time Zone        | Brasilia                         | 
+	| External ID      | User1                            |''');
+
+		ZendeskRequestAPI._createMultipleRequestsWithProductAndComponentAndSystemStatusValues(
+			requesterEmail = "zendesk.user1@zendesk.com.broken",
+			table = '''| prd_lxc_engage   | | production_completely_shutdown |
+	| prd_lxc_transact | | production_completely_shutdown |
+	| prd_lxc_support  | | production_completely_shutdown |''');
+
+		ZendeskTicketAPI._viewMultipleTicketPriorities(
 			priority = "urgent",
 			ticketIdList = ${staticRequestIdList});
 	}
