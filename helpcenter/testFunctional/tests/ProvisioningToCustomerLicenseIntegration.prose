@@ -174,3 +174,86 @@ Scenario: View DXP Production license on customer
 	| Environment Type         | DXP Production                                     |
 #	| Expiration Date          | ${staticFullEndDate}                               |
 	| Status                   | Activated                                          |
+
+Scenario: View Portal Production license on customer
+    Testing the Portal Production license integration from koroneiki to customer
+
+	Given I create an account on koroneiki with the following values
+	| Account Field and Value | liferayVersion                       | DXP 7.4 |
+	| Code                    | CSTPROPROCST                         |         |
+	| Contact Email Address   | lic.koroneiki1@lrcustomer.com.broken |         |
+	| Description             | Test osb account on koroneiki        |         |
+	| Fax Number              | 555-555-1234                         |         |
+	| Name                    | Procst - ${staticProjectName}        |         |
+	| Phone Number            | 555-555-5678                         |         |
+	| Profile Email Address   | lic.koroneiki1@lrcustomer.com.broken |         |
+	| Region                  | United States                        |         |
+	| Status                  | Active                               |         |
+	| Tier                    | T4                                   |         |
+	| Website                 | www.koroneikicorporation.com         |         |
+	And I assign the contact with the email address "${staticEmailValue1}" on the account "Procst - ${staticProjectName}" to the following roles
+	| Support Administrator |
+	And I log into the dev domain as "${staticEmailValue1}" with password "${staticOktaUserPassword}"
+	And I obtain the okta session ID value from the dev domain page
+	And I generate the account key value for "Procst - ${staticProjectName}"
+	And I create a product purchase for an account with the name "Procst - ${staticProjectName}" and the product "Portal Production" on koroneiki with the following values
+	| End Date                | ${staticEndDate}         |   |
+	| Original End Date       | ${staticOriginalEndDate} |   |
+	| Perpetual               | false                    |   |
+	| Product Field and Value | sizing                   | 1 |
+	| Product Field and Value | licenses                 | 1 |
+	| Product Field and Value | version                  | 7 |
+	| Quantity                | 1                        |   |
+	| Start Date              | ${staticStartDate}       |   |
+	| Status                  | Approved                 |   |
+	And I create a product purchase for an account with the name "Procst - ${staticProjectName}" and the product "Platinum Subscription" on koroneiki with the following values
+	| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |
+	And I generate the product purchase ID value for the product purchase made by "Procst - ${staticProjectName}" for "Portal Production"
+	And I generate the product purchase key value for the product purchase made by "Procst - ${staticProjectName}" for "Portal Production"
+	And I create a license with the following parameters on the account "Procst - ${staticProjectName}" and product purchase "Portal Production" using okta session id with the following values
+	| Name               | Procst - ${staticProjectName} License1 Name        |
+	| Description        | Procst - ${staticProjectName} License1 Description |
+	| Active             | true                                               |
+	| Expiration Date    | ${staticEndDate}                                   |
+	| License Entry Type | production                                         |
+	| Max Cluster Nodes  | 0                                                  |
+	| Product Version    | 7.4                                                |
+	| Start Date         | ${staticStartDate}                                 |
+	Then I should be able to view the license on the account "Procst - ${staticProjectName}" with the name "Procst - ${staticProjectName} License1 Name" and the following filters
+	| Name                  | Procst - ${staticProjectName} License1 Name        |
+	| Complimentary         | false                                              |
+	| Description           | Procst - ${staticProjectName} License1 Description |
+	| Host Name             | localhost                                          |
+	| IP Addresses          | 123.45.67.89                                       |
+	| MAC Addresses         | 0A-1B-2C-3D-4E-5F                                  |
+	| Instance Size         | 1                                                  |
+	| Maximum Cluster Nodes | 0                                                  |
+	| Product Name          | Portal Production                                  |
+	And I synchronize the contact entitlement definition with the name "Customer"
+	And I wait for "1" minutes
+	And the user with the email address "${staticEmailValue1}" should be a member of the okta group "Customer"
+	When I log into the provisioning homepage as "${staticProvisioningAdminEmailAddress}" with password "${staticProvisioningAdminPassword}"
+	And I go to the account index page
+	And I search the accounts page using the keyword "Procst - ${staticProjectName}"
+	And I click on the account with the name "Procst - ${staticProjectName}" on the provisioning index
+	And I click on the Sync To Customer Portal button on the account page
+	And I log out of the dev domain
+	And I log into the customer homepage as "${staticEmailValue1}" with password "${staticOktaUserPassword}"
+	And I click on the project with the name "Procst - ${staticProjectName}" on the customer project details page
+	And I click on start project setup on setup pop up
+	And I click on skip button on invite team members pop up
+	And I choose the "Portal" subscription at the product activation tab
+	And I search the activation key with the keyword "Procst - ${staticProjectName}"
+	Then I should be able to view a Portal or DXP activation key with the environment name "Procst - ${staticProjectName} License1 Name" on product activation tab with the following values
+	| Environment Name         | Procst - ${staticProjectName} License1 Name        |
+	| Description              | Procst - ${staticProjectName} License1 Description |
+	| Key Type                 | On-Premise                                         |
+	| Host Name / Cluster Size | localhost                                          |
+	| Environment Type         | Portal Production                                  |
+#	| Expiration Date          | ${staticFullEndDate}                               |
+	| Status                   | Activated                                          |
