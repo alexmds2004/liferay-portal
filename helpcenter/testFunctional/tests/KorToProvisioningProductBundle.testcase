@@ -4,310 +4,313 @@ definition {
 	property type = "provisioning.product.integration";
 
 	setUp {
-		LocalFile.Passwords.getPasswords();
+		Passwords.getPasswords();
 	}
 
 	tearDown {
-		LocalFile.OSBAdmin.logoutAndLoginToProvisioning(
+		OSBAdmin.logoutAndLoginToProvisioning(
 			userEmailAddress = ${staticProvisioningAdminEmailAddress},
 			userPassword = ${staticProvisioningAdminPassword});
 
-		LocalFile.Provisioning.gotoProductBundles();
+		Provisioning.gotoProductBundles();
 
-		LocalFile.Provisioning.tearDownProductBundles(table = '''| Bundled Products |
+		Provisioning.tearDownProductBundles(table = '''| Bundled Products |
 	| Updated Products |''');
 
-		LocalFile.KoroneikiProductAPI._tearDownProducts(table = '''| A Bundled Product        |
+		KoroneikiProductAPI._tearDownProducts(table = '''| A Bundled Product        |
 	| A Bundled Second Product |
 	| A Bundled Third Product  |
 	| A Bundled Fourth Product |''');
 	}
 
-	property help.center.acceptance = "true";
+
 	test Createproductbundle {
-		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | A Bundled Product | |''');
+	property help.center.acceptance = "true";
+		KoroneikiProductAPI._createProduct(table = '''| Name | A Bundled Product | |''');
 
-		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | A Bundled Second Product | |''');
+		KoroneikiProductAPI._createProduct(table = '''| Name | A Bundled Second Product | |''');
 
-		LocalFile.OSBAdmin.loginToProvisioning(
+		OSBAdmin.loginToProvisioning(
 			userEmailAddress = ${staticProvisioningAdminEmailAddress},
 			userPassword = ${staticProvisioningAdminPassword});
 
-		LocalFile.Provisioning.gotoProductBundles();
+		Provisioning.gotoProductBundles();
 
-		LocalFile.Provisioning.clickNewProductBundleButton();
+		Provisioning.clickNewProductBundleButton();
 
-		LocalFile.ProvisioningProductBundle.populateProductBundleFormAndSave(table = '''| Name        | Input | Bundled Products         |
+		ProvisioningProductBundle.populateProductBundleFormAndSave(table = '''| Name        | Input | Bundled Products         |
 	| Add Product |       | A Bundled Product        |
 	| Add Product |       | A Bundled Second Product |''');
 
-		LocalFile.Provisioning._viewProductBundleViaIndex(
+		Provisioning._viewProductBundleViaIndex(
 			productBundleName = "Bundled Products",
 			table = '''| Name | Bundled Products |''');
 
-		LocalFile.Provisioning.clickProductBundle(productBundleName = "Bundled Products");
+		Provisioning.clickProductBundle(productBundleName = "Bundled Products");
 
-		LocalFile.ProvisioningProductBundle.viewProductViaProductBundle(productName = "A Bundled Product");
+		ProvisioningProductBundle.viewProductViaProductBundle(productName = "A Bundled Product");
 
-		LocalFile.ProvisioningProductBundle.viewProductViaProductBundle(productName = "A Bundled Second Product");
+		ProvisioningProductBundle.viewProductViaProductBundle(productName = "A Bundled Second Product");
 	}
 
 	test Deletebundledproductviakoroneiki {
-		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | A Bundled Product | |''');
+		KoroneikiProductAPI._createProduct(table = '''| Name | A Bundled Product | |''');
 
-		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | A Bundled Second Product | |''');
+		KoroneikiProductAPI._createProduct(table = '''| Name | A Bundled Second Product | |''');
 
-		LocalFile.OSBAdmin.loginToProvisioning(
+		OSBAdmin.loginToProvisioning(
 			userEmailAddress = ${staticProvisioningAdminEmailAddress},
 			userPassword = ${staticProvisioningAdminPassword});
 
-		LocalFile.Provisioning.gotoProductBundles();
+		Provisioning.gotoProductBundles();
 
-		LocalFile.Provisioning.clickNewProductBundleButton();
+		Provisioning.clickNewProductBundleButton();
 
-		LocalFile.ProvisioningProductBundle.populateProductBundleFormAndSave(table = '''| Name        | Input | Bundled Products         |
+		ProvisioningProductBundle.populateProductBundleFormAndSave(table = '''| Name        | Input | Bundled Products         |
 	| Add Product |       | A Bundled Product        |
 	| Add Product |       | A Bundled Second Product |''');
 
-		LocalFile.Provisioning._viewProductBundleViaIndex(
+		Provisioning._viewProductBundleViaIndex(
 			productBundleName = "Bundled Products",
 			table = '''| Name | Bundled Products |''');
 
-		LocalFile.KoroneikiProductAPI._deleteProduct(productName = "A Bundled Product");
+		KoroneikiProductAPI._deleteProduct(productName = "A Bundled Product");
 
-		LocalFile.KoroneikiProductAPI._deleteProduct(productName = "A Bundled Second Product");
+		KoroneikiProductAPI._deleteProduct(productName = "A Bundled Second Product");
 
-		LocalFile.Provisioning.gotoProductBundles();
+		Provisioning.gotoProductBundles();
 
-		LocalFile.Provisioning.clickProductBundle(productBundleName = "Bundled Products");
+		Provisioning.clickProductBundle(productBundleName = "Bundled Products");
 
-		LocalFile.ProvisioningProductBundle.viewNoProductViaProductBundle(productName = "A Bundled Product");
+		ProvisioningProductBundle.viewNoProductViaProductBundle(productName = "A Bundled Product");
 
-		LocalFile.ProvisioningProductBundle.viewNoProductViaProductBundle(productName = "A Bundled Second Product");
+		ProvisioningProductBundle.viewNoProductViaProductBundle(productName = "A Bundled Second Product");
 
-		LocalFile.Provisioning.gotoProducts();
+		Provisioning.gotoProducts();
 
-		LocalFile.Provisioning.searchProducts(keyword = "A");
+		Provisioning.searchProducts(keyword = "A");
 
-		LocalFile.Provisioning._viewNoProductViaIndex(productName = "A Bundled Product");
+		Provisioning._viewNoProductViaIndex(productName = "A Bundled Product");
 
-		LocalFile.Provisioning._viewNoProductViaIndex(productName = "A Bundled Second Product");
+		Provisioning._viewNoProductViaIndex(productName = "A Bundled Second Product");
 
-		LocalFile.KoroneikiProductAPI._viewNoProduct(productName = "A Bundled Product");
+		KoroneikiProductAPI._viewNoProduct(productName = "A Bundled Product");
 
-		LocalFile.KoroneikiProductAPI._viewNoProduct(productName = "A Bundled Second Product");
+		KoroneikiProductAPI._viewNoProduct(productName = "A Bundled Second Product");
 	}
 
 	test Deletebundledproductviaprovisioning {
-		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | A Bundled Product | |''');
+		KoroneikiProductAPI._createProduct(table = '''| Name | A Bundled Product | |''');
 
-		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | A Bundled Second Product | |''');
+		KoroneikiProductAPI._createProduct(table = '''| Name | A Bundled Second Product | |''');
 
-		LocalFile.OSBAdmin.loginToProvisioning(
+		OSBAdmin.loginToProvisioning(
 			userEmailAddress = ${staticProvisioningAdminEmailAddress},
 			userPassword = ${staticProvisioningAdminPassword});
 
-		LocalFile.Provisioning.gotoProductBundles();
+		Provisioning.gotoProductBundles();
 
-		LocalFile.Provisioning.clickNewProductBundleButton();
+		Provisioning.clickNewProductBundleButton();
 
-		LocalFile.ProvisioningProductBundle.populateProductBundleFormAndSave(table = '''| Name        | Input | Bundled Products         |
+		ProvisioningProductBundle.populateProductBundleFormAndSave(table = '''| Name        | Input | Bundled Products         |
 	| Add Product |       | A Bundled Product        |
 	| Add Product |       | A Bundled Second Product |''');
 
-		LocalFile.Provisioning._viewProductBundleViaIndex(
+		Provisioning._viewProductBundleViaIndex(
 			productBundleName = "Bundled Products",
 			table = '''| Name | Bundled Products |''');
 
-		LocalFile.Provisioning.gotoProducts();
+		Provisioning.gotoProducts();
 
-		LocalFile.Provisioning.searchProducts(keyword = "A");
+		Provisioning.searchProducts(keyword = "A");
 
-		LocalFile.Provisioning.clickProductDeleteButton(productName = "A Bundled Product");
+		Provisioning.clickProductDeleteButton(productName = "A Bundled Product");
 
-		LocalFile.Provisioning.viewProductIndexProductBundleErrorMessage();
+		Provisioning.viewProductIndexProductBundleErrorMessage();
 
-		LocalFile.Provisioning.searchProducts(keyword = "A");
+		Provisioning.searchProducts(keyword = "A");
 
-		LocalFile.Provisioning.clickProductDeleteButton(productName = "A Bundled Second Product");
+		Provisioning.clickProductDeleteButton(productName = "A Bundled Second Product");
 
-		LocalFile.Provisioning.viewProductIndexProductBundleErrorMessage();
+		Provisioning.viewProductIndexProductBundleErrorMessage();
 
-		LocalFile.Provisioning.gotoProductBundles();
+		Provisioning.gotoProductBundles();
 
-		LocalFile.Provisioning.clickProductBundle(productBundleName = "Bundled Products");
+		Provisioning.clickProductBundle(productBundleName = "Bundled Products");
 
-		LocalFile.ProvisioningProductBundle.viewProductViaProductBundle(productName = "A Bundled Product");
+		ProvisioningProductBundle.viewProductViaProductBundle(productName = "A Bundled Product");
 
-		LocalFile.ProvisioningProductBundle.viewProductViaProductBundle(productName = "A Bundled Second Product");
+		ProvisioningProductBundle.viewProductViaProductBundle(productName = "A Bundled Second Product");
 	}
 
-	property help.center.acceptance = "true";
+
 	test Deleteproductbundle {
-		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | A Bundled Product | |''');
+	property help.center.acceptance = "true";
+		KoroneikiProductAPI._createProduct(table = '''| Name | A Bundled Product | |''');
 
-		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | A Bundled Second Product | |''');
+		KoroneikiProductAPI._createProduct(table = '''| Name | A Bundled Second Product | |''');
 
-		LocalFile.OSBAdmin.loginToProvisioning(
+		OSBAdmin.loginToProvisioning(
 			userEmailAddress = ${staticProvisioningAdminEmailAddress},
 			userPassword = ${staticProvisioningAdminPassword});
 
-		LocalFile.Provisioning.gotoProductBundles();
+		Provisioning.gotoProductBundles();
 
-		LocalFile.Provisioning.clickNewProductBundleButton();
+		Provisioning.clickNewProductBundleButton();
 
-		LocalFile.ProvisioningProductBundle.populateProductBundleFormAndSave(table = '''| Name        | Input | Bundled Products         |
+		ProvisioningProductBundle.populateProductBundleFormAndSave(table = '''| Name        | Input | Bundled Products         |
 	| Add Product |       | A Bundled Product        |
 	| Add Product |       | A Bundled Second Product |''');
 
-		LocalFile.Provisioning.clickProductBundleDeleteButton(productBundleName = "Bundled Products");
+		Provisioning.clickProductBundleDeleteButton(productBundleName = "Bundled Products");
 
-		LocalFile.Provisioning._viewNoProductBundleViaIndex(productBundleName = "Bundled Products");
+		Provisioning._viewNoProductBundleViaIndex(productBundleName = "Bundled Products");
 	}
 
 	test Updatebundledproductviakoroneiki {
-		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | A Bundled Product | |''');
+		KoroneikiProductAPI._createProduct(table = '''| Name | A Bundled Product | |''');
 
-		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | A Bundled Second Product | |''');
+		KoroneikiProductAPI._createProduct(table = '''| Name | A Bundled Second Product | |''');
 
-		LocalFile.OSBAdmin.loginToProvisioning(
+		OSBAdmin.loginToProvisioning(
 			userEmailAddress = ${staticProvisioningAdminEmailAddress},
 			userPassword = ${staticProvisioningAdminPassword});
 
-		LocalFile.Provisioning.gotoProductBundles();
+		Provisioning.gotoProductBundles();
 
-		LocalFile.Provisioning.clickNewProductBundleButton();
+		Provisioning.clickNewProductBundleButton();
 
-		LocalFile.ProvisioningProductBundle.populateProductBundleFormAndSave(table = '''| Name        | Input | Bundled Products         |
+		ProvisioningProductBundle.populateProductBundleFormAndSave(table = '''| Name        | Input | Bundled Products         |
 	| Add Product |       | A Bundled Product        |
 	| Add Product |       | A Bundled Second Product |''');
 
-		LocalFile.KoroneikiProductAPI.updateProduct(
+		KoroneikiProductAPI.updateProduct(
 			productName = "A Bundled Product",
 			table = '''| Name | A Bundled Third Product | |''');
 
-		LocalFile.KoroneikiProductAPI.updateProduct(
+		KoroneikiProductAPI.updateProduct(
 			productName = "A Bundled Second Product",
 			table = '''| Name | A Bundled Fourth Product | |''');
 
-		LocalFile.Provisioning.clickProductBundle(productBundleName = "Bundled Products");
+		Provisioning.clickProductBundle(productBundleName = "Bundled Products");
 
-		LocalFile.ProvisioningProductBundle.viewProductViaProductBundle(productName = "A Bundled Third Product");
+		ProvisioningProductBundle.viewProductViaProductBundle(productName = "A Bundled Third Product");
 
-		LocalFile.ProvisioningProductBundle.viewProductViaProductBundle(productName = "A Bundled Fourth Product");
+		ProvisioningProductBundle.viewProductViaProductBundle(productName = "A Bundled Fourth Product");
 
-		LocalFile.ProvisioningProductBundle.viewNoProductViaProductBundle(productName = "A Bundled Product");
+		ProvisioningProductBundle.viewNoProductViaProductBundle(productName = "A Bundled Product");
 
-		LocalFile.ProvisioningProductBundle.viewNoProductViaProductBundle(productName = "A Bundled Second Product");
+		ProvisioningProductBundle.viewNoProductViaProductBundle(productName = "A Bundled Second Product");
 	}
 
 	test Updatebundledproductviaprovisioning {
-		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | A Bundled Product | |''');
+		KoroneikiProductAPI._createProduct(table = '''| Name | A Bundled Product | |''');
 
-		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | A Bundled Second Product | |''');
+		KoroneikiProductAPI._createProduct(table = '''| Name | A Bundled Second Product | |''');
 
-		LocalFile.OSBAdmin.loginToProvisioning(
+		OSBAdmin.loginToProvisioning(
 			userEmailAddress = ${staticProvisioningAdminEmailAddress},
 			userPassword = ${staticProvisioningAdminPassword});
 
-		LocalFile.Provisioning.gotoProductBundles();
+		Provisioning.gotoProductBundles();
 
-		LocalFile.Provisioning.clickNewProductBundleButton();
+		Provisioning.clickNewProductBundleButton();
 
-		LocalFile.ProvisioningProductBundle.populateProductBundleFormAndSave(table = '''| Name        | Input | Bundled Products         |
+		ProvisioningProductBundle.populateProductBundleFormAndSave(table = '''| Name        | Input | Bundled Products         |
 	| Add Product |       | A Bundled Product        |
 	| Add Product |       | A Bundled Second Product |''');
 
-		LocalFile.Provisioning._viewProductBundleViaIndex(
+		Provisioning._viewProductBundleViaIndex(
 			productBundleName = "Bundled Products",
 			table = '''| Name | Bundled Products |''');
 
-		LocalFile.Provisioning.gotoProducts();
+		Provisioning.gotoProducts();
 
-		LocalFile.Provisioning.searchProducts(keyword = "A");
+		Provisioning.searchProducts(keyword = "A");
 
-		LocalFile.Provisioning.clickProduct(productName = "A Bundled Product");
+		Provisioning.clickProduct(productName = "A Bundled Product");
 
-		LocalFile.ProvisioningProduct.populateProductFormAndSave(table = '''| Name | Input  | A Bundled Third Product |
+		ProvisioningProduct.populateProductFormAndSave(table = '''| Name | Input  | A Bundled Third Product |
 	| Type | Select | Primary                 |''');
 
-		LocalFile.Provisioning.searchProducts(keyword = "A");
+		Provisioning.searchProducts(keyword = "A");
 
-		LocalFile.Provisioning._viewProductViaIndex(
+		Provisioning._viewProductViaIndex(
 			productName = "A Bundled Third Product",
 			table = '''| Name | A Bundled Third Product |''');
 
-		LocalFile.Provisioning.searchProducts(keyword = "A");
+		Provisioning.searchProducts(keyword = "A");
 
-		LocalFile.Provisioning.clickProduct(productName = "A Bundled Second Product");
+		Provisioning.clickProduct(productName = "A Bundled Second Product");
 
-		LocalFile.ProvisioningProduct.populateProductFormAndSave(table = '''| Name | Input  | A Bundled Fourth Product |
+		ProvisioningProduct.populateProductFormAndSave(table = '''| Name | Input  | A Bundled Fourth Product |
 	| Type | Select | Primary                  |''');
 
-		LocalFile.Provisioning.searchProducts(keyword = "A");
+		Provisioning.searchProducts(keyword = "A");
 
-		LocalFile.Provisioning._viewProductViaIndex(
+		Provisioning._viewProductViaIndex(
 			productName = "A Bundled Fourth Product",
 			table = '''| Name | A Bundled Fourth Product |''');
 
-		LocalFile.Provisioning.gotoProductBundles();
+		Provisioning.gotoProductBundles();
 
-		LocalFile.Provisioning.clickProductBundle(productBundleName = "Bundled Products");
+		Provisioning.clickProductBundle(productBundleName = "Bundled Products");
 
-		LocalFile.ProvisioningProductBundle.viewProductViaProductBundle(productName = "A Bundled Third Product");
+		ProvisioningProductBundle.viewProductViaProductBundle(productName = "A Bundled Third Product");
 
-		LocalFile.ProvisioningProductBundle.viewProductViaProductBundle(productName = "A Bundled Fourth Product");
+		ProvisioningProductBundle.viewProductViaProductBundle(productName = "A Bundled Fourth Product");
 
-		LocalFile.ProvisioningProductBundle.viewNoProductViaProductBundle(productName = "A Bundled Product");
+		ProvisioningProductBundle.viewNoProductViaProductBundle(productName = "A Bundled Product");
 
-		LocalFile.ProvisioningProductBundle.viewNoProductViaProductBundle(productName = "A Bundled Second Product");
+		ProvisioningProductBundle.viewNoProductViaProductBundle(productName = "A Bundled Second Product");
 	}
 
-	property help.center.acceptance = "true";
+
 	test Updateproductbundle {
-		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | A Bundled Product | |''');
+	property help.center.acceptance = "true";
+		KoroneikiProductAPI._createProduct(table = '''| Name | A Bundled Product | |''');
 
-		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | A Bundled Second Product | |''');
+		KoroneikiProductAPI._createProduct(table = '''| Name | A Bundled Second Product | |''');
 
-		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | A Bundled Third Product | |''');
+		KoroneikiProductAPI._createProduct(table = '''| Name | A Bundled Third Product | |''');
 
-		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | A Bundled Fourth Product | |''');
+		KoroneikiProductAPI._createProduct(table = '''| Name | A Bundled Fourth Product | |''');
 
-		LocalFile.OSBAdmin.loginToProvisioning(
+		OSBAdmin.loginToProvisioning(
 			userEmailAddress = ${staticProvisioningAdminEmailAddress},
 			userPassword = ${staticProvisioningAdminPassword});
 
-		LocalFile.Provisioning.gotoProductBundles();
+		Provisioning.gotoProductBundles();
 
-		LocalFile.Provisioning.clickNewProductBundleButton();
+		Provisioning.clickNewProductBundleButton();
 
-		LocalFile.ProvisioningProductBundle.populateProductBundleFormAndSave(table = '''| Name        | Input | Bundled Products         |
+		ProvisioningProductBundle.populateProductBundleFormAndSave(table = '''| Name        | Input | Bundled Products         |
 	| Add Product |       | A Bundled Product        |
 	| Add Product |       | A Bundled Second Product |''');
 
-		LocalFile.Provisioning.clickProductBundle(productBundleName = "Bundled Products");
+		Provisioning.clickProductBundle(productBundleName = "Bundled Products");
 
-		LocalFile.ProvisioningProductBundle.populateProductBundleFormAndSave(table = '''| Name           | Input | Updated Products         |
+		ProvisioningProductBundle.populateProductBundleFormAndSave(table = '''| Name           | Input | Updated Products         |
 	| Remove Product |       | A Bundled Second Product |
 	| Add Product    |       | A Bundled Third Product  |
 	| Remove Product |       | A Bundled Product        |
 	| Add Product    |       | A Bundled Fourth Product |''');
 
-		LocalFile.Provisioning._viewProductBundleViaIndex(
+		Provisioning._viewProductBundleViaIndex(
 			productBundleName = "Updated Products",
 			table = '''| Name | Updated Products |''');
 
-		LocalFile.Provisioning._viewNoProductBundleViaIndex(productBundleName = "Bundled Products");
+		Provisioning._viewNoProductBundleViaIndex(productBundleName = "Bundled Products");
 
-		LocalFile.Provisioning.clickProductBundle(productBundleName = "Updated Products");
+		Provisioning.clickProductBundle(productBundleName = "Updated Products");
 
-		LocalFile.ProvisioningProductBundle.viewProductViaProductBundle(productName = "A Bundled Third Product");
+		ProvisioningProductBundle.viewProductViaProductBundle(productName = "A Bundled Third Product");
 
-		LocalFile.ProvisioningProductBundle.viewProductViaProductBundle(productName = "A Bundled Fourth Product");
+		ProvisioningProductBundle.viewProductViaProductBundle(productName = "A Bundled Fourth Product");
 
-		LocalFile.ProvisioningProductBundle.viewNoProductViaProductBundle(productName = "A Bundled Product");
+		ProvisioningProductBundle.viewNoProductViaProductBundle(productName = "A Bundled Product");
 
-		LocalFile.ProvisioningProductBundle.viewNoProductViaProductBundle(productName = "A Bundled Second Product");
+		ProvisioningProductBundle.viewNoProductViaProductBundle(productName = "A Bundled Second Product");
 	}
 
 }

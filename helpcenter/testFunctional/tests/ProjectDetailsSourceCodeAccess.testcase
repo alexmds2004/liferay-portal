@@ -4,39 +4,39 @@ definition {
 	property type = "customer.portal";
 
 	setUp {
-		LocalFile.Passwords.getPasswords();
+		Passwords.getPasswords();
 
-		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+		OSBAdminRabbitMQ.generateProvisioningProjectName();
 
-		LocalFile.OSBAdminRabbitMQ.generateProvisioningCompanyName();
+		OSBAdminRabbitMQ.generateProvisioningCompanyName();
 
-		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | pjd.customer1                       |
+		JSONOkta.createOktaUser(table = '''| Screen Name   | pjd.customer1                       |
 	| Email Address | pjd.customer1@lrcustomer.com.broken |
 	| First Name    | PJD                                 |
 	| Last Name     | Customer1                           |''');
 
-		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | pjd.customer2                       |
+		JSONOkta.createOktaUser(table = '''| Screen Name   | pjd.customer2                       |
 	| Email Address | pjd.customer2@lrcustomer.com.broken |
 	| First Name    | PJD                                 |
 	| Last Name     | Customer2                           |''');
 
-		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | pjd.partner1                      |
+		JSONOkta.createOktaUser(table = '''| Screen Name   | pjd.partner1                      |
 	| Email Address | pjd.partner1@lrpartner.com.broken |
 	| First Name    | PJD                               |
 	| Last Name     | Partner1                          |''');
 
-		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Name   | Zenpar - ${staticCompanyName} | |
+		KoroneikiAccountAPI._createAccount(table = '''| Name   | Zenpar - ${staticCompanyName} | |
 	| Code   | ZENPARZENPAR                  | |
 	| Status | Active                        | |''');
 
-		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+		KoroneikiAccountAPI._assignContactRolesToContact(
 			accountName = "Zenpar - ${staticCompanyName}",
 			contactEmailAddress = "pjd.partner1@lrpartner.com.broken",
 			table = '''| Partner Manager |''');
 
-		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+		KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Zenpar - ${staticCompanyName}",
 			productName = "Service Partnership",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -46,38 +46,38 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._createAssignedTeamNestedField(
+		KoroneikiAccountAPI._createAssignedTeamNestedField(
 			accountName = "Pjdzen - ${staticProjectName}",
 			teamName = "Zenpar - ${staticCompanyName}");
 
-		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Assigned Team Nested Field | ${staticAssignedTeamNestedField} | |
+		KoroneikiAccountAPI._createAccount(table = '''| Assigned Team Nested Field | ${staticAssignedTeamNestedField} | |
 	| Code                       | PJDZENPJDZEN                     | |
 	| Name                       | Pjdzen - ${staticProjectName}    | |
 	| Region                     | United States                    | |
 	| Status                     | Active                           | |
 	| Tier                       | T1                               | |''');
 
-		LocalFile.KoroneikiAccountAPI._assignTeamRolesToTeam(
+		KoroneikiAccountAPI._assignTeamRolesToTeam(
 			accountName = "Pjdzen - ${staticProjectName}",
 			table = '''| Partner |''',
 			teamName = "Zenpar - ${staticCompanyName}");
 
-		LocalFile.KoroneikiAccountAPI._assignTeamRolesToTeam(
+		KoroneikiAccountAPI._assignTeamRolesToTeam(
 			accountName = "Pjdzen - ${staticProjectName}",
 			table = '''| First Line Support |''',
 			teamName = "Zenpar - ${staticCompanyName}");
 
-		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+		KoroneikiAccountAPI._assignContactRolesToContact(
 			accountName = "Pjdzen - ${staticProjectName}",
 			contactEmailAddress = "pjd.customer1@lrcustomer.com.broken",
 			table = '''| Support Requester |''');
 
-		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+		KoroneikiAccountAPI._assignContactRolesToContact(
 			accountName = "Pjdzen - ${staticProjectName}",
 			contactEmailAddress = "pjd.customer2@lrcustomer.com.broken",
 			table = '''| Support User |''');
 
-		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code   | DUPZENDUPZEN                     | |
+		KoroneikiAccountAPI._createAccount(table = '''| Code   | DUPZENDUPZEN                     | |
 	| Name   | Dupzen - ${staticProjectName}    | |
 	| Region | United States                    | |
 	| Status | Active                           | |
@@ -85,81 +85,81 @@ definition {
 	}
 
 	tearDown {
-		LocalFile.ZendeskUserAPI._getDefaultUserId(organizationName = "Pjdzen - ${staticProjectName}");
+		ZendeskUserAPI._getDefaultUserId(organizationName = "Pjdzen - ${staticProjectName}");
 
-		LocalFile.ZendeskUserAPI._renameFirstDefaultUserIdVariable();
+		ZendeskUserAPI._renameFirstDefaultUserIdVariable();
 
-		LocalFile.ZendeskUserAPI._getDefaultUserId(organizationName = "Dupzen - ${staticProjectName}");
+		ZendeskUserAPI._getDefaultUserId(organizationName = "Dupzen - ${staticProjectName}");
 
-		LocalFile.ZendeskUserAPI._renameSecondDefaultUserIdVariable();
+		ZendeskUserAPI._renameSecondDefaultUserIdVariable();
 
-		LocalFile.ZendeskUserAPI._getDefaultUserId(organizationName = "Zenpar - ${staticCompanyName}");
+		ZendeskUserAPI._getDefaultUserId(organizationName = "Zenpar - ${staticCompanyName}");
 
-		LocalFile.ZendeskUserAPI._renameThirdDefaultUserIdVariable();
+		ZendeskUserAPI._renameThirdDefaultUserIdVariable();
 
-		LocalFile.OSBAdminProject.tearDownProjects(table = '''| ZENPARZENPAR |
+		OSBAdminProject.tearDownProjects(table = '''| ZENPARZENPAR |
 	| PJDZENPJDZEN |
 	| DUPZENDUPZEN |''');
 
-		LocalFile.KoroneikiAccountAPI._tearDownAccounts(table = '''| Zenpar - ${staticCompanyName} |
+		KoroneikiAccountAPI._tearDownAccounts(table = '''| Zenpar - ${staticCompanyName} |
 	| Pjdzen - ${staticProjectName} |
 	| Dupzen - ${staticProjectName} |''');
 
-		LocalFile.KoroneikiAccountAPI._tearDownAccountsViaAccountFieldNameAndValue(
+		KoroneikiAccountAPI._tearDownAccountsViaAccountFieldNameAndValue(
 			fieldName = "Code",
 			table = '''| ZENPARZENPAR |
 	| PJDZENPJDZEN |
 	| DUPZENDUPZEN |''');
 
-		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+		KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
 
-		LocalFile.JSONUser.tearDownUsers(table = '''| pjd.customer1@lrcustomer.com.broken |
+		JSONUser.tearDownUsers(table = '''| pjd.customer1@lrcustomer.com.broken |
 	| pjd.customer2@lrcustomer.com.broken |
 	| pjd.partner1@lrpartner.com.broken   |''');
 
-		LocalFile.JSONUser.tearDownUsersViaSupport(table = '''| pjd.customer1@lrcustomer.com.broken |
+		JSONUser.tearDownUsersViaSupport(table = '''| pjd.customer1@lrcustomer.com.broken |
 	| pjd.customer2@lrcustomer.com.broken |
 	| pjd.partner1@lrpartner.com.broken   |''');
 
-		LocalFile.JSONUser.tearDownUsersViaKoroneiki(table = '''| pjd.customer1@lrcustomer.com.broken |
+		JSONUser.tearDownUsersViaKoroneiki(table = '''| pjd.customer1@lrcustomer.com.broken |
 	| pjd.customer2@lrcustomer.com.broken |
 	| pjd.partner1@lrpartner.com.broken   |''');
 
-		LocalFile.KoroneikiContactAPI._tearDownContacts(table = '''| pjd.customer1@lrcustomer.com.broken |
+		KoroneikiContactAPI._tearDownContacts(table = '''| pjd.customer1@lrcustomer.com.broken |
 	| pjd.customer2@lrcustomer.com.broken |
 	| pjd.partner1@lrpartner.com.broken   |''');
 
-		LocalFile.JSONOkta.tearDownUsers(table = '''| pjd.customer1@lrcustomer.com.broken |
+		JSONOkta.tearDownUsers(table = '''| pjd.customer1@lrcustomer.com.broken |
 	| pjd.customer2@lrcustomer.com.broken |
 	| pjd.partner1@lrpartner.com.broken   |''');
 
-		LocalFile.ZendeskUserAPI._getMultipleUserIdsByEmailAddress(table = '''| pjd.customer1@lrcustomer.com.broken |
+		ZendeskUserAPI._getMultipleUserIdsByEmailAddress(table = '''| pjd.customer1@lrcustomer.com.broken |
 	| pjd.customer2@lrcustomer.com.broken |
 	| pjd.partner1@lrpartner.com.broken   |''');
 
-		LocalFile.ZendeskUserAPI._tearDownUsersByIdList(userIds = ${staticUserIdList});
+		ZendeskUserAPI._tearDownUsersByIdList(userIds = ${staticUserIdList});
 
-		LocalFile.ZendeskOrganizationAPI._getMultipleOrganizationExternalIdsByOrganizationNameIfStillPresent(table = '''| Zenpar - ${staticCompanyName} |
+		ZendeskOrganizationAPI._getMultipleOrganizationExternalIdsByOrganizationNameIfStillPresent(table = '''| Zenpar - ${staticCompanyName} |
 	| Pjdzen - ${staticProjectName} |
 	| Dupzen - ${staticProjectName} |''');
 
-		LocalFile.ZendeskOrganizationAPI._tearDownOrganizationsByExternalIdList(organizationExternalIds = ${staticOrganizationExternalIdList});
+		ZendeskOrganizationAPI._tearDownOrganizationsByExternalIdList(organizationExternalIds = ${staticOrganizationExternalIdList});
 
-		LocalFile.ZendeskUserAPI._tearDownUserById(userId = ${staticDefaultUserId1});
+		ZendeskUserAPI._tearDownUserById(userId = ${staticDefaultUserId1});
 
-		LocalFile.ZendeskUserAPI._tearDownUserById(userId = ${staticDefaultUserId2});
+		ZendeskUserAPI._tearDownUserById(userId = ${staticDefaultUserId2});
 
-		LocalFile.ZendeskUserAPI._tearDownUserById(userId = ${staticDefaultUserId3});
+		ZendeskUserAPI._tearDownUserById(userId = ${staticDefaultUserId3});
 
-		LocalFile.OSBAdmin.logoutAndLoginToSupport(
+		OSBAdmin.logoutAndLoginToSupport(
 			userEmailAddress = "amos.fong@liferay.com.broken",
 			userPassword = "test");
 
-		LocalFile.OSBAdminProject.removeNonSourceCodeAccessUsersFromGitHub();
+		OSBAdminProject.removeNonSourceCodeAccessUsersFromGitHub();
 	}
 
 	test Addduplicatesourcecodeaccessuser {
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Pjdzen - ${staticProjectName}",
 			productName = "DXP Production",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -169,7 +169,7 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Pjdzen - ${staticProjectName}",
 			productName = "Platinum Subscription",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -179,77 +179,77 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+		KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
 
-		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "PJDZENPJDZEN");
+		JSONOSBAccount.viewSupportOrganizationSync(accountCode = "PJDZENPJDZEN");
 
-		LocalFile.OSBAdmin.loginToSupport(
+		OSBAdmin.loginToSupport(
 			userEmailAddress = ${staticSupportAdminEmailAdress},
 			userPassword = ${staticSupportAdminPassword});
 
-		LocalFile.ProjectDetails.gotoProjectDetailsPage();
+		ProjectDetails.gotoProjectDetailsPage();
 
-		LocalFile.ProjectDetails.searchProject(projectName = "Pjdzen - ${staticProjectName}");
+		ProjectDetails.searchProject(projectName = "Pjdzen - ${staticProjectName}");
 
-		LocalFile.ProjectDetails.gotoProject(projectName = "Pjdzen - ${staticProjectName}");
+		ProjectDetails.gotoProject(projectName = "Pjdzen - ${staticProjectName}");
 
-		LocalFile.ProjectDetails.gotoSourceCodeAccess();
+		ProjectDetails.gotoSourceCodeAccess();
 
-		LocalFile.ProjectDetails.addSourceCodeAccessUser(table = '''| Name            | Info Services QA           |
+		ProjectDetails.addSourceCodeAccessUser(table = '''| Name            | Info Services QA           |
 	| Email Address   | info.services.qa@gmail.com |
 	| GitHub Username | infoservicesqa             |''');
 
-		LocalFile.ProjectDetails.viewSourceCodeAccessUserPanel(
+		ProjectDetails.viewSourceCodeAccessUserPanel(
 			table = '''| Name            | Info Services QA           |
 	| Email Address   | info.services.qa@gmail.com |
 	| GitHub Username | infoservicesqa             |''',
 			userEmailAddress = "info.services.qa@gmail.com");
 
-		LocalFile.ProjectDetails.viewSourceCodeAccessUserDetails(
+		ProjectDetails.viewSourceCodeAccessUserDetails(
 			table = '''| Name            | Info Services QA           |
 	| Email Address   | info.services.qa@gmail.com |
 	| GitHub Username | infoservicesqa             |''',
 			userEmailAddress = "info.services.qa@gmail.com");
 
-		LocalFile.ZendeskHomepage.pause(timeInSeconds = 30);
+		ZendeskHomepage.pause(timeInSeconds = 30);
 
-		LocalFile.GitHub.acceptGitHubInvitation(
+		GitHub.acceptGitHubInvitation(
 			userGitHubUsername = "infoservicesqa",
 			userPassword = "rejoicealways123");
 
-		LocalFile.GitHub.viewISSupportIntegrationGitHubRespository(
+		GitHub.viewISSupportIntegrationGitHubRespository(
 			userGitHubUsername = "infoservicesqa",
 			userPassword = "rejoicealways123");
 
-		LocalFile.ProjectDetails.gotoProjectDetailsPage();
+		ProjectDetails.gotoProjectDetailsPage();
 
-		LocalFile.ProjectDetails.searchProject(projectName = "Pjdzen - ${staticProjectName}");
+		ProjectDetails.searchProject(projectName = "Pjdzen - ${staticProjectName}");
 
-		LocalFile.ProjectDetails.gotoProject(projectName = "Pjdzen - ${staticProjectName}");
+		ProjectDetails.gotoProject(projectName = "Pjdzen - ${staticProjectName}");
 
-		LocalFile.ProjectDetails.gotoSourceCodeAccess();
+		ProjectDetails.gotoSourceCodeAccess();
 
-		LocalFile.ProjectDetails.clickSourceCodeAccessAddUserButton();
+		ProjectDetails.clickSourceCodeAccessAddUserButton();
 
-		LocalFile.ProjectDetails.populateSourceCodeAccessUserForm(table = '''| Name            | Info Services QA           |
+		ProjectDetails.populateSourceCodeAccessUserForm(table = '''| Name            | Info Services QA           |
 	| Email Address   | info.services.qa@gmail.com |
 	| GitHub Username | infoservicesqa             |''');
 
-		LocalFile.ProjectDetails.clickSourceCodeAccessFormSubmitButton();
+		ProjectDetails.clickSourceCodeAccessFormSubmitButton();
 
-		LocalFile.ProjectDetails.viewSourceCodeAccessFormErrors(table = '''| Main Error |  Please provide a unique GitHub username |''');
+		ProjectDetails.viewSourceCodeAccessFormErrors(table = '''| Main Error |  Please provide a unique GitHub username |''');
 
-		LocalFile.ProjectDetails.populateSourceCodeAccessUserForm(table = '''| Name            | Info Service QA           |
+		ProjectDetails.populateSourceCodeAccessUserForm(table = '''| Name            | Info Service QA           |
 	| Email Address   | info.service.qa@gmail.com |
 	| GitHub Username | infoservicesqa            |''');
 
-		LocalFile.ProjectDetails.clickSourceCodeAccessFormSubmitButton();
+		ProjectDetails.clickSourceCodeAccessFormSubmitButton();
 
-		LocalFile.ProjectDetails.viewSourceCodeAccessFormErrors(table = '''| Main Error |  Please provide a unique GitHub username |''');
+		ProjectDetails.viewSourceCodeAccessFormErrors(table = '''| Main Error |  Please provide a unique GitHub username |''');
 	}
 
 	test Addsourcecodeaccessuseronpartneraccount {
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Zenpar - ${staticCompanyName}",
 			productName = "Service Partnership",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -259,59 +259,59 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Partner");
+		KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Partner");
 
-		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Partner");
+		KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Partner");
 
-		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+		ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
 
-		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "ZENPARZENPAR");
+		JSONOSBAccount.viewSupportOrganizationSync(accountCode = "ZENPARZENPAR");
 
-		LocalFile.JSONUser.viewSupportUserSync(userEmailAddress = "pjd.partner1@lrpartner.com.broken");
+		JSONUser.viewSupportUserSync(userEmailAddress = "pjd.partner1@lrpartner.com.broken");
 
-		LocalFile.JSONUser.updateSupportPassword(
+		JSONUser.updateSupportPassword(
 			userEmailAddress = "pjd.partner1@lrpartner.com.broken",
 			userPassword = ${staticSupportUserTestPassword});
 
-		LocalFile.JSONUser.assignUserToSupportGroup(
+		JSONUser.assignUserToSupportGroup(
 			groupName = "Help Center",
 			userEmailAddress = "pjd.partner1@lrpartner.com.broken");
 
-		LocalFile.OSBAdmin.logoutAndLoginToSupport(
+		OSBAdmin.logoutAndLoginToSupport(
 			userEmailAddress = "pjd.partner1@lrpartner.com.broken",
 			userPassword = ${staticSupportUserTestPassword});
 
-		LocalFile.ProjectDetails.gotoProjectDetailsPage();
+		ProjectDetails.gotoProjectDetailsPage();
 
-		LocalFile.ProjectDetails.gotoSourceCodeAccess();
+		ProjectDetails.gotoSourceCodeAccess();
 
-		LocalFile.ProjectDetails.addSourceCodeAccessUser(table = '''| Name            | Info Services QA           |
+		ProjectDetails.addSourceCodeAccessUser(table = '''| Name            | Info Services QA           |
 	| Email Address   | info.services.qa@gmail.com |
 	| GitHub Username | infoservicesqa             |''');
 
-		LocalFile.ProjectDetails.viewSourceCodeAccessUserPanel(
+		ProjectDetails.viewSourceCodeAccessUserPanel(
 			table = '''| Name            | Info Services QA           |
 	| Email Address   | info.services.qa@gmail.com |
 	| GitHub Username | infoservicesqa             |''',
 			userEmailAddress = "info.services.qa@gmail.com");
 
-		LocalFile.ProjectDetails.viewSourceCodeAccessUserDetails(
+		ProjectDetails.viewSourceCodeAccessUserDetails(
 			table = '''| Name            | Info Services QA           |
 	| Email Address   | info.services.qa@gmail.com |
 	| GitHub Username | infoservicesqa             |''',
 			userEmailAddress = "info.services.qa@gmail.com");
 
-		LocalFile.GitHub.acceptGitHubInvitation(
+		GitHub.acceptGitHubInvitation(
 			userGitHubUsername = "infoservicesqa",
 			userPassword = "rejoicealways123");
 
-		LocalFile.GitHub.viewISSupportIntegrationGitHubRespository(
+		GitHub.viewISSupportIntegrationGitHubRespository(
 			userGitHubUsername = "infoservicesqa",
 			userPassword = "rejoicealways123");
 	}
 
 	test Deletesourcecodeaccessuser {
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Pjdzen - ${staticProjectName}",
 			productName = "DXP Production",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -321,7 +321,7 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Pjdzen - ${staticProjectName}",
 			productName = "Platinum Subscription",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -331,59 +331,59 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+		KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
 
-		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "PJDZENPJDZEN");
+		JSONOSBAccount.viewSupportOrganizationSync(accountCode = "PJDZENPJDZEN");
 
-		LocalFile.OSBAdmin.loginToSupport(
+		OSBAdmin.loginToSupport(
 			userEmailAddress = ${staticSupportAdminEmailAdress},
 			userPassword = ${staticSupportAdminPassword});
 
-		LocalFile.ProjectDetails.gotoProjectDetailsPage();
+		ProjectDetails.gotoProjectDetailsPage();
 
-		LocalFile.ProjectDetails.searchProject(projectName = "Pjdzen - ${staticProjectName}");
+		ProjectDetails.searchProject(projectName = "Pjdzen - ${staticProjectName}");
 
-		LocalFile.ProjectDetails.gotoProject(projectName = "Pjdzen - ${staticProjectName}");
+		ProjectDetails.gotoProject(projectName = "Pjdzen - ${staticProjectName}");
 
-		LocalFile.ProjectDetails.gotoSourceCodeAccess();
+		ProjectDetails.gotoSourceCodeAccess();
 
-		LocalFile.ProjectDetails.addSourceCodeAccessUser(table = '''| Name            | Info Services QA           |
+		ProjectDetails.addSourceCodeAccessUser(table = '''| Name            | Info Services QA           |
 	| Email Address   | info.services.qa@gmail.com |
 	| GitHub Username | infoservicesqa             |''');
 
-		LocalFile.ProjectDetails.viewSourceCodeAccessUserPanel(
+		ProjectDetails.viewSourceCodeAccessUserPanel(
 			table = '''| Name            | Info Services QA           |
 	| Email Address   | info.services.qa@gmail.com |
 	| GitHub Username | infoservicesqa             |''',
 			userEmailAddress = "info.services.qa@gmail.com");
 
-		LocalFile.ProjectDetails.viewSourceCodeAccessUserDetails(
+		ProjectDetails.viewSourceCodeAccessUserDetails(
 			table = '''| Name            | Info Services QA           |
 	| Email Address   | info.services.qa@gmail.com |
 	| GitHub Username | infoservicesqa             |''',
 			userEmailAddress = "info.services.qa@gmail.com");
 
-		LocalFile.GitHub.acceptGitHubInvitation(
+		GitHub.acceptGitHubInvitation(
 			userGitHubUsername = "infoservicesqa",
 			userPassword = "rejoicealways123");
 
-		LocalFile.ProjectDetails.gotoProjectDetailsPage();
+		ProjectDetails.gotoProjectDetailsPage();
 
-		LocalFile.ProjectDetails.searchProject(projectName = "Pjdzen - ${staticProjectName}");
+		ProjectDetails.searchProject(projectName = "Pjdzen - ${staticProjectName}");
 
-		LocalFile.ProjectDetails.gotoProject(projectName = "Pjdzen - ${staticProjectName}");
+		ProjectDetails.gotoProject(projectName = "Pjdzen - ${staticProjectName}");
 
-		LocalFile.ProjectDetails.gotoSourceCodeAccess();
+		ProjectDetails.gotoSourceCodeAccess();
 
-		LocalFile.ProjectDetails.deleteSourceCodeAccessUser(userEmailAddress = "info.services.qa@gmail.com");
+		ProjectDetails.deleteSourceCodeAccessUser(userEmailAddress = "info.services.qa@gmail.com");
 
-		LocalFile.GitHub.viewNoGitHubRespository(
+		GitHub.viewNoGitHubRespository(
 			userGitHubUsername = "infoservicesqa",
 			userPassword = "rejoicealways123");
 	}
 
 	test Deletesourcecodeaccessuserfromclosedproject {
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Pjdzen - ${staticProjectName}",
 			productName = "DXP Production",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -393,7 +393,7 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Pjdzen - ${staticProjectName}",
 			productName = "Platinum Subscription",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -403,55 +403,55 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+		KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
 
-		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "PJDZENPJDZEN");
+		JSONOSBAccount.viewSupportOrganizationSync(accountCode = "PJDZENPJDZEN");
 
-		LocalFile.KoroneikiAccountAPI._updateAccount(
+		KoroneikiAccountAPI._updateAccount(
 			accountName = "Pjdzen - ${staticProjectName}",
 			table = '''| Status | Closed | |''');
 
-		LocalFile.OSBAdmin.loginToSupport(
+		OSBAdmin.loginToSupport(
 			userEmailAddress = ${staticSupportAdminEmailAdress},
 			userPassword = ${staticSupportAdminPassword});
 
-		LocalFile.ProjectDetails.gotoProjectDetailsPage();
+		ProjectDetails.gotoProjectDetailsPage();
 
-		LocalFile.ProjectDetails.searchProject(projectName = "Pjdzen - ${staticProjectName}");
+		ProjectDetails.searchProject(projectName = "Pjdzen - ${staticProjectName}");
 
-		LocalFile.ProjectDetails.gotoProject(projectName = "Pjdzen - ${staticProjectName}");
+		ProjectDetails.gotoProject(projectName = "Pjdzen - ${staticProjectName}");
 
-		LocalFile.ProjectDetails.gotoSourceCodeAccess();
+		ProjectDetails.gotoSourceCodeAccess();
 
-		LocalFile.ProjectDetails.addSourceCodeAccessUserOnClosedProject(table = '''| Name            | Info Services QA           |
+		ProjectDetails.addSourceCodeAccessUserOnClosedProject(table = '''| Name            | Info Services QA           |
 	| Email Address   | info.services.qa@gmail.com |
 	| GitHub Username | infoservicesqa             |''');
 
-		LocalFile.ProjectDetails.viewSourceCodeAccessUserPanel(
+		ProjectDetails.viewSourceCodeAccessUserPanel(
 			table = '''| Name            | Info Services QA           |
 	| Email Address   | info.services.qa@gmail.com |
 	| GitHub Username | infoservicesqa             |''',
 			userEmailAddress = "info.services.qa@gmail.com");
 
-		LocalFile.ProjectDetails.viewSourceCodeAccessUserDetails(
+		ProjectDetails.viewSourceCodeAccessUserDetails(
 			table = '''| Name            | Info Services QA           |
 	| Email Address   | info.services.qa@gmail.com |
 	| GitHub Username | infoservicesqa             |''',
 			userEmailAddress = "info.services.qa@gmail.com");
 
-		LocalFile.ProjectDetails.deleteSourceCodeAccessUser(userEmailAddress = "info.services.qa@gmail.com");
+		ProjectDetails.deleteSourceCodeAccessUser(userEmailAddress = "info.services.qa@gmail.com");
 
-		LocalFile.GitHub.viewNoGitHubInvitation(
+		GitHub.viewNoGitHubInvitation(
 			userGitHubUsername = "infoservicesqa",
 			userPassword = "rejoicealways123");
 
-		LocalFile.GitHub.viewNoGitHubRespository(
+		GitHub.viewNoGitHubRespository(
 			userGitHubUsername = "infoservicesqa",
 			userPassword = "rejoicealways123");
 	}
 
 	test Viewsourcecodeaccessformerrors {
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Pjdzen - ${staticProjectName}",
 			productName = "DXP Production",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -461,7 +461,7 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Pjdzen - ${staticProjectName}",
 			productName = "Platinum Subscription",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -471,83 +471,84 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+		KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
 
-		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "PJDZENPJDZEN");
+		JSONOSBAccount.viewSupportOrganizationSync(accountCode = "PJDZENPJDZEN");
 
-		LocalFile.OSBAdmin.loginToSupport(
+		OSBAdmin.loginToSupport(
 			userEmailAddress = ${staticSupportAdminEmailAdress},
 			userPassword = ${staticSupportAdminPassword});
 
-		LocalFile.ProjectDetails.gotoProjectDetailsPage();
+		ProjectDetails.gotoProjectDetailsPage();
 
-		LocalFile.ProjectDetails.searchProject(projectName = "Pjdzen - ${staticProjectName}");
+		ProjectDetails.searchProject(projectName = "Pjdzen - ${staticProjectName}");
 
-		LocalFile.ProjectDetails.gotoProject(projectName = "Pjdzen - ${staticProjectName}");
+		ProjectDetails.gotoProject(projectName = "Pjdzen - ${staticProjectName}");
 
-		LocalFile.ProjectDetails.gotoSourceCodeAccess();
+		ProjectDetails.gotoSourceCodeAccess();
 
-		LocalFile.ProjectDetails.clickSourceCodeAccessAddUserButton();
+		ProjectDetails.clickSourceCodeAccessAddUserButton();
 
-		LocalFile.ProjectDetails.populateSourceCodeAccessUserForm(table = '''| Name            | |
+		ProjectDetails.populateSourceCodeAccessUserForm(table = '''| Name            | |
 	| Email Address   | |
 	| GitHub Username | |''');
 
-		LocalFile.ProjectDetails.clickSourceCodeAccessFormSubmitButton();
+		ProjectDetails.clickSourceCodeAccessFormSubmitButton();
 
-		LocalFile.ProjectDetails.viewSourceCodeAccessFormErrors(table = '''| Main Error                  | Please correct the following fields: Name, Email Address, GitHub Username |
+		ProjectDetails.viewSourceCodeAccessFormErrors(table = '''| Main Error                  | Please correct the following fields: Name, Email Address, GitHub Username |
 	| Name Field Error            | This field is required.                                                   |
 	| Email Address Field Error   | This field is required.                                                   |
 	| GitHub Username Field Error | This field is required.                                                   |''');
 
-		LocalFile.ProjectDetails.populateSourceCodeAccessUserForm(table = '''| Name            | Info                |
+		ProjectDetails.populateSourceCodeAccessUserForm(table = '''| Name            | Info                |
 	| Email Address   | info.services.qa    |
 	| GitHub Username | infoservicesqa78592 |''');
 
-		LocalFile.ProjectDetails.clickSourceCodeAccessFormSubmitButton();
+		ProjectDetails.clickSourceCodeAccessFormSubmitButton();
 
-		LocalFile.ProjectDetails.viewSourceCodeAccessFormErrors(table = '''| Main Error                  | Please correct the following fields: Email Address |
+		ProjectDetails.viewSourceCodeAccessFormErrors(table = '''| Main Error                  | Please correct the following fields: Email Address |
 	| Email Address Field Error   | Invalid Format                                     |''');
 
-		LocalFile.ProjectDetails.populateSourceCodeAccessUserForm(table = '''| Name            | Info                   |
+		ProjectDetails.populateSourceCodeAccessUserForm(table = '''| Name            | Info                   |
 	| Email Address   | info.services.qa@gmail |
 	| GitHub Username | infoservicesqa78592    |''');
 
-		LocalFile.ProjectDetails.clickSourceCodeAccessFormSubmitButton();
+		ProjectDetails.clickSourceCodeAccessFormSubmitButton();
 
-		LocalFile.ProjectDetails.viewSourceCodeAccessFormErrors(table = '''| Main Error                  | Please correct the following fields: Email Address |
+		ProjectDetails.viewSourceCodeAccessFormErrors(table = '''| Main Error                  | Please correct the following fields: Email Address |
 	| Email Address Field Error   | Invalid Format                                     |''');
 
-		LocalFile.ProjectDetails.populateSourceCodeAccessUserForm(table = '''| Name            | Info Services          |
+		ProjectDetails.populateSourceCodeAccessUserForm(table = '''| Name            | Info Services          |
 	| Email Address   | info.services.qa@gmail |
 	| GitHub Username | infoservicesqa78592    |''');
 
-		LocalFile.ProjectDetails.clickSourceCodeAccessFormSubmitButton();
+		ProjectDetails.clickSourceCodeAccessFormSubmitButton();
 
-		LocalFile.ProjectDetails.viewSourceCodeAccessFormErrors(table = '''| Main Error                | Please correct the following fields: Email Address |
+		ProjectDetails.viewSourceCodeAccessFormErrors(table = '''| Main Error                | Please correct the following fields: Email Address |
 	| Email Address Field Error | Invalid Format                                     |''');
 
-		LocalFile.ProjectDetails.populateSourceCodeAccessUserForm(table = '''| Name            | Info Services              |
+		ProjectDetails.populateSourceCodeAccessUserForm(table = '''| Name            | Info Services              |
 	| Email Address   | info.services.qa@gmail.com |
 	| GitHub Username | infoservicesqa.78592       |''');
 
-		LocalFile.ProjectDetails.clickSourceCodeAccessFormSubmitButton();
+		ProjectDetails.clickSourceCodeAccessFormSubmitButton();
 
-		LocalFile.ProjectDetails.viewSourceCodeAccessFormErrors(table = '''| Main Error                  | Error: Please correct the following fields: GitHub Username |
+		ProjectDetails.viewSourceCodeAccessFormErrors(table = '''| Main Error                  | Error: Please correct the following fields: GitHub Username |
 	| GitHub Username Field Error | Incorrect Username                                          |''');
 
-		LocalFile.ProjectDetails.populateSourceCodeAccessUserForm(table = '''| Name            | Info Services              |
+		ProjectDetails.populateSourceCodeAccessUserForm(table = '''| Name            | Info Services              |
 	| Email Address   | info.services.qa@gmail.com |
 	| GitHub Username | infoservicesqa78592        |''');
 
-		LocalFile.ProjectDetails.clickSourceCodeAccessFormSubmitButton();
+		ProjectDetails.clickSourceCodeAccessFormSubmitButton();
 
-		LocalFile.ProjectDetails.viewSourceCodeAccessFormErrors(table = '''| Main Error | Please provide a valid GitHub user or collaborator. |''');
+		ProjectDetails.viewSourceCodeAccessFormErrors(table = '''| Main Error | Please provide a valid GitHub user or collaborator. |''');
 	}
 
-	property help.center.acceptance = "true";
+
 	test Viewsourcecodeaccessuser {
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+	property help.center.acceptance = "true";
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Pjdzen - ${staticProjectName}",
 			productName = "DXP Production",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -557,7 +558,7 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Pjdzen - ${staticProjectName}",
 			productName = "Platinum Subscription",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -567,49 +568,49 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+		KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
 
-		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "PJDZENPJDZEN");
+		JSONOSBAccount.viewSupportOrganizationSync(accountCode = "PJDZENPJDZEN");
 
-		LocalFile.OSBAdmin.loginToSupport(
+		OSBAdmin.loginToSupport(
 			userEmailAddress = ${staticSupportAdminEmailAdress},
 			userPassword = ${staticSupportAdminPassword});
 
-		LocalFile.ProjectDetails.gotoProjectDetailsPage();
+		ProjectDetails.gotoProjectDetailsPage();
 
-		LocalFile.ProjectDetails.searchProject(projectName = "Pjdzen - ${staticProjectName}");
+		ProjectDetails.searchProject(projectName = "Pjdzen - ${staticProjectName}");
 
-		LocalFile.ProjectDetails.gotoProject(projectName = "Pjdzen - ${staticProjectName}");
+		ProjectDetails.gotoProject(projectName = "Pjdzen - ${staticProjectName}");
 
-		LocalFile.ProjectDetails.gotoSourceCodeAccess();
+		ProjectDetails.gotoSourceCodeAccess();
 
-		LocalFile.ProjectDetails.addSourceCodeAccessUser(table = '''| Name            | Info Services QA           |
+		ProjectDetails.addSourceCodeAccessUser(table = '''| Name            | Info Services QA           |
 	| Email Address   | info.services.qa@gmail.com |
 	| GitHub Username | infoservicesqa             |''');
 
-		LocalFile.ProjectDetails.viewSourceCodeAccessUserPanel(
+		ProjectDetails.viewSourceCodeAccessUserPanel(
 			table = '''| Name            | Info Services QA           |
 	| Email Address   | info.services.qa@gmail.com |
 	| GitHub Username | infoservicesqa             |''',
 			userEmailAddress = "info.services.qa@gmail.com");
 
-		LocalFile.ProjectDetails.viewSourceCodeAccessUserDetails(
+		ProjectDetails.viewSourceCodeAccessUserDetails(
 			table = '''| Name            | Info Services QA           |
 	| Email Address   | info.services.qa@gmail.com |
 	| GitHub Username | infoservicesqa             |''',
 			userEmailAddress = "info.services.qa@gmail.com");
 
-		LocalFile.GitHub.acceptGitHubInvitation(
+		GitHub.acceptGitHubInvitation(
 			userGitHubUsername = "infoservicesqa",
 			userPassword = "rejoicealways123");
 
-		LocalFile.GitHub.viewISSupportIntegrationGitHubRespository(
+		GitHub.viewISSupportIntegrationGitHubRespository(
 			userGitHubUsername = "infoservicesqa",
 			userPassword = "rejoicealways123");
 	}
 
 	test Viewsourcecodeaccessuseraddedandremovedbeforeprojectapproval {
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Pjdzen - ${staticProjectName}",
 			productName = "DXP Production",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -619,7 +620,7 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Pjdzen - ${staticProjectName}",
 			productName = "Platinum Subscription",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -629,63 +630,63 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+		KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
 
-		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "PJDZENPJDZEN");
+		JSONOSBAccount.viewSupportOrganizationSync(accountCode = "PJDZENPJDZEN");
 
-		LocalFile.KoroneikiAccountAPI._updateAccount(
+		KoroneikiAccountAPI._updateAccount(
 			accountName = "Pjdzen - ${staticProjectName}",
 			table = '''| Status | Closed | |''');
 
-		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+		KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
 
-		LocalFile.OSBAdmin.loginToSupport(
+		OSBAdmin.loginToSupport(
 			userEmailAddress = ${staticSupportAdminEmailAdress},
 			userPassword = ${staticSupportAdminPassword});
 
-		LocalFile.ProjectDetails.gotoProjectDetailsPage();
+		ProjectDetails.gotoProjectDetailsPage();
 
-		LocalFile.ProjectDetails.searchProject(projectName = "Pjdzen - ${staticProjectName}");
+		ProjectDetails.searchProject(projectName = "Pjdzen - ${staticProjectName}");
 
-		LocalFile.ProjectDetails.gotoProject(projectName = "Pjdzen - ${staticProjectName}");
+		ProjectDetails.gotoProject(projectName = "Pjdzen - ${staticProjectName}");
 
-		LocalFile.ProjectDetails.gotoSourceCodeAccess();
+		ProjectDetails.gotoSourceCodeAccess();
 
-		LocalFile.ProjectDetails.addSourceCodeAccessUserOnClosedProject(table = '''| Name            | Info Services QA           |
+		ProjectDetails.addSourceCodeAccessUserOnClosedProject(table = '''| Name            | Info Services QA           |
 	| Email Address   | info.services.qa@gmail.com |
 	| GitHub Username | infoservicesqa             |''');
 
-		LocalFile.ProjectDetails.viewSourceCodeAccessUserPanel(
+		ProjectDetails.viewSourceCodeAccessUserPanel(
 			table = '''| Name            | Info Services QA           |
 	| Email Address   | info.services.qa@gmail.com |
 	| GitHub Username | infoservicesqa             |''',
 			userEmailAddress = "info.services.qa@gmail.com");
 
-		LocalFile.ProjectDetails.viewSourceCodeAccessUserDetails(
+		ProjectDetails.viewSourceCodeAccessUserDetails(
 			table = '''| Name            | Info Services QA           |
 	| Email Address   | info.services.qa@gmail.com |
 	| GitHub Username | infoservicesqa             |''',
 			userEmailAddress = "info.services.qa@gmail.com");
 
-		LocalFile.ProjectDetails.deleteSourceCodeAccessUser(userEmailAddress = "info.services.qa@gmail.com");
+		ProjectDetails.deleteSourceCodeAccessUser(userEmailAddress = "info.services.qa@gmail.com");
 
-		LocalFile.KoroneikiAccountAPI._updateAccount(
+		KoroneikiAccountAPI._updateAccount(
 			accountName = "Pjdzen - ${staticProjectName}",
 			table = '''| Status | Active | |''');
 
-		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+		KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
 
-		LocalFile.GitHub.viewNoGitHubInvitation(
+		GitHub.viewNoGitHubInvitation(
 			userGitHubUsername = "infoservicesqa",
 			userPassword = "rejoicealways123");
 
-		LocalFile.GitHub.viewNoGitHubRespository(
+		GitHub.viewNoGitHubRespository(
 			userGitHubUsername = "infoservicesqa",
 			userPassword = "rejoicealways123");
 	}
 
 	test Viewsourcecodeaccessuseraddedbyteammember {
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Pjdzen - ${staticProjectName}",
 			productName = "DXP Production",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -695,7 +696,7 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Pjdzen - ${staticProjectName}",
 			productName = "Platinum Subscription",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -705,81 +706,81 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+		KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
 
-		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer");
+		KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer");
 
-		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - DXP");
+		KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - DXP");
 
-		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+		ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
 
-		LocalFile.JSONUser.viewSupportUserSync(userEmailAddress = "pjd.customer1@lrcustomer.com.broken");
+		JSONUser.viewSupportUserSync(userEmailAddress = "pjd.customer1@lrcustomer.com.broken");
 
-		LocalFile.JSONUser.viewSupportUserSync(userEmailAddress = "pjd.customer2@lrcustomer.com.broken");
+		JSONUser.viewSupportUserSync(userEmailAddress = "pjd.customer2@lrcustomer.com.broken");
 
-		LocalFile.JSONUser.updateSupportPassword(
+		JSONUser.updateSupportPassword(
 			userEmailAddress = "pjd.customer1@lrcustomer.com.broken",
 			userPassword = ${staticSupportUserTestPassword});
 
-		LocalFile.JSONUser.updateSupportPassword(
+		JSONUser.updateSupportPassword(
 			userEmailAddress = "pjd.customer2@lrcustomer.com.broken",
 			userPassword = ${staticSupportUserTestPassword});
 
-		LocalFile.JSONUser.assignUserToSupportGroup(
+		JSONUser.assignUserToSupportGroup(
 			groupName = "Help Center",
 			userEmailAddress = "pjd.customer1@lrcustomer.com.broken");
 
-		LocalFile.JSONUser.assignUserToSupportGroup(
+		JSONUser.assignUserToSupportGroup(
 			groupName = "Help Center",
 			userEmailAddress = "pjd.customer2@lrcustomer.com.broken");
 
-		LocalFile.JSONUser.assignUserToSupportRole(
+		JSONUser.assignUserToSupportRole(
 			roleName = "Customer - DXP",
 			userEmailAddress = "pjd.customer1@lrcustomer.com.broken");
 
-		LocalFile.JSONUser.assignUserToSupportRole(
+		JSONUser.assignUserToSupportRole(
 			roleName = "Customer - DXP",
 			userEmailAddress = "pjd.customer2@lrcustomer.com.broken");
 
-		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "PJDZENPJDZEN");
+		JSONOSBAccount.viewSupportOrganizationSync(accountCode = "PJDZENPJDZEN");
 
-		LocalFile.OSBAdmin.loginToSupport(
+		OSBAdmin.loginToSupport(
 			userEmailAddress = "pjd.customer1@lrcustomer.com.broken",
 			userPassword = ${staticSupportUserTestPassword});
 
-		LocalFile.ProjectDetails.gotoProjectDetailsPage();
+		ProjectDetails.gotoProjectDetailsPage();
 
-		LocalFile.ProjectDetails.gotoSourceCodeAccess();
+		ProjectDetails.gotoSourceCodeAccess();
 
-		LocalFile.ProjectDetails.addSourceCodeAccessUser(table = '''| Name            | Info Services QA           |
+		ProjectDetails.addSourceCodeAccessUser(table = '''| Name            | Info Services QA           |
 	| Email Address   | info.services.qa@gmail.com |
 	| GitHub Username | infoservicesqa             |''');
 
-		LocalFile.ProjectDetails.viewSourceCodeAccessUserPanel(
+		ProjectDetails.viewSourceCodeAccessUserPanel(
 			table = '''| Name            | Info Services QA           |
 	| Email Address   | info.services.qa@gmail.com |
 	| GitHub Username | infoservicesqa             |''',
 			userEmailAddress = "info.services.qa@gmail.com");
 
-		LocalFile.ProjectDetails.viewSourceCodeAccessUserDetails(
+		ProjectDetails.viewSourceCodeAccessUserDetails(
 			table = '''| Name            | Info Services QA           |
 	| Email Address   | info.services.qa@gmail.com |
 	| GitHub Username | infoservicesqa             |''',
 			userEmailAddress = "info.services.qa@gmail.com");
 
-		LocalFile.GitHub.acceptGitHubInvitation(
+		GitHub.acceptGitHubInvitation(
 			userGitHubUsername = "infoservicesqa",
 			userPassword = "rejoicealways123");
 
-		LocalFile.GitHub.viewISSupportIntegrationGitHubRespository(
+		GitHub.viewISSupportIntegrationGitHubRespository(
 			userGitHubUsername = "infoservicesqa",
 			userPassword = "rejoicealways123");
 	}
 
 	test Viewsourcecodeaccessuseraddedbyteammemberafterprojectexpiration {
-		LocalFile.KoroneikiProductPurchaseAPI.generateStaticPastStartAndEndDate();
+		KoroneikiProductPurchaseAPI.generateStaticPastStartAndEndDate();
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Pjdzen - ${staticProjectName}",
 			productName = "DXP Production",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -789,7 +790,7 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Pjdzen - ${staticProjectName}",
 			productName = "Platinum Subscription",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -799,75 +800,75 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+		KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
 
-		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer");
+		KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer");
 
-		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - DXP");
+		KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - DXP");
 
-		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+		ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
 
-		LocalFile.JSONUser.viewSupportUserSync(userEmailAddress = "pjd.customer1@lrcustomer.com.broken");
+		JSONUser.viewSupportUserSync(userEmailAddress = "pjd.customer1@lrcustomer.com.broken");
 
-		LocalFile.JSONUser.viewSupportUserSync(userEmailAddress = "pjd.customer2@lrcustomer.com.broken");
+		JSONUser.viewSupportUserSync(userEmailAddress = "pjd.customer2@lrcustomer.com.broken");
 
-		LocalFile.JSONUser.updateSupportPassword(
+		JSONUser.updateSupportPassword(
 			userEmailAddress = "pjd.customer1@lrcustomer.com.broken",
 			userPassword = ${staticSupportUserTestPassword});
 
-		LocalFile.JSONUser.updateSupportPassword(
+		JSONUser.updateSupportPassword(
 			userEmailAddress = "pjd.customer2@lrcustomer.com.broken",
 			userPassword = ${staticSupportUserTestPassword});
 
-		LocalFile.JSONUser.assignUserToSupportGroup(
+		JSONUser.assignUserToSupportGroup(
 			groupName = "Help Center",
 			userEmailAddress = "pjd.customer1@lrcustomer.com.broken");
 
-		LocalFile.JSONUser.assignUserToSupportGroup(
+		JSONUser.assignUserToSupportGroup(
 			groupName = "Help Center",
 			userEmailAddress = "pjd.customer2@lrcustomer.com.broken");
 
-		LocalFile.JSONUser.assignUserToSupportRole(
+		JSONUser.assignUserToSupportRole(
 			roleName = "Customer - DXP",
 			userEmailAddress = "pjd.customer1@lrcustomer.com.broken");
 
-		LocalFile.JSONUser.assignUserToSupportRole(
+		JSONUser.assignUserToSupportRole(
 			roleName = "Customer - DXP",
 			userEmailAddress = "pjd.customer2@lrcustomer.com.broken");
 
-		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "PJDZENPJDZEN");
+		JSONOSBAccount.viewSupportOrganizationSync(accountCode = "PJDZENPJDZEN");
 
-		LocalFile.OSBAdmin.loginToSupport(
+		OSBAdmin.loginToSupport(
 			userEmailAddress = "pjd.customer1@lrcustomer.com.broken",
 			userPassword = ${staticSupportUserTestPassword});
 
-		LocalFile.ProjectDetails.gotoProjectDetailsPage();
+		ProjectDetails.gotoProjectDetailsPage();
 
-		LocalFile.ProjectDetails.gotoSourceCodeAccess();
+		ProjectDetails.gotoSourceCodeAccess();
 
-		LocalFile.ProjectDetails.addSourceCodeAccessUser(table = '''| Name            | Info Services QA           |
+		ProjectDetails.addSourceCodeAccessUser(table = '''| Name            | Info Services QA           |
 	| Email Address   | info.services.qa@gmail.com |
 	| GitHub Username | infoservicesqa             |''');
 
-		LocalFile.ProjectDetails.viewSourceCodeAccessUserPanel(
+		ProjectDetails.viewSourceCodeAccessUserPanel(
 			table = '''| Name            | Info Services QA           |
 	| Email Address   | info.services.qa@gmail.com |
 	| GitHub Username | infoservicesqa             |''',
 			userEmailAddress = "info.services.qa@gmail.com");
 
-		LocalFile.ProjectDetails.viewSourceCodeAccessUserDetails(
+		ProjectDetails.viewSourceCodeAccessUserDetails(
 			table = '''| Name            | Info Services QA           |
 	| Email Address   | info.services.qa@gmail.com |
 	| GitHub Username | infoservicesqa             |''',
 			userEmailAddress = "info.services.qa@gmail.com");
 
-		LocalFile.ZendeskHomepage.pause(timeInSeconds = 30);
+		ZendeskHomepage.pause(timeInSeconds = 30);
 
-		LocalFile.GitHub.acceptGitHubInvitation(
+		GitHub.acceptGitHubInvitation(
 			userGitHubUsername = "infoservicesqa",
 			userPassword = "rejoicealways123");
 
-		LocalFile.KoroneikiProductPurchaseAPI._updateProductPurchase(
+		KoroneikiProductPurchaseAPI._updateProductPurchase(
 			accountName = "Pjdzen - ${staticProjectName}",
 			productName = "DXP Production",
 			table = '''| End Date                | ${staticPastEndDate}         | |
@@ -876,7 +877,7 @@ definition {
 	| Start Date              | ${staticPastStartDate}       | |
 	| Status                  | Approved                     | |''');
 
-		LocalFile.KoroneikiProductPurchaseAPI._updateProductPurchase(
+		KoroneikiProductPurchaseAPI._updateProductPurchase(
 			accountName = "Pjdzen - ${staticProjectName}",
 			productName = "Platinum Subscription",
 			table = '''| End Date                | ${staticPastEndDate}         | |
@@ -885,17 +886,17 @@ definition {
 	| Start Date              | ${staticPastStartDate}       | |
 	| Status                  | Approved                     | |''');
 
-		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+		KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
 
-		LocalFile.ZendeskHomepage.pause(timeInSeconds = 5);
+		ZendeskHomepage.pause(timeInSeconds = 5);
 
-		LocalFile.GitHub.viewNoGitHubRespository(
+		GitHub.viewNoGitHubRespository(
 			userGitHubUsername = "infoservicesqa",
 			userPassword = "rejoicealways123");
 	}
 
 	test Viewsourcecodeaccessuseraddedtoclosedproject {
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Pjdzen - ${staticProjectName}",
 			productName = "DXP Production",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -905,7 +906,7 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Pjdzen - ${staticProjectName}",
 			productName = "Platinum Subscription",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -915,57 +916,57 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+		KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
 
-		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "PJDZENPJDZEN");
+		JSONOSBAccount.viewSupportOrganizationSync(accountCode = "PJDZENPJDZEN");
 
-		LocalFile.KoroneikiAccountAPI._updateAccount(
+		KoroneikiAccountAPI._updateAccount(
 			accountName = "Pjdzen - ${staticProjectName}",
 			table = '''| Status | Closed | |''');
 
-		LocalFile.OSBAdmin.loginToSupport(
+		OSBAdmin.loginToSupport(
 			userEmailAddress = ${staticSupportAdminEmailAdress},
 			userPassword = ${staticSupportAdminPassword});
 
-		LocalFile.ProjectDetails.gotoProjectDetailsPage();
+		ProjectDetails.gotoProjectDetailsPage();
 
-		LocalFile.ProjectDetails.searchProject(projectName = "Pjdzen - ${staticProjectName}");
+		ProjectDetails.searchProject(projectName = "Pjdzen - ${staticProjectName}");
 
-		LocalFile.ProjectDetails.gotoProject(projectName = "Pjdzen - ${staticProjectName}");
+		ProjectDetails.gotoProject(projectName = "Pjdzen - ${staticProjectName}");
 
-		LocalFile.ProjectDetails.gotoSourceCodeAccess();
+		ProjectDetails.gotoSourceCodeAccess();
 
-		LocalFile.ProjectDetails.addSourceCodeAccessUserOnClosedProject(table = '''| Name            | Info Services QA           |
+		ProjectDetails.addSourceCodeAccessUserOnClosedProject(table = '''| Name            | Info Services QA           |
 	| Email Address   | info.services.qa@gmail.com |
 	| GitHub Username | infoservicesqa             |''');
 
-		LocalFile.ProjectDetails.viewSourceCodeAccessUserPanel(
+		ProjectDetails.viewSourceCodeAccessUserPanel(
 			table = '''| Name            | Info Services QA           |
 	| Email Address   | info.services.qa@gmail.com |
 	| GitHub Username | infoservicesqa             |''',
 			userEmailAddress = "info.services.qa@gmail.com");
 
-		LocalFile.ProjectDetails.viewSourceCodeAccessUserDetails(
+		ProjectDetails.viewSourceCodeAccessUserDetails(
 			table = '''| Name            | Info Services QA           |
 	| Email Address   | info.services.qa@gmail.com |
 	| GitHub Username | infoservicesqa             |''',
 			userEmailAddress = "info.services.qa@gmail.com");
 
-		LocalFile.ZendeskHomepage.pause(timeInSeconds = 30);
+		ZendeskHomepage.pause(timeInSeconds = 30);
 
-		LocalFile.GitHub.viewNoGitHubInvitation(
+		GitHub.viewNoGitHubInvitation(
 			userGitHubUsername = "infoservicesqa",
 			userPassword = "rejoicealways123");
 
-		LocalFile.GitHub.viewNoGitHubRespository(
+		GitHub.viewNoGitHubRespository(
 			userGitHubUsername = "infoservicesqa",
 			userPassword = "rejoicealways123");
 	}
 
 	test Viewsourcecodeaccessuseraddedtoexpiredproject {
-		LocalFile.KoroneikiProductPurchaseAPI.generateStaticPastStartAndEndDate();
+		KoroneikiProductPurchaseAPI.generateStaticPastStartAndEndDate();
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Pjdzen - ${staticProjectName}",
 			productName = "DXP Production",
 			table = '''| End Date                | ${staticPastEndDate}         | |
@@ -975,7 +976,7 @@ definition {
 	| Start Date              | ${staticPastStartDate}       | |
 	| Status                  | Approved                     | |''');
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Pjdzen - ${staticProjectName}",
 			productName = "Platinum Subscription",
 			table = '''| End Date                | ${staticPastEndDate}         | |
@@ -985,49 +986,49 @@ definition {
 	| Start Date              | ${staticPastStartDate}       | |
 	| Status                  | Approved                     | |''');
 
-		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+		KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
 
-		LocalFile.OSBAdmin.loginToSupport(
+		OSBAdmin.loginToSupport(
 			userEmailAddress = ${staticSupportAdminEmailAdress},
 			userPassword = ${staticSupportAdminPassword});
 
-		LocalFile.ProjectDetails.gotoProjectDetailsPage();
+		ProjectDetails.gotoProjectDetailsPage();
 
-		LocalFile.ProjectDetails.searchProject(projectName = "Pjdzen - ${staticProjectName}");
+		ProjectDetails.searchProject(projectName = "Pjdzen - ${staticProjectName}");
 
-		LocalFile.ProjectDetails.gotoProject(projectName = "Pjdzen - ${staticProjectName}");
+		ProjectDetails.gotoProject(projectName = "Pjdzen - ${staticProjectName}");
 
-		LocalFile.ProjectDetails.gotoSourceCodeAccess();
+		ProjectDetails.gotoSourceCodeAccess();
 
-		LocalFile.ProjectDetails.addSourceCodeAccessUserOnClosedProject(table = '''| Name            | Info Services QA           |
+		ProjectDetails.addSourceCodeAccessUserOnClosedProject(table = '''| Name            | Info Services QA           |
 	| Email Address   | info.services.qa@gmail.com |
 	| GitHub Username | infoservicesqa             |''');
 
-		LocalFile.ProjectDetails.viewSourceCodeAccessUserPanel(
+		ProjectDetails.viewSourceCodeAccessUserPanel(
 			table = '''| Name            | Info Services QA           |
 	| Email Address   | info.services.qa@gmail.com |
 	| GitHub Username | infoservicesqa             |''',
 			userEmailAddress = "info.services.qa@gmail.com");
 
-		LocalFile.ProjectDetails.viewSourceCodeAccessUserDetails(
+		ProjectDetails.viewSourceCodeAccessUserDetails(
 			table = '''| Name            | Info Services QA           |
 	| Email Address   | info.services.qa@gmail.com |
 	| GitHub Username | infoservicesqa             |''',
 			userEmailAddress = "info.services.qa@gmail.com");
 
-		LocalFile.GitHub.viewNoGitHubInvitation(
+		GitHub.viewNoGitHubInvitation(
 			userGitHubUsername = "infoservicesqa",
 			userPassword = "rejoicealways123");
 
-		LocalFile.GitHub.viewNoGitHubRespository(
+		GitHub.viewNoGitHubRespository(
 			userGitHubUsername = "infoservicesqa",
 			userPassword = "rejoicealways123");
 	}
 
 	test Viewsourcecodeaccessuseraftermultipleprojectexpirations {
-		LocalFile.KoroneikiProductPurchaseAPI.generateStaticPastStartAndEndDate();
+		KoroneikiProductPurchaseAPI.generateStaticPastStartAndEndDate();
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Pjdzen - ${staticProjectName}",
 			productName = "DXP Production",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -1037,7 +1038,7 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Pjdzen - ${staticProjectName}",
 			productName = "Platinum Subscription",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -1047,7 +1048,7 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Dupzen - ${staticProjectName}",
 			productName = "DXP Production",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -1057,7 +1058,7 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Dupzen - ${staticProjectName}",
 			productName = "Platinum Subscription",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -1067,71 +1068,71 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+		KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
 
-		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+		ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
 
-		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "PJDZENPJDZEN");
+		JSONOSBAccount.viewSupportOrganizationSync(accountCode = "PJDZENPJDZEN");
 
-		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "DUPZENDUPZEN");
+		JSONOSBAccount.viewSupportOrganizationSync(accountCode = "DUPZENDUPZEN");
 
-		LocalFile.OSBAdmin.loginToSupport(
+		OSBAdmin.loginToSupport(
 			userEmailAddress = ${staticSupportAdminEmailAdress},
 			userPassword = ${staticSupportAdminPassword});
 
-		LocalFile.ProjectDetails.gotoProjectDetailsPage();
+		ProjectDetails.gotoProjectDetailsPage();
 
-		LocalFile.ProjectDetails.searchProject(projectName = "Pjdzen - ${staticProjectName}");
+		ProjectDetails.searchProject(projectName = "Pjdzen - ${staticProjectName}");
 
-		LocalFile.ProjectDetails.gotoProject(projectName = "Pjdzen - ${staticProjectName}");
+		ProjectDetails.gotoProject(projectName = "Pjdzen - ${staticProjectName}");
 
-		LocalFile.ProjectDetails.gotoSourceCodeAccess();
+		ProjectDetails.gotoSourceCodeAccess();
 
-		LocalFile.ProjectDetails.addSourceCodeAccessUser(table = '''| Name            | Info Services QA           |
+		ProjectDetails.addSourceCodeAccessUser(table = '''| Name            | Info Services QA           |
 	| Email Address   | info.services.qa@gmail.com |
 	| GitHub Username | infoservicesqa             |''');
 
-		LocalFile.ProjectDetails.viewSourceCodeAccessUserPanel(
+		ProjectDetails.viewSourceCodeAccessUserPanel(
 			table = '''| Name            | Info Services QA           |
 	| Email Address   | info.services.qa@gmail.com |
 	| GitHub Username | infoservicesqa             |''',
 			userEmailAddress = "info.services.qa@gmail.com");
 
-		LocalFile.ProjectDetails.viewSourceCodeAccessUserDetails(
+		ProjectDetails.viewSourceCodeAccessUserDetails(
 			table = '''| Name            | Info Services QA           |
 	| Email Address   | info.services.qa@gmail.com |
 	| GitHub Username | infoservicesqa             |''',
 			userEmailAddress = "info.services.qa@gmail.com");
 
-		LocalFile.GitHub.acceptGitHubInvitation(
+		GitHub.acceptGitHubInvitation(
 			userGitHubUsername = "infoservicesqa",
 			userPassword = "rejoicealways123");
 
-		LocalFile.ProjectDetails.gotoProjectDetailsPage();
+		ProjectDetails.gotoProjectDetailsPage();
 
-		LocalFile.ProjectDetails.searchProject(projectName = "Dupzen - ${staticProjectName}");
+		ProjectDetails.searchProject(projectName = "Dupzen - ${staticProjectName}");
 
-		LocalFile.ProjectDetails.gotoProject(projectName = "Dupzen - ${staticProjectName}");
+		ProjectDetails.gotoProject(projectName = "Dupzen - ${staticProjectName}");
 
-		LocalFile.ProjectDetails.gotoSourceCodeAccess();
+		ProjectDetails.gotoSourceCodeAccess();
 
-		LocalFile.ProjectDetails.addSourceCodeAccessUser(table = '''| Name            | Info Services QA           |
+		ProjectDetails.addSourceCodeAccessUser(table = '''| Name            | Info Services QA           |
 	| Email Address   | info.services.qa@gmail.com |
 	| GitHub Username | infoservicesqa             |''');
 
-		LocalFile.ProjectDetails.viewSourceCodeAccessUserPanel(
+		ProjectDetails.viewSourceCodeAccessUserPanel(
 			table = '''| Name            | Info Services QA           |
 	| Email Address   | info.services.qa@gmail.com |
 	| GitHub Username | infoservicesqa             |''',
 			userEmailAddress = "info.services.qa@gmail.com");
 
-		LocalFile.ProjectDetails.viewSourceCodeAccessUserDetails(
+		ProjectDetails.viewSourceCodeAccessUserDetails(
 			table = '''| Name            | Info Services QA           |
 	| Email Address   | info.services.qa@gmail.com |
 	| GitHub Username | infoservicesqa             |''',
 			userEmailAddress = "info.services.qa@gmail.com");
 
-		LocalFile.KoroneikiProductPurchaseAPI._updateProductPurchase(
+		KoroneikiProductPurchaseAPI._updateProductPurchase(
 			accountName = "Pjdzen - ${staticProjectName}",
 			productName = "DXP Production",
 			table = '''| End Date                | ${staticPastEndDate}         | |
@@ -1140,7 +1141,7 @@ definition {
 	| Start Date              | ${staticPastStartDate}       | |
 	| Status                  | Approved                     | |''');
 
-		LocalFile.KoroneikiProductPurchaseAPI._updateProductPurchase(
+		KoroneikiProductPurchaseAPI._updateProductPurchase(
 			accountName = "Pjdzen - ${staticProjectName}",
 			productName = "Platinum Subscription",
 			table = '''| End Date                | ${staticPastEndDate}         | |
@@ -1149,7 +1150,7 @@ definition {
 	| Start Date              | ${staticPastStartDate}       | |
 	| Status                  | Approved                     | |''');
 
-		LocalFile.KoroneikiProductPurchaseAPI._updateProductPurchase(
+		KoroneikiProductPurchaseAPI._updateProductPurchase(
 			accountName = "Dupzen - ${staticProjectName}",
 			productName = "DXP Production",
 			table = '''| End Date                | ${staticPastEndDate}         | |
@@ -1158,7 +1159,7 @@ definition {
 	| Start Date              | ${staticPastStartDate}       | |
 	| Status                  | Approved                     | |''');
 
-		LocalFile.KoroneikiProductPurchaseAPI._updateProductPurchase(
+		KoroneikiProductPurchaseAPI._updateProductPurchase(
 			accountName = "Dupzen - ${staticProjectName}",
 			productName = "Platinum Subscription",
 			table = '''| End Date                | ${staticPastEndDate}         | |
@@ -1167,17 +1168,17 @@ definition {
 	| Start Date              | ${staticPastStartDate}       | |
 	| Status                  | Approved                     | |''');
 
-		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+		KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
 
-		LocalFile.ZendeskHomepage.pause(timeInSeconds = 5);
+		ZendeskHomepage.pause(timeInSeconds = 5);
 
-		LocalFile.GitHub.viewNoGitHubRespository(
+		GitHub.viewNoGitHubRespository(
 			userGitHubUsername = "infoservicesqa",
 			userPassword = "rejoicealways123");
 	}
 
 	test Viewsourcecodeaccessuserafterprojectapproval {
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Pjdzen - ${staticProjectName}",
 			productName = "DXP Production",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -1187,7 +1188,7 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Pjdzen - ${staticProjectName}",
 			productName = "Platinum Subscription",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -1197,59 +1198,59 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+		KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
 
-		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "PJDZENPJDZEN");
+		JSONOSBAccount.viewSupportOrganizationSync(accountCode = "PJDZENPJDZEN");
 
-		LocalFile.KoroneikiAccountAPI._updateAccount(
+		KoroneikiAccountAPI._updateAccount(
 			accountName = "Pjdzen - ${staticProjectName}",
 			table = '''| Status | Closed | |''');
 
-		LocalFile.OSBAdmin.loginToSupport(
+		OSBAdmin.loginToSupport(
 			userEmailAddress = ${staticSupportAdminEmailAdress},
 			userPassword = ${staticSupportAdminPassword});
 
-		LocalFile.ProjectDetails.gotoProjectDetailsPage();
+		ProjectDetails.gotoProjectDetailsPage();
 
-		LocalFile.ProjectDetails.searchProject(projectName = "Pjdzen - ${staticProjectName}");
+		ProjectDetails.searchProject(projectName = "Pjdzen - ${staticProjectName}");
 
-		LocalFile.ProjectDetails.gotoProject(projectName = "Pjdzen - ${staticProjectName}");
+		ProjectDetails.gotoProject(projectName = "Pjdzen - ${staticProjectName}");
 
-		LocalFile.ProjectDetails.gotoSourceCodeAccess();
+		ProjectDetails.gotoSourceCodeAccess();
 
-		LocalFile.ProjectDetails.addSourceCodeAccessUserOnClosedProject(table = '''| Name            | Info Services QA           |
+		ProjectDetails.addSourceCodeAccessUserOnClosedProject(table = '''| Name            | Info Services QA           |
 	| Email Address   | info.services.qa@gmail.com |
 	| GitHub Username | infoservicesqa             |''');
 
-		LocalFile.ProjectDetails.viewSourceCodeAccessUserPanel(
+		ProjectDetails.viewSourceCodeAccessUserPanel(
 			table = '''| Name            | Info Services QA           |
 	| Email Address   | info.services.qa@gmail.com |
 	| GitHub Username | infoservicesqa             |''',
 			userEmailAddress = "info.services.qa@gmail.com");
 
-		LocalFile.ProjectDetails.viewSourceCodeAccessUserDetails(
+		ProjectDetails.viewSourceCodeAccessUserDetails(
 			table = '''| Name            | Info Services QA           |
 	| Email Address   | info.services.qa@gmail.com |
 	| GitHub Username | infoservicesqa             |''',
 			userEmailAddress = "info.services.qa@gmail.com");
 
-		LocalFile.KoroneikiAccountAPI._updateAccount(
+		KoroneikiAccountAPI._updateAccount(
 			accountName = "Pjdzen - ${staticProjectName}",
 			table = '''| Status | Active | |''');
 
-		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+		KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
 
-		LocalFile.GitHub.acceptGitHubInvitation(
+		GitHub.acceptGitHubInvitation(
 			userGitHubUsername = "infoservicesqa",
 			userPassword = "rejoicealways123");
 
-		LocalFile.GitHub.viewISSupportIntegrationGitHubRespository(
+		GitHub.viewISSupportIntegrationGitHubRespository(
 			userGitHubUsername = "infoservicesqa",
 			userPassword = "rejoicealways123");
 	}
 
 	test Viewsourcecodeaccessuserafterprojectclosure {
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Pjdzen - ${staticProjectName}",
 			productName = "DXP Production",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -1259,7 +1260,7 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Pjdzen - ${staticProjectName}",
 			productName = "Platinum Subscription",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -1269,57 +1270,57 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+		KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
 
-		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "PJDZENPJDZEN");
+		JSONOSBAccount.viewSupportOrganizationSync(accountCode = "PJDZENPJDZEN");
 
-		LocalFile.OSBAdmin.loginToSupport(
+		OSBAdmin.loginToSupport(
 			userEmailAddress = ${staticSupportAdminEmailAdress},
 			userPassword = ${staticSupportAdminPassword});
 
-		LocalFile.ProjectDetails.gotoProjectDetailsPage();
+		ProjectDetails.gotoProjectDetailsPage();
 
-		LocalFile.ProjectDetails.searchProject(projectName = "Pjdzen - ${staticProjectName}");
+		ProjectDetails.searchProject(projectName = "Pjdzen - ${staticProjectName}");
 
-		LocalFile.ProjectDetails.gotoProject(projectName = "Pjdzen - ${staticProjectName}");
+		ProjectDetails.gotoProject(projectName = "Pjdzen - ${staticProjectName}");
 
-		LocalFile.ProjectDetails.gotoSourceCodeAccess();
+		ProjectDetails.gotoSourceCodeAccess();
 
-		LocalFile.ProjectDetails.addSourceCodeAccessUser(table = '''| Name            | Info Services QA           |
+		ProjectDetails.addSourceCodeAccessUser(table = '''| Name            | Info Services QA           |
 	| Email Address   | info.services.qa@gmail.com |
 	| GitHub Username | infoservicesqa             |''');
 
-		LocalFile.ProjectDetails.viewSourceCodeAccessUserPanel(
+		ProjectDetails.viewSourceCodeAccessUserPanel(
 			table = '''| Name            | Info Services QA           |
 	| Email Address   | info.services.qa@gmail.com |
 	| GitHub Username | infoservicesqa             |''',
 			userEmailAddress = "info.services.qa@gmail.com");
 
-		LocalFile.ProjectDetails.viewSourceCodeAccessUserDetails(
+		ProjectDetails.viewSourceCodeAccessUserDetails(
 			table = '''| Name            | Info Services QA           |
 	| Email Address   | info.services.qa@gmail.com |
 	| GitHub Username | infoservicesqa             |''',
 			userEmailAddress = "info.services.qa@gmail.com");
 
-		LocalFile.GitHub.acceptGitHubInvitation(
+		GitHub.acceptGitHubInvitation(
 			userGitHubUsername = "infoservicesqa",
 			userPassword = "rejoicealways123");
 
-		LocalFile.KoroneikiAccountAPI._updateAccount(
+		KoroneikiAccountAPI._updateAccount(
 			accountName = "Pjdzen - ${staticProjectName}",
 			table = '''| Status | Closed | |''');
 
-		LocalFile.ZendeskHomepage.pause(timeInSeconds = 5);
+		ZendeskHomepage.pause(timeInSeconds = 5);
 
-		LocalFile.GitHub.viewNoGitHubRespository(
+		GitHub.viewNoGitHubRespository(
 			userGitHubUsername = "infoservicesqa",
 			userPassword = "rejoicealways123");
 	}
 
 	test Viewsourcecodeaccessuserafterprojectexpiration {
-		LocalFile.KoroneikiProductPurchaseAPI.generateStaticPastStartAndEndDate();
+		KoroneikiProductPurchaseAPI.generateStaticPastStartAndEndDate();
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Pjdzen - ${staticProjectName}",
 			productName = "DXP Production",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -1329,7 +1330,7 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Pjdzen - ${staticProjectName}",
 			productName = "Platinum Subscription",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -1339,43 +1340,43 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+		KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
 
-		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "PJDZENPJDZEN");
+		JSONOSBAccount.viewSupportOrganizationSync(accountCode = "PJDZENPJDZEN");
 
-		LocalFile.OSBAdmin.loginToSupport(
+		OSBAdmin.loginToSupport(
 			userEmailAddress = ${staticSupportAdminEmailAdress},
 			userPassword = ${staticSupportAdminPassword});
 
-		LocalFile.ProjectDetails.gotoProjectDetailsPage();
+		ProjectDetails.gotoProjectDetailsPage();
 
-		LocalFile.ProjectDetails.searchProject(projectName = "Pjdzen - ${staticProjectName}");
+		ProjectDetails.searchProject(projectName = "Pjdzen - ${staticProjectName}");
 
-		LocalFile.ProjectDetails.gotoProject(projectName = "Pjdzen - ${staticProjectName}");
+		ProjectDetails.gotoProject(projectName = "Pjdzen - ${staticProjectName}");
 
-		LocalFile.ProjectDetails.gotoSourceCodeAccess();
+		ProjectDetails.gotoSourceCodeAccess();
 
-		LocalFile.ProjectDetails.addSourceCodeAccessUser(table = '''| Name            | Info Services QA           |
+		ProjectDetails.addSourceCodeAccessUser(table = '''| Name            | Info Services QA           |
 	| Email Address   | info.services.qa@gmail.com |
 	| GitHub Username | infoservicesqa             |''');
 
-		LocalFile.ProjectDetails.viewSourceCodeAccessUserPanel(
+		ProjectDetails.viewSourceCodeAccessUserPanel(
 			table = '''| Name            | Info Services QA           |
 	| Email Address   | info.services.qa@gmail.com |
 	| GitHub Username | infoservicesqa             |''',
 			userEmailAddress = "info.services.qa@gmail.com");
 
-		LocalFile.ProjectDetails.viewSourceCodeAccessUserDetails(
+		ProjectDetails.viewSourceCodeAccessUserDetails(
 			table = '''| Name            | Info Services QA           |
 	| Email Address   | info.services.qa@gmail.com |
 	| GitHub Username | infoservicesqa             |''',
 			userEmailAddress = "info.services.qa@gmail.com");
 
-		LocalFile.GitHub.acceptGitHubInvitation(
+		GitHub.acceptGitHubInvitation(
 			userGitHubUsername = "infoservicesqa",
 			userPassword = "rejoicealways123");
 
-		LocalFile.KoroneikiProductPurchaseAPI._updateProductPurchase(
+		KoroneikiProductPurchaseAPI._updateProductPurchase(
 			accountName = "Pjdzen - ${staticProjectName}",
 			productName = "DXP Production",
 			table = '''| End Date                | ${staticPastEndDate}         | |
@@ -1384,7 +1385,7 @@ definition {
 	| Start Date              | ${staticPastStartDate}       | |
 	| Status                  | Approved                     | |''');
 
-		LocalFile.KoroneikiProductPurchaseAPI._updateProductPurchase(
+		KoroneikiProductPurchaseAPI._updateProductPurchase(
 			accountName = "Pjdzen - ${staticProjectName}",
 			productName = "Platinum Subscription",
 			table = '''| End Date                | ${staticPastEndDate}         | |
@@ -1393,17 +1394,17 @@ definition {
 	| Start Date              | ${staticPastStartDate}       | |
 	| Status                  | Approved                     | |''');
 
-		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+		KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
 
-		LocalFile.ZendeskHomepage.pause(timeInSeconds = 5);
+		ZendeskHomepage.pause(timeInSeconds = 5);
 
-		LocalFile.GitHub.viewNoGitHubRespository(
+		GitHub.viewNoGitHubRespository(
 			userGitHubUsername = "infoservicesqa",
 			userPassword = "rejoicealways123");
 	}
 
 	test Viewsourcecodeaccessuserafterremovalfrommultipleprojects {
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Pjdzen - ${staticProjectName}",
 			productName = "DXP Production",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -1413,7 +1414,7 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Pjdzen - ${staticProjectName}",
 			productName = "Platinum Subscription",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -1423,7 +1424,7 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Dupzen - ${staticProjectName}",
 			productName = "DXP Production",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -1433,7 +1434,7 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Dupzen - ${staticProjectName}",
 			productName = "Platinum Subscription",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -1443,97 +1444,97 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+		KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
 
-		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+		ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
 
-		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "PJDZENPJDZEN");
+		JSONOSBAccount.viewSupportOrganizationSync(accountCode = "PJDZENPJDZEN");
 
-		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "DUPZENDUPZEN");
+		JSONOSBAccount.viewSupportOrganizationSync(accountCode = "DUPZENDUPZEN");
 
-		LocalFile.OSBAdmin.loginToSupport(
+		OSBAdmin.loginToSupport(
 			userEmailAddress = ${staticSupportAdminEmailAdress},
 			userPassword = ${staticSupportAdminPassword});
 
-		LocalFile.ProjectDetails.gotoProjectDetailsPage();
+		ProjectDetails.gotoProjectDetailsPage();
 
-		LocalFile.ProjectDetails.searchProject(projectName = "Pjdzen - ${staticProjectName}");
+		ProjectDetails.searchProject(projectName = "Pjdzen - ${staticProjectName}");
 
-		LocalFile.ProjectDetails.gotoProject(projectName = "Pjdzen - ${staticProjectName}");
+		ProjectDetails.gotoProject(projectName = "Pjdzen - ${staticProjectName}");
 
-		LocalFile.ProjectDetails.gotoSourceCodeAccess();
+		ProjectDetails.gotoSourceCodeAccess();
 
-		LocalFile.ProjectDetails.addSourceCodeAccessUser(table = '''| Name            | Info Services QA           |
+		ProjectDetails.addSourceCodeAccessUser(table = '''| Name            | Info Services QA           |
 	| Email Address   | info.services.qa@gmail.com |
 	| GitHub Username | infoservicesqa             |''');
 
-		LocalFile.ProjectDetails.viewSourceCodeAccessUserPanel(
+		ProjectDetails.viewSourceCodeAccessUserPanel(
 			table = '''| Name            | Info Services QA           |
 	| Email Address   | info.services.qa@gmail.com |
 	| GitHub Username | infoservicesqa             |''',
 			userEmailAddress = "info.services.qa@gmail.com");
 
-		LocalFile.ProjectDetails.viewSourceCodeAccessUserDetails(
+		ProjectDetails.viewSourceCodeAccessUserDetails(
 			table = '''| Name            | Info Services QA           |
 	| Email Address   | info.services.qa@gmail.com |
 	| GitHub Username | infoservicesqa             |''',
 			userEmailAddress = "info.services.qa@gmail.com");
 
-		LocalFile.GitHub.acceptGitHubInvitation(
+		GitHub.acceptGitHubInvitation(
 			userGitHubUsername = "infoservicesqa",
 			userPassword = "rejoicealways123");
 
-		LocalFile.ProjectDetails.gotoProjectDetailsPage();
+		ProjectDetails.gotoProjectDetailsPage();
 
-		LocalFile.ProjectDetails.searchProject(projectName = "Dupzen - ${staticProjectName}");
+		ProjectDetails.searchProject(projectName = "Dupzen - ${staticProjectName}");
 
-		LocalFile.ProjectDetails.gotoProject(projectName = "Dupzen - ${staticProjectName}");
+		ProjectDetails.gotoProject(projectName = "Dupzen - ${staticProjectName}");
 
-		LocalFile.ProjectDetails.gotoSourceCodeAccess();
+		ProjectDetails.gotoSourceCodeAccess();
 
-		LocalFile.ProjectDetails.addSourceCodeAccessUser(table = '''| Name            | Info Services QA           |
+		ProjectDetails.addSourceCodeAccessUser(table = '''| Name            | Info Services QA           |
 	| Email Address   | info.services.qa@gmail.com |
 	| GitHub Username | infoservicesqa             |''');
 
-		LocalFile.ProjectDetails.viewSourceCodeAccessUserPanel(
+		ProjectDetails.viewSourceCodeAccessUserPanel(
 			table = '''| Name            | Info Services QA           |
 	| Email Address   | info.services.qa@gmail.com |
 	| GitHub Username | infoservicesqa             |''',
 			userEmailAddress = "info.services.qa@gmail.com");
 
-		LocalFile.ProjectDetails.viewSourceCodeAccessUserDetails(
+		ProjectDetails.viewSourceCodeAccessUserDetails(
 			table = '''| Name            | Info Services QA           |
 	| Email Address   | info.services.qa@gmail.com |
 	| GitHub Username | infoservicesqa             |''',
 			userEmailAddress = "info.services.qa@gmail.com");
 
-		LocalFile.ProjectDetails.gotoProjectDetailsPage();
+		ProjectDetails.gotoProjectDetailsPage();
 
-		LocalFile.ProjectDetails.searchProject(projectName = "Pjdzen - ${staticProjectName}");
+		ProjectDetails.searchProject(projectName = "Pjdzen - ${staticProjectName}");
 
-		LocalFile.ProjectDetails.gotoProject(projectName = "Pjdzen - ${staticProjectName}");
+		ProjectDetails.gotoProject(projectName = "Pjdzen - ${staticProjectName}");
 
-		LocalFile.ProjectDetails.gotoSourceCodeAccess();
+		ProjectDetails.gotoSourceCodeAccess();
 
-		LocalFile.ProjectDetails.deleteSourceCodeAccessUser(userEmailAddress = "info.services.qa@gmail.com");
+		ProjectDetails.deleteSourceCodeAccessUser(userEmailAddress = "info.services.qa@gmail.com");
 
-		LocalFile.ProjectDetails.gotoProjectDetailsPage();
+		ProjectDetails.gotoProjectDetailsPage();
 
-		LocalFile.ProjectDetails.searchProject(projectName = "Dupzen - ${staticProjectName}");
+		ProjectDetails.searchProject(projectName = "Dupzen - ${staticProjectName}");
 
-		LocalFile.ProjectDetails.gotoProject(projectName = "Dupzen - ${staticProjectName}");
+		ProjectDetails.gotoProject(projectName = "Dupzen - ${staticProjectName}");
 
-		LocalFile.ProjectDetails.gotoSourceCodeAccess();
+		ProjectDetails.gotoSourceCodeAccess();
 
-		LocalFile.ProjectDetails.deleteSourceCodeAccessUser(userEmailAddress = "info.services.qa@gmail.com");
+		ProjectDetails.deleteSourceCodeAccessUser(userEmailAddress = "info.services.qa@gmail.com");
 
-		LocalFile.GitHub.viewNoGitHubRespository(
+		GitHub.viewNoGitHubRespository(
 			userGitHubUsername = "infoservicesqa",
 			userPassword = "rejoicealways123");
 	}
 
 	test Viewsourcecodeaccessuserinvitationacceptanceafteraccessremoval {
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Pjdzen - ${staticProjectName}",
 			productName = "DXP Production",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -1543,7 +1544,7 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Pjdzen - ${staticProjectName}",
 			productName = "Platinum Subscription",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -1553,59 +1554,59 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+		KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
 
-		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "PJDZENPJDZEN");
+		JSONOSBAccount.viewSupportOrganizationSync(accountCode = "PJDZENPJDZEN");
 
-		LocalFile.OSBAdmin.loginToSupport(
+		OSBAdmin.loginToSupport(
 			userEmailAddress = ${staticSupportAdminEmailAdress},
 			userPassword = ${staticSupportAdminPassword});
 
-		LocalFile.ProjectDetails.gotoProjectDetailsPage();
+		ProjectDetails.gotoProjectDetailsPage();
 
-		LocalFile.ProjectDetails.searchProject(projectName = "Pjdzen - ${staticProjectName}");
+		ProjectDetails.searchProject(projectName = "Pjdzen - ${staticProjectName}");
 
-		LocalFile.ProjectDetails.gotoProject(projectName = "Pjdzen - ${staticProjectName}");
+		ProjectDetails.gotoProject(projectName = "Pjdzen - ${staticProjectName}");
 
-		LocalFile.ProjectDetails.gotoSourceCodeAccess();
+		ProjectDetails.gotoSourceCodeAccess();
 
-		LocalFile.ProjectDetails.addSourceCodeAccessUser(table = '''| Name            | Info Services QA           |
+		ProjectDetails.addSourceCodeAccessUser(table = '''| Name            | Info Services QA           |
 	| Email Address   | info.services.qa@gmail.com |
 	| GitHub Username | infoservicesqa             |''');
 
-		LocalFile.ProjectDetails.viewSourceCodeAccessUserPanel(
+		ProjectDetails.viewSourceCodeAccessUserPanel(
 			table = '''| Name            | Info Services QA           |
 	| Email Address   | info.services.qa@gmail.com |
 	| GitHub Username | infoservicesqa             |''',
 			userEmailAddress = "info.services.qa@gmail.com");
 
-		LocalFile.ProjectDetails.viewSourceCodeAccessUserDetails(
+		ProjectDetails.viewSourceCodeAccessUserDetails(
 			table = '''| Name            | Info Services QA           |
 	| Email Address   | info.services.qa@gmail.com |
 	| GitHub Username | infoservicesqa             |''',
 			userEmailAddress = "info.services.qa@gmail.com");
 
-		LocalFile.ProjectDetails.deleteSourceCodeAccessUser(userEmailAddress = "info.services.qa@gmail.com");
+		ProjectDetails.deleteSourceCodeAccessUser(userEmailAddress = "info.services.qa@gmail.com");
 
-		LocalFile.GitHub.acceptGitHubInvitation(
+		GitHub.acceptGitHubInvitation(
 			userGitHubUsername = "infoservicesqa",
 			userPassword = "rejoicealways123");
 
-		LocalFile.GitHub.viewISSupportIntegrationGitHubRespository(
+		GitHub.viewISSupportIntegrationGitHubRespository(
 			userGitHubUsername = "infoservicesqa",
 			userPassword = "rejoicealways123");
 
-		LocalFile.OSBAdminProject.removeNonSourceCodeAccessUsersFromGitHub();
+		OSBAdminProject.removeNonSourceCodeAccessUsersFromGitHub();
 
-		LocalFile.GitHub.viewNoGitHubRespository(
+		GitHub.viewNoGitHubRespository(
 			userGitHubUsername = "infoservicesqa",
 			userPassword = "rejoicealways123");
 	}
 
 	test Viewsourcecodeaccessuserinvitationacceptanceafterprojectexpiration {
-		LocalFile.KoroneikiProductPurchaseAPI.generateStaticPastStartAndEndDate();
+		KoroneikiProductPurchaseAPI.generateStaticPastStartAndEndDate();
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Pjdzen - ${staticProjectName}",
 			productName = "DXP Production",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -1615,7 +1616,7 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Pjdzen - ${staticProjectName}",
 			productName = "Platinum Subscription",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -1625,39 +1626,39 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+		KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
 
-		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "PJDZENPJDZEN");
+		JSONOSBAccount.viewSupportOrganizationSync(accountCode = "PJDZENPJDZEN");
 
-		LocalFile.OSBAdmin.loginToSupport(
+		OSBAdmin.loginToSupport(
 			userEmailAddress = ${staticSupportAdminEmailAdress},
 			userPassword = ${staticSupportAdminPassword});
 
-		LocalFile.ProjectDetails.gotoProjectDetailsPage();
+		ProjectDetails.gotoProjectDetailsPage();
 
-		LocalFile.ProjectDetails.searchProject(projectName = "Pjdzen - ${staticProjectName}");
+		ProjectDetails.searchProject(projectName = "Pjdzen - ${staticProjectName}");
 
-		LocalFile.ProjectDetails.gotoProject(projectName = "Pjdzen - ${staticProjectName}");
+		ProjectDetails.gotoProject(projectName = "Pjdzen - ${staticProjectName}");
 
-		LocalFile.ProjectDetails.gotoSourceCodeAccess();
+		ProjectDetails.gotoSourceCodeAccess();
 
-		LocalFile.ProjectDetails.addSourceCodeAccessUser(table = '''| Name            | Info Services QA           |
+		ProjectDetails.addSourceCodeAccessUser(table = '''| Name            | Info Services QA           |
 	| Email Address   | info.services.qa@gmail.com |
 	| GitHub Username | infoservicesqa             |''');
 
-		LocalFile.ProjectDetails.viewSourceCodeAccessUserPanel(
+		ProjectDetails.viewSourceCodeAccessUserPanel(
 			table = '''| Name            | Info Services QA           |
 	| Email Address   | info.services.qa@gmail.com |
 	| GitHub Username | infoservicesqa             |''',
 			userEmailAddress = "info.services.qa@gmail.com");
 
-		LocalFile.ProjectDetails.viewSourceCodeAccessUserDetails(
+		ProjectDetails.viewSourceCodeAccessUserDetails(
 			table = '''| Name            | Info Services QA           |
 	| Email Address   | info.services.qa@gmail.com |
 	| GitHub Username | infoservicesqa             |''',
 			userEmailAddress = "info.services.qa@gmail.com");
 
-		LocalFile.KoroneikiProductPurchaseAPI._updateProductPurchase(
+		KoroneikiProductPurchaseAPI._updateProductPurchase(
 			accountName = "Pjdzen - ${staticProjectName}",
 			productName = "DXP Production",
 			table = '''| End Date                | ${staticPastEndDate}         | |
@@ -1666,7 +1667,7 @@ definition {
 	| Start Date              | ${staticPastStartDate}       | |
 	| Status                  | Approved                     | |''');
 
-		LocalFile.KoroneikiProductPurchaseAPI._updateProductPurchase(
+		KoroneikiProductPurchaseAPI._updateProductPurchase(
 			accountName = "Pjdzen - ${staticProjectName}",
 			productName = "Platinum Subscription",
 			table = '''| End Date                | ${staticPastEndDate}         | |
@@ -1675,25 +1676,25 @@ definition {
 	| Start Date              | ${staticPastStartDate}       | |
 	| Status                  | Approved                     | |''');
 
-		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+		KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
 
-		LocalFile.GitHub.acceptGitHubInvitation(
+		GitHub.acceptGitHubInvitation(
 			userGitHubUsername = "infoservicesqa",
 			userPassword = "rejoicealways123");
 
-		LocalFile.GitHub.viewISSupportIntegrationGitHubRespository(
+		GitHub.viewISSupportIntegrationGitHubRespository(
 			userGitHubUsername = "infoservicesqa",
 			userPassword = "rejoicealways123");
 
-		LocalFile.OSBAdminProject.removeNonSourceCodeAccessUsersFromGitHub();
+		OSBAdminProject.removeNonSourceCodeAccessUsersFromGitHub();
 
-		LocalFile.GitHub.viewNoGitHubRespository(
+		GitHub.viewNoGitHubRespository(
 			userGitHubUsername = "infoservicesqa",
 			userPassword = "rejoicealways123");
 	}
 
 	test Viewsourcecodeaccessuseronmultipleprojects {
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Pjdzen - ${staticProjectName}",
 			productName = "DXP Production",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -1703,7 +1704,7 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Pjdzen - ${staticProjectName}",
 			productName = "Platinum Subscription",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -1713,7 +1714,7 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Dupzen - ${staticProjectName}",
 			productName = "DXP Production",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -1723,7 +1724,7 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Dupzen - ${staticProjectName}",
 			productName = "Platinum Subscription",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -1733,85 +1734,85 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+		KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
 
-		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "PJDZENPJDZEN");
+		JSONOSBAccount.viewSupportOrganizationSync(accountCode = "PJDZENPJDZEN");
 
-		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "DUPZENDUPZEN");
+		JSONOSBAccount.viewSupportOrganizationSync(accountCode = "DUPZENDUPZEN");
 
-		LocalFile.OSBAdmin.loginToSupport(
+		OSBAdmin.loginToSupport(
 			userEmailAddress = ${staticSupportAdminEmailAdress},
 			userPassword = ${staticSupportAdminPassword});
 
-		LocalFile.ProjectDetails.gotoProjectDetailsPage();
+		ProjectDetails.gotoProjectDetailsPage();
 
-		LocalFile.ProjectDetails.searchProject(projectName = "Pjdzen - ${staticProjectName}");
+		ProjectDetails.searchProject(projectName = "Pjdzen - ${staticProjectName}");
 
-		LocalFile.ProjectDetails.gotoProject(projectName = "Pjdzen - ${staticProjectName}");
+		ProjectDetails.gotoProject(projectName = "Pjdzen - ${staticProjectName}");
 
-		LocalFile.ProjectDetails.gotoSourceCodeAccess();
+		ProjectDetails.gotoSourceCodeAccess();
 
-		LocalFile.ProjectDetails.addSourceCodeAccessUser(table = '''| Name            | Info Services QA           |
+		ProjectDetails.addSourceCodeAccessUser(table = '''| Name            | Info Services QA           |
 	| Email Address   | info.services.qa@gmail.com |
 	| GitHub Username | infoservicesqa             |''');
 
-		LocalFile.ProjectDetails.viewSourceCodeAccessUserPanel(
+		ProjectDetails.viewSourceCodeAccessUserPanel(
 			table = '''| Name            | Info Services QA           |
 	| Email Address   | info.services.qa@gmail.com |
 	| GitHub Username | infoservicesqa             |''',
 			userEmailAddress = "info.services.qa@gmail.com");
 
-		LocalFile.ProjectDetails.viewSourceCodeAccessUserDetails(
+		ProjectDetails.viewSourceCodeAccessUserDetails(
 			table = '''| Name            | Info Services QA           |
 	| Email Address   | info.services.qa@gmail.com |
 	| GitHub Username | infoservicesqa             |''',
 			userEmailAddress = "info.services.qa@gmail.com");
 
-		LocalFile.GitHub.acceptGitHubInvitation(
+		GitHub.acceptGitHubInvitation(
 			userGitHubUsername = "infoservicesqa",
 			userPassword = "rejoicealways123");
 
-		LocalFile.GitHub.viewISSupportIntegrationGitHubRespository(
+		GitHub.viewISSupportIntegrationGitHubRespository(
 			userGitHubUsername = "infoservicesqa",
 			userPassword = "rejoicealways123");
 
-		LocalFile.ProjectDetails.gotoProjectDetailsPage();
+		ProjectDetails.gotoProjectDetailsPage();
 
-		LocalFile.ProjectDetails.searchProject(projectName = "Dupzen - ${staticProjectName}");
+		ProjectDetails.searchProject(projectName = "Dupzen - ${staticProjectName}");
 
-		LocalFile.ProjectDetails.gotoProject(projectName = "Dupzen - ${staticProjectName}");
+		ProjectDetails.gotoProject(projectName = "Dupzen - ${staticProjectName}");
 
-		LocalFile.ProjectDetails.gotoSourceCodeAccess();
+		ProjectDetails.gotoSourceCodeAccess();
 
-		LocalFile.ProjectDetails.addSourceCodeAccessUser(table = '''| Name            | Info Services QA           |
+		ProjectDetails.addSourceCodeAccessUser(table = '''| Name            | Info Services QA           |
 	| Email Address   | info.services.qa@gmail.com |
 	| GitHub Username | infoservicesqa             |''');
 
-		LocalFile.ProjectDetails.viewSourceCodeAccessUserPanel(
+		ProjectDetails.viewSourceCodeAccessUserPanel(
 			table = '''| Name            | Info Services QA           |
 	| Email Address   | info.services.qa@gmail.com |
 	| GitHub Username | infoservicesqa             |''',
 			userEmailAddress = "info.services.qa@gmail.com");
 
-		LocalFile.ProjectDetails.viewSourceCodeAccessUserDetails(
+		ProjectDetails.viewSourceCodeAccessUserDetails(
 			table = '''| Name            | Info Services QA           |
 	| Email Address   | info.services.qa@gmail.com |
 	| GitHub Username | infoservicesqa             |''',
 			userEmailAddress = "info.services.qa@gmail.com");
 
-		LocalFile.GitHub.viewNoGitHubInvitation(
+		GitHub.viewNoGitHubInvitation(
 			userGitHubUsername = "infoservicesqa",
 			userPassword = "rejoicealways123");
 
-		LocalFile.GitHub.viewISSupportIntegrationGitHubRespository(
+		GitHub.viewISSupportIntegrationGitHubRespository(
 			userGitHubUsername = "infoservicesqa",
 			userPassword = "rejoicealways123");
 	}
 
 	test Viewsourcecodeaccessuseronmultipleprojectsafteroneprojectexpiration {
-		LocalFile.KoroneikiProductPurchaseAPI.generateStaticPastStartAndEndDate();
+		KoroneikiProductPurchaseAPI.generateStaticPastStartAndEndDate();
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Pjdzen - ${staticProjectName}",
 			productName = "DXP Production",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -1821,7 +1822,7 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Pjdzen - ${staticProjectName}",
 			productName = "Platinum Subscription",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -1831,7 +1832,7 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Dupzen - ${staticProjectName}",
 			productName = "DXP Production",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -1841,7 +1842,7 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Dupzen - ${staticProjectName}",
 			productName = "Platinum Subscription",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -1851,71 +1852,71 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+		KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
 
-		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+		ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
 
-		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "PJDZENPJDZEN");
+		JSONOSBAccount.viewSupportOrganizationSync(accountCode = "PJDZENPJDZEN");
 
-		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "DUPZENDUPZEN");
+		JSONOSBAccount.viewSupportOrganizationSync(accountCode = "DUPZENDUPZEN");
 
-		LocalFile.OSBAdmin.loginToSupport(
+		OSBAdmin.loginToSupport(
 			userEmailAddress = ${staticSupportAdminEmailAdress},
 			userPassword = ${staticSupportAdminPassword});
 
-		LocalFile.ProjectDetails.gotoProjectDetailsPage();
+		ProjectDetails.gotoProjectDetailsPage();
 
-		LocalFile.ProjectDetails.searchProject(projectName = "Pjdzen - ${staticProjectName}");
+		ProjectDetails.searchProject(projectName = "Pjdzen - ${staticProjectName}");
 
-		LocalFile.ProjectDetails.gotoProject(projectName = "Pjdzen - ${staticProjectName}");
+		ProjectDetails.gotoProject(projectName = "Pjdzen - ${staticProjectName}");
 
-		LocalFile.ProjectDetails.gotoSourceCodeAccess();
+		ProjectDetails.gotoSourceCodeAccess();
 
-		LocalFile.ProjectDetails.addSourceCodeAccessUser(table = '''| Name            | Info Services QA           |
+		ProjectDetails.addSourceCodeAccessUser(table = '''| Name            | Info Services QA           |
 	| Email Address   | info.services.qa@gmail.com |
 	| GitHub Username | infoservicesqa             |''');
 
-		LocalFile.ProjectDetails.viewSourceCodeAccessUserPanel(
+		ProjectDetails.viewSourceCodeAccessUserPanel(
 			table = '''| Name            | Info Services QA           |
 	| Email Address   | info.services.qa@gmail.com |
 	| GitHub Username | infoservicesqa             |''',
 			userEmailAddress = "info.services.qa@gmail.com");
 
-		LocalFile.ProjectDetails.viewSourceCodeAccessUserDetails(
+		ProjectDetails.viewSourceCodeAccessUserDetails(
 			table = '''| Name            | Info Services QA           |
 	| Email Address   | info.services.qa@gmail.com |
 	| GitHub Username | infoservicesqa             |''',
 			userEmailAddress = "info.services.qa@gmail.com");
 
-		LocalFile.GitHub.acceptGitHubInvitation(
+		GitHub.acceptGitHubInvitation(
 			userGitHubUsername = "infoservicesqa",
 			userPassword = "rejoicealways123");
 
-		LocalFile.ProjectDetails.gotoProjectDetailsPage();
+		ProjectDetails.gotoProjectDetailsPage();
 
-		LocalFile.ProjectDetails.searchProject(projectName = "Dupzen - ${staticProjectName}");
+		ProjectDetails.searchProject(projectName = "Dupzen - ${staticProjectName}");
 
-		LocalFile.ProjectDetails.gotoProject(projectName = "Dupzen - ${staticProjectName}");
+		ProjectDetails.gotoProject(projectName = "Dupzen - ${staticProjectName}");
 
-		LocalFile.ProjectDetails.gotoSourceCodeAccess();
+		ProjectDetails.gotoSourceCodeAccess();
 
-		LocalFile.ProjectDetails.addSourceCodeAccessUser(table = '''| Name            | Info Services QA           |
+		ProjectDetails.addSourceCodeAccessUser(table = '''| Name            | Info Services QA           |
 	| Email Address   | info.services.qa@gmail.com |
 	| GitHub Username | infoservicesqa             |''');
 
-		LocalFile.ProjectDetails.viewSourceCodeAccessUserPanel(
+		ProjectDetails.viewSourceCodeAccessUserPanel(
 			table = '''| Name            | Info Services QA           |
 	| Email Address   | info.services.qa@gmail.com |
 	| GitHub Username | infoservicesqa             |''',
 			userEmailAddress = "info.services.qa@gmail.com");
 
-		LocalFile.ProjectDetails.viewSourceCodeAccessUserDetails(
+		ProjectDetails.viewSourceCodeAccessUserDetails(
 			table = '''| Name            | Info Services QA           |
 	| Email Address   | info.services.qa@gmail.com |
 	| GitHub Username | infoservicesqa             |''',
 			userEmailAddress = "info.services.qa@gmail.com");
 
-		LocalFile.KoroneikiProductPurchaseAPI._updateProductPurchase(
+		KoroneikiProductPurchaseAPI._updateProductPurchase(
 			accountName = "Pjdzen - ${staticProjectName}",
 			productName = "DXP Production",
 			table = '''| End Date                | ${staticPastEndDate}         | |
@@ -1924,7 +1925,7 @@ definition {
 	| Start Date              | ${staticPastStartDate}       | |
 	| Status                  | Approved                     | |''');
 
-		LocalFile.KoroneikiProductPurchaseAPI._updateProductPurchase(
+		KoroneikiProductPurchaseAPI._updateProductPurchase(
 			accountName = "Pjdzen - ${staticProjectName}",
 			productName = "Platinum Subscription",
 			table = '''| End Date                | ${staticPastEndDate}         | |
@@ -1933,15 +1934,15 @@ definition {
 	| Start Date              | ${staticPastStartDate}       | |
 	| Status                  | Approved                     | |''');
 
-		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+		KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
 
-		LocalFile.GitHub.viewISSupportIntegrationGitHubRespository(
+		GitHub.viewISSupportIntegrationGitHubRespository(
 			userGitHubUsername = "infoservicesqa",
 			userPassword = "rejoicealways123");
 	}
 
 	test Viewsourcecodeaccessuseronmultipleprojectsafterremovalfromoneproject {
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Pjdzen - ${staticProjectName}",
 			productName = "DXP Production",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -1951,7 +1952,7 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Pjdzen - ${staticProjectName}",
 			productName = "Platinum Subscription",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -1961,7 +1962,7 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Dupzen - ${staticProjectName}",
 			productName = "DXP Production",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -1971,7 +1972,7 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Dupzen - ${staticProjectName}",
 			productName = "Platinum Subscription",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -1981,85 +1982,85 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+		KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
 
-		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "PJDZENPJDZEN");
+		JSONOSBAccount.viewSupportOrganizationSync(accountCode = "PJDZENPJDZEN");
 
-		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "DUPZENDUPZEN");
+		JSONOSBAccount.viewSupportOrganizationSync(accountCode = "DUPZENDUPZEN");
 
-		LocalFile.OSBAdmin.loginToSupport(
+		OSBAdmin.loginToSupport(
 			userEmailAddress = ${staticSupportAdminEmailAdress},
 			userPassword = ${staticSupportAdminPassword});
 
-		LocalFile.ProjectDetails.gotoProjectDetailsPage();
+		ProjectDetails.gotoProjectDetailsPage();
 
-		LocalFile.ProjectDetails.searchProject(projectName = "Pjdzen - ${staticProjectName}");
+		ProjectDetails.searchProject(projectName = "Pjdzen - ${staticProjectName}");
 
-		LocalFile.ProjectDetails.gotoProject(projectName = "Pjdzen - ${staticProjectName}");
+		ProjectDetails.gotoProject(projectName = "Pjdzen - ${staticProjectName}");
 
-		LocalFile.ProjectDetails.gotoSourceCodeAccess();
+		ProjectDetails.gotoSourceCodeAccess();
 
-		LocalFile.ProjectDetails.addSourceCodeAccessUser(table = '''| Name            | Info Services QA           |
+		ProjectDetails.addSourceCodeAccessUser(table = '''| Name            | Info Services QA           |
 	| Email Address   | info.services.qa@gmail.com |
 	| GitHub Username | infoservicesqa             |''');
 
-		LocalFile.ProjectDetails.viewSourceCodeAccessUserPanel(
+		ProjectDetails.viewSourceCodeAccessUserPanel(
 			table = '''| Name            | Info Services QA           |
 	| Email Address   | info.services.qa@gmail.com |
 	| GitHub Username | infoservicesqa             |''',
 			userEmailAddress = "info.services.qa@gmail.com");
 
-		LocalFile.ProjectDetails.viewSourceCodeAccessUserDetails(
+		ProjectDetails.viewSourceCodeAccessUserDetails(
 			table = '''| Name            | Info Services QA           |
 	| Email Address   | info.services.qa@gmail.com |
 	| GitHub Username | infoservicesqa             |''',
 			userEmailAddress = "info.services.qa@gmail.com");
 
-		LocalFile.GitHub.acceptGitHubInvitation(
+		GitHub.acceptGitHubInvitation(
 			userGitHubUsername = "infoservicesqa",
 			userPassword = "rejoicealways123");
 
-		LocalFile.ProjectDetails.gotoProjectDetailsPage();
+		ProjectDetails.gotoProjectDetailsPage();
 
-		LocalFile.ProjectDetails.searchProject(projectName = "Dupzen - ${staticProjectName}");
+		ProjectDetails.searchProject(projectName = "Dupzen - ${staticProjectName}");
 
-		LocalFile.ProjectDetails.gotoProject(projectName = "Dupzen - ${staticProjectName}");
+		ProjectDetails.gotoProject(projectName = "Dupzen - ${staticProjectName}");
 
-		LocalFile.ProjectDetails.gotoSourceCodeAccess();
+		ProjectDetails.gotoSourceCodeAccess();
 
-		LocalFile.ProjectDetails.addSourceCodeAccessUser(table = '''| Name            | Info Services QA           |
+		ProjectDetails.addSourceCodeAccessUser(table = '''| Name            | Info Services QA           |
 	| Email Address   | info.services.qa@gmail.com |
 	| GitHub Username | infoservicesqa             |''');
 
-		LocalFile.ProjectDetails.viewSourceCodeAccessUserPanel(
+		ProjectDetails.viewSourceCodeAccessUserPanel(
 			table = '''| Name            | Info Services QA           |
 	| Email Address   | info.services.qa@gmail.com |
 	| GitHub Username | infoservicesqa             |''',
 			userEmailAddress = "info.services.qa@gmail.com");
 
-		LocalFile.ProjectDetails.viewSourceCodeAccessUserDetails(
+		ProjectDetails.viewSourceCodeAccessUserDetails(
 			table = '''| Name            | Info Services QA           |
 	| Email Address   | info.services.qa@gmail.com |
 	| GitHub Username | infoservicesqa             |''',
 			userEmailAddress = "info.services.qa@gmail.com");
 
-		LocalFile.ProjectDetails.gotoProjectDetailsPage();
+		ProjectDetails.gotoProjectDetailsPage();
 
-		LocalFile.ProjectDetails.searchProject(projectName = "Pjdzen - ${staticProjectName}");
+		ProjectDetails.searchProject(projectName = "Pjdzen - ${staticProjectName}");
 
-		LocalFile.ProjectDetails.gotoProject(projectName = "Pjdzen - ${staticProjectName}");
+		ProjectDetails.gotoProject(projectName = "Pjdzen - ${staticProjectName}");
 
-		LocalFile.ProjectDetails.gotoSourceCodeAccess();
+		ProjectDetails.gotoSourceCodeAccess();
 
-		LocalFile.ProjectDetails.deleteSourceCodeAccessUser(userEmailAddress = "info.services.qa@gmail.com");
+		ProjectDetails.deleteSourceCodeAccessUser(userEmailAddress = "info.services.qa@gmail.com");
 
-		LocalFile.GitHub.viewISSupportIntegrationGitHubRespository(
+		GitHub.viewISSupportIntegrationGitHubRespository(
 			userGitHubUsername = "infoservicesqa",
 			userPassword = "rejoicealways123");
 	}
 
 	test Viewsourcecodeaccessuserremovedbyteammember {
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Pjdzen - ${staticProjectName}",
 			productName = "DXP Production",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -2069,7 +2070,7 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Pjdzen - ${staticProjectName}",
 			productName = "Platinum Subscription",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -2079,85 +2080,85 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+		KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
 
-		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer");
+		KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer");
 
-		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - DXP");
+		KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - DXP");
 
-		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+		ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
 
-		LocalFile.JSONUser.viewSupportUserSync(userEmailAddress = "pjd.customer1@lrcustomer.com.broken");
+		JSONUser.viewSupportUserSync(userEmailAddress = "pjd.customer1@lrcustomer.com.broken");
 
-		LocalFile.JSONUser.viewSupportUserSync(userEmailAddress = "pjd.customer2@lrcustomer.com.broken");
+		JSONUser.viewSupportUserSync(userEmailAddress = "pjd.customer2@lrcustomer.com.broken");
 
-		LocalFile.JSONUser.updateSupportPassword(
+		JSONUser.updateSupportPassword(
 			userEmailAddress = "pjd.customer1@lrcustomer.com.broken",
 			userPassword = ${staticSupportUserTestPassword});
 
-		LocalFile.JSONUser.updateSupportPassword(
+		JSONUser.updateSupportPassword(
 			userEmailAddress = "pjd.customer2@lrcustomer.com.broken",
 			userPassword = ${staticSupportUserTestPassword});
 
-		LocalFile.JSONUser.assignUserToSupportGroup(
+		JSONUser.assignUserToSupportGroup(
 			groupName = "Help Center",
 			userEmailAddress = "pjd.customer1@lrcustomer.com.broken");
 
-		LocalFile.JSONUser.assignUserToSupportGroup(
+		JSONUser.assignUserToSupportGroup(
 			groupName = "Help Center",
 			userEmailAddress = "pjd.customer2@lrcustomer.com.broken");
 
-		LocalFile.JSONUser.assignUserToSupportRole(
+		JSONUser.assignUserToSupportRole(
 			roleName = "Customer - DXP",
 			userEmailAddress = "pjd.customer1@lrcustomer.com.broken");
 
-		LocalFile.JSONUser.assignUserToSupportRole(
+		JSONUser.assignUserToSupportRole(
 			roleName = "Customer - DXP",
 			userEmailAddress = "pjd.customer2@lrcustomer.com.broken");
 
-		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "PJDZENPJDZEN");
+		JSONOSBAccount.viewSupportOrganizationSync(accountCode = "PJDZENPJDZEN");
 
-		LocalFile.OSBAdmin.loginToSupport(
+		OSBAdmin.loginToSupport(
 			userEmailAddress = "pjd.customer1@lrcustomer.com.broken",
 			userPassword = ${staticSupportUserTestPassword});
 
-		LocalFile.ProjectDetails.gotoProjectDetailsPage();
+		ProjectDetails.gotoProjectDetailsPage();
 
-		LocalFile.ProjectDetails.gotoSourceCodeAccess();
+		ProjectDetails.gotoSourceCodeAccess();
 
-		LocalFile.ProjectDetails.addSourceCodeAccessUser(table = '''| Name            | Info Services QA           |
+		ProjectDetails.addSourceCodeAccessUser(table = '''| Name            | Info Services QA           |
 	| Email Address   | info.services.qa@gmail.com |
 	| GitHub Username | infoservicesqa             |''');
 
-		LocalFile.ProjectDetails.viewSourceCodeAccessUserPanel(
+		ProjectDetails.viewSourceCodeAccessUserPanel(
 			table = '''| Name            | Info Services QA           |
 	| Email Address   | info.services.qa@gmail.com |
 	| GitHub Username | infoservicesqa             |''',
 			userEmailAddress = "info.services.qa@gmail.com");
 
-		LocalFile.ProjectDetails.viewSourceCodeAccessUserDetails(
+		ProjectDetails.viewSourceCodeAccessUserDetails(
 			table = '''| Name            | Info Services QA           |
 	| Email Address   | info.services.qa@gmail.com |
 	| GitHub Username | infoservicesqa             |''',
 			userEmailAddress = "info.services.qa@gmail.com");
 
-		LocalFile.ZendeskHomepage.pause(timeInSeconds = 30);
+		ZendeskHomepage.pause(timeInSeconds = 30);
 
-		LocalFile.GitHub.acceptGitHubInvitation(
+		GitHub.acceptGitHubInvitation(
 			userGitHubUsername = "infoservicesqa",
 			userPassword = "rejoicealways123");
 
-		LocalFile.ProjectDetails.gotoProjectDetailsPage();
+		ProjectDetails.gotoProjectDetailsPage();
 
-		LocalFile.ProjectDetails.gotoSourceCodeAccess();
+		ProjectDetails.gotoSourceCodeAccess();
 
-		LocalFile.ProjectDetails.deleteSourceCodeAccessUser(userEmailAddress = "info.services.qa@gmail.com");
+		ProjectDetails.deleteSourceCodeAccessUser(userEmailAddress = "info.services.qa@gmail.com");
 
-		LocalFile.OSBAdmin.logoutAndLoginToSupport(
+		OSBAdmin.logoutAndLoginToSupport(
 			userEmailAddress = "amos.fong@liferay.com.broken",
 			userPassword = "test");
 
-		LocalFile.GitHub.viewNoGitHubRespository(
+		GitHub.viewNoGitHubRespository(
 			userGitHubUsername = "infoservicesqa",
 			userPassword = "rejoicealways123");
 	}

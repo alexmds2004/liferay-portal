@@ -4,22 +4,22 @@ definition {
 	property type = "zendesk.api";
 
 	setUp {
-		LocalFile.Passwords.getPasswords();
+		Passwords.getPasswords();
 	}
 
 	tearDown {
-		LocalFile.ZendeskTicketAPI._tearDownTicketByIds(ticketIdList = ${staticRequestIdList});
+		ZendeskTicketAPI._tearDownTicketByIds(ticketIdList = ${staticRequestIdList});
 
-		LocalFile.ZendeskUserAPI._tearDownUsersByExternalIdTable(table = '''| User1  |
+		ZendeskUserAPI._tearDownUsersByExternalIdTable(table = '''| User1  |
 	| Agent1 |''');
 
-		LocalFile.ZendeskOrganizationAPI._tearDownOrganizationsByExternalIdTable(table = '''| 12345678 |''');
+		ZendeskOrganizationAPI._tearDownOrganizationsByExternalIdTable(table = '''| 12345678 |''');
 
-		LocalFile.ZendeskHomepage.pause(timeInSeconds = 3);
+		ZendeskHomepage.pause(timeInSeconds = 3);
 	}
 
 	test NonProductionEnvironmentRouting {
-		LocalFile.ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved                   |
+		ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved                   |
 	| Name             | Organization Name 1        |
 	| Tags             | liferay_dxp,liferay_portal |
 	| Shared Tickets   | true                       |
@@ -30,7 +30,7 @@ definition {
 	| Support Language | English                    |
 	| External ID      | 12345678                   |''');
 
-		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
+		ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
 	| Tags             | osb_customer,osb_kb              |
 	| Password         | ${staticZendeskAdminPassword}    |
 	| Role             | End-user                         |
@@ -42,7 +42,7 @@ definition {
 	| Time Zone        | Brasilia                         |
 	| External ID      | User1                            |''');
 
-		LocalFile.ZendeskRequestAPI._createMultipleRequestsWithProductAndComponentAndSystemStatusValues(
+		ZendeskRequestAPI._createMultipleRequestsWithProductAndComponentAndSystemStatusValues(
 			requesterEmail = "zendesk.user1@zendesk.com.broken",
 			table = '''| prd_liferay_dxp_7_4    | authentication          | non-production_completely_shutdown                   |
 	| prd_liferay_dxp_7_3    | caching_clustering      | non-production_severely_impacted_inoperable          |
@@ -50,14 +50,15 @@ definition {
 	| prd_liferay_portal_6_1 | collaboration_suite     | non-production_functioning_with_limited_capabilities |
 	| prd_liferay_portal_6_0 | deployment_environments | non-production_fully_functional_with_observed_errors |''');
 
-		LocalFile.ZendeskTicketAPI._viewMultipleTicketEnvironments(
+		ZendeskTicketAPI._viewMultipleTicketEnvironments(
 			environment = "non-production",
 			ticketIdList = ${staticRequestIdList});
 	}
 
-	property help.center.acceptance = "true";
+
 	test ProductionEnvironmentRouting {
-		LocalFile.ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved                   |
+	property help.center.acceptance = "true";
+		ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved                   |
 	| Name             | Organization Name 1        |
 	| Tags             | liferay_dxp,liferay_portal |
 	| Shared Tickets   | true                       |
@@ -68,7 +69,7 @@ definition {
 	| Support Language | English                    |
 	| External ID      | 12345678                   |''');
 
-		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
+		ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
 	| Tags             | osb_customer,osb_kb              |
 	| Password         | ${staticZendeskAdminPassword}    |
 	| Role             | End-user                         |
@@ -80,7 +81,7 @@ definition {
 	| Time Zone        | Brasilia                         |
 	| External ID      | User1                            |''');
 
-		LocalFile.ZendeskRequestAPI._createMultipleRequestsWithProductAndComponentAndSystemStatusValues(
+		ZendeskRequestAPI._createMultipleRequestsWithProductAndComponentAndSystemStatusValues(
 			requesterEmail = "zendesk.user1@zendesk.com.broken",
 			table = '''| prd_liferay_dxp_7_4    | authentication          | production_completely_shutdown                   |
 	| prd_liferay_dxp_7_3    | caching_clustering      | production_severely_impacted_inoperable          |
@@ -88,13 +89,13 @@ definition {
 	| prd_liferay_portal_6_1 | collaboration_suite     | production_functioning_with_limited_capabilities |
 	| prd_liferay_portal_6_0 | deployment_environments | production_fully_functional_with_observed_errors |''');
 
-		LocalFile.ZendeskTicketAPI._viewMultipleTicketEnvironments(
+		ZendeskTicketAPI._viewMultipleTicketEnvironments(
 			environment = "production",
 			ticketIdList = ${staticRequestIdList});
 	}
 
 	test ResolutionPlanningRouting {
-		LocalFile.ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved            |
+		ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved            |
 	| Name             | Organization Name 1 |
 	| Tags             | lxc_sm              |
 	| Shared Tickets   | true                |
@@ -105,7 +106,7 @@ definition {
 	| Support Language | English             |
 	| External ID      | 12345678            |''');
 
-		LocalFile.ZendeskOrganizationAPI._assignTagsToOrganizationViaOrganizationExternalID(
+		ZendeskOrganizationAPI._assignTagsToOrganizationViaOrganizationExternalID(
 			organizationExternalId = 12345678,
 			table = '''| developer_tools         |
 	| enterprise_search       |
@@ -118,7 +119,7 @@ definition {
 	| productivity_tools_sync |
 	| social_office           |''');
 
-		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
+		ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
 	| Tags             | osb_customer,osb_kb              |
 	| Password         | ${staticZendeskAdminPassword}    |
 	| Role             | End-user                         |
@@ -130,7 +131,7 @@ definition {
 	| Time Zone        | Pacific Time (US & Canada)       |
 	| External ID      | User1                            |''');
 
-		LocalFile.ZendeskRequestAPI._createMultipleRequestsWithProductAndComponentValues(
+		ZendeskRequestAPI._createMultipleRequestsWithProductAndComponentValues(
 			requesterEmail = "zendesk.user1@zendesk.com.broken",
 			table = '''| prd_developer_tools         |                                        |
 	| prd_enterprise_search       | monitoring                             |
@@ -154,19 +155,19 @@ definition {
 	| prd_productivity_tools_sync |                                        |
 	| prd_social_office           |                                        |''');
 
-		LocalFile.ZendeskTicketAPI._assignTagsToTickets(
+		ZendeskTicketAPI._assignTagsToTickets(
 			table = '''| jira_verified |''',
 			ticketIdList = ${staticRequestIdList});
 
-		LocalFile.ZendeskTicketAPI._viewMultipleTicketSubStatuses(
+		ZendeskTicketAPI._viewMultipleTicketSubStatuses(
 			subStatus = "resolution_planning",
 			ticketIdList = ${staticRequestIdList});
 
-		LocalFile.ZendeskTicketAPI._viewSpecificTagForMultipleTickets(
+		ZendeskTicketAPI._viewSpecificTagForMultipleTickets(
 			tagName = "resolution_planning",
 			ticketIdList = ${staticRequestIdList});
 
-		LocalFile.ZendeskTicketAPI._viewNoSpecificTagForMultipleTickets(
+		ZendeskTicketAPI._viewNoSpecificTagForMultipleTickets(
 			tagName = "jira_verified",
 			ticketIdList = ${staticRequestIdList});
 	}

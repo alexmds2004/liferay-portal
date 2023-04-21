@@ -4,83 +4,83 @@ definition {
 	property type = "auto.provisioning";
 
 	setUp {
-		LocalFile.Passwords.getPasswords();
+		Passwords.getPasswords();
 
-		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | usr.provisioning1                       |
+		JSONOkta.createOktaUser(table = '''| Screen Name   | usr.provisioning1                       |
 	| Email Address | usr.provisioning1@lrcustomer.com.broken |
 	| First Name    | USR                                     |
 	| Last Name     | Provisioning1                           |''');
 	}
 
 	tearDown {
-		LocalFile.ZendeskUserAPI._getDefaultUserId(organizationName = "Provis - ${staticProjectName}");
+		ZendeskUserAPI._getDefaultUserId(organizationName = "Provis - ${staticProjectName}");
 
-		LocalFile.ZendeskUserAPI._renameFirstDefaultUserIdVariable();
+		ZendeskUserAPI._renameFirstDefaultUserIdVariable();
 
-		LocalFile.ZendeskUserAPI._getDefaultUserId(organizationName = "Propar - ${staticCompanyName}");
+		ZendeskUserAPI._getDefaultUserId(organizationName = "Propar - ${staticCompanyName}");
 
-		LocalFile.ZendeskUserAPI._renameSecondDefaultUserIdVariable();
+		ZendeskUserAPI._renameSecondDefaultUserIdVariable();
 
-		LocalFile.OSBAdminProject.tearDownProjects(table = '''| PROPAR       |
+		OSBAdminProject.tearDownProjects(table = '''| PROPAR       |
 	| VISPROPROVIS |''');
 
-		LocalFile.KoroneikiAccountAPI._tearDownAccounts(table = '''| Propar - ${staticCompanyName} |
+		KoroneikiAccountAPI._tearDownAccounts(table = '''| Propar - ${staticCompanyName} |
 	| Provis - ${staticProjectName} |
 	| Vispro - ${staticCompanyName} |''');
 
-		LocalFile.KoroneikiAccountAPI._tearDownAccountsViaAccountFieldNameAndValue(
+		KoroneikiAccountAPI._tearDownAccountsViaAccountFieldNameAndValue(
 			fieldName = "Code",
 			table = '''| PROPAR       |
 	| VISPROPROVIS |
 	| VISPRO       |''');
 
-		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+		KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
 
-		LocalFile.JSONUser.tearDownUsers(table = '''| usr.provisioning1@lrcustomer.com.broken |
+		JSONUser.tearDownUsers(table = '''| usr.provisioning1@lrcustomer.com.broken |
 	| usr.provisioning2@lrcustomer.com.broken |''');
 
-		LocalFile.JSONUser.tearDownUsersViaSupport(table = '''| usr.provisioning1@lrcustomer.com.broken |
+		JSONUser.tearDownUsersViaSupport(table = '''| usr.provisioning1@lrcustomer.com.broken |
 	| usr.provisioning2@lrcustomer.com.broken |''');
 
-		LocalFile.JSONUser.tearDownUsersViaKoroneiki(table = '''| usr.provisioning1@lrcustomer.com.broken |
+		JSONUser.tearDownUsersViaKoroneiki(table = '''| usr.provisioning1@lrcustomer.com.broken |
 	| usr.provisioning2@lrcustomer.com.broken |''');
 
-		LocalFile.KoroneikiContactAPI._tearDownContacts(table = '''| usr.provisioning1@lrcustomer.com.broken |
+		KoroneikiContactAPI._tearDownContacts(table = '''| usr.provisioning1@lrcustomer.com.broken |
 	| usr.provisioning2@lrcustomer.com.broken |''');
 
-		LocalFile.JSONOkta.tearDownUsers(table = '''| usr.provisioning1@lrcustomer.com.broken |
+		JSONOkta.tearDownUsers(table = '''| usr.provisioning1@lrcustomer.com.broken |
 	| usr.provisioning2@lrcustomer.com.broken |''');
 
-		LocalFile.ZendeskTicketAPI._tearDownTicketsByKeywords(table = '''| New Subscription(s) for Propar - ${staticCompanyName} |
+		ZendeskTicketAPI._tearDownTicketsByKeywords(table = '''| New Subscription(s) for Propar - ${staticCompanyName} |
 	| New Subscription(s) for Provis - ${staticProjectName} |''');
 
-		LocalFile.ZendeskUserAPI._getMultipleUserIdsByEmailAddress(table = '''| usr.provisioning1@lrcustomer.com.broken |
+		ZendeskUserAPI._getMultipleUserIdsByEmailAddress(table = '''| usr.provisioning1@lrcustomer.com.broken |
 	| usr.provisioning2@lrcustomer.com.broken |''');
 
-		LocalFile.ZendeskUserAPI._tearDownUsersByIdList(userIds = ${staticUserIdList});
+		ZendeskUserAPI._tearDownUsersByIdList(userIds = ${staticUserIdList});
 
-		LocalFile.ZendeskOrganizationAPI._getMultipleOrganizationExternalIdsByOrganizationNameIfStillPresent(table = '''| Propar - ${staticCompanyName} |
+		ZendeskOrganizationAPI._getMultipleOrganizationExternalIdsByOrganizationNameIfStillPresent(table = '''| Propar - ${staticCompanyName} |
 	| Provis - ${staticProjectName} |''');
 
-		LocalFile.ZendeskOrganizationAPI._tearDownOrganizationsByExternalIdList(organizationExternalIds = ${staticOrganizationExternalIdList});
+		ZendeskOrganizationAPI._tearDownOrganizationsByExternalIdList(organizationExternalIds = ${staticOrganizationExternalIdList});
 
-		LocalFile.ZendeskUserAPI._tearDownUserById(userId = ${staticDefaultUserId1});
+		ZendeskUserAPI._tearDownUserById(userId = ${staticDefaultUserId1});
 
-		LocalFile.ZendeskUserAPI._tearDownUserById(userId = ${staticDefaultUserId2});
+		ZendeskUserAPI._tearDownUserById(userId = ${staticDefaultUserId2});
 	}
 
 	test Createflexproject {
-		LocalFile.OSBAdminRabbitMQ.generateStaticVariables();
+		OSBAdminRabbitMQ.generateStaticVariables();
 
-		LocalFile.OSBAdminRabbitMQ.generateProvisioningCompanyName();
+		OSBAdminRabbitMQ.generateProvisioningCompanyName();
 
-		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+		OSBAdminRabbitMQ.generateProvisioningProjectName();
 
-		LocalFile.OSBAdmin.loginToSupport(
+		OSBAdmin.loginToSupport(
 			userEmailAddress = ${staticSupportAdminEmailAdress},
 			userPassword = ${staticSupportAdminPassword});
 
-		LocalFile.OSBAdminRabbitMQ.publishCreatePartnerAccountMessage(
+		OSBAdminRabbitMQ.publishCreatePartnerAccountMessage(
 			routingKey = "dossiera.provisioning.create",
 			table = '''| Account Name                           | Propar - ${staticCompanyName}              |
 	| Address City                           | Diamond Bar                                |
@@ -112,9 +112,9 @@ definition {
 	| Start Month                            | ${staticStartMonth}                        |
 	| Start Year                             | ${staticStartYear}                         |''');
 
-		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Partner");
+		KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Partner");
 
-		LocalFile.OSBAdminRabbitMQ.publishCreateProjectMessage(
+		OSBAdminRabbitMQ.publishCreateProjectMessage(
 			routingKey = "dossiera.provisioning.create",
 			table = '''| Account Name                           | Vispro - ${staticCompanyName}              |
 	| Address City                           | Diamond Bar                                |
@@ -160,23 +160,23 @@ definition {
 	| Subscription Level                     | Platinum                                   |
 	| Version Number                         | 7.1                                        |''');
 
-		LocalFile.OSBAdmin.loginToProvisioning(
+		OSBAdmin.loginToProvisioning(
 			userEmailAddress = ${staticProvisioningAdminEmailAddress},
 			userPassword = ${staticProvisioningAdminPassword});
 
-		LocalFile.Provisioning.gotoAccounts();
+		Provisioning.gotoAccounts();
 
-		LocalFile.Provisioning.searchAccounts(keyword = "Provis");
+		Provisioning.searchAccounts(keyword = "Provis");
 
-		LocalFile.Provisioning.clickAccount(accountName = "Provis - ${staticProjectName}");
+		Provisioning.clickAccount(accountName = "Provis - ${staticProjectName}");
 
-		LocalFile.ProvisioningAccount.clickSyncToZendeskButton();
+		ProvisioningAccount.clickSyncToZendeskButton();
 
-		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "VISPROPROVIS");
+		JSONOSBAccount.viewSupportOrganizationSync(accountCode = "VISPROPROVIS");
 
-		LocalFile.OSBAdmin.gotoOSBAdmin();
+		OSBAdmin.gotoOSBAdmin();
 
-		LocalFile.OSBAdminProject.view(
+		OSBAdminProject.view(
 			projectName = "Provis - ${staticProjectName}",
 			table = '''| Koroneiki Account Key | Obtain from project name      |
 	| Project Name          | Provis - ${staticProjectName} |
@@ -191,47 +191,47 @@ definition {
 	| Tier                  | T4                            |
 	| Language              | English                       |''');
 
-		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchase(
+		KoroneikiProductPurchaseAPI._viewProductPurchase(
 			accountName = "Provis - ${staticProjectName}",
 			productName = "DXP Flex",
 			table = '''| Quantity | 1        | |
 	| Status   | Approved | |''');
 
-		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchase(
+		KoroneikiProductPurchaseAPI._viewProductPurchase(
 			accountName = "Provis - ${staticProjectName}",
 			productName = "Platinum Subscription",
 			table = '''| Quantity | 1        | |
 	| Status   | Approved | |''');
 
-		LocalFile.KoroneikiAccountAPI._viewContactRole(
+		KoroneikiAccountAPI._viewContactRole(
 			accountName = "Provis - ${staticProjectName}",
 			contactEmailAddress = "usr.provisioning1@lrcustomer.com.broken",
 			contactRoleName = "Support Administrator");
 
-		LocalFile.KoroneikiAccountAPI._viewContactRole(
+		KoroneikiAccountAPI._viewContactRole(
 			accountName = "Provis - ${staticProjectName}",
 			contactEmailAddress = "usr.provisioning1@lrcustomer.com.broken",
 			contactRoleName = "Liferay Sales");
 
-		LocalFile.KoroneikiAccountAPI._viewContactRole(
+		KoroneikiAccountAPI._viewContactRole(
 			accountName = "Provis - ${staticProjectName}",
 			contactEmailAddress = "usr.provisioning1@lrcustomer.com.broken",
 			contactRoleName = "Secondary Contact");
 	}
 
-	property help.center.acceptance = "true";
 	test Createproject {
-		LocalFile.OSBAdminRabbitMQ.generateStaticVariables();
+		property help.center.acceptance = "true";
+		OSBAdminRabbitMQ.generateStaticVariables();
 
-		LocalFile.OSBAdminRabbitMQ.generateProvisioningCompanyName();
+		OSBAdminRabbitMQ.generateProvisioningCompanyName();
 
-		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+		OSBAdminRabbitMQ.generateProvisioningProjectName();
 
-		LocalFile.OSBAdmin.loginToSupport(
+		OSBAdmin.loginToSupport(
 			userEmailAddress = ${staticSupportAdminEmailAdress},
 			userPassword = ${staticSupportAdminPassword});
 
-		LocalFile.OSBAdminRabbitMQ.publishCreatePartnerAccountMessage(
+		OSBAdminRabbitMQ.publishCreatePartnerAccountMessage(
 			routingKey = "dossiera.provisioning.create",
 			table = '''| Account Name                           | Propar - ${staticCompanyName}              |
 	| Address City                           | Diamond Bar                                |
@@ -263,9 +263,9 @@ definition {
 	| Start Month                            | ${staticStartMonth}                        |
 	| Start Year                             | ${staticStartYear}                         |''');
 
-		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Partner");
+		KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Partner");
 
-		LocalFile.OSBAdminRabbitMQ.publishCreateProjectMessage(
+		OSBAdminRabbitMQ.publishCreateProjectMessage(
 			routingKey = "dossiera.provisioning.create",
 			table = '''| Account Name                           | Vispro - ${staticCompanyName}              |
 	| Address City                           | Diamond Bar                                |
@@ -311,23 +311,23 @@ definition {
 	| Subscription Level                     | Platinum                                   |
 	| Version Number                         | 7.1                                        |''');
 
-		LocalFile.OSBAdmin.loginToProvisioning(
+		OSBAdmin.loginToProvisioning(
 			userEmailAddress = ${staticProvisioningAdminEmailAddress},
 			userPassword = ${staticProvisioningAdminPassword});
 
-		LocalFile.Provisioning.gotoAccounts();
+		Provisioning.gotoAccounts();
 
-		LocalFile.Provisioning.searchAccounts(keyword = "Provis");
+		Provisioning.searchAccounts(keyword = "Provis");
 
-		LocalFile.Provisioning.clickAccount(accountName = "Provis - ${staticProjectName}");
+		Provisioning.clickAccount(accountName = "Provis - ${staticProjectName}");
 
-		LocalFile.ProvisioningAccount.clickSyncToZendeskButton();
+		ProvisioningAccount.clickSyncToZendeskButton();
 
-		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "VISPROPROVIS");
+		JSONOSBAccount.viewSupportOrganizationSync(accountCode = "VISPROPROVIS");
 
-		LocalFile.OSBAdmin.gotoOSBAdmin();
+		OSBAdmin.gotoOSBAdmin();
 
-		LocalFile.OSBAdminProject.view(
+		OSBAdminProject.view(
 			projectName = "Provis - ${staticProjectName}",
 			table = '''| Koroneiki Account Key | Obtain from project name      |
 	| Project Name          | Provis - ${staticProjectName} |
@@ -342,56 +342,56 @@ definition {
 	| Tier                  | T4                            |
 	| Language              | English                       |''');
 
-		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchase(
+		KoroneikiProductPurchaseAPI._viewProductPurchase(
 			accountName = "Provis - ${staticProjectName}",
 			productName = "DXP Production",
 			table = '''| Quantity | 1        | |
 	| Status   | Approved | |''');
 
-		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchase(
+		KoroneikiProductPurchaseAPI._viewProductPurchase(
 			accountName = "Provis - ${staticProjectName}",
 			productName = "Platinum Subscription",
 			table = '''| Quantity | 1        | |
 	| Status   | Approved | |''');
 
-		LocalFile.KoroneikiAccountAPI._viewContactRole(
+		KoroneikiAccountAPI._viewContactRole(
 			accountName = "Provis - ${staticProjectName}",
 			contactEmailAddress = "usr.provisioning1@lrcustomer.com.broken",
 			contactRoleName = "Support Administrator");
 
-		LocalFile.KoroneikiAccountAPI._viewContactRole(
+		KoroneikiAccountAPI._viewContactRole(
 			accountName = "Provis - ${staticProjectName}",
 			contactEmailAddress = "usr.provisioning1@lrcustomer.com.broken",
 			contactRoleName = "Liferay Sales");
 
-		LocalFile.KoroneikiAccountAPI._viewContactRole(
+		KoroneikiAccountAPI._viewContactRole(
 			accountName = "Provis - ${staticProjectName}",
 			contactEmailAddress = "usr.provisioning1@lrcustomer.com.broken",
 			contactRoleName = "Secondary Contact");
 
-		LocalFile.KoroneikiAccountAPI._viewTeamRole(
+		KoroneikiAccountAPI._viewTeamRole(
 			accountName = "Provis - ${staticProjectName}",
 			teamName = "Propar - ${staticCompanyName}",
 			teamRoleName = "Partner");
 
-		LocalFile.KoroneikiAccountAPI._viewNoTeamRole(
+		KoroneikiAccountAPI._viewNoTeamRole(
 			accountName = "Provis - ${staticProjectName}",
 			teamName = "Propar - ${staticCompanyName}",
 			teamRoleName = "First Line Support");
 	}
 
 	test Createprojectwithanoktauserandviewviazendesk {
-		LocalFile.OSBAdminRabbitMQ.generateStaticVariables();
+		OSBAdminRabbitMQ.generateStaticVariables();
 
-		LocalFile.OSBAdminRabbitMQ.generateProvisioningCompanyName();
+		OSBAdminRabbitMQ.generateProvisioningCompanyName();
 
-		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+		OSBAdminRabbitMQ.generateProvisioningProjectName();
 
-		LocalFile.OSBAdmin.loginToSupport(
+		OSBAdmin.loginToSupport(
 			userEmailAddress = ${staticSupportAdminEmailAdress},
 			userPassword = ${staticSupportAdminPassword});
 
-		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+		OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
 			routingKey = "dossiera.provisioning.create",
 			table = '''| Account Name                           | Vispro - ${staticCompanyName}              |
 	| Address City                           | Diamond Bar                                |
@@ -434,23 +434,23 @@ definition {
 	| Subscription Level                     | Platinum                                   |
 	| Version Number                         | 7.1                                        |''');
 
-		LocalFile.OSBAdmin.loginToProvisioning(
+		OSBAdmin.loginToProvisioning(
 			userEmailAddress = ${staticProvisioningAdminEmailAddress},
 			userPassword = ${staticProvisioningAdminPassword});
 
-		LocalFile.Provisioning.gotoAccounts();
+		Provisioning.gotoAccounts();
 
-		LocalFile.Provisioning.searchAccounts(keyword = "Provis");
+		Provisioning.searchAccounts(keyword = "Provis");
 
-		LocalFile.Provisioning.clickAccount(accountName = "Provis - ${staticProjectName}");
+		Provisioning.clickAccount(accountName = "Provis - ${staticProjectName}");
 
-		LocalFile.ProvisioningAccount.clickSyncToZendeskButton();
+		ProvisioningAccount.clickSyncToZendeskButton();
 
-		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "VISPROPROVIS");
+		JSONOSBAccount.viewSupportOrganizationSync(accountCode = "VISPROPROVIS");
 
-		LocalFile.OSBAdmin.gotoOSBAdmin();
+		OSBAdmin.gotoOSBAdmin();
 
-		LocalFile.OSBAdminProject.view(
+		OSBAdminProject.view(
 			projectName = "Provis - ${staticProjectName}",
 			table = '''| Koroneiki Account Key | Obtain from project name      |
 	| Project Name          | Provis - ${staticProjectName} |
@@ -464,77 +464,77 @@ definition {
 	| Tier                  | T4                            |
 	| Language              | English                       |''');
 
-		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchase(
+		KoroneikiProductPurchaseAPI._viewProductPurchase(
 			accountName = "Provis - ${staticProjectName}",
 			productName = "DXP Production",
 			table = '''| Quantity | 1        | |
 	| Status   | Approved | |''');
 
-		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchase(
+		KoroneikiProductPurchaseAPI._viewProductPurchase(
 			accountName = "Provis - ${staticProjectName}",
 			productName = "Platinum Subscription",
 			table = '''| Quantity | 1        | |
 	| Status   | Approved | |''');
 
-		LocalFile.Provisioning.gotoUsers();
+		Provisioning.gotoUsers();
 
-		LocalFile.Provisioning.searchUsers(keyword = "usr.provisioning1");
+		Provisioning.searchUsers(keyword = "usr.provisioning1");
 
-		LocalFile.Provisioning._viewUserViaIndex(
+		Provisioning._viewUserViaIndex(
 			table = '''| Name               | USR Provisioning1                       |
 	| Email Address      | usr.provisioning1@lrcustomer.com.broken |
 	| Number of Accounts | 1                                       |
 	| Status             | VERIFIED                                |''',
 			userName = "USR Provisioning1");
 
-		LocalFile.Provisioning.clickUser(userName = "USR Provisioning1");
+		Provisioning.clickUser(userName = "USR Provisioning1");
 
-		LocalFile.ProvisioningUser._viewUserDetails(table = '''| Name               | USR Provisioning1                       |
+		ProvisioningUser._viewUserDetails(table = '''| Name               | USR Provisioning1                       |
 	| Email Address      | usr.provisioning1@lrcustomer.com.broken |
 	| Number of Accounts | 1                                       |
 	| Status             | VERIFIED                                |''');
 
-		LocalFile.JSONOkta.viewOktaUser(userEmailAddress = "usr.provisioning1@lrcustomer.com.broken");
+		JSONOkta.viewOktaUser(userEmailAddress = "usr.provisioning1@lrcustomer.com.broken");
 
-		LocalFile.ZendeskUserAPI._viewUserOrganizationIdSync(
+		ZendeskUserAPI._viewUserOrganizationIdSync(
 			organizationName = "Provis - ${staticProjectName}",
 			userEmailAddress = "usr.provisioning1@lrcustomer.com.broken");
 
-		LocalFile.ZendeskUserAPI._viewUserOrganizationIdSync(
+		ZendeskUserAPI._viewUserOrganizationIdSync(
 			organizationName = "Provis - ${staticProjectName}",
 			userEmailAddress = "usr.provisioning1@lrcustomer.com.broken");
 
-		LocalFile.ZendeskUserAPI._viewUserOrganizationSubscriptionSync(
+		ZendeskUserAPI._viewUserOrganizationSubscriptionSync(
 			organizationName = "Provis - ${staticProjectName}",
 			userEmailAddress = "usr.provisioning1@lrcustomer.com.broken");
 
-		LocalFile.ZendeskUserAPI._viewUserOrganizationSubscriptionSync(
+		ZendeskUserAPI._viewUserOrganizationSubscriptionSync(
 			organizationName = "Provis - ${staticProjectName}",
 			userEmailAddress = "usr.provisioning1@lrcustomer.com.broken");
 
-		LocalFile.ZendeskUserAPI._viewUserTagSync(
+		ZendeskUserAPI._viewUserTagSync(
 			tag = "osb_kb",
 			userEmailAddress = "usr.provisioning1@lrcustomer.com.broken");
 
-		LocalFile.ZendeskUserAPI._viewUserTagSync(
+		ZendeskUserAPI._viewUserTagSync(
 			tag = "osb_customer",
 			userEmailAddress = "usr.provisioning1@lrcustomer.com.broken");
 
-		LocalFile.ZendeskUserAPI._matchOsbUserUuIdWithZendeskUserId(userEmailAddress = "usr.provisioning1@lrcustomer.com.broken");
+		ZendeskUserAPI._matchOsbUserUuIdWithZendeskUserId(userEmailAddress = "usr.provisioning1@lrcustomer.com.broken");
 	}
 
 	test Createprojectwithanonoktauserandviewviazendesk {
-		LocalFile.OSBAdminRabbitMQ.generateStaticVariables();
+		OSBAdminRabbitMQ.generateStaticVariables();
 
-		LocalFile.OSBAdminRabbitMQ.generateProvisioningCompanyName();
+		OSBAdminRabbitMQ.generateProvisioningCompanyName();
 
-		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+		OSBAdminRabbitMQ.generateProvisioningProjectName();
 
-		LocalFile.OSBAdmin.loginToSupport(
+		OSBAdmin.loginToSupport(
 			userEmailAddress = ${staticSupportAdminEmailAdress},
 			userPassword = ${staticSupportAdminPassword});
 
-		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+		OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
 			routingKey = "dossiera.provisioning.create",
 			table = '''| Account Name                           | Vispro - ${staticCompanyName}              |
 	| Address City                           | Sao Paulo                                  |
@@ -577,23 +577,23 @@ definition {
 	| Subscription Level                     | Platinum                                   |
 	| Version Number                         | 7.1                                        |''');
 
-		LocalFile.OSBAdmin.loginToProvisioning(
+		OSBAdmin.loginToProvisioning(
 			userEmailAddress = ${staticProvisioningAdminEmailAddress},
 			userPassword = ${staticProvisioningAdminPassword});
 
-		LocalFile.Provisioning.gotoAccounts();
+		Provisioning.gotoAccounts();
 
-		LocalFile.Provisioning.searchAccounts(keyword = "Provis");
+		Provisioning.searchAccounts(keyword = "Provis");
 
-		LocalFile.Provisioning.clickAccount(accountName = "Provis - ${staticProjectName}");
+		Provisioning.clickAccount(accountName = "Provis - ${staticProjectName}");
 
-		LocalFile.ProvisioningAccount.clickSyncToZendeskButton();
+		ProvisioningAccount.clickSyncToZendeskButton();
 
-		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "VISPROPROVIS");
+		JSONOSBAccount.viewSupportOrganizationSync(accountCode = "VISPROPROVIS");
 
-		LocalFile.OSBAdmin.gotoOSBAdmin();
+		OSBAdmin.gotoOSBAdmin();
 
-		LocalFile.OSBAdminProject.view(
+		OSBAdminProject.view(
 			projectName = "Provis - ${staticProjectName}",
 			table = '''| Koroneiki Account Key | Obtain from project name          |
 	| Project Name          | Provis - ${staticProjectName}     |
@@ -607,73 +607,73 @@ definition {
 	| Tier                  | T4                                |
 	| Language              | Portuguese                        |''');
 
-		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchase(
+		KoroneikiProductPurchaseAPI._viewProductPurchase(
 			accountName = "Provis - ${staticProjectName}",
 			productName = "DXP Production",
 			table = '''| Quantity | 1        | |
 	| Status   | Approved | |''');
 
-		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchase(
+		KoroneikiProductPurchaseAPI._viewProductPurchase(
 			accountName = "Provis - ${staticProjectName}",
 			productName = "Platinum Subscription",
 			table = '''| Quantity | 1        | |
 	| Status   | Approved | |''');
 
-		LocalFile.Provisioning.gotoUsers();
+		Provisioning.gotoUsers();
 
-		LocalFile.Provisioning.searchUsers(keyword = "usr.provisioning2");
+		Provisioning.searchUsers(keyword = "usr.provisioning2");
 
-		LocalFile.Provisioning._viewUserViaIndex(
+		Provisioning._viewUserViaIndex(
 			table = '''| Name               | USR Provisioning2                       |
 	| Email Address      | usr.provisioning2@lrcustomer.com.broken |
 	| Number of Accounts | 1                                       |
 	| Status             | UNVERIFIED                              |''',
 			userName = "USR Provisioning2");
 
-		LocalFile.Provisioning.clickUser(userName = "USR Provisioning2");
+		Provisioning.clickUser(userName = "USR Provisioning2");
 
-		LocalFile.ProvisioningUser._viewUserDetails(table = '''| Name               | USR Provisioning2                       |
+		ProvisioningUser._viewUserDetails(table = '''| Name               | USR Provisioning2                       |
 	| Email Address      | usr.provisioning2@lrcustomer.com.broken |
 	| Number of Accounts | 1                                       |
 	| Status             | UNVERIFIED                              |''');
 
-		LocalFile.JSONOkta.viewOktaUser(userEmailAddress = "usr.provisioning2@lrcustomer.com.broken");
+		JSONOkta.viewOktaUser(userEmailAddress = "usr.provisioning2@lrcustomer.com.broken");
 
-		LocalFile.ZendeskUserAPI._viewUserOrganizationIdSync(
+		ZendeskUserAPI._viewUserOrganizationIdSync(
 			organizationName = "Provis - ${staticProjectName}",
 			userEmailAddress = "usr.provisioning2@lrcustomer.com.broken");
 
-		LocalFile.ZendeskUserAPI._viewUserOrganizationSubscriptionSync(
+		ZendeskUserAPI._viewUserOrganizationSubscriptionSync(
 			organizationName = "Provis - ${staticProjectName}",
 			userEmailAddress = "usr.provisioning2@lrcustomer.com.broken");
 
-		LocalFile.ZendeskUserAPI._viewUserTagSync(
+		ZendeskUserAPI._viewUserTagSync(
 			tag = "osb_kb",
 			userEmailAddress = "usr.provisioning2@lrcustomer.com.broken");
 
-		LocalFile.ZendeskUserAPI._viewUserTagSync(
+		ZendeskUserAPI._viewUserTagSync(
 			tag = "osb_customer",
 			userEmailAddress = "usr.provisioning2@lrcustomer.com.broken");
 
-		LocalFile.ZendeskUserAPI._viewNoUserWatcherTagSync(
+		ZendeskUserAPI._viewNoUserWatcherTagSync(
 			organizationName = "Provis - ${staticProjectName}",
 			userEmailAddress = "usr.provisioning2@lrcustomer.com.broken");
 
-		LocalFile.ZendeskUserAPI._matchOsbUserUuIdWithZendeskUserId(userEmailAddress = "usr.provisioning2@lrcustomer.com.broken");
+		ZendeskUserAPI._matchOsbUserUuIdWithZendeskUserId(userEmailAddress = "usr.provisioning2@lrcustomer.com.broken");
 	}
 
 	test CreateprojectwithClosedLostopportunity {
-		LocalFile.OSBAdminRabbitMQ.generateStaticVariables();
+		OSBAdminRabbitMQ.generateStaticVariables();
 
-		LocalFile.OSBAdminRabbitMQ.generateProvisioningCompanyName();
+		OSBAdminRabbitMQ.generateProvisioningCompanyName();
 
-		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+		OSBAdminRabbitMQ.generateProvisioningProjectName();
 
-		LocalFile.OSBAdmin.loginToSupport(
+		OSBAdmin.loginToSupport(
 			userEmailAddress = ${staticSupportAdminEmailAdress},
 			userPassword = ${staticSupportAdminPassword});
 
-		LocalFile.OSBAdminRabbitMQ.publishCreatePartnerAccountMessage(
+		OSBAdminRabbitMQ.publishCreatePartnerAccountMessage(
 			routingKey = "dossiera.provisioning.create",
 			table = '''| Account Name                           | Propar - ${staticCompanyName}              |
 	| Address City                           | Diamond Bar                                |
@@ -705,9 +705,9 @@ definition {
 	| Start Month                            | ${staticStartMonth}                        |
 	| Start Year                             | ${staticStartYear}                         |''');
 
-		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Partner");
+		KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Partner");
 
-		LocalFile.OSBAdminRabbitMQ.publishCreateProjectMessage(
+		OSBAdminRabbitMQ.publishCreateProjectMessage(
 			routingKey = "dossiera.provisioning.create",
 			table = '''| Account Name                           | Vispro - ${staticCompanyName}              |
 	| Address City                           | Diamond Bar                                |
@@ -753,25 +753,25 @@ definition {
 	| Subscription Level                     | Platinum                                   |
 	| Version Number                         | 7.1                                        |''');
 
-		LocalFile.OSBAdmin.gotoOSBAdmin();
+		OSBAdmin.gotoOSBAdmin();
 
-		LocalFile.OSBAdminProject.viewNoneViaName(projectName = "Provis - ${staticProjectName}");
+		OSBAdminProject.viewNoneViaName(projectName = "Provis - ${staticProjectName}");
 
-		LocalFile.KoroneikiAccountAPI._viewNoAccount(accountName = "Provis - ${staticProjectName}");
+		KoroneikiAccountAPI._viewNoAccount(accountName = "Provis - ${staticProjectName}");
 	}
 
 	test Createprojectwithfirstlinesupport {
-		LocalFile.OSBAdminRabbitMQ.generateStaticVariables();
+		OSBAdminRabbitMQ.generateStaticVariables();
 
-		LocalFile.OSBAdminRabbitMQ.generateProvisioningCompanyName();
+		OSBAdminRabbitMQ.generateProvisioningCompanyName();
 
-		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+		OSBAdminRabbitMQ.generateProvisioningProjectName();
 
-		LocalFile.OSBAdmin.loginToSupport(
+		OSBAdmin.loginToSupport(
 			userEmailAddress = ${staticSupportAdminEmailAdress},
 			userPassword = ${staticSupportAdminPassword});
 
-		LocalFile.OSBAdminRabbitMQ.publishCreatePartnerAccountMessage(
+		OSBAdminRabbitMQ.publishCreatePartnerAccountMessage(
 			routingKey = "dossiera.provisioning.create",
 			table = '''| Account Name                           | Propar - ${staticCompanyName}              |
 	| Address City                           | Diamond Bar                                |
@@ -803,9 +803,9 @@ definition {
 	| Start Month                            | ${staticStartMonth}                        |
 	| Start Year                             | ${staticStartYear}                         |''');
 
-		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Partner");
+		KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Partner");
 
-		LocalFile.OSBAdminRabbitMQ.publishCreateProjectMessage(
+		OSBAdminRabbitMQ.publishCreateProjectMessage(
 			routingKey = "dossiera.provisioning.create",
 			table = '''| Account Name                           | Vispro - ${staticCompanyName}              |
 	| Address City                           | Diamond Bar                                |
@@ -851,23 +851,23 @@ definition {
 	| Subscription Level                     | Platinum                                   |
 	| Version Number                         | 7.1                                        |''');
 
-		LocalFile.OSBAdmin.loginToProvisioning(
+		OSBAdmin.loginToProvisioning(
 			userEmailAddress = ${staticProvisioningAdminEmailAddress},
 			userPassword = ${staticProvisioningAdminPassword});
 
-		LocalFile.Provisioning.gotoAccounts();
+		Provisioning.gotoAccounts();
 
-		LocalFile.Provisioning.searchAccounts(keyword = "Provis");
+		Provisioning.searchAccounts(keyword = "Provis");
 
-		LocalFile.Provisioning.clickAccount(accountName = "Provis - ${staticProjectName}");
+		Provisioning.clickAccount(accountName = "Provis - ${staticProjectName}");
 
-		LocalFile.ProvisioningAccount.clickSyncToZendeskButton();
+		ProvisioningAccount.clickSyncToZendeskButton();
 
-		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "VISPROPROVIS");
+		JSONOSBAccount.viewSupportOrganizationSync(accountCode = "VISPROPROVIS");
 
-		LocalFile.OSBAdmin.gotoOSBAdmin();
+		OSBAdmin.gotoOSBAdmin();
 
-		LocalFile.OSBAdminProject.view(
+		OSBAdminProject.view(
 			projectName = "Provis - ${staticProjectName}",
 			table = '''| Koroneiki Account Key      | Obtain from project name      |
 	| Project Name               | Provis - ${staticProjectName} |
@@ -883,61 +883,61 @@ definition {
 	| Tier                       | T4                            |
 	| Language                   | English                       |''');
 
-		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchase(
+		KoroneikiProductPurchaseAPI._viewProductPurchase(
 			accountName = "Provis - ${staticProjectName}",
 			productName = "DXP Production",
 			table = '''| Quantity | 1        | |
 	| Status   | Approved | |''');
 
-		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchase(
+		KoroneikiProductPurchaseAPI._viewProductPurchase(
 			accountName = "Provis - ${staticProjectName}",
 			productName = "Platinum Subscription",
 			table = '''| Quantity | 1        | |
 	| Status   | Approved | |''');
 
-		LocalFile.KoroneikiAccountAPI._viewContactRole(
+		KoroneikiAccountAPI._viewContactRole(
 			accountName = "Provis - ${staticProjectName}",
 			contactEmailAddress = "usr.provisioning1@lrcustomer.com.broken",
 			contactRoleName = "Support Administrator");
 
-		LocalFile.KoroneikiAccountAPI._viewContactRole(
+		KoroneikiAccountAPI._viewContactRole(
 			accountName = "Provis - ${staticProjectName}",
 			contactEmailAddress = "usr.provisioning1@lrcustomer.com.broken",
 			contactRoleName = "Liferay Sales");
 
-		LocalFile.KoroneikiAccountAPI._viewContactRole(
+		KoroneikiAccountAPI._viewContactRole(
 			accountName = "Provis - ${staticProjectName}",
 			contactEmailAddress = "usr.provisioning1@lrcustomer.com.broken",
 			contactRoleName = "Secondary Contact");
 
-		LocalFile.KoroneikiAccountAPI._viewTeamRole(
+		KoroneikiAccountAPI._viewTeamRole(
 			accountName = "Provis - ${staticProjectName}",
 			teamName = "Propar - ${staticCompanyName}",
 			teamRoleName = "Partner");
 
-		LocalFile.KoroneikiAccountAPI._viewTeamRole(
+		KoroneikiAccountAPI._viewTeamRole(
 			accountName = "Provis - ${staticProjectName}",
 			teamName = "Propar - ${staticCompanyName}",
 			teamRoleName = "First Line Support");
 	}
 
 	test Createprojectwithfutureenddate {
-		LocalFile.OSBAdminRabbitMQ.generateStaticVariables();
+		OSBAdminRabbitMQ.generateStaticVariables();
 
-		LocalFile.OSBAdminRabbitMQ.generateProvisioningCompanyName();
+		OSBAdminRabbitMQ.generateProvisioningCompanyName();
 
-		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+		OSBAdminRabbitMQ.generateProvisioningProjectName();
 
-		LocalFile.OSBAdmin.loginToSupport(
+		OSBAdmin.loginToSupport(
 			userEmailAddress = ${staticSupportAdminEmailAdress},
 			userPassword = ${staticSupportAdminPassword});
 
-		LocalFile.OSBAdminRabbitMQ.adjustStartAndEndYearsToFutureYears(
+		OSBAdminRabbitMQ.adjustStartAndEndYearsToFutureYears(
 			endYear = ${staticEndYear},
 			numberOfYears = 2,
 			startYear = ${staticStartYear});
 
-		LocalFile.OSBAdminRabbitMQ.publishCreatePartnerAccountMessage(
+		OSBAdminRabbitMQ.publishCreatePartnerAccountMessage(
 			routingKey = "dossiera.provisioning.create",
 			table = '''| Account Name                           | Propar - ${staticCompanyName}              |
 	| Address City                           | Diamond Bar                                |
@@ -969,9 +969,9 @@ definition {
 	| Start Month                            | ${staticStartMonth}                        |
 	| Start Year                             | ${staticStartYear}                         |''');
 
-		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Partner");
+		KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Partner");
 
-		LocalFile.OSBAdminRabbitMQ.publishCreateProjectMessage(
+		OSBAdminRabbitMQ.publishCreateProjectMessage(
 			routingKey = "dossiera.provisioning.create",
 			table = '''| Account Name                           | Vispro - ${staticCompanyName}              |
 	| Address City                           | Diamond Bar                                |
@@ -1017,23 +1017,23 @@ definition {
 	| Subscription Level                     | Platinum                                   |
 	| Version Number                         | 7.1                                        |''');
 
-		LocalFile.OSBAdmin.loginToProvisioning(
+		OSBAdmin.loginToProvisioning(
 			userEmailAddress = ${staticProvisioningAdminEmailAddress},
 			userPassword = ${staticProvisioningAdminPassword});
 
-		LocalFile.Provisioning.gotoAccounts();
+		Provisioning.gotoAccounts();
 
-		LocalFile.Provisioning.searchAccounts(keyword = "Provis");
+		Provisioning.searchAccounts(keyword = "Provis");
 
-		LocalFile.Provisioning.clickAccount(accountName = "Provis - ${staticProjectName}");
+		Provisioning.clickAccount(accountName = "Provis - ${staticProjectName}");
 
-		LocalFile.ProvisioningAccount.clickSyncToZendeskButton();
+		ProvisioningAccount.clickSyncToZendeskButton();
 
-		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "VISPROPROVIS");
+		JSONOSBAccount.viewSupportOrganizationSync(accountCode = "VISPROPROVIS");
 
-		LocalFile.OSBAdmin.gotoOSBAdmin();
+		OSBAdmin.gotoOSBAdmin();
 
-		LocalFile.OSBAdminProject.view(
+		OSBAdminProject.view(
 			projectName = "Provis - ${staticProjectName}",
 			table = '''| Koroneiki Account Key | Obtain from project name      |
 	| Project Name          | Provis - ${staticProjectName} |
@@ -1048,56 +1048,56 @@ definition {
 	| Tier                  | T4                            |
 	| Language              | English                       |''');
 
-		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchase(
+		KoroneikiProductPurchaseAPI._viewProductPurchase(
 			accountName = "Provis - ${staticProjectName}",
 			productName = "DXP Production",
 			table = '''| Quantity | 1        | |
 	| Status   | Approved | |''');
 
-		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchase(
+		KoroneikiProductPurchaseAPI._viewProductPurchase(
 			accountName = "Provis - ${staticProjectName}",
 			productName = "Platinum Subscription",
 			table = '''| Quantity | 1        | |
 	| Status   | Approved | |''');
 
-		LocalFile.KoroneikiAccountAPI._viewContactRole(
+		KoroneikiAccountAPI._viewContactRole(
 			accountName = "Provis - ${staticProjectName}",
 			contactEmailAddress = "usr.provisioning1@lrcustomer.com.broken",
 			contactRoleName = "Support Administrator");
 
-		LocalFile.KoroneikiAccountAPI._viewContactRole(
+		KoroneikiAccountAPI._viewContactRole(
 			accountName = "Provis - ${staticProjectName}",
 			contactEmailAddress = "usr.provisioning1@lrcustomer.com.broken",
 			contactRoleName = "Liferay Sales");
 
-		LocalFile.KoroneikiAccountAPI._viewContactRole(
+		KoroneikiAccountAPI._viewContactRole(
 			accountName = "Provis - ${staticProjectName}",
 			contactEmailAddress = "usr.provisioning1@lrcustomer.com.broken",
 			contactRoleName = "Secondary Contact");
 
-		LocalFile.KoroneikiAccountAPI._viewTeamRole(
+		KoroneikiAccountAPI._viewTeamRole(
 			accountName = "Provis - ${staticProjectName}",
 			teamName = "Propar - ${staticCompanyName}",
 			teamRoleName = "Partner");
 
-		LocalFile.KoroneikiAccountAPI._viewNoTeamRole(
+		KoroneikiAccountAPI._viewNoTeamRole(
 			accountName = "Provis - ${staticProjectName}",
 			teamName = "Propar - ${staticCompanyName}",
 			teamRoleName = "First Line Support");
 	}
 
 	test Createprojectwithnonoktauser {
-		LocalFile.OSBAdminRabbitMQ.generateStaticVariables();
+		OSBAdminRabbitMQ.generateStaticVariables();
 
-		LocalFile.OSBAdminRabbitMQ.generateProvisioningCompanyName();
+		OSBAdminRabbitMQ.generateProvisioningCompanyName();
 
-		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+		OSBAdminRabbitMQ.generateProvisioningProjectName();
 
-		LocalFile.OSBAdmin.loginToSupport(
+		OSBAdmin.loginToSupport(
 			userEmailAddress = ${staticSupportAdminEmailAdress},
 			userPassword = ${staticSupportAdminPassword});
 
-		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+		OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
 			routingKey = "dossiera.provisioning.create",
 			table = '''| Account Name                           | Vispro - ${staticCompanyName}              |
 	| Address City                           | Sao Paulo                                  |
@@ -1140,23 +1140,23 @@ definition {
 	| Subscription Level                     | Platinum                                   |
 	| Version Number                         | 7.1                                        |''');
 
-		LocalFile.OSBAdmin.loginToProvisioning(
+		OSBAdmin.loginToProvisioning(
 			userEmailAddress = ${staticProvisioningAdminEmailAddress},
 			userPassword = ${staticProvisioningAdminPassword});
 
-		LocalFile.Provisioning.gotoAccounts();
+		Provisioning.gotoAccounts();
 
-		LocalFile.Provisioning.searchAccounts(keyword = "Provis");
+		Provisioning.searchAccounts(keyword = "Provis");
 
-		LocalFile.Provisioning.clickAccount(accountName = "Provis - ${staticProjectName}");
+		Provisioning.clickAccount(accountName = "Provis - ${staticProjectName}");
 
-		LocalFile.ProvisioningAccount.clickSyncToZendeskButton();
+		ProvisioningAccount.clickSyncToZendeskButton();
 
-		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "VISPROPROVIS");
+		JSONOSBAccount.viewSupportOrganizationSync(accountCode = "VISPROPROVIS");
 
-		LocalFile.OSBAdmin.gotoOSBAdmin();
+		OSBAdmin.gotoOSBAdmin();
 
-		LocalFile.OSBAdminProject.view(
+		OSBAdminProject.view(
 			projectName = "Provis - ${staticProjectName}",
 			table = '''| Koroneiki Account Key | Obtain from project name          |
 	| Project Name          | Provis - ${staticProjectName}     |
@@ -1170,51 +1170,51 @@ definition {
 	| Tier                  | T4                                |
 	| Language              | Portuguese                        |''');
 
-		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchase(
+		KoroneikiProductPurchaseAPI._viewProductPurchase(
 			accountName = "Provis - ${staticProjectName}",
 			productName = "DXP Production",
 			table = '''| Quantity | 1        | |
 	| Status   | Approved | |''');
 
-		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchase(
+		KoroneikiProductPurchaseAPI._viewProductPurchase(
 			accountName = "Provis - ${staticProjectName}",
 			productName = "Platinum Subscription",
 			table = '''| Quantity | 1        | |
 	| Status   | Approved | |''');
 
-		LocalFile.Provisioning.gotoUsers();
+		Provisioning.gotoUsers();
 
-		LocalFile.Provisioning.searchUsers(keyword = "usr.provisioning2");
+		Provisioning.searchUsers(keyword = "usr.provisioning2");
 
-		LocalFile.Provisioning._viewUserViaIndex(
+		Provisioning._viewUserViaIndex(
 			table = '''| Name               | USR Provisioning2                       |
 	| Email Address      | usr.provisioning2@lrcustomer.com.broken |
 	| Number of Accounts | 1                                       |
 	| Status             | UNVERIFIED                              |''',
 			userName = "USR Provisioning2");
 
-		LocalFile.Provisioning.clickUser(userName = "USR Provisioning2");
+		Provisioning.clickUser(userName = "USR Provisioning2");
 
-		LocalFile.ProvisioningUser._viewUserDetails(table = '''| Name               | USR Provisioning2                       |
+		ProvisioningUser._viewUserDetails(table = '''| Name               | USR Provisioning2                       |
 	| Email Address      | usr.provisioning2@lrcustomer.com.broken |
 	| Number of Accounts | 1                                       |
 	| Status             | UNVERIFIED                              |''');
 
-		LocalFile.JSONOkta.viewOktaUser(userEmailAddress = "usr.provisioning2@lrcustomer.com.broken");
+		JSONOkta.viewOktaUser(userEmailAddress = "usr.provisioning2@lrcustomer.com.broken");
 	}
 
 	test Createprojectwithnopartner {
-		LocalFile.OSBAdminRabbitMQ.generateStaticVariables();
+		OSBAdminRabbitMQ.generateStaticVariables();
 
-		LocalFile.OSBAdminRabbitMQ.generateProvisioningCompanyName();
+		OSBAdminRabbitMQ.generateProvisioningCompanyName();
 
-		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+		OSBAdminRabbitMQ.generateProvisioningProjectName();
 
-		LocalFile.OSBAdmin.loginToSupport(
+		OSBAdmin.loginToSupport(
 			userEmailAddress = ${staticSupportAdminEmailAdress},
 			userPassword = ${staticSupportAdminPassword});
 
-		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+		OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
 			routingKey = "dossiera.provisioning.create",
 			table = '''| Account Name                           | Vispro - ${staticCompanyName}              |
 	| Address City                           | Diamond Bar                                |
@@ -1257,23 +1257,23 @@ definition {
 	| Subscription Level                     | Platinum                                   |
 	| Version Number                         | 7.1                                        |''');
 
-		LocalFile.OSBAdmin.loginToProvisioning(
+		OSBAdmin.loginToProvisioning(
 			userEmailAddress = ${staticProvisioningAdminEmailAddress},
 			userPassword = ${staticProvisioningAdminPassword});
 
-		LocalFile.Provisioning.gotoAccounts();
+		Provisioning.gotoAccounts();
 
-		LocalFile.Provisioning.searchAccounts(keyword = "Provis");
+		Provisioning.searchAccounts(keyword = "Provis");
 
-		LocalFile.Provisioning.clickAccount(accountName = "Provis - ${staticProjectName}");
+		Provisioning.clickAccount(accountName = "Provis - ${staticProjectName}");
 
-		LocalFile.ProvisioningAccount.clickSyncToZendeskButton();
+		ProvisioningAccount.clickSyncToZendeskButton();
 
-		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "VISPROPROVIS");
+		JSONOSBAccount.viewSupportOrganizationSync(accountCode = "VISPROPROVIS");
 
-		LocalFile.OSBAdmin.gotoOSBAdmin();
+		OSBAdmin.gotoOSBAdmin();
 
-		LocalFile.OSBAdminProject.view(
+		OSBAdminProject.view(
 			projectName = "Provis - ${staticProjectName}",
 			table = '''| Koroneiki Account Key | Obtain from project name      |
 	| Project Name          | Provis - ${staticProjectName} |
@@ -1287,51 +1287,51 @@ definition {
 	| Tier                  | T4                            |
 	| Language              | English                       |''');
 
-		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchase(
+		KoroneikiProductPurchaseAPI._viewProductPurchase(
 			accountName = "Provis - ${staticProjectName}",
 			productName = "DXP Production",
 			table = '''| Quantity | 1        | |
 	| Status   | Approved | |''');
 
-		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchase(
+		KoroneikiProductPurchaseAPI._viewProductPurchase(
 			accountName = "Provis - ${staticProjectName}",
 			productName = "Platinum Subscription",
 			table = '''| Quantity | 1        | |
 	| Status   | Approved | |''');
 
-		LocalFile.KoroneikiAccountAPI._viewContactRole(
+		KoroneikiAccountAPI._viewContactRole(
 			accountName = "Provis - ${staticProjectName}",
 			contactEmailAddress = "usr.provisioning1@lrcustomer.com.broken",
 			contactRoleName = "Support Administrator");
 
-		LocalFile.KoroneikiAccountAPI._viewContactRole(
+		KoroneikiAccountAPI._viewContactRole(
 			accountName = "Provis - ${staticProjectName}",
 			contactEmailAddress = "usr.provisioning1@lrcustomer.com.broken",
 			contactRoleName = "Liferay Sales");
 
-		LocalFile.KoroneikiAccountAPI._viewContactRole(
+		KoroneikiAccountAPI._viewContactRole(
 			accountName = "Provis - ${staticProjectName}",
 			contactEmailAddress = "usr.provisioning1@lrcustomer.com.broken",
 			contactRoleName = "Secondary Contact");
 	}
 
 	test Createprojectwithpastenddate {
-		LocalFile.OSBAdminRabbitMQ.generateStaticVariables();
+		OSBAdminRabbitMQ.generateStaticVariables();
 
-		LocalFile.OSBAdminRabbitMQ.generateProvisioningCompanyName();
+		OSBAdminRabbitMQ.generateProvisioningCompanyName();
 
-		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+		OSBAdminRabbitMQ.generateProvisioningProjectName();
 
-		LocalFile.OSBAdmin.loginToSupport(
+		OSBAdmin.loginToSupport(
 			userEmailAddress = ${staticSupportAdminEmailAdress},
 			userPassword = ${staticSupportAdminPassword});
 
-		LocalFile.OSBAdminRabbitMQ.adjustStartAndEndYearsToPastYears(
+		OSBAdminRabbitMQ.adjustStartAndEndYearsToPastYears(
 			endYear = ${staticEndYear},
 			numberOfYears = 2,
 			startYear = ${staticStartYear});
 
-		LocalFile.OSBAdminRabbitMQ.publishCreatePartnerAccountMessage(
+		OSBAdminRabbitMQ.publishCreatePartnerAccountMessage(
 			routingKey = "dossiera.provisioning.create",
 			table = '''| Account Name                           | Propar - ${staticCompanyName}              |
 	| Address City                           | Diamond Bar                                |
@@ -1363,9 +1363,9 @@ definition {
 	| Start Month                            | ${staticStartMonth}                        |
 	| Start Year                             | ${staticStartYear}                         |''');
 
-		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Partner");
+		KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Partner");
 
-		LocalFile.OSBAdminRabbitMQ.publishCreateProjectMessage(
+		OSBAdminRabbitMQ.publishCreateProjectMessage(
 			routingKey = "dossiera.provisioning.create",
 			table = '''| Account Name                           | Vispro - ${staticCompanyName}              |
 	| Address City                           | Diamond Bar                                |
@@ -1411,74 +1411,74 @@ definition {
 	| Subscription Level                     | Platinum                                   |
 	| Version Number                         | 7.1                                        |''');
 
-		LocalFile.OSBAdmin.loginToProvisioning(
+		OSBAdmin.loginToProvisioning(
 			userEmailAddress = ${staticProvisioningAdminEmailAddress},
 			userPassword = ${staticProvisioningAdminPassword});
 
-		LocalFile.Provisioning.gotoAccounts();
+		Provisioning.gotoAccounts();
 
-		LocalFile.Provisioning.searchAccounts(keyword = "Provis");
+		Provisioning.searchAccounts(keyword = "Provis");
 
-		LocalFile.Provisioning.clickAccount(accountName = "Provis - ${staticProjectName}");
+		Provisioning.clickAccount(accountName = "Provis - ${staticProjectName}");
 
-		LocalFile.ProvisioningAccount.clickSyncToZendeskButton();
+		ProvisioningAccount.clickSyncToZendeskButton();
 
-		LocalFile.JSONOSBAccount.viewNoSupportOrganizationSync(accountCode = "VISPROPROVIS");
+		JSONOSBAccount.viewNoSupportOrganizationSync(accountCode = "VISPROPROVIS");
 
-		LocalFile.OSBAdmin.gotoOSBAdmin();
+		OSBAdmin.gotoOSBAdmin();
 
-		LocalFile.OSBAdminProject.viewNoneViaName(projectName = "Provis - ${staticProjectName}");
+		OSBAdminProject.viewNoneViaName(projectName = "Provis - ${staticProjectName}");
 
-		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchase(
+		KoroneikiProductPurchaseAPI._viewProductPurchase(
 			accountName = "Provis - ${staticProjectName}",
 			productName = "DXP Production",
 			table = '''| Quantity | 1        | |
 	| Status   | Approved | |''');
 
-		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchase(
+		KoroneikiProductPurchaseAPI._viewProductPurchase(
 			accountName = "Provis - ${staticProjectName}",
 			productName = "Platinum Subscription",
 			table = '''| Quantity | 1        | |
 	| Status   | Approved | |''');
 
-		LocalFile.KoroneikiAccountAPI._viewContactRole(
+		KoroneikiAccountAPI._viewContactRole(
 			accountName = "Provis - ${staticProjectName}",
 			contactEmailAddress = "usr.provisioning1@lrcustomer.com.broken",
 			contactRoleName = "Support Administrator");
 
-		LocalFile.KoroneikiAccountAPI._viewContactRole(
+		KoroneikiAccountAPI._viewContactRole(
 			accountName = "Provis - ${staticProjectName}",
 			contactEmailAddress = "usr.provisioning1@lrcustomer.com.broken",
 			contactRoleName = "Liferay Sales");
 
-		LocalFile.KoroneikiAccountAPI._viewContactRole(
+		KoroneikiAccountAPI._viewContactRole(
 			accountName = "Provis - ${staticProjectName}",
 			contactEmailAddress = "usr.provisioning1@lrcustomer.com.broken",
 			contactRoleName = "Secondary Contact");
 
-		LocalFile.KoroneikiAccountAPI._viewTeamRole(
+		KoroneikiAccountAPI._viewTeamRole(
 			accountName = "Provis - ${staticProjectName}",
 			teamName = "Propar - ${staticCompanyName}",
 			teamRoleName = "Partner");
 
-		LocalFile.KoroneikiAccountAPI._viewNoTeamRole(
+		KoroneikiAccountAPI._viewNoTeamRole(
 			accountName = "Provis - ${staticProjectName}",
 			teamName = "Propar - ${staticCompanyName}",
 			teamRoleName = "First Line Support");
 	}
 
 	test Createprojectwithportalandgoldsupport {
-		LocalFile.OSBAdminRabbitMQ.generateStaticVariables();
+		OSBAdminRabbitMQ.generateStaticVariables();
 
-		LocalFile.OSBAdminRabbitMQ.generateProvisioningCompanyName();
+		OSBAdminRabbitMQ.generateProvisioningCompanyName();
 
-		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+		OSBAdminRabbitMQ.generateProvisioningProjectName();
 
-		LocalFile.OSBAdmin.loginToSupport(
+		OSBAdmin.loginToSupport(
 			userEmailAddress = ${staticSupportAdminEmailAdress},
 			userPassword = ${staticSupportAdminPassword});
 
-		LocalFile.OSBAdminRabbitMQ.publishCreatePartnerAccountMessage(
+		OSBAdminRabbitMQ.publishCreatePartnerAccountMessage(
 			routingKey = "dossiera.provisioning.create",
 			table = '''| Account Name                           | Propar - ${staticCompanyName}              |
 	| Address City                           | Diamond Bar                                |
@@ -1510,9 +1510,9 @@ definition {
 	| Start Month                            | ${staticStartMonth}                        |
 	| Start Year                             | ${staticStartYear}                         |''');
 
-		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Partner");
+		KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Partner");
 
-		LocalFile.OSBAdminRabbitMQ.publishCreateProjectMessage(
+		OSBAdminRabbitMQ.publishCreateProjectMessage(
 			routingKey = "dossiera.provisioning.create",
 			table = '''| Account Name                           | Vispro - ${staticCompanyName}              |
 	| Address City                           | Diamond Bar                                |
@@ -1558,23 +1558,23 @@ definition {
 	| Subscription Level                     | Gold                                       |
 	| Version Number                         | 7.1                                        |''');
 
-		LocalFile.OSBAdmin.loginToProvisioning(
+		OSBAdmin.loginToProvisioning(
 			userEmailAddress = ${staticProvisioningAdminEmailAddress},
 			userPassword = ${staticProvisioningAdminPassword});
 
-		LocalFile.Provisioning.gotoAccounts();
+		Provisioning.gotoAccounts();
 
-		LocalFile.Provisioning.searchAccounts(keyword = "Provis");
+		Provisioning.searchAccounts(keyword = "Provis");
 
-		LocalFile.Provisioning.clickAccount(accountName = "Provis - ${staticProjectName}");
+		Provisioning.clickAccount(accountName = "Provis - ${staticProjectName}");
 
-		LocalFile.ProvisioningAccount.clickSyncToZendeskButton();
+		ProvisioningAccount.clickSyncToZendeskButton();
 
-		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "VISPROPROVIS");
+		JSONOSBAccount.viewSupportOrganizationSync(accountCode = "VISPROPROVIS");
 
-		LocalFile.OSBAdmin.gotoOSBAdmin();
+		OSBAdmin.gotoOSBAdmin();
 
-		LocalFile.OSBAdminProject.view(
+		OSBAdminProject.view(
 			projectName = "Provis - ${staticProjectName}",
 			table = '''| Koroneiki Account Key | Obtain from project name      |
 	| Project Name          | Provis - ${staticProjectName} |
@@ -1589,56 +1589,56 @@ definition {
 	| Tier                  | T4                            |
 	| Language              | English                       |''');
 
-		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchase(
+		KoroneikiProductPurchaseAPI._viewProductPurchase(
 			accountName = "Provis - ${staticProjectName}",
 			productName = "Portal Production",
 			table = '''| Quantity | 1        | |
 	| Status   | Approved | |''');
 
-		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchase(
+		KoroneikiProductPurchaseAPI._viewProductPurchase(
 			accountName = "Provis - ${staticProjectName}",
 			productName = "Gold Subscription",
 			table = '''| Quantity | 1        | |
 	| Status   | Approved | |''');
 
-		LocalFile.KoroneikiAccountAPI._viewContactRole(
+		KoroneikiAccountAPI._viewContactRole(
 			accountName = "Provis - ${staticProjectName}",
 			contactEmailAddress = "usr.provisioning1@lrcustomer.com.broken",
 			contactRoleName = "Support Administrator");
 
-		LocalFile.KoroneikiAccountAPI._viewContactRole(
+		KoroneikiAccountAPI._viewContactRole(
 			accountName = "Provis - ${staticProjectName}",
 			contactEmailAddress = "usr.provisioning1@lrcustomer.com.broken",
 			contactRoleName = "Liferay Sales");
 
-		LocalFile.KoroneikiAccountAPI._viewContactRole(
+		KoroneikiAccountAPI._viewContactRole(
 			accountName = "Provis - ${staticProjectName}",
 			contactEmailAddress = "usr.provisioning1@lrcustomer.com.broken",
 			contactRoleName = "Secondary Contact");
 
-		LocalFile.KoroneikiAccountAPI._viewTeamRole(
+		KoroneikiAccountAPI._viewTeamRole(
 			accountName = "Provis - ${staticProjectName}",
 			teamName = "Propar - ${staticCompanyName}",
 			teamRoleName = "Partner");
 
-		LocalFile.KoroneikiAccountAPI._viewNoTeamRole(
+		KoroneikiAccountAPI._viewNoTeamRole(
 			accountName = "Provis - ${staticProjectName}",
 			teamName = "Propar - ${staticCompanyName}",
 			teamRoleName = "First Line Support");
 	}
 
 	test CreateprojectwithQualifyingopportunity {
-		LocalFile.OSBAdminRabbitMQ.generateStaticVariables();
+		OSBAdminRabbitMQ.generateStaticVariables();
 
-		LocalFile.OSBAdminRabbitMQ.generateProvisioningCompanyName();
+		OSBAdminRabbitMQ.generateProvisioningCompanyName();
 
-		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+		OSBAdminRabbitMQ.generateProvisioningProjectName();
 
-		LocalFile.OSBAdmin.loginToSupport(
+		OSBAdmin.loginToSupport(
 			userEmailAddress = ${staticSupportAdminEmailAdress},
 			userPassword = ${staticSupportAdminPassword});
 
-		LocalFile.OSBAdminRabbitMQ.publishCreatePartnerAccountMessage(
+		OSBAdminRabbitMQ.publishCreatePartnerAccountMessage(
 			routingKey = "dossiera.provisioning.create",
 			table = '''| Account Name                           | Propar - ${staticCompanyName}              |
 	| Address City                           | Diamond Bar                                |
@@ -1670,9 +1670,9 @@ definition {
 	| Start Month                            | ${staticStartMonth}                        |
 	| Start Year                             | ${staticStartYear}                         |''');
 
-		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Partner");
+		KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Partner");
 
-		LocalFile.OSBAdminRabbitMQ.publishCreateProjectMessage(
+		OSBAdminRabbitMQ.publishCreateProjectMessage(
 			routingKey = "dossiera.provisioning.create",
 			table = '''| Account Name                           | Vispro - ${staticCompanyName}              |
 	| Address City                           | Diamond Bar                                |
@@ -1718,11 +1718,11 @@ definition {
 	| Subscription Level                     | Platinum                                   |
 	| Version Number                         | 7.1                                        |''');
 
-		LocalFile.OSBAdmin.gotoOSBAdmin();
+		OSBAdmin.gotoOSBAdmin();
 
-		LocalFile.OSBAdminProject.viewNoneViaName(projectName = "Provis - ${staticProjectName}");
+		OSBAdminProject.viewNoneViaName(projectName = "Provis - ${staticProjectName}");
 
-		LocalFile.KoroneikiAccountAPI._viewNoAccount(accountName = "Provis - ${staticProjectName}");
+		KoroneikiAccountAPI._viewNoAccount(accountName = "Provis - ${staticProjectName}");
 	}
 
 }

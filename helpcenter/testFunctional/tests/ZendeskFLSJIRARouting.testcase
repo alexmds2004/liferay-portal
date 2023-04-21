@@ -4,22 +4,23 @@ definition {
 	property type = "zendesk.api";
 
 	setUp {
-		LocalFile.Passwords.getPasswords();
+		Passwords.getPasswords();
 	}
 
 	tearDown {
-		LocalFile.ZendeskTicketAPI._tearDownTicketByIds(ticketIdList = ${staticRequestIdList});
+		ZendeskTicketAPI._tearDownTicketByIds(ticketIdList = ${staticRequestIdList});
 
-		LocalFile.ZendeskUserAPI._tearDownUsersByExternalIdTable(table = '''| User1 |''');
+		ZendeskUserAPI._tearDownUsersByExternalIdTable(table = '''| User1 |''');
 	}
 
-	property help.center.acceptance = "true";
+
 	test FLSJIRARouting {
-		LocalFile.ZendeskOrganizationAPI._assignTagsToOrganization(
+	property help.center.acceptance = "true";
+		ZendeskOrganizationAPI._assignTagsToOrganization(
 			organizationName = "The Space Program",
 			table = '''| partner_first_line_support |''');
 
-		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
+		ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
 	| Tags             | osb_customer,osb_kb              |
 	| Password         | ${staticZendeskAdminPassword}    |
 	| Role             | End-user                         |
@@ -31,7 +32,7 @@ definition {
 	| Time Zone        | Pacific Time (US & Canada)       | 
 	| External ID      | User1                            |''');
 
-		LocalFile.ZendeskRequestAPI._createMultipleRequestsWithProductAndComponentValues(
+		ZendeskRequestAPI._createMultipleRequestsWithProductAndComponentValues(
 			requesterEmail = "zendesk.user1@zendesk.com.broken",
 			table = '''| prd_developer_tools         |                                        |
 	| prd_enterprise_search       | security                               |
@@ -44,9 +45,9 @@ definition {
 	| prd_productivity_tools_sync |                                        |
 	| prd_social_office           |                                        |''');
 
-		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 5);
+		ZendeskHomepage.pauseInMinutes(timeInMinutes = 5);
 
-		LocalFile.ZendeskTicketAPI._viewSpecificTagForMultipleTickets(
+		ZendeskTicketAPI._viewSpecificTagForMultipleTickets(
 			tagName = "jira_escalated",
 			ticketIdList = ${staticRequestIdList});
 	}

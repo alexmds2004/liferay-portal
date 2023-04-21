@@ -4,36 +4,37 @@ definition {
 	property type = "osb.integration";
 
 	tearDown {
-		LocalFile.ZendeskUserAPI._getDefaultUserId(organizationName = "Korone - ${staticProjectName}");
+		ZendeskUserAPI._getDefaultUserId(organizationName = "Korone - ${staticProjectName}");
 
-		LocalFile.KoroneikiProductConsumptionAPI._tearDownProductConsumptions(
+		KoroneikiProductConsumptionAPI._tearDownProductConsumptions(
 			accountName = "Korone - ${staticProjectName}",
 			table = '''| A Liferay OSB Product |''');
 
-		LocalFile.OSBAdminProject.tearDownProjects(table = '''| KORONEKORONE |''');
+		OSBAdminProject.tearDownProjects(table = '''| KORONEKORONE |''');
 
-		LocalFile.KoroneikiAccountAPI._tearDownAccounts(table = '''| Korone - ${staticProjectName} |''');
+		KoroneikiAccountAPI._tearDownAccounts(table = '''| Korone - ${staticProjectName} |''');
 
-		LocalFile.KoroneikiAccountAPI._tearDownAccountsViaAccountFieldNameAndValue(
+		KoroneikiAccountAPI._tearDownAccountsViaAccountFieldNameAndValue(
 			fieldName = "Code",
 			table = '''| KORONEKORONE |''');
 
-		LocalFile.KoroneikiProductAPI._tearDownProducts(table = '''| A Liferay OSB Product |''');
+		KoroneikiProductAPI._tearDownProducts(table = '''| A Liferay OSB Product |''');
 
-		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+		KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
 
-		LocalFile.ZendeskOrganizationAPI._getMultipleOrganizationExternalIdsByOrganizationNameIfStillPresent(table = '''| Korone - ${staticProjectName} |''');
+		ZendeskOrganizationAPI._getMultipleOrganizationExternalIdsByOrganizationNameIfStillPresent(table = '''| Korone - ${staticProjectName} |''');
 
-		LocalFile.ZendeskOrganizationAPI._tearDownOrganizationsByExternalIdList(organizationExternalIds = ${staticOrganizationExternalIdList});
+		ZendeskOrganizationAPI._tearDownOrganizationsByExternalIdList(organizationExternalIds = ${staticOrganizationExternalIdList});
 
-		LocalFile.ZendeskUserAPI._tearDownUserById(userId = ${staticDefaultUserId});
+		ZendeskUserAPI._tearDownUserById(userId = ${staticDefaultUserId});
 	}
 
-	property help.center.acceptance = "true";
-	test Createandviewproductconsumptionwithpurchase {
-		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
 
-		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | KORONEKORONE                         | |
+	test Createandviewproductconsumptionwithpurchase {
+	property help.center.acceptance = "true";
+		OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		KoroneikiAccountAPI._createAccount(table = '''| Code                  | KORONEKORONE                         | |
 	| Contact Email Address | osb.koroneiki1@lrcustomer.com.broken | |
 	| Description           | Test osb account on koroneiki        | |
 	| Fax Number            | 555-555-1234                         | |
@@ -45,11 +46,11 @@ definition {
 	| Tier                  | T4                                   | |
 	| Website               | www.koroneikicorporation.com         | |''');
 
-		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | A Liferay OSB Product | |''');
+		KoroneikiProductAPI._createProduct(table = '''| Name | A Liferay OSB Product | |''');
 
-		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+		KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Korone - ${staticProjectName}",
 			productName = "DXP Production",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -59,7 +60,7 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Korone - ${staticProjectName}",
 			productName = "Platinum Subscription",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -69,9 +70,9 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+		KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Korone - ${staticProjectName}",
 			productName = "A Liferay OSB Product",
 			table = '''| End Date                | ${staticEndDate}         |                |
@@ -84,7 +85,7 @@ definition {
 	| Start Date              | ${staticStartDate}       |                |
 	| Status                  | Approved                 |                |''');
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductConsumption(
+		KoroneikiAccountAPI._createAccountProductConsumption(
 			accountName = "Korone - ${staticProjectName}",
 			productName = "A Liferay OSB Product",
 			table = '''| Product Purchase        | true            |                |
@@ -92,29 +93,29 @@ definition {
 	| Product Field and Value | additionalProp2 | propertyValue2 |
 	| Product Field and Value | additionalProp3 | propertyValue3 |''');
 
-		LocalFile.Passwords.getPasswords();
+		Passwords.getPasswords();
 
-		LocalFile.OSBAdmin.loginToSupport(
+		OSBAdmin.loginToSupport(
 			userEmailAddress = ${staticSupportAdminEmailAdress},
 			userPassword = ${staticSupportAdminPassword});
 
-		LocalFile.ProjectDetails.gotoProjectDetailsPage();
+		ProjectDetails.gotoProjectDetailsPage();
 
-		LocalFile.ProjectDetails.searchKeyword(keyword = "Korone");
+		ProjectDetails.searchKeyword(keyword = "Korone");
 
-		LocalFile.ProjectDetails.gotoProject(projectName = "Korone - ${staticProjectName}");
+		ProjectDetails.gotoProject(projectName = "Korone - ${staticProjectName}");
 
-		LocalFile.ProjectDetails.gotoHistory();
+		ProjectDetails.gotoHistory();
 
-		LocalFile.KoroneikiAccountAPI._generateAccountId(accountName = "Korone - ${staticProjectName}");
+		KoroneikiAccountAPI._generateAccountId(accountName = "Korone - ${staticProjectName}");
 
-		LocalFile.KoroneikiProductAPI._generateProductId(productName = "A Liferay OSB Product");
+		KoroneikiProductAPI._generateProductId(productName = "A Liferay OSB Product");
 
-		LocalFile.KoroneikiProductPurchaseAPI._generateProductPurchaseId(
+		KoroneikiProductPurchaseAPI._generateProductPurchaseId(
 			accountName = "Korone - ${staticProjectName}",
 			productName = "A Liferay OSB Product");
 
-		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+		ProjectDetails.viewHistoryEntryByKeywords(
 			fieldName = "quantity",
 			keyword1 = "Added Product Purchase",
 			keyword2 = "A Liferay OSB Product",
@@ -126,7 +127,7 @@ definition {
 	| Update Field Original Value | N/A                           |
 	| Update Field New Value      | 1                             |''');
 
-		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+		ProjectDetails.viewHistoryEntryByKeywords(
 			fieldName = "accountId",
 			keyword1 = "Added Product Purchase",
 			keyword2 = "A Liferay OSB Product",
@@ -138,7 +139,7 @@ definition {
 	| Update Field Original Value | N/A                           |
 	| Update Field New Value      | ${staticAccountId}            |''');
 
-		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+		ProjectDetails.viewHistoryEntryByKeywords(
 			fieldName = "productEntryId",
 			keyword1 = "Added Product Purchase",
 			keyword2 = "A Liferay OSB Product",
@@ -150,7 +151,7 @@ definition {
 	| Update Field Original Value | N/A                           |
 	| Update Field New Value      | ${staticProductId}            |''');
 
-		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+		ProjectDetails.viewHistoryEntryByKeywords(
 			fieldName = "additionalProp1",
 			keyword1 = "Added Product Purchase",
 			keyword2 = "A Liferay OSB Product",
@@ -162,7 +163,7 @@ definition {
 	| Update Field Original Value | N/A                           |
 	| Update Field New Value      | propertyValue1                |''');
 
-		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+		ProjectDetails.viewHistoryEntryByKeywords(
 			fieldName = "additionalProp2",
 			keyword1 = "Added Product Purchase",
 			keyword2 = "A Liferay OSB Product",
@@ -174,7 +175,7 @@ definition {
 	| Update Field Original Value | N/A                           |
 	| Update Field New Value      | propertyValue2                |''');
 
-		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+		ProjectDetails.viewHistoryEntryByKeywords(
 			fieldName = "additionalProp3",
 			keyword1 = "Added Product Purchase",
 			keyword2 = "A Liferay OSB Product",
@@ -186,7 +187,7 @@ definition {
 	| Update Field Original Value | N/A                           |
 	| Update Field New Value      | propertyValue3                |''');
 
-		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+		ProjectDetails.viewHistoryEntryByKeywords(
 			fieldName = "status",
 			keyword1 = "Added Product Purchase",
 			keyword2 = "A Liferay OSB Product",
@@ -198,7 +199,7 @@ definition {
 	| Update Field Original Value | N/A                           |
 	| Update Field New Value      | 0                             |''');
 
-		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+		ProjectDetails.viewHistoryEntryByKeywords(
 			fieldName = "productPurchaseId",
 			keyword1 = "Added Product Consumption",
 			keyword2 = "A Liferay OSB Product",
@@ -210,7 +211,7 @@ definition {
 	| Update Field Original Value | N/A                           |
 	| Update Field New Value      | ${staticProductPurchaseId}    |''');
 
-		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+		ProjectDetails.viewHistoryEntryByKeywords(
 			fieldName = "accountId",
 			keyword1 = "Added Product Consumption",
 			keyword2 = "A Liferay OSB Product",
@@ -222,7 +223,7 @@ definition {
 	| Update Field Original Value | N/A                           |
 	| Update Field New Value      | ${staticAccountId}            |''');
 
-		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+		ProjectDetails.viewHistoryEntryByKeywords(
 			fieldName = "productEntryId",
 			keyword1 = "Added Product Consumption",
 			keyword2 = "A Liferay OSB Product",
@@ -234,7 +235,7 @@ definition {
 	| Update Field Original Value | N/A                           |
 	| Update Field New Value      | ${staticProductId}            |''');
 
-		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+		ProjectDetails.viewHistoryEntryByKeywords(
 			fieldName = "additionalProp1",
 			keyword1 = "Added Product Consumption",
 			keyword2 = "A Liferay OSB Product",
@@ -246,7 +247,7 @@ definition {
 	| Update Field Original Value | N/A                           |
 	| Update Field New Value      | propertyValue1                |''');
 
-		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+		ProjectDetails.viewHistoryEntryByKeywords(
 			fieldName = "additionalProp2",
 			keyword1 = "Added Product Consumption",
 			keyword2 = "A Liferay OSB Product",
@@ -258,7 +259,7 @@ definition {
 	| Update Field Original Value | N/A                           |
 	| Update Field New Value      | propertyValue2                |''');
 
-		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+		ProjectDetails.viewHistoryEntryByKeywords(
 			fieldName = "additionalProp3",
 			keyword1 = "Added Product Consumption",
 			keyword2 = "A Liferay OSB Product",
@@ -272,9 +273,9 @@ definition {
 	}
 
 	test Removeandviewproductconsumptionwithpurchase {
-		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+		OSBAdminRabbitMQ.generateProvisioningProjectName();
 
-		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | KORONEKORONE                         | |
+		KoroneikiAccountAPI._createAccount(table = '''| Code                  | KORONEKORONE                         | |
 	| Contact Email Address | osb.koroneiki1@lrcustomer.com.broken | |
 	| Description           | Test osb account on koroneiki        | |
 	| Fax Number            | 555-555-1234                         | |
@@ -286,11 +287,11 @@ definition {
 	| Tier                  | T4                                   | |
 	| Website               | www.koroneikicorporation.com         | |''');
 
-		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | A Liferay OSB Product | |''');
+		KoroneikiProductAPI._createProduct(table = '''| Name | A Liferay OSB Product | |''');
 
-		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+		KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Korone - ${staticProjectName}",
 			productName = "DXP Production",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -300,7 +301,7 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Korone - ${staticProjectName}",
 			productName = "Platinum Subscription",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -310,9 +311,9 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+		KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Korone - ${staticProjectName}",
 			productName = "A Liferay OSB Product",
 			table = '''| End Date                | ${staticEndDate}         |                |
@@ -325,7 +326,7 @@ definition {
 	| Start Date              | ${staticStartDate}       |                |
 	| Status                  | Approved                 |                |''');
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductConsumption(
+		KoroneikiAccountAPI._createAccountProductConsumption(
 			accountName = "Korone - ${staticProjectName}",
 			productName = "A Liferay OSB Product",
 			table = '''| Product Purchase        | true            |                |
@@ -333,33 +334,33 @@ definition {
 	| Product Field and Value | additionalProp2 | propertyValue2 |
 	| Product Field and Value | additionalProp3 | propertyValue3 |''');
 
-		LocalFile.KoroneikiProductConsumptionAPI._deleteProductConsumption(
+		KoroneikiProductConsumptionAPI._deleteProductConsumption(
 			accountName = "Korone - ${staticProjectName}",
 			productName = "A Liferay OSB Product");
 
-		LocalFile.Passwords.getPasswords();
+		Passwords.getPasswords();
 
-		LocalFile.OSBAdmin.loginToSupport(
+		OSBAdmin.loginToSupport(
 			userEmailAddress = ${staticSupportAdminEmailAdress},
 			userPassword = ${staticSupportAdminPassword});
 
-		LocalFile.ProjectDetails.gotoProjectDetailsPage();
+		ProjectDetails.gotoProjectDetailsPage();
 
-		LocalFile.ProjectDetails.searchKeyword(keyword = "Korone");
+		ProjectDetails.searchKeyword(keyword = "Korone");
 
-		LocalFile.ProjectDetails.gotoProject(projectName = "Korone - ${staticProjectName}");
+		ProjectDetails.gotoProject(projectName = "Korone - ${staticProjectName}");
 
-		LocalFile.ProjectDetails.gotoHistory();
+		ProjectDetails.gotoHistory();
 
-		LocalFile.KoroneikiAccountAPI._generateAccountId(accountName = "Korone - ${staticProjectName}");
+		KoroneikiAccountAPI._generateAccountId(accountName = "Korone - ${staticProjectName}");
 
-		LocalFile.KoroneikiProductAPI._generateProductId(productName = "A Liferay OSB Product");
+		KoroneikiProductAPI._generateProductId(productName = "A Liferay OSB Product");
 
-		LocalFile.KoroneikiProductPurchaseAPI._generateProductPurchaseId(
+		KoroneikiProductPurchaseAPI._generateProductPurchaseId(
 			accountName = "Korone - ${staticProjectName}",
 			productName = "A Liferay OSB Product");
 
-		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+		ProjectDetails.viewHistoryEntryByKeywords(
 			fieldName = "quantity",
 			keyword1 = "Added Product Purchase",
 			keyword2 = "A Liferay OSB Product",
@@ -371,7 +372,7 @@ definition {
 	| Update Field Original Value | N/A                           |
 	| Update Field New Value      | 1                             |''');
 
-		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+		ProjectDetails.viewHistoryEntryByKeywords(
 			fieldName = "accountId",
 			keyword1 = "Added Product Purchase",
 			keyword2 = "A Liferay OSB Product",
@@ -383,7 +384,7 @@ definition {
 	| Update Field Original Value | N/A                           |
 	| Update Field New Value      | ${staticAccountId}            |''');
 
-		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+		ProjectDetails.viewHistoryEntryByKeywords(
 			fieldName = "productEntryId",
 			keyword1 = "Added Product Purchase",
 			keyword2 = "A Liferay OSB Product",
@@ -395,7 +396,7 @@ definition {
 	| Update Field Original Value | N/A                           |
 	| Update Field New Value      | ${staticProductId}            |''');
 
-		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+		ProjectDetails.viewHistoryEntryByKeywords(
 			fieldName = "additionalProp1",
 			keyword1 = "Added Product Purchase",
 			keyword2 = "A Liferay OSB Product",
@@ -407,7 +408,7 @@ definition {
 	| Update Field Original Value | N/A                           |
 	| Update Field New Value      | propertyValue1                |''');
 
-		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+		ProjectDetails.viewHistoryEntryByKeywords(
 			fieldName = "additionalProp2",
 			keyword1 = "Added Product Purchase",
 			keyword2 = "A Liferay OSB Product",
@@ -419,7 +420,7 @@ definition {
 	| Update Field Original Value | N/A                           |
 	| Update Field New Value      | propertyValue2                |''');
 
-		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+		ProjectDetails.viewHistoryEntryByKeywords(
 			fieldName = "additionalProp3",
 			keyword1 = "Added Product Purchase",
 			keyword2 = "A Liferay OSB Product",
@@ -431,7 +432,7 @@ definition {
 	| Update Field Original Value | N/A                           |
 	| Update Field New Value      | propertyValue3                |''');
 
-		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+		ProjectDetails.viewHistoryEntryByKeywords(
 			fieldName = "status",
 			keyword1 = "Added Product Purchase",
 			keyword2 = "A Liferay OSB Product",
@@ -443,7 +444,7 @@ definition {
 	| Update Field Original Value | N/A                           |
 	| Update Field New Value      | 0                             |''');
 
-		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+		ProjectDetails.viewHistoryEntryByKeywords(
 			fieldName = "productPurchaseId",
 			keyword1 = "Added Product Consumption",
 			keyword2 = "A Liferay OSB Product",
@@ -455,7 +456,7 @@ definition {
 	| Update Field Original Value | N/A                           |
 	| Update Field New Value      | ${staticProductPurchaseId}    |''');
 
-		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+		ProjectDetails.viewHistoryEntryByKeywords(
 			fieldName = "accountId",
 			keyword1 = "Added Product Consumption",
 			keyword2 = "A Liferay OSB Product",
@@ -467,7 +468,7 @@ definition {
 	| Update Field Original Value | N/A                           |
 	| Update Field New Value      | ${staticAccountId}            |''');
 
-		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+		ProjectDetails.viewHistoryEntryByKeywords(
 			fieldName = "productEntryId",
 			keyword1 = "Added Product Consumption",
 			keyword2 = "A Liferay OSB Product",
@@ -479,7 +480,7 @@ definition {
 	| Update Field Original Value | N/A                           |
 	| Update Field New Value      | ${staticProductId}            |''');
 
-		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+		ProjectDetails.viewHistoryEntryByKeywords(
 			fieldName = "additionalProp1",
 			keyword1 = "Added Product Consumption",
 			keyword2 = "A Liferay OSB Product",
@@ -491,7 +492,7 @@ definition {
 	| Update Field Original Value | N/A                           |
 	| Update Field New Value      | propertyValue1                |''');
 
-		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+		ProjectDetails.viewHistoryEntryByKeywords(
 			fieldName = "additionalProp2",
 			keyword1 = "Added Product Consumption",
 			keyword2 = "A Liferay OSB Product",
@@ -503,7 +504,7 @@ definition {
 	| Update Field Original Value | N/A                           |
 	| Update Field New Value      | propertyValue2                |''');
 
-		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+		ProjectDetails.viewHistoryEntryByKeywords(
 			fieldName = "additionalProp3",
 			keyword1 = "Added Product Consumption",
 			keyword2 = "A Liferay OSB Product",
@@ -515,7 +516,7 @@ definition {
 	| Update Field Original Value | N/A                           |
 	| Update Field New Value      | propertyValue3                |''');
 
-		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+		ProjectDetails.viewHistoryEntryByKeywords(
 			fieldName = "productPurchaseId",
 			keyword1 = "Deleted Product Consumption",
 			keyword2 = "A Liferay OSB Product",
@@ -527,7 +528,7 @@ definition {
 	| Update Field Original Value | ${staticProductPurchaseId}    |
 	| Update Field New Value      | N/A                           |''');
 
-		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+		ProjectDetails.viewHistoryEntryByKeywords(
 			fieldName = "accountId",
 			keyword1 = "Deleted Product Consumption",
 			keyword2 = "A Liferay OSB Product",
@@ -539,7 +540,7 @@ definition {
 	| Update Field Original Value | ${staticAccountId}            |
 	| Update Field New Value      | N/A                           |''');
 
-		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+		ProjectDetails.viewHistoryEntryByKeywords(
 			fieldName = "productEntryId",
 			keyword1 = "Deleted Product Consumption",
 			keyword2 = "A Liferay OSB Product",
@@ -551,7 +552,7 @@ definition {
 	| Update Field Original Value | ${staticProductId}            |
 	| Update Field New Value      | N/A                           |''');
 
-		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+		ProjectDetails.viewHistoryEntryByKeywords(
 			fieldName = "additionalProp1",
 			keyword1 = "Deleted Product Consumption",
 			keyword2 = "A Liferay OSB Product",
@@ -563,7 +564,7 @@ definition {
 	| Update Field Original Value | propertyValue1                |
 	| Update Field New Value      | N/A                           |''');
 
-		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+		ProjectDetails.viewHistoryEntryByKeywords(
 			fieldName = "additionalProp2",
 			keyword1 = "Deleted Product Consumption",
 			keyword2 = "A Liferay OSB Product",
@@ -575,7 +576,7 @@ definition {
 	| Update Field Original Value | propertyValue2                |
 	| Update Field New Value      | N/A                           |''');
 
-		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+		ProjectDetails.viewHistoryEntryByKeywords(
 			fieldName = "additionalProp3",
 			keyword1 = "Deleted Product Consumption",
 			keyword2 = "A Liferay OSB Product",
@@ -589,9 +590,9 @@ definition {
 	}
 
 	test Updateandviewproductpurchaseonproductconsumption {
-		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+		OSBAdminRabbitMQ.generateProvisioningProjectName();
 
-		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | KORONEKORONE                         | |
+		KoroneikiAccountAPI._createAccount(table = '''| Code                  | KORONEKORONE                         | |
 	| Contact Email Address | osb.koroneiki1@lrcustomer.com.broken | |
 	| Description           | Test osb account on koroneiki        | |
 	| Fax Number            | 555-555-1234                         | |
@@ -603,11 +604,11 @@ definition {
 	| Tier                  | T4                                   | |
 	| Website               | www.koroneikicorporation.com         | |''');
 
-		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | A Liferay OSB Product | |''');
+		KoroneikiProductAPI._createProduct(table = '''| Name | A Liferay OSB Product | |''');
 
-		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+		KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Korone - ${staticProjectName}",
 			productName = "DXP Production",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -617,7 +618,7 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Korone - ${staticProjectName}",
 			productName = "Platinum Subscription",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -627,9 +628,9 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+		KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Korone - ${staticProjectName}",
 			productName = "A Liferay OSB Product",
 			table = '''| End Date                | ${staticEndDate}         |                |
@@ -642,7 +643,7 @@ definition {
 	| Start Date              | ${staticStartDate}       |                |
 	| Status                  | Approved                 |                |''');
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductConsumption(
+		KoroneikiAccountAPI._createAccountProductConsumption(
 			accountName = "Korone - ${staticProjectName}",
 			productName = "A Liferay OSB Product",
 			table = '''| Product Purchase        | true            |                |
@@ -650,7 +651,7 @@ definition {
 	| Product Field and Value | additionalProp2 | propertyValue2 |
 	| Product Field and Value | additionalProp3 | propertyValue3 |''');
 
-		LocalFile.KoroneikiProductPurchaseAPI._updateProductPurchase(
+		KoroneikiProductPurchaseAPI._updateProductPurchase(
 			accountName = "Korone - ${staticProjectName}",
 			productName = "A Liferay OSB Product",
 			table = '''| End Date                | ${staticEndDate}         |                |
@@ -663,29 +664,29 @@ definition {
 	| Start Date              | ${staticStartDate}       |                |
 	| Status                  | Approved                 |                |''');
 
-		LocalFile.Passwords.getPasswords();
+		Passwords.getPasswords();
 
-		LocalFile.OSBAdmin.loginToSupport(
+		OSBAdmin.loginToSupport(
 			userEmailAddress = ${staticSupportAdminEmailAdress},
 			userPassword = ${staticSupportAdminPassword});
 
-		LocalFile.ProjectDetails.gotoProjectDetailsPage();
+		ProjectDetails.gotoProjectDetailsPage();
 
-		LocalFile.ProjectDetails.searchKeyword(keyword = "Korone");
+		ProjectDetails.searchKeyword(keyword = "Korone");
 
-		LocalFile.ProjectDetails.gotoProject(projectName = "Korone - ${staticProjectName}");
+		ProjectDetails.gotoProject(projectName = "Korone - ${staticProjectName}");
 
-		LocalFile.ProjectDetails.gotoHistory();
+		ProjectDetails.gotoHistory();
 
-		LocalFile.KoroneikiAccountAPI._generateAccountId(accountName = "Korone - ${staticProjectName}");
+		KoroneikiAccountAPI._generateAccountId(accountName = "Korone - ${staticProjectName}");
 
-		LocalFile.KoroneikiProductAPI._generateProductId(productName = "A Liferay OSB Product");
+		KoroneikiProductAPI._generateProductId(productName = "A Liferay OSB Product");
 
-		LocalFile.KoroneikiProductPurchaseAPI._generateProductPurchaseId(
+		KoroneikiProductPurchaseAPI._generateProductPurchaseId(
 			accountName = "Korone - ${staticProjectName}",
 			productName = "A Liferay OSB Product");
 
-		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+		ProjectDetails.viewHistoryEntryByKeywords(
 			fieldName = "quantity",
 			keyword1 = "Added Product Purchase",
 			keyword2 = "A Liferay OSB Product",
@@ -697,7 +698,7 @@ definition {
 	| Update Field Original Value | N/A                           |
 	| Update Field New Value      | 1                             |''');
 
-		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+		ProjectDetails.viewHistoryEntryByKeywords(
 			fieldName = "accountId",
 			keyword1 = "Added Product Purchase",
 			keyword2 = "A Liferay OSB Product",
@@ -709,7 +710,7 @@ definition {
 	| Update Field Original Value | N/A                           |
 	| Update Field New Value      | ${staticAccountId}            |''');
 
-		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+		ProjectDetails.viewHistoryEntryByKeywords(
 			fieldName = "productEntryId",
 			keyword1 = "Added Product Purchase",
 			keyword2 = "A Liferay OSB Product",
@@ -721,7 +722,7 @@ definition {
 	| Update Field Original Value | N/A                           |
 	| Update Field New Value      | ${staticProductId}            |''');
 
-		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+		ProjectDetails.viewHistoryEntryByKeywords(
 			fieldName = "additionalProp1",
 			keyword1 = "Added Product Purchase",
 			keyword2 = "A Liferay OSB Product",
@@ -733,7 +734,7 @@ definition {
 	| Update Field Original Value | N/A                           |
 	| Update Field New Value      | propertyValue1                |''');
 
-		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+		ProjectDetails.viewHistoryEntryByKeywords(
 			fieldName = "additionalProp2",
 			keyword1 = "Added Product Purchase",
 			keyword2 = "A Liferay OSB Product",
@@ -745,7 +746,7 @@ definition {
 	| Update Field Original Value | N/A                           |
 	| Update Field New Value      | propertyValue2                |''');
 
-		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+		ProjectDetails.viewHistoryEntryByKeywords(
 			fieldName = "additionalProp3",
 			keyword1 = "Added Product Purchase",
 			keyword2 = "A Liferay OSB Product",
@@ -757,7 +758,7 @@ definition {
 	| Update Field Original Value | N/A                           |
 	| Update Field New Value      | propertyValue3                |''');
 
-		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+		ProjectDetails.viewHistoryEntryByKeywords(
 			fieldName = "status",
 			keyword1 = "Added Product Purchase",
 			keyword2 = "A Liferay OSB Product",
@@ -769,7 +770,7 @@ definition {
 	| Update Field Original Value | N/A                           |
 	| Update Field New Value      | 0                             |''');
 
-		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+		ProjectDetails.viewHistoryEntryByKeywords(
 			fieldName = "productPurchaseId",
 			keyword1 = "Added Product Consumption",
 			keyword2 = "A Liferay OSB Product",
@@ -781,7 +782,7 @@ definition {
 	| Update Field Original Value | N/A                           |
 	| Update Field New Value      | ${staticProductPurchaseId}    |''');
 
-		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+		ProjectDetails.viewHistoryEntryByKeywords(
 			fieldName = "accountId",
 			keyword1 = "Added Product Consumption",
 			keyword2 = "A Liferay OSB Product",
@@ -793,7 +794,7 @@ definition {
 	| Update Field Original Value | N/A                           |
 	| Update Field New Value      | ${staticAccountId}            |''');
 
-		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+		ProjectDetails.viewHistoryEntryByKeywords(
 			fieldName = "productEntryId",
 			keyword1 = "Added Product Consumption",
 			keyword2 = "A Liferay OSB Product",
@@ -805,7 +806,7 @@ definition {
 	| Update Field Original Value | N/A                           |
 	| Update Field New Value      | ${staticProductId}            |''');
 
-		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+		ProjectDetails.viewHistoryEntryByKeywords(
 			fieldName = "additionalProp1",
 			keyword1 = "Added Product Consumption",
 			keyword2 = "A Liferay OSB Product",
@@ -817,7 +818,7 @@ definition {
 	| Update Field Original Value | N/A                           |
 	| Update Field New Value      | propertyValue1                |''');
 
-		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+		ProjectDetails.viewHistoryEntryByKeywords(
 			fieldName = "additionalProp2",
 			keyword1 = "Added Product Consumption",
 			keyword2 = "A Liferay OSB Product",
@@ -829,7 +830,7 @@ definition {
 	| Update Field Original Value | N/A                           |
 	| Update Field New Value      | propertyValue2                |''');
 
-		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+		ProjectDetails.viewHistoryEntryByKeywords(
 			fieldName = "additionalProp3",
 			keyword1 = "Added Product Consumption",
 			keyword2 = "A Liferay OSB Product",
@@ -841,7 +842,7 @@ definition {
 	| Update Field Original Value | N/A                           |
 	| Update Field New Value      | propertyValue3                |''');
 
-		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+		ProjectDetails.viewHistoryEntryByKeywords(
 			fieldName = "additionalProp1",
 			keyword1 = "Updated Product Purchase",
 			keyword2 = "A Liferay OSB Product",
@@ -853,7 +854,7 @@ definition {
 	| Update Field Original Value | propertyValue1                |
 	| Update Field New Value      | N/A                           |''');
 
-		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+		ProjectDetails.viewHistoryEntryByKeywords(
 			fieldName = "additionalProp2",
 			keyword1 = "Updated Product Purchase",
 			keyword2 = "A Liferay OSB Product",
@@ -865,7 +866,7 @@ definition {
 	| Update Field Original Value | propertyValue2                |
 	| Update Field New Value      | N/A                           |''');
 
-		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+		ProjectDetails.viewHistoryEntryByKeywords(
 			fieldName = "additionalProp3",
 			keyword1 = "Updated Product Purchase",
 			keyword2 = "A Liferay OSB Product",
@@ -877,7 +878,7 @@ definition {
 	| Update Field Original Value | propertyValue3                |
 	| Update Field New Value      | N/A                           |''');
 
-		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+		ProjectDetails.viewHistoryEntryByKeywords(
 			fieldName = "additionalProp4",
 			keyword1 = "Updated Product Purchase",
 			keyword2 = "A Liferay OSB Product",
@@ -889,7 +890,7 @@ definition {
 	| Update Field Original Value | N/A                           |
 	| Update Field New Value      | propertyValue4                |''');
 
-		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+		ProjectDetails.viewHistoryEntryByKeywords(
 			fieldName = "additionalProp5",
 			keyword1 = "Updated Product Purchase",
 			keyword2 = "A Liferay OSB Product",
@@ -901,7 +902,7 @@ definition {
 	| Update Field Original Value | N/A                           |
 	| Update Field New Value      | propertyValue5                |''');
 
-		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+		ProjectDetails.viewHistoryEntryByKeywords(
 			fieldName = "additionalProp6",
 			keyword1 = "Updated Product Purchase",
 			keyword2 = "A Liferay OSB Product",
@@ -913,7 +914,7 @@ definition {
 	| Update Field Original Value | N/A                           |
 	| Update Field New Value      | propertyValue6                |''');
 
-		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+		ProjectDetails.viewHistoryEntryByKeywords(
 			fieldName = "status",
 			keyword1 = "Updated Product Purchase",
 			keyword2 = "A Liferay OSB Product",
