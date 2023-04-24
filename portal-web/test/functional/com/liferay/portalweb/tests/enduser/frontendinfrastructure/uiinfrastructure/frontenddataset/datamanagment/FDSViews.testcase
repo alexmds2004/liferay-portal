@@ -70,6 +70,66 @@ definition {
 		}
 	}
 
+	@description = "LPS-181347. Confirm that field is trunked if exceed 100 characters"
+	@priority = 4
+	test CanAssertNameFieldIsTrunkedIfExceedCharacters {
+		task ("And Add a Dataset") {
+			FrontendDataSetAdmin.createDataSet(
+				key_name = "Dataset Test",
+				key_type = "/c/fdsentries");
+		}
+
+		task ("When go to the View page of the dataset created.") {
+			FrontendDataSetAdmin.goToViews(dataSetName = "Dataset Test");
+		}
+
+		task ("And Clicking add button, and a user types a name that is more than 100 characters until 280 characters, and Filling the description field with 'Test Description', and Clicking Save button") {
+			FrontendDataSetAdmin.createDataSetView(
+				description = "Test Description",
+				key_name = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer non tincidunt ipsum. Quisque in justo a nibh sagittis auctor non at quam. Nulla facilisi. Donec feugiat, sapien at cursus orci aliquam.");
+		}
+
+		task ("Then confirm the name value will be trunked") {
+			AssertElementPresent(
+				entryName = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer non tincidunt ipsum. Quisque in justo a nibh sagittis auctor non at quam. Nulla facilisi. Donec feugiat, sapien at cursus orci aliquam.",
+				locator1 = "FrontendDataSetAdmin#DATA_SET_VIEW_ENTRY_NAME");
+		}
+	}
+
+	@description = "LPS-181340. Confirm that the name field is required for creating a view"
+	@priority = 5
+	test CanAssertNameIsRequired {
+		task ("And Add a Dataset") {
+			FrontendDataSetAdmin.createDataSet(
+				key_name = "Dataset Test",
+				key_type = "/c/fdsentries");
+		}
+
+		task ("When going to the Dataset View page of the dataset created.") {
+			FrontendDataSetAdmin.goToViews(dataSetName = "Dataset Test");
+		}
+
+		task ("And Clicking add button") {
+			LexiconEntry.gotoAdd();
+		}
+
+		task ("And Filling the description field with 'Test Description'") {
+			Type(
+				locator1 = "FrontendDataSetAdmin#NEW_DATA_SET_VIEW_DESCRIPTION",
+				value1 = "Test Description");
+		}
+
+		task ("And When Click the Save button") {
+			PortletEntry.save();
+		}
+
+		task ("Then Confirm that 'This field is required' alert messages are present in the provider field") {
+			AssertTextPresent(
+				locator1 = "Message#ERROR",
+				value1 = "This field is required.");
+		}
+	}
+
 	@description = "LPS-181346. Confirm that pagination works right on views page"
 	@priority = 3
 	test CanAssertPaginationOnFDSViewsPage {
@@ -220,6 +280,38 @@ definition {
 		}
 	}
 
+	@description = "LPS-181339. Confirm that the user can create a view"
+	@priority = 5
+	test CanCreateView {
+		task ("And Add a Dataset") {
+			FrontendDataSetAdmin.createDataSet(
+				key_name = "Dataset Test",
+				key_type = "/c/fdsentries");
+		}
+
+		task ("When go to the View page of the dataset created.") {
+			FrontendDataSetAdmin.goToViews(dataSetName = "Dataset Test");
+		}
+
+		task ("And Filling the name with 'View Test' And Clicking Save button") {
+			FrontendDataSetAdmin.createDataSetView(
+				description = "Test Description",
+				key_name = "View Test");
+		}
+
+		task ("Then Confirm the view name in View page as expected") {
+			AssertElementPresent(
+				entryName = "View Test",
+				locator1 = "FrontendDataSetAdmin#DATA_SET_VIEW_ENTRY_NAME");
+		}
+
+		task ("And Confirm the description is 'Test Description'") {
+			AssertElementPresent(
+				key_itemName = "Test Description",
+				locator1 = "FrontendDataSetAdmin#NAME_OF_VIEWS");
+		}
+	}
+
 	@description = "LPS-181341. Confirm that The user can create a view with no description"
 	@priority = 4
 	test CanCreateViewWithNoDescription {
@@ -278,6 +370,42 @@ definition {
 		}
 	}
 
+	@description = "LPS-181353. Confirm that the user can search a view by its description"
+	@priority = 4
+	test CanSearchViewByDescription {
+		task ("And Add a Dataset") {
+			FrontendDataSetAdmin.createDataSet(
+				key_name = "Dataset Test",
+				key_type = "/c/fdsentries");
+		}
+
+		task ("When go to the View page of the dataset created.") {
+			FrontendDataSetAdmin.goToViews(dataSetName = "Dataset Test");
+		}
+
+		task ("And Adding a new view called 'View Test' and the description field with 'Test Description', And Clicking Save button") {
+			FrontendDataSetAdmin.createDataSetView(
+				description = "Test Description",
+				key_name = "View Test");
+		}
+
+		task ("And Adding a new view called 'Bob Test' and the description field with 'Bob Description'") {
+			FrontendDataSetAdmin.createDataSetView(
+				description = "Bob Description",
+				key_name = "Bob Test");
+		}
+
+		task ("And type 'Bob Description' in the search bar and click enter.") {
+			CommerceNavigator.searchEntry(entryName = "Test Description");
+		}
+
+		task ("Then the corresponding view is displayed") {
+			AssertElementPresent(
+				key_itemName = "Test Description",
+				locator1 = "FrontendDataSetAdmin#NAME_OF_VIEWS");
+		}
+	}
+
 	@description = "LPS-181351. Confirm that the user can search a view by its name"
 	@priority = 4
 	test CanSearchViewByName {
@@ -311,6 +439,38 @@ definition {
 			AssertElementPresent(
 				entryName = "View Test",
 				locator1 = "FrontendDataSetAdmin#DATA_SET_VIEW_ENTRY_NAME");
+		}
+	}
+
+	@description = "LPS-181350. Confirm that special characters are confirmed in the display name on the page "
+	@priority = 4
+	test CanUseSpecialCharactersInNameField {
+		task ("And Add a Dataset") {
+			FrontendDataSetAdmin.createDataSet(
+				key_name = "Dataset Test",
+				key_type = "/c/fdsentries");
+		}
+
+		task ("When go to the View page of the dataset created.") {
+			FrontendDataSetAdmin.goToViews(dataSetName = "Dataset Test");
+		}
+
+		task ("And Clicking add button, and Filling the Name field with, and Clicking Save button") {
+			FrontendDataSetAdmin.createDataSetView(
+				description = "Test Description",
+				key_name = "!\/\£$%&/'()=");
+		}
+
+		task ("And Confirm the view name in View page as expected") {
+			AssertElementPresent(
+				entryName = "!\/\£$%&/'()=",
+				locator1 = "FrontendDataSetAdmin#DATA_SET_VIEW_ENTRY_NAME");
+		}
+
+		task ("And Then Confirm the description is 'Test Description'") {
+			AssertElementPresent(
+				key_itemName = "Test Description",
+				locator1 = "FrontendDataSetAdmin#NAME_OF_VIEWS");
 		}
 	}
 
