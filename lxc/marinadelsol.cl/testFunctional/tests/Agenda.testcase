@@ -1,0 +1,35 @@
+definition {
+
+	property test.env = "modl";
+	property testray.main.component.name = "Marina del Sol";
+
+	setUp {
+		Utils.launchModlHomePage();
+
+		General.gotoMenuItem(menuItem = "Agenda");
+	}
+
+	@description = "Automation ID: LRQA-80244 | Test Summary: Verify user can search the agenda for events"
+	@priority = 5
+	test UserCanSearch {
+		task ("Given the user has filled out the filter fields") {
+			var searchedEvent = Agenda.getEventName(index = 1);
+			var differentEvent = Agenda.getEventName(index = 2);
+
+			Agenda.searchForEvent(eventName = ${searchedEvent});
+
+			Agenda.selectFilterOption(eventType = "Todos");
+		}
+
+		task ("When the filters are applied") {
+			Agenda.applyFilters();
+		}
+
+		task ("Then only the cards with the selected filters should be displayed") {
+			Agenda.viewCardsAfterFilter(
+				differentEventName = ${differentEvent},
+				eventName = ${searchedEvent});
+		}
+	}
+
+}
