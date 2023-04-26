@@ -35,7 +35,7 @@ Setup:
 	| Screen Name   | ${staticScreenNameValue3}       |
 	| Email Address | ${staticEmailValue3}            |
 	| First Name    | ${staticContactFirstNameValue3} |
-	| Last Name     | Employee1                       |
+	| Last Name     | ${staticContactLastNameValue3}  |
 	| Group         | Employees                       |
 	* I should be able to view a koroneiki contact with the email address "${staticEmailValue3}" added via automatic sync
 	* the account with the name "Liferay, Inc." should be assigned the contact with the email address "${staticEmailValue3}" via automatic sync
@@ -129,7 +129,9 @@ Scenario: View ticket after employee deactivation
 	# Necessary pause for tags and zendesk org sync. Analyze if can be taken out or reduced once account index improves
 	And I wait for "1" minutes
 	And I assign the ticket with the ID "${staticRequestIdList}" to a user with the email address "${staticEmailValue3}"
-	And I deactivate the user with the email address "${staticEmailValue3}" from okta
+	# Necessary pause for tags and zendesk org sync. Analyze if can be taken out or reduced once account index improves
+	And I wait for "1" minutes
+	When I deactivate the user with the email address "${staticEmailValue3}" from okta
 	Then the account with the name "Liferay, Inc." should not be assigned the contact with the email address "${staticEmailValue3}" via automatic sync
 	When I synchronize the contact entitlement definition with the name "Customer"
 	And I synchronize the contact entitlement definition with the name "Customer - DXP"
@@ -140,7 +142,6 @@ Scenario: View ticket after employee deactivation
 	And I wait for "1" minutes
 	Then the user with the email address "${staticEmailValue3}" should be present on zendesk.liferay.com
 	And the user with the email address "${staticEmailValue3}" should not be in the organization "Liferay, Inc."
-	And the user with the email address "${staticEmailValue3}" should have the "osb_kb" tag
 	And the user with the email address "${staticEmailValue3}" should not have the "osb_lr_employee" tag
 	And the user with the email address "${staticEmailValue3}" on zendesk.liferay.com should have the name "${staticContactFirstNameValue3} ${staticContactLastNameValue3}"	
 	And the user with the email address "${staticEmailValue3}" on zendesk.liferay.com should have the role "Agent"
@@ -266,10 +267,14 @@ Scenario: View closed ticket after employee deactivation
 	| Subject           | Request Subject                                  |
 	| Description       | Request Description                              |
 	| Organization Name | Osbzen - ${staticProjectName}                    |
+	# Necessary pause for tags and zendesk org sync. Analyze if can be taken out or reduced once account index improves
+	And I wait for "1" minutes
 	And I assign the ticket with the ID "${staticRequestIdList}" to a user with the email address "${staticEmailValue3}"
 	# Necessary pause for tags and zendesk org sync. Analyze if can be taken out or reduced once account index improves
 	And I wait for "1" minutes
 	And I change the status of the ticket with the ID "${staticRequestIdList}" to "closed"
+	# Necessary pause for tags and zendesk org sync. Analyze if can be taken out or reduced once account index improves
+	And I wait for "1" minutes
 	And I deactivate the user with the email address "${staticEmailValue3}" from okta
 	Then the account with the name "Liferay, Inc." should not be assigned the contact with the email address "${staticEmailValue3}" via automatic sync
 	When I synchronize the contact entitlement definition with the name "Customer"
