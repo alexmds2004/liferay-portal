@@ -1,0 +1,92 @@
+definition {
+
+	@summary = "Download a template from a selected brand"
+	macro downloadBrandTemplate {
+		Default.ScrollWebElementIntoView(
+			key_text = "Upload",
+			locator1 = "Portal.Button#ANY");
+
+		Default.Select(
+			locator1 = "Portal.Select#ANY_ID",
+			selectId = "TemplateDownload",
+			value1 = ${brandName});
+
+		Default.Click(
+			key_text = "Download",
+			locator1 = "Portal.Button#ANY");
+
+		Default.DownloadTempFile();
+	}
+
+	@summary = "Upload a filled brand template"
+	macro uploadBrandTemplate {
+		Default.ScrollWebElementIntoView(
+			key_text = "Upload",
+			locator1 = "Portal.Button#ANY");
+
+		Default.Click.clickAtNotVisible(
+			key_fileName = "Select File",
+			locator1 = "HomePage#UPLOAD_BRAND_TEMPLATE_FIELD");
+
+		Portal.UploadDependencyFile.uploadFile(fileName = ${fileName});
+
+		Default.Click(
+			key_text = "Upload",
+			locator1 = "Portal.Button#ANY");
+	}
+
+	@summary = "View if the brand template was downloaded"
+	macro viewDownloadedBrandTemplate {
+		var fileName = StringUtil.replace("Order Form ${FileBrandName}.xlsx", " ", "-");
+
+		var tempFileName = HomePage.getDownloadedTempFileName(fileNamePattern = ${fileName});
+		var tempFileDirectory = selenium.getOutputDirName();
+
+		var exportedConfigFile = FileUtil.exists("${tempFileDirectory}/${tempFileName}");
+
+		if (${exportedConfigFile} == "true") {
+			echo("PASSED! The file ${tempFileName} exists.");
+		}
+		else {
+			fail("FAIL! The file ${tempFileName} doesn't exists.");
+		}
+	}
+
+	@summary = "Get the file name from the downloaded brand template"
+	macro getDownloadedTempFileName {
+		var tempDir = PropsUtil.get("output.dir.name");
+		var pattern = StringUtil.split("**/${fileNamePattern}");
+
+		var filePath = FileUtil.getIncludedResourceURLs(${pattern}, ${tempDir});
+
+		var filePath = StringUtil.valueOf(${filePath});
+
+		var filePath = RegexUtil.replace(${filePath}, "\[(.*)\]", 1);
+
+		var filePath = StringUtil.replace(${filePath}, "file:/", "");
+
+		var fileName = FileUtil.getFileName(${filePath});
+
+		return ${fileName};
+	}
+
+	@summary = "View if the template was uploaded"
+	macro viewUploadedTemplate {
+		if (isSet(validTemplateMessage)) {
+			Portal.Alert.viewSuccessMessageText(successMessage = ${validTemplateMessage});
+
+			Default.WaitForVisible(
+				key_text = "Confirm order upload",
+				locator1 = "Portal.Button#ANY");
+		}
+
+		if (isSet(invalidTemplateMessage)) {
+			Portal.Alert.viewErrorMessage(errorMessage = ${invalidTemplateMessage});
+		}
+
+		if (isSet(unsupportedFileMessage)) {
+			Portal.Alert.viewErrorMessage(errorMessage = ${unsupportedFileMessage});
+		}
+	}
+
+}
