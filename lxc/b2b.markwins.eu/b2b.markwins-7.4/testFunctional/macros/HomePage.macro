@@ -18,6 +18,24 @@ definition {
 		Default.DownloadTempFile();
 	}
 
+	@summary = "Get the file name from the downloaded brand template"
+	macro getDownloadedTempFileName {
+		var tempDir = PropsUtil.get("output.dir.name");
+		var pattern = StringUtil.split("**/${fileNamePattern}");
+
+		var filePath = FileUtil.getIncludedResourceURLs(${pattern}, ${tempDir});
+
+		var filePath = StringUtil.valueOf(${filePath});
+
+		var filePath = RegexUtil.replace(${filePath}, "\[(.*)\]", 1);
+
+		var filePath = StringUtil.replace(${filePath}, "file:/", "");
+
+		var fileName = FileUtil.getFileName(${filePath});
+
+		return ${fileName};
+	}
+
 	@summary = "Upload a filled brand template"
 	macro uploadBrandTemplate {
 		Default.ScrollWebElementIntoView(
@@ -50,24 +68,6 @@ definition {
 		else {
 			fail("FAIL! The file ${tempFileName} doesn't exists.");
 		}
-	}
-
-	@summary = "Get the file name from the downloaded brand template"
-	macro getDownloadedTempFileName {
-		var tempDir = PropsUtil.get("output.dir.name");
-		var pattern = StringUtil.split("**/${fileNamePattern}");
-
-		var filePath = FileUtil.getIncludedResourceURLs(${pattern}, ${tempDir});
-
-		var filePath = StringUtil.valueOf(${filePath});
-
-		var filePath = RegexUtil.replace(${filePath}, "\[(.*)\]", 1);
-
-		var filePath = StringUtil.replace(${filePath}, "file:/", "");
-
-		var fileName = FileUtil.getFileName(${filePath});
-
-		return ${fileName};
 	}
 
 	@summary = "View if the template was uploaded"
