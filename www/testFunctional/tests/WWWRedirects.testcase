@@ -1,0 +1,44 @@
+definition {
+
+	property testray.main.component.name = "Support QA";
+
+	setUp {
+		LocalFile.Passwords.getPasswords();
+	}
+
+	tearDown {
+		LocalFile.WWWHomepage.pause(timeInSeconds = 10);
+
+		LocalFile.WWWSignIn.signOutAndSignIn(
+			emailAddress = ${staticWWWAdminEmailAddress},
+			password = ${staticWWWAdminPassword});
+
+		LocalFile.WWWRedirects.tearDownCP(table = '''| privacy | https://www.liferay.com/privacy-policy |''');
+	}
+
+	test AddSourceLink {
+		LocalFile.WWWHomepage.gotoHomePage();
+
+		LocalFile.WWWHomepage.clickFooterSignInCreateAccountLink();
+
+		LocalFile.WWWSignIn.signIn(
+			emailAddress = ${staticWWWAdminEmailAddress},
+			password = ${staticWWWAdminPassword});
+
+		LocalFile.ProductMenu.gotoPortlet(
+			category = "Configuration",
+			panel = "Site Administration",
+			portlet = "Redirection");
+
+		LocalFile.WWWRedirects.clickAddButton();
+
+		LocalFile.WWWRedirects.createSourceLink(table = '''| Source URL      | Input  | privacy                                |
+	| Destination URL | Input  | https://www.liferay.com/privacy-policy |
+	| Type            | Select | Temporary (302)                        |''');
+
+		LocalFile.WWWHomepage.gotoRelativeURL(url = "privacy");
+
+		LocalFile.WWWHomepage.viewURLContent(urlText = "privacy-policy");
+	}
+
+}

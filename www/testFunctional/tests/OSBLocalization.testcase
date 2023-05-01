@@ -1,0 +1,51 @@
+definition {
+
+	property testray.main.component.name = "Support QA";
+
+	setUp {
+		LocalFile.Passwords.getPasswords();
+	}
+
+	tearDown {
+		LocalFile.WWWHomepage.pause(timeInSeconds = 10);
+
+		LocalFile.WWWSignIn.signOutAndSignIn(
+			emailAddress = ${staticWWWAdminEmailAddress},
+			password = ${staticWWWAdminPassword});
+
+		LocalFile.WWWHomepage.pause(timeInSeconds = 5);
+
+		LocalFile.WWWHomepage.gotoRelativeURL(url = "web/l");
+
+		LocalFile.OSBLocalization.tearDownCP(table = '''| $1 billion - $10 billion | $1 billion - $10 billion |''');
+	}
+
+	test AddLocalization {
+		LocalFile.WWWHomepage.gotoHomePage();
+
+		LocalFile.WWWHomepage.clickFooterSignInCreateAccountLink();
+
+		LocalFile.WWWSignIn.signIn(
+			emailAddress = ${staticWWWAdminEmailAddress},
+			password = ${staticWWWAdminPassword});
+
+		LocalFile.WWWHomepage.pause(timeInSeconds = 5);
+
+		LocalFile.WWWHomepage.gotoRelativeURL(url = "web/l");
+
+		LocalFile.ProductMenu.gotoPortlet(
+			category = "Content & Data",
+			panel = "Site Administration",
+			portlet = "OSB Localization");
+
+		LocalFile.OSBLocalization.createLocalization(
+			key = "$1 billion - $10 billion",
+			value = "$1 billion - $10 billion");
+
+		LocalFile.OSBLocalization.viewLocalization(
+			key = "$1 billion - $10 billion",
+			positionValue = 1,
+			value = "$1 billion - $10 billion");
+	}
+
+}

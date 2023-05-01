@@ -1,0 +1,65 @@
+definition {
+
+	property testray.main.component.name = "Support QA";
+
+	setUp {
+		LocalFile.Passwords.getPasswords();
+	}
+
+	tearDown {
+		LocalFile.WWWHomepage.pause(timeInSeconds = 10);
+
+		LocalFile.WWWSignIn.signOutAndSignIn(
+			emailAddress = ${staticWWWAdminEmailAddress},
+			password = ${staticWWWAdminPassword});
+
+		LocalFile.DocumentsAndMedia.tearDownCP(table = '''| Document_1 |''');
+	}
+
+	test AddWhitepaper {
+		LocalFile.WWWHomepage.gotoHomePage();
+
+		LocalFile.WWWHomepage.clickFooterSignInCreateAccountLink();
+
+		LocalFile.WWWSignIn.signIn(
+			emailAddress = ${staticWWWAdminEmailAddress},
+			password = ${staticWWWAdminPassword});
+
+		LocalFile.ProductMenu.gotoPortlet(
+			category = "Content & Data",
+			panel = "Site Administration",
+			portlet = "Documents and Media");
+
+		LocalFile.ProductMenuHelper.closeProductMenu();
+
+		LocalFile.DocumentsAndMedia.gotoFolder(folderName = "RESOURCES");
+
+		LocalFile.DocumentsAndMedia.gotoFolder(folderName = "whitepapers");
+
+		LocalFile.DocumentsAndMedia.gotoMarketingAssetDocumentForm();
+
+		LocalFile.DocumentsAndMedia.expandBottomPanelHeader(bottomPanelCategory = "Custom Fields");
+
+		LocalFile.DocumentsAndMedia.expandBottomPanelHeader(bottomPanelCategory = "Categorization");
+
+		LocalFile.DocumentsAndMedia.createDocument(table = '''| File Upload          | File Upload        | Document_1.pdf       |
+	| Primary Buyer Stage  | Select             | Evaluation           |
+	| Seo Description      | Bottom Panel Input | Test Seo Description |
+	| Seo Title            | Bottom Panel Input | Test Seo Title       |
+	| Category List Filter | Category Select    | Resources            |
+	| Language             | Category Select    | English              |
+	| Resource Type        | Category Select    | Whitepapers          |
+	| Topic                | Category Select    | Customer Experience  |''');
+
+		LocalFile.DocumentsAndMedia.clickPublish();
+
+		LocalFile.WWWSignIn.signOut();
+
+		LocalFile.WWWHomepage.gotoRelativeURL(url = "resources");
+
+		LocalFile.WWWResourceLibrary.filterResources(table = '''| Resource Types | Whitepapers |''');
+
+		LocalFile.WWWResourceLibrary.viewResource(resourceTitle = "Document_1");
+	}
+
+}

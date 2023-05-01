@@ -1,30 +1,44 @@
-@testray.main.component.name = "Support QA"
+definition {
 
-Feature: WWW Case Study
-	Frontend testing for creating a www case study
+	property testray.main.component.name = "Support QA";
 
-Setup:
-    * I get all test passwords and admin emails
+	setUp {
+		LocalFile.Passwords.getPasswords();
+	}
 
-Teardown:
-	* I wait for "10" seconds
-	* I sign out and sign into www as a user with the email address "${staticWWWAdminEmailAddress}" and password "${staticWWWAdminPassword}"
-	* I tear down the following web content entries
-	| ABC Education Test 1 |
+	tearDown {
+		LocalFile.WWWHomepage.pause(timeInSeconds = 10);
 
-Scenario: Add Case Study
-	Admins should be able to add a case study on www.
+		LocalFile.WWWSignIn.signOutAndSignIn(
+			emailAddress = ${staticWWWAdminEmailAddress},
+			password = ${staticWWWAdminPassword});
 
-	Given I go to the www homepage
-	And I click on the Sign In Create Account footer link
-	And I sign into www as a user with the email address "${staticWWWAdminEmailAddress}" and password "${staticWWWAdminPassword}"
-	And I navigate to the Product Menu and go to the "Web Content" portlet under the "Content & Data" category under the "Site Administration" panel
-	And I go to the web content folder "RESOURCES"
-	And I go to the web content folder "CASE STUDIES"
-	And I go to a new form for a "Case Study" web content
-	And I expand the "Categorization" header in the side panel
-	And I populate the following web content fields and values
-	| Title                |                 | ABC Education Test 1                                          |
+		LocalFile.WebContent.tearDownCP(table = '''| ABC Education Test 1 |''');
+	}
+
+	test AddCaseStudy {
+		LocalFile.WWWHomepage.gotoHomePage();
+
+		LocalFile.WWWHomepage.clickFooterSignInCreateAccountLink();
+
+		LocalFile.WWWSignIn.signIn(
+			emailAddress = ${staticWWWAdminEmailAddress},
+			password = ${staticWWWAdminPassword});
+
+		LocalFile.ProductMenu.gotoPortlet(
+			category = "Content & Data",
+			panel = "Site Administration",
+			portlet = "Web Content");
+
+		LocalFile.WebContent.gotoFolder(folderName = "RESOURCES");
+
+		LocalFile.WebContent.gotoFolder(folderName = "CASE STUDIES");
+
+		LocalFile.WebContent.gotoNewWebContentForm(type = "Case Study");
+
+		LocalFile.WebContent.expandSidePanelHeader(sidePanelCategory = "Categorization");
+
+		LocalFile.WebContent.createWebContent(table = '''| Title                |                 | ABC Education Test 1                                          |
 	| Company Name         | Input           | ABC Education 1                                               |
 	| Company Logo         | File Upload     | RESOURCES,case-studies,ABC EDUCATION,ABC Education logo yello |
 	| Subheading           | Input           | Heading 1                                                     |
@@ -50,17 +64,23 @@ Scenario: Add Case Study
 	| Location             | Category Select | United States                                                 |
 	| Resource Types       | Category Select | Case Studies                                                  |
 	| Solutions            | Category Select | Customer Portals                                              |
-	| Topic                | Category Select | Digital Strategy                                              |
-	And I click the publish button
-	And I wait for "3" seconds
-	And I sign out of www
-	And I go to the www page with the relative url "resources"
-	And I filter the resources in the Resource Library using the following filters and values
-	| Resource Types | Case Studies |
-	Then I should be able to view the resource with the title "ABC Education Test 1"
-	When I go to the www page with the relative url "resources/case-studies/abc-education-test-1"
-	Then the following text should be visible on the page
-	| Heading 1                                     |
+	| Topic                | Category Select | Digital Strategy                                              |''');
+
+		LocalFile.WebContent.clickPublish();
+
+		LocalFile.WWWHomepage.pause(timeInSeconds = 3);
+
+		LocalFile.WWWSignIn.signOut();
+
+		LocalFile.WWWHomepage.gotoRelativeURL(url = "resources");
+
+		LocalFile.WWWResourceLibrary.filterResources(table = '''| Resource Types | Case Studies |''');
+
+		LocalFile.WWWResourceLibrary.viewResource(resourceTitle = "ABC Education Test 1");
+
+		LocalFile.WWWHomepage.gotoRelativeURL(url = "resources/case-studies/abc-education-test-1");
+
+		LocalFile.WWWHomepage.viewText(table = '''| Heading 1                                     |
 	| This is the first test summary                |
 	| Heading 2                                     |
 	| This is the second test summary               |
@@ -78,11 +98,8 @@ Scenario: Add Case Study
 	| First result from dealing with challenge one  |
 	| Result 2                                      |
 	| Second result from dealing with challenge two |
-#	| INDUSTRY                                      |
-#	| Education                                     |
-#	| LOCATION                                      |
-#	| United States                                 |
-#	| SOLUTION                                      |
-#	| Customer Portals                              |
 	| TOPIC                                         |
-	| Digital Strategy                              |
+	| Digital Strategy                              |''');
+	}
+
+}

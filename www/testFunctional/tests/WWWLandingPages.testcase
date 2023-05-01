@@ -1,0 +1,57 @@
+definition {
+
+	property testray.main.component.name = "Support QA";
+
+	setUp {
+		LocalFile.Passwords.getPasswords();
+	}
+
+	tearDown {
+		LocalFile.WWWHomepage.pause(timeInSeconds = 10);
+
+		LocalFile.WWWSignIn.signOutAndSignIn(
+			emailAddress = ${staticWWWAdminEmailAddress},
+			password = ${staticWWWAdminPassword});
+
+		LocalFile.WWWHomepage.pause(timeInSeconds = 5);
+
+		LocalFile.WWWHomepage.gotoRelativeURL(url = "web/l");
+
+		LocalFile.Page.tearDownCP(table = '''| Test Event1 Page |
+	| Test Event2 Page |''');
+	}
+
+	test AddLandingPageWithRemovedSection {
+		LocalFile.WWWHomepage.gotoHomePage();
+
+		LocalFile.WWWHomepage.clickFooterSignInCreateAccountLink();
+
+		LocalFile.WWWSignIn.signIn(
+			emailAddress = ${staticWWWAdminEmailAddress},
+			password = ${staticWWWAdminPassword});
+
+		LocalFile.WWWHomepage.pause(timeInSeconds = 5);
+
+		LocalFile.WWWHomepage.gotoRelativeURL(url = "web/l");
+
+		LocalFile.ProductMenu.gotoPortlet(
+			category = "Site Builder",
+			panel = "Site Administration",
+			portlet = "Pages");
+
+		LocalFile.Page.clickAddPublicPageButton();
+
+		LocalFile.Page.clickPageTemplate(pageTemplate = "Event - Thank You");
+
+		LocalFile.Page.addPublicPage(pageName = "Test Event1 Page");
+
+		LocalFile.Page.gotoEditorSidebarCategory(sidebarCategory = "browser");
+
+		LocalFile.Page.removeSection(positionValue = 2);
+
+		LocalFile.Page.clickPublishButton();
+
+		LocalFile.Page.viewPublicPage(pageName = "Test Event1 Page");
+	}
+
+}
