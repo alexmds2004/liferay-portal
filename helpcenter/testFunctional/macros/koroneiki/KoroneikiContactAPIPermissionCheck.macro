@@ -6,32 +6,32 @@ definition {
 
 	@prose = "I attempt to create a contact on koroneiki with the following values as a non permissioned user ${table}"
 	macro _createContactAttempt {
-		var  rawTable = TableUtil.newTable(${table});
+		var rawTable = TableUtil.newTable(${table});
 
-		for (var row : table "${rawTable}") {
+		for (var row : table ${rawTable}) {
 			var field = "${row[0]}";
 			var value = "${row[1]}";
 
-			if ("${field}" == "Email Address") {
-				var emailAddress = "${value}";
+			if (${field} == "Email Address") {
+				var emailAddress = ${value};
 			}
-			else if ("${field}" == "Email Address Verified") {
-				var emailAddressVerified = "${value}";
+			else if (${field} == "Email Address Verified") {
+				var emailAddressVerified = ${value};
 			}
-			else if ("${field}" == "First Name") {
-				var firstName = "${value}";
+			else if (${field} == "First Name") {
+				var firstName = ${value};
 			}
-			else if ("${field}" == "Language") {
-				var languageId = "${value}";
+			else if (${field} == "Language") {
+				var languageId = ${value};
 			}
-			else if ("${field}" == "Last Name") {
-				var lastName = "${value}";
+			else if (${field} == "Last Name") {
+				var lastName = ${value};
 			}
-			else if ("${field}" == "Middle Name") {
-				var middleName = "${value}";
+			else if (${field} == "Middle Name") {
+				var middleName = ${value};
 			}
-			else if ("${field}" == "UUID") {
-				var uuid = "${value}";
+			else if (${field} == "UUID") {
+				var uuid = ${value};
 			}
 			else {
 				fail("No such contact field ${field}");
@@ -68,41 +68,41 @@ definition {
 
 		var curl = '''
 			${koroneikiURL}/o/koroneiki-rest/v1.0/contacts --tlsv1.2
-			--header "API_Token: ${apiToken}"
-			-H "accept: application/json"
-			-H "Content-Type: application/json"
-			-d
-			{
-				"emailAddress": "${emailAddress}",
-				"emailAddressVerified": ${emailAddressVerified},
-				"firstName": "${firstName}",
-				"languageId": "${languageId}",
-				"lastName": "${lastName}",
-				"middleName": "${middleName}",
-				"uuid": "${uuid}"
-			}
-			''';
+				--header "API_Token: ${apiToken}"
+				-H "accept: application/json"
+				-H "Content-Type: application/json"
+				-d
+				{
+					"emailAddress": "${emailAddress}",
+					"emailAddressVerified": ${emailAddressVerified},
+					"firstName": "${firstName}",
+					"languageId": "${languageId}",
+					"lastName": "${lastName}",
+					"middleName": "${middleName}",
+					"uuid": "${uuid}"
+				}
+		''';
 
-		com.liferay.poshi.runner.util.JSONCurlUtil.post("${curl}");
+		com.liferay.poshi.runner.util.JSONCurlUtil.post(${curl});
 	}
 
 	@prose = "I attempt to create an external link for the contact with the email address ${contactEmailAddress} with the following values as a non permissioned user ${table}"
 	macro _createContactExternalLinkViaUuidAttempt {
-		var contactUuid = KoroneikiContactAPI._getContactUuidViaContactEmailAddress(contactEmailAddress = "${contactEmailAddress}");
-		var  rawTable = TableUtil.newTable(${table});
+		var contactUuid = KoroneikiContactAPI._getContactUuidViaContactEmailAddress(contactEmailAddress = ${contactEmailAddress});
+		var rawTable = TableUtil.newTable(${table});
 
-		for (var row : table "${rawTable}") {
+		for (var row : table ${rawTable}) {
 			var field = "${row[0]}";
 			var value = "${row[1]}";
 
-			if ("${field}" == "Domain") {
-				var domain = "${value}";
+			if (${field} == "Domain") {
+				var domain = ${value};
 			}
-			else if ("${field}" == "Entity Id") {
-				var entityId = "${value}";
+			else if (${field} == "Entity Id") {
+				var entityId = ${value};
 			}
-			else if ("${field}" == "Entity Name") {
-				var entityName = "${value}";
+			else if (${field} == "Entity Name") {
+				var entityName = ${value};
 			}
 			else {
 				fail("No such external link field ${field}");
@@ -123,116 +123,116 @@ definition {
 
 		var curl = '''
 			${koroneikiURL}/o/koroneiki-rest/v1.0/contacts/by-uuid/${contactUuid}/external-links --tlsv1.2
-			--header "API_Token: ${apiToken}"
-			-H "accept: application/json"
-			-H "Content-Type: application/json"
-			-d
-			{
-				"domain": "${domain}",
-				"entityId": "${entityId}",
-				"entityName": "${entityName}"
-			}
-			''';
+				--header "API_Token: ${apiToken}"
+				-H "accept: application/json"
+				-H "Content-Type: application/json"
+				-d
+				{
+					"domain": "${domain}",
+					"entityId": "${entityId}",
+					"entityName": "${entityName}"
+				}
+		''';
 
-		com.liferay.poshi.runner.util.JSONCurlUtil.post("${curl}");
+		com.liferay.poshi.runner.util.JSONCurlUtil.post(${curl});
 	}
 
 	@prose = "I attempt to delete an external link with the entity id ${entityId} on the contact with the email address ${contactEmailAddress} as a non permissioned user"
 	macro _deleteContactExternalLinkAttempt {
 		var externalLinkKey = KoroneikiContactAPI._getContactExternalLinkKey(
-			contactEmailAddress = "${contactEmailAddress}",
-			entityId = "${entityId}");
+			contactEmailAddress = ${contactEmailAddress},
+			entityId = ${entityId});
 
 		var curl = '''
 			${koroneikiURL}/o/koroneiki-rest/v1.0/external-links/${externalLinkKey} --tlsv1.2
-			--header "API_Token: ${apiToken}"
-			-H "accept: application/json"
-			-H "Content-Type: application/json"
-			''';
+				--header "API_Token: ${apiToken}"
+				-H "accept: application/json"
+				-H "Content-Type: application/json"
+		''';
 
-		com.liferay.poshi.runner.util.JSONCurlUtil.delete("${curl}");
+		com.liferay.poshi.runner.util.JSONCurlUtil.delete(${curl});
 	}
 
 	@prose = "I delete a contact on koroneiki with the email address ${contactEmailAddress} as a permissioned user"
 	macro _deleteContactViaEmailAddress {
 		var curl = '''
 			${koroneikiURL}/o/koroneiki-rest/v1.0/contacts/by-email-address/${contactEmailAddress} --tlsv1.2
-			--header "API_Token: ${apiToken}"
-			-H "accept: application/json"
-			-H "Content-Type: application/json"
-			''';
+				--header "API_Token: ${apiToken}"
+				-H "accept: application/json"
+				-H "Content-Type: application/json"
+		''';
 
-		com.liferay.poshi.runner.util.JSONCurlUtil.delete("${curl}");
+		com.liferay.poshi.runner.util.JSONCurlUtil.delete(${curl});
 	}
 
 	@prose = "I attempt to delete a contact on koroneiki with the email address ${contactEmailAddress} as a non permissioned user"
 	macro _deleteContactViaEmailAddressAttempt {
 		var curl = '''
 			${koroneikiURL}/o/koroneiki-rest/v1.0/contacts/by-email-address/${contactEmailAddress} --tlsv1.2
-			--header "API_Token: ${apiToken}"
-			-H "accept: application/json"
-			-H "Content-Type: application/json"
-			''';
+				--header "API_Token: ${apiToken}"
+				-H "accept: application/json"
+				-H "Content-Type: application/json"
+		''';
 
-		com.liferay.poshi.runner.util.JSONCurlUtil.delete("${curl}");
+		com.liferay.poshi.runner.util.JSONCurlUtil.delete(${curl});
 	}
 
 	@prose = "I delete a contact on koroneiki with the email address ${contactEmailAddress} via uuid as a permissioned user"
 	macro _deleteContactViaUuid {
-		var contactUuid = KoroneikiContactAPI._getContactUuidViaContactEmailAddress(contactEmailAddress = "${contactEmailAddress}");
+		var contactUuid = KoroneikiContactAPI._getContactUuidViaContactEmailAddress(contactEmailAddress = ${contactEmailAddress});
 
 		var curl = '''
 			${koroneikiURL}/o/koroneiki-rest/v1.0/contacts/by-uuid/${contactUuid} --tlsv1.2
-			--header "API_Token: ${apiToken}"
-			-H "accept: application/json"
-			-H "Content-Type: application/json"
-			''';
+				--header "API_Token: ${apiToken}"
+				-H "accept: application/json"
+				-H "Content-Type: application/json"
+		''';
 
-		com.liferay.poshi.runner.util.JSONCurlUtil.delete("${curl}");
+		com.liferay.poshi.runner.util.JSONCurlUtil.delete(${curl});
 	}
 
 	@prose = "I attempt to delete a contact on koroneiki with the email address ${contactEmailAddress} via uuid as a non permissioned user"
 	macro _deleteContactViaUuidAttempt {
-		var contactUuid = KoroneikiContactAPI._getContactUuidViaContactEmailAddress(contactEmailAddress = "${contactEmailAddress}");
+		var contactUuid = KoroneikiContactAPI._getContactUuidViaContactEmailAddress(contactEmailAddress = ${contactEmailAddress});
 
 		var curl = '''
 			${koroneikiURL}/o/koroneiki-rest/v1.0/contacts/by-uuid/${contactUuid} --tlsv1.2
-			--header "API_Token: ${apiToken}"
-			-H "accept: application/json"
-			-H "Content-Type: application/json"
-			''';
+				--header "API_Token: ${apiToken}"
+				-H "accept: application/json"
+				-H "Content-Type: application/json"
+		''';
 
-		com.liferay.poshi.runner.util.JSONCurlUtil.delete("${curl}");
+		com.liferay.poshi.runner.util.JSONCurlUtil.delete(${curl});
 	}
 
 	@prose = "I set the permissions for a contact with the email address ${contactEmailAddress} to have the following values for a non permissioned user as a permissioned user ${table}"
 	macro _setContactPermissionsViaUuid {
-		var contactUuid = KoroneikiContactAPI._getContactUuidViaContactEmailAddress(contactEmailAddress = "${contactEmailAddress}");
-		var  rawTable = TableUtil.newTable(${table});
+		var contactUuid = KoroneikiContactAPI._getContactUuidViaContactEmailAddress(contactEmailAddress = ${contactEmailAddress});
+		var rawTable = TableUtil.newTable(${table});
 
-		for (var row : table "${rawTable}") {
+		for (var row : table ${rawTable}) {
 			var field = "${row[0]}";
 			var value = "${row[1]}";
 
-			if ("${field}" == "Delete") {
-				var value = StringUtil.lowerCase("${value}");
+			if (${field} == "Delete") {
+				var value = StringUtil.lowerCase(${value});
 
-				var delete = "${value}";
+				var delete = ${value};
 			}
-			else if ("${field}" == "Permissions") {
-				var value = StringUtil.lowerCase("${value}");
+			else if (${field} == "Permissions") {
+				var value = StringUtil.lowerCase(${value});
 
-				var permissions = "${value}";
+				var permissions = ${value};
 			}
-			else if ("${field}" == "Update") {
-				var value = StringUtil.lowerCase("${value}");
+			else if (${field} == "Update") {
+				var value = StringUtil.lowerCase(${value});
 
-				var update = "${value}";
+				var update = ${value};
 			}
-			else if ("${field}" == "View") {
-				var value = StringUtil.lowerCase("${value}");
+			else if (${field} == "View") {
+				var value = StringUtil.lowerCase(${value});
 
-				var view = "${value}";
+				var view = ${value};
 			}
 			else {
 				fail("No such permission field ${field}");
@@ -257,52 +257,52 @@ definition {
 
 		var curl = '''
 			${koroneikiURL}/o/koroneiki-rest/v1.0/contacts/by-uuid/${contactUuid}/contact-permissions --tlsv1.2
-			--header "API_Token: ${apiToken}"
-			-H "accept: application/json"
-			-H "Content-Type: application/json"
-			-d
-			{
-				"delete": "${delete}",
-				"permissions": "${permissions}",
-				"roleNames": [
-					"${roleName}"
-				],
-				"update": "${update}",
-				"view": "${view}"
-			}
-			''';
+				--header "API_Token: ${apiToken}"
+				-H "accept: application/json"
+				-H "Content-Type: application/json"
+				-d
+				{
+					"delete": "${delete}",
+					"permissions": "${permissions}",
+					"roleNames": [
+						"${roleName}"
+					],
+					"update": "${update}",
+					"view": "${view}"
+				}
+		''';
 
-		com.liferay.poshi.runner.util.JSONCurlUtil.put("${curl}");
+		com.liferay.poshi.runner.util.JSONCurlUtil.put(${curl});
 	}
 
 	@prose = "I attempt to set the permissions for a contact with the email address ${contactEmailAddress} to have the following values for a non permissioned user as a non permissioned user ${table}"
 	macro _setContactPermissionsViaUuidAttempt {
-		var contactUuid = KoroneikiContactAPI._getContactUuidViaContactEmailAddress(contactEmailAddress = "${contactEmailAddress}");
-		var  rawTable = TableUtil.newTable(${table});
+		var contactUuid = KoroneikiContactAPI._getContactUuidViaContactEmailAddress(contactEmailAddress = ${contactEmailAddress});
+		var rawTable = TableUtil.newTable(${table});
 
-		for (var row : table "${rawTable}") {
+		for (var row : table ${rawTable}) {
 			var field = "${row[0]}";
 			var value = "${row[1]}";
 
-			if ("${field}" == "Delete") {
-				var value = StringUtil.lowerCase("${value}");
+			if (${field} == "Delete") {
+				var value = StringUtil.lowerCase(${value});
 
-				var delete = "${value}";
+				var delete = ${value};
 			}
-			else if ("${field}" == "Permissions") {
-				var value = StringUtil.lowerCase("${value}");
+			else if (${field} == "Permissions") {
+				var value = StringUtil.lowerCase(${value});
 
-				var permissions = "${value}";
+				var permissions = ${value};
 			}
-			else if ("${field}" == "Update") {
-				var value = StringUtil.lowerCase("${value}");
+			else if (${field} == "Update") {
+				var value = StringUtil.lowerCase(${value});
 
-				var update = "${value}";
+				var update = ${value};
 			}
-			else if ("${field}" == "View") {
-				var value = StringUtil.lowerCase("${value}");
+			else if (${field} == "View") {
+				var value = StringUtil.lowerCase(${value});
 
-				var view = "${value}";
+				var view = ${value};
 			}
 			else {
 				fail("No such permission field ${field}");
@@ -327,52 +327,52 @@ definition {
 
 		var curl = '''
 			${koroneikiURL}/o/koroneiki-rest/v1.0/contacts/by-uuid/${contactUuid}/contact-permissions --tlsv1.2
-			--header "API_Token: ${apiToken}"
-			-H "accept: application/json"
-			-H "Content-Type: application/json"
-			-d
-			{
-				"delete": "${delete}",
-				"permissions": "${permissions}",
-				"roleNames": [
-					"${roleName}"
-				],
-				"update": "${update}",
-				"view": "${view}"
-			}
-			''';
+				--header "API_Token: ${apiToken}"
+				-H "accept: application/json"
+				-H "Content-Type: application/json"
+				-d
+				{
+					"delete": "${delete}",
+					"permissions": "${permissions}",
+					"roleNames": [
+						"${roleName}"
+					],
+					"update": "${update}",
+					"view": "${view}"
+				}
+		''';
 
-		com.liferay.poshi.runner.util.JSONCurlUtil.put("${curl}");
+		com.liferay.poshi.runner.util.JSONCurlUtil.put(${curl});
 	}
 
 	@prose = "I unset the following permissions for a contact with the email address ${contactEmailAddress} for a permissioned user as a permissioned user ${table}"
 	macro _unsetContactPermissionsViaUuid {
-		var contactUuid = KoroneikiContactAPI._getContactUuidViaContactEmailAddress(contactEmailAddress = "${contactEmailAddress}");
-		var  rawTable = TableUtil.newTable(${table});
+		var contactUuid = KoroneikiContactAPI._getContactUuidViaContactEmailAddress(contactEmailAddress = ${contactEmailAddress});
+		var rawTable = TableUtil.newTable(${table});
 
-		for (var row : table "${rawTable}") {
+		for (var row : table ${rawTable}) {
 			var field = "${row[0]}";
 			var value = "${row[1]}";
 
-			if ("${field}" == "Delete") {
-				var value = StringUtil.lowerCase("${value}");
+			if (${field} == "Delete") {
+				var value = StringUtil.lowerCase(${value});
 
-				var delete = "${value}";
+				var delete = ${value};
 			}
-			else if ("${field}" == "Permissions") {
-				var value = StringUtil.lowerCase("${value}");
+			else if (${field} == "Permissions") {
+				var value = StringUtil.lowerCase(${value});
 
-				var permissions = "${value}";
+				var permissions = ${value};
 			}
-			else if ("${field}" == "Update") {
-				var value = StringUtil.lowerCase("${value}");
+			else if (${field} == "Update") {
+				var value = StringUtil.lowerCase(${value});
 
-				var update = "${value}";
+				var update = ${value};
 			}
-			else if ("${field}" == "View") {
-				var value = StringUtil.lowerCase("${value}");
+			else if (${field} == "View") {
+				var value = StringUtil.lowerCase(${value});
 
-				var view = "${value}";
+				var view = ${value};
 			}
 			else {
 				fail("No such permission field ${field}");
@@ -397,52 +397,52 @@ definition {
 
 		var curl = '''
 			${koroneikiURL}/o/koroneiki-rest/v1.0/contacts/by-uuid/${contactUuid}/contact-permissions --tlsv1.2
-			--header "API_Token: ${apiToken}"
-			-H "accept: application/json"
-			-H "Content-Type: application/json"
-			-d
-			{
-				"delete": "${delete}",
-				"permissions": "${permissions}",
-				"roleNames": [
-					"${roleName}"
-				],
-				"update": "${update}",
-				"view": "${view}"
-			}
-			''';
+				--header "API_Token: ${apiToken}"
+				-H "accept: application/json"
+				-H "Content-Type: application/json"
+				-d
+				{
+					"delete": "${delete}",
+					"permissions": "${permissions}",
+					"roleNames": [
+						"${roleName}"
+					],
+					"update": "${update}",
+					"view": "${view}"
+				}
+		''';
 
-		com.liferay.poshi.runner.util.JSONCurlUtil.delete("${curl}");
+		com.liferay.poshi.runner.util.JSONCurlUtil.delete(${curl});
 	}
 
 	@prose = "I attempt to unset the following permissions for a contact with the email address ${contactEmailAddress} for a permissioned user as a non permissioned user ${table}"
 	macro _unsetContactPermissionsViaUuidAttempt {
-		var contactUuid = KoroneikiContactAPI._getContactUuidViaContactEmailAddress(contactEmailAddress = "${contactEmailAddress}");
-		var  rawTable = TableUtil.newTable(${table});
+		var contactUuid = KoroneikiContactAPI._getContactUuidViaContactEmailAddress(contactEmailAddress = ${contactEmailAddress});
+		var rawTable = TableUtil.newTable(${table});
 
-		for (var row : table "${rawTable}") {
+		for (var row : table ${rawTable}) {
 			var field = "${row[0]}";
 			var value = "${row[1]}";
 
-			if ("${field}" == "Delete") {
-				var value = StringUtil.lowerCase("${value}");
+			if (${field} == "Delete") {
+				var value = StringUtil.lowerCase(${value});
 
-				var delete = "${value}";
+				var delete = ${value};
 			}
-			else if ("${field}" == "Permissions") {
-				var value = StringUtil.lowerCase("${value}");
+			else if (${field} == "Permissions") {
+				var value = StringUtil.lowerCase(${value});
 
-				var permissions = "${value}";
+				var permissions = ${value};
 			}
-			else if ("${field}" == "Update") {
-				var value = StringUtil.lowerCase("${value}");
+			else if (${field} == "Update") {
+				var value = StringUtil.lowerCase(${value});
 
-				var update = "${value}";
+				var update = ${value};
 			}
-			else if ("${field}" == "View") {
-				var value = StringUtil.lowerCase("${value}");
+			else if (${field} == "View") {
+				var value = StringUtil.lowerCase(${value});
 
-				var view = "${value}";
+				var view = ${value};
 			}
 			else {
 				fail("No such permission field ${field}");
@@ -467,52 +467,52 @@ definition {
 
 		var curl = '''
 			${koroneikiURL}/o/koroneiki-rest/v1.0/contacts/by-uuid/${contactUuid}/contact-permissions --tlsv1.2
-			--header "API_Token: ${apiToken}"
-			-H "accept: application/json"
-			-H "Content-Type: application/json"
-			-d
-			{
-				"delete": "${delete}",
-				"permissions": "${permissions}",
-				"roleNames": [
-					"${roleName}"
-				],
-				"update": "${update}",
-				"view": "${view}"
-			}
-			''';
+				--header "API_Token: ${apiToken}"
+				-H "accept: application/json"
+				-H "Content-Type: application/json"
+				-d
+				{
+					"delete": "${delete}",
+					"permissions": "${permissions}",
+					"roleNames": [
+						"${roleName}"
+					],
+					"update": "${update}",
+					"view": "${view}"
+				}
+		''';
 
-		com.liferay.poshi.runner.util.JSONCurlUtil.delete("${curl}");
+		com.liferay.poshi.runner.util.JSONCurlUtil.delete(${curl});
 	}
 
 	@prose = "I update a koroneiki contact with the email address ${contactEmailAddress} to have the following values as a permissioned user ${table}"
 	macro _updateContactViaEmailAddress {
-		var  rawTable = TableUtil.newTable(${table});
+		var rawTable = TableUtil.newTable(${table});
 
-		for (var row : table "${rawTable}") {
+		for (var row : table ${rawTable}) {
 			var field = "${row[0]}";
 			var value = "${row[1]}";
 
-			if ("${field}" == "Email Address") {
-				var emailAddress = "${value}";
+			if (${field} == "Email Address") {
+				var emailAddress = ${value};
 			}
-			else if ("${field}" == "Email Address Verified") {
-				var emailAddressVerified = "${value}";
+			else if (${field} == "Email Address Verified") {
+				var emailAddressVerified = ${value};
 			}
-			else if ("${field}" == "First Name") {
-				var firstName = "${value}";
+			else if (${field} == "First Name") {
+				var firstName = ${value};
 			}
-			else if ("${field}" == "Language") {
-				var languageId = "${value}";
+			else if (${field} == "Language") {
+				var languageId = ${value};
 			}
-			else if ("${field}" == "Last Name") {
-				var lastName = "${value}";
+			else if (${field} == "Last Name") {
+				var lastName = ${value};
 			}
-			else if ("${field}" == "Middle Name") {
-				var middleName = "${value}";
+			else if (${field} == "Middle Name") {
+				var middleName = ${value};
 			}
-			else if ("${field}" == "UUID") {
-				var uuid = "${value}";
+			else if (${field} == "UUID") {
+				var uuid = ${value};
 			}
 			else {
 				fail("No such contact field ${field}");
@@ -521,18 +521,18 @@ definition {
 
 		var curl = '''
 			${koroneikiURL}/o/koroneiki-rest/v1.0/contacts/by-email-address/${contactEmailAddress} --tlsv1.2
-			--header "API_Token: ${apiToken}"
-			-H "accept: application/json"
-			-H "Content-Type: application/json"
-			''';
+				--header "API_Token: ${apiToken}"
+				-H "accept: application/json"
+				-H "Content-Type: application/json"
+		''';
 
 		if (!(isSet(emailAddress))) {
-			var contactObject = JSONCurlUtil.get("${curl}", "$");
+			var contactObject = JSONCurlUtil.get(${curl}, "$");
 
-			if (contains("${contactObject}", "emailAddress=")) {
-				var value = JSONCurlUtil.get("${curl}", "$.emailAddress");
+			if (contains(${contactObject}, "emailAddress=")) {
+				var value = JSONCurlUtil.get(${curl}, "$.emailAddress");
 
-				var emailAddress = "${value}";
+				var emailAddress = ${value};
 			}
 			else {
 				var emailAddress = "";
@@ -540,12 +540,12 @@ definition {
 		}
 
 		if (!(isSet(emailAddressVerified))) {
-			var contactObject = JSONCurlUtil.get("${curl}", "$");
+			var contactObject = JSONCurlUtil.get(${curl}, "$");
 
-			if (contains("${contactObject}", "emailAddressVerified=")) {
-				var value = JSONCurlUtil.get("${curl}", "$.emailAddressVerified");
+			if (contains(${contactObject}, "emailAddressVerified=")) {
+				var value = JSONCurlUtil.get(${curl}, "$.emailAddressVerified");
 
-				var emailAddressVerified = "${value}";
+				var emailAddressVerified = ${value};
 			}
 			else {
 				var emailAddressVerified = "false";
@@ -553,12 +553,12 @@ definition {
 		}
 
 		if (!(isSet(firstName))) {
-			var contactObject = JSONCurlUtil.get("${curl}", "$");
+			var contactObject = JSONCurlUtil.get(${curl}, "$");
 
-			if (contains("${contactObject}", "firstName=")) {
-				var value = JSONCurlUtil.get("${curl}", "$.firstName");
+			if (contains(${contactObject}, "firstName=")) {
+				var value = JSONCurlUtil.get(${curl}, "$.firstName");
 
-				var firstName = "${value}";
+				var firstName = ${value};
 			}
 			else {
 				var firstName = "";
@@ -566,12 +566,12 @@ definition {
 		}
 
 		if (!(isSet(languageId))) {
-			var contactObject = JSONCurlUtil.get("${curl}", "$");
+			var contactObject = JSONCurlUtil.get(${curl}, "$");
 
-			if (contains("${contactObject}", "languageId=")) {
-				var value = JSONCurlUtil.get("${curl}", "$.languageId");
+			if (contains(${contactObject}, "languageId=")) {
+				var value = JSONCurlUtil.get(${curl}, "$.languageId");
 
-				var languageId = "${value}";
+				var languageId = ${value};
 			}
 			else {
 				var languageId = "";
@@ -579,12 +579,12 @@ definition {
 		}
 
 		if (!(isSet(lastName))) {
-			var contactObject = JSONCurlUtil.get("${curl}", "$");
+			var contactObject = JSONCurlUtil.get(${curl}, "$");
 
-			if (contains("${contactObject}", "lastName=")) {
-				var value = JSONCurlUtil.get("${curl}", "$.lastName");
+			if (contains(${contactObject}, "lastName=")) {
+				var value = JSONCurlUtil.get(${curl}, "$.lastName");
 
-				var lastName = "${value}";
+				var lastName = ${value};
 			}
 			else {
 				var lastName = "";
@@ -592,12 +592,12 @@ definition {
 		}
 
 		if (!(isSet(middleName))) {
-			var contactObject = JSONCurlUtil.get("${curl}", "$");
+			var contactObject = JSONCurlUtil.get(${curl}, "$");
 
-			if (contains("${contactObject}", "middleName=")) {
-				var value = JSONCurlUtil.get("${curl}", "$.middleName");
+			if (contains(${contactObject}, "middleName=")) {
+				var value = JSONCurlUtil.get(${curl}, "$.middleName");
 
-				var middleName = "${value}";
+				var middleName = ${value};
 			}
 			else {
 				var middleName = "";
@@ -605,12 +605,12 @@ definition {
 		}
 
 		if (!(isSet(uuid))) {
-			var contactObject = JSONCurlUtil.get("${curl}", "$");
+			var contactObject = JSONCurlUtil.get(${curl}, "$");
 
-			if (contains("${contactObject}", "uuid=")) {
-				var value = JSONCurlUtil.get("${curl}", "$.uuid");
+			if (contains(${contactObject}, "uuid=")) {
+				var value = JSONCurlUtil.get(${curl}, "$.uuid");
 
-				var uuid = "${value}";
+				var uuid = ${value};
 			}
 			else {
 				var uuid = "";
@@ -619,52 +619,52 @@ definition {
 
 		var curl = '''
 			${koroneikiURL}/o/koroneiki-rest/v1.0/contacts/by-email-address/${contactEmailAddress} --tlsv1.2
-			--header "API_Token: ${apiToken}"
-			-H "accept: application/json"
-			-H "Content-Type: application/json"
-			-d
-			{
-				"emailAddress": "${emailAddress}",
-				"emailAddressVerified": ${emailAddressVerified},
-				"firstName": "${firstName}",
-				"languageId": "${languageId}",
-				"lastName": "${lastName}",
-				"middleName": "${middleName}",
-				"uuid": "${uuid}"
-			}
-			''';
+				--header "API_Token: ${apiToken}"
+				-H "accept: application/json"
+				-H "Content-Type: application/json"
+				-d
+				{
+					"emailAddress": "${emailAddress}",
+					"emailAddressVerified": ${emailAddressVerified},
+					"firstName": "${firstName}",
+					"languageId": "${languageId}",
+					"lastName": "${lastName}",
+					"middleName": "${middleName}",
+					"uuid": "${uuid}"
+				}
+		''';
 
-		com.liferay.poshi.runner.util.JSONCurlUtil.put("${curl}");
+		com.liferay.poshi.runner.util.JSONCurlUtil.put(${curl});
 	}
 
 	@prose = "I attempt to update a koroneiki contact with the email address ${contactEmailAddress} to have the following values as a non permissioned user ${table}"
 	macro _updateContactViaEmailAddressAttempt {
-		var  rawTable = TableUtil.newTable(${table});
+		var rawTable = TableUtil.newTable(${table});
 
-		for (var row : table "${rawTable}") {
+		for (var row : table ${rawTable}) {
 			var field = "${row[0]}";
 			var value = "${row[1]}";
 
-			if ("${field}" == "Email Address") {
-				var emailAddress = "${value}";
+			if (${field} == "Email Address") {
+				var emailAddress = ${value};
 			}
-			else if ("${field}" == "Email Address Verified") {
-				var emailAddressVerified = "${value}";
+			else if (${field} == "Email Address Verified") {
+				var emailAddressVerified = ${value};
 			}
-			else if ("${field}" == "First Name") {
-				var firstName = "${value}";
+			else if (${field} == "First Name") {
+				var firstName = ${value};
 			}
-			else if ("${field}" == "Language") {
-				var languageId = "${value}";
+			else if (${field} == "Language") {
+				var languageId = ${value};
 			}
-			else if ("${field}" == "Last Name") {
-				var lastName = "${value}";
+			else if (${field} == "Last Name") {
+				var lastName = ${value};
 			}
-			else if ("${field}" == "Middle Name") {
-				var middleName = "${value}";
+			else if (${field} == "Middle Name") {
+				var middleName = ${value};
 			}
-			else if ("${field}" == "UUID") {
-				var uuid = "${value}";
+			else if (${field} == "UUID") {
+				var uuid = ${value};
 			}
 			else {
 				fail("No such contact field ${field}");
@@ -673,18 +673,18 @@ definition {
 
 		var curl = '''
 			${koroneikiURL}/o/koroneiki-rest/v1.0/contacts/by-email-address/${contactEmailAddress} --tlsv1.2
-			--header "API_Token: ${apiToken}"
-			-H "accept: application/json"
-			-H "Content-Type: application/json"
-			''';
+				--header "API_Token: ${apiToken}"
+				-H "accept: application/json"
+				-H "Content-Type: application/json"
+		''';
 
 		if (!(isSet(emailAddress))) {
-			var contactObject = JSONCurlUtil.get("${curl}", "$");
+			var contactObject = JSONCurlUtil.get(${curl}, "$");
 
-			if (contains("${contactObject}", "emailAddress=")) {
-				var value = JSONCurlUtil.get("${curl}", "$.emailAddress");
+			if (contains(${contactObject}, "emailAddress=")) {
+				var value = JSONCurlUtil.get(${curl}, "$.emailAddress");
 
-				var emailAddress = "${value}";
+				var emailAddress = ${value};
 			}
 			else {
 				var emailAddress = "";
@@ -692,12 +692,12 @@ definition {
 		}
 
 		if (!(isSet(emailAddressVerified))) {
-			var contactObject = JSONCurlUtil.get("${curl}", "$");
+			var contactObject = JSONCurlUtil.get(${curl}, "$");
 
-			if (contains("${contactObject}", "emailAddressVerified=")) {
-				var value = JSONCurlUtil.get("${curl}", "$.emailAddressVerified");
+			if (contains(${contactObject}, "emailAddressVerified=")) {
+				var value = JSONCurlUtil.get(${curl}, "$.emailAddressVerified");
 
-				var emailAddressVerified = "${value}";
+				var emailAddressVerified = ${value};
 			}
 			else {
 				var emailAddressVerified = "false";
@@ -705,12 +705,12 @@ definition {
 		}
 
 		if (!(isSet(firstName))) {
-			var contactObject = JSONCurlUtil.get("${curl}", "$");
+			var contactObject = JSONCurlUtil.get(${curl}, "$");
 
-			if (contains("${contactObject}", "firstName=")) {
-				var value = JSONCurlUtil.get("${curl}", "$.firstName");
+			if (contains(${contactObject}, "firstName=")) {
+				var value = JSONCurlUtil.get(${curl}, "$.firstName");
 
-				var firstName = "${value}";
+				var firstName = ${value};
 			}
 			else {
 				var firstName = "";
@@ -718,12 +718,12 @@ definition {
 		}
 
 		if (!(isSet(languageId))) {
-			var contactObject = JSONCurlUtil.get("${curl}", "$");
+			var contactObject = JSONCurlUtil.get(${curl}, "$");
 
-			if (contains("${contactObject}", "languageId=")) {
-				var value = JSONCurlUtil.get("${curl}", "$.languageId");
+			if (contains(${contactObject}, "languageId=")) {
+				var value = JSONCurlUtil.get(${curl}, "$.languageId");
 
-				var languageId = "${value}";
+				var languageId = ${value};
 			}
 			else {
 				var languageId = "";
@@ -731,12 +731,12 @@ definition {
 		}
 
 		if (!(isSet(lastName))) {
-			var contactObject = JSONCurlUtil.get("${curl}", "$");
+			var contactObject = JSONCurlUtil.get(${curl}, "$");
 
-			if (contains("${contactObject}", "lastName=")) {
-				var value = JSONCurlUtil.get("${curl}", "$.lastName");
+			if (contains(${contactObject}, "lastName=")) {
+				var value = JSONCurlUtil.get(${curl}, "$.lastName");
 
-				var lastName = "${value}";
+				var lastName = ${value};
 			}
 			else {
 				var lastName = "";
@@ -744,12 +744,12 @@ definition {
 		}
 
 		if (!(isSet(middleName))) {
-			var contactObject = JSONCurlUtil.get("${curl}", "$");
+			var contactObject = JSONCurlUtil.get(${curl}, "$");
 
-			if (contains("${contactObject}", "middleName=")) {
-				var value = JSONCurlUtil.get("${curl}", "$.middleName");
+			if (contains(${contactObject}, "middleName=")) {
+				var value = JSONCurlUtil.get(${curl}, "$.middleName");
 
-				var middleName = "${value}";
+				var middleName = ${value};
 			}
 			else {
 				var middleName = "";
@@ -757,12 +757,12 @@ definition {
 		}
 
 		if (!(isSet(uuid))) {
-			var contactObject = JSONCurlUtil.get("${curl}", "$");
+			var contactObject = JSONCurlUtil.get(${curl}, "$");
 
-			if (contains("${contactObject}", "uuid=")) {
-				var value = JSONCurlUtil.get("${curl}", "$.uuid");
+			if (contains(${contactObject}, "uuid=")) {
+				var value = JSONCurlUtil.get(${curl}, "$.uuid");
 
-				var uuid = "${value}";
+				var uuid = ${value};
 			}
 			else {
 				var uuid = "";
@@ -771,53 +771,53 @@ definition {
 
 		var curl = '''
 			${koroneikiURL}/o/koroneiki-rest/v1.0/contacts/by-email-address/${contactEmailAddress} --tlsv1.2
-			--header "API_Token: ${apiToken}"
-			-H "accept: application/json"
-			-H "Content-Type: application/json"
-			-d
-			{
-				"emailAddress": "${emailAddress}",
-				"emailAddressVerified": ${emailAddressVerified},
-				"firstName": "${firstName}",
-				"languageId": "${languageId}",
-				"lastName": "${lastName}",
-				"middleName": "${middleName}",
-				"uuid": "${uuid}"
-			}
-			''';
+				--header "API_Token: ${apiToken}"
+				-H "accept: application/json"
+				-H "Content-Type: application/json"
+				-d
+				{
+					"emailAddress": "${emailAddress}",
+					"emailAddressVerified": ${emailAddressVerified},
+					"firstName": "${firstName}",
+					"languageId": "${languageId}",
+					"lastName": "${lastName}",
+					"middleName": "${middleName}",
+					"uuid": "${uuid}"
+				}
+		''';
 
-		com.liferay.poshi.runner.util.JSONCurlUtil.put("${curl}");
+		com.liferay.poshi.runner.util.JSONCurlUtil.put(${curl});
 	}
 
 	@prose = "I update a koroneiki contact with the email address ${contactEmailAddress} via uuid to have the following values as a permissioned user ${table}"
 	macro _updateContactViaUuid {
-		var contactUuid = KoroneikiContactAPI._getContactUuidViaContactEmailAddress(contactEmailAddress = "${contactEmailAddress}");
-		var  rawTable = TableUtil.newTable(${table});
+		var contactUuid = KoroneikiContactAPI._getContactUuidViaContactEmailAddress(contactEmailAddress = ${contactEmailAddress});
+		var rawTable = TableUtil.newTable(${table});
 
-		for (var row : table "${rawTable}") {
+		for (var row : table ${rawTable}) {
 			var field = "${row[0]}";
 			var value = "${row[1]}";
 
-			if ("${field}" == "Email Address") {
-				var emailAddress = "${value}";
+			if (${field} == "Email Address") {
+				var emailAddress = ${value};
 			}
-			else if ("${field}" == "Email Address Verified") {
-				var emailAddressVerified = "${value}";
+			else if (${field} == "Email Address Verified") {
+				var emailAddressVerified = ${value};
 			}
-			else if ("${field}" == "First Name") {
-				var firstName = "${value}";
+			else if (${field} == "First Name") {
+				var firstName = ${value};
 			}
-			else if ("${field}" == "Language") {
-				var languageId = "${value}";
+			else if (${field} == "Language") {
+				var languageId = ${value};
 			}
-			else if ("${field}" == "Last Name") {
-				var lastName = "${value}";
+			else if (${field} == "Last Name") {
+				var lastName = ${value};
 			}
-			else if ("${field}" == "Middle Name") {
-				var middleName = "${value}";
+			else if (${field} == "Middle Name") {
+				var middleName = ${value};
 			}
-			else if ("${field}" == "UUID") {
-				var uuid = "${value}";
+			else if (${field} == "UUID") {
+				var uuid = ${value};
 			}
 			else {
 				fail("No such contact field ${field}");
@@ -826,18 +826,18 @@ definition {
 
 		var curl = '''
 			${koroneikiURL}/o/koroneiki-rest/v1.0/contacts/by-uuid/${contactUuid} --tlsv1.2
-			--header "API_Token: ${apiToken}"
-			-H "accept: application/json"
-			-H "Content-Type: application/json"
-			''';
+				--header "API_Token: ${apiToken}"
+				-H "accept: application/json"
+				-H "Content-Type: application/json"
+		''';
 
 		if (!(isSet(emailAddress))) {
-			var contactObject = JSONCurlUtil.get("${curl}", "$");
+			var contactObject = JSONCurlUtil.get(${curl}, "$");
 
-			if (contains("${contactObject}", "emailAddress=")) {
-				var value = JSONCurlUtil.get("${curl}", "$.emailAddress");
+			if (contains(${contactObject}, "emailAddress=")) {
+				var value = JSONCurlUtil.get(${curl}, "$.emailAddress");
 
-				var emailAddress = "${value}";
+				var emailAddress = ${value};
 			}
 			else {
 				var emailAddress = "";
@@ -845,12 +845,12 @@ definition {
 		}
 
 		if (!(isSet(emailAddressVerified))) {
-			var contactObject = JSONCurlUtil.get("${curl}", "$");
+			var contactObject = JSONCurlUtil.get(${curl}, "$");
 
-			if (contains("${contactObject}", "emailAddressVerified=")) {
-				var value = JSONCurlUtil.get("${curl}", "$.emailAddressVerified");
+			if (contains(${contactObject}, "emailAddressVerified=")) {
+				var value = JSONCurlUtil.get(${curl}, "$.emailAddressVerified");
 
-				var emailAddressVerified = "${value}";
+				var emailAddressVerified = ${value};
 			}
 			else {
 				var emailAddressVerified = "false";
@@ -858,12 +858,12 @@ definition {
 		}
 
 		if (!(isSet(firstName))) {
-			var contactObject = JSONCurlUtil.get("${curl}", "$");
+			var contactObject = JSONCurlUtil.get(${curl}, "$");
 
-			if (contains("${contactObject}", "firstName=")) {
-				var value = JSONCurlUtil.get("${curl}", "$.firstName");
+			if (contains(${contactObject}, "firstName=")) {
+				var value = JSONCurlUtil.get(${curl}, "$.firstName");
 
-				var firstName = "${value}";
+				var firstName = ${value};
 			}
 			else {
 				var firstName = "";
@@ -871,12 +871,12 @@ definition {
 		}
 
 		if (!(isSet(languageId))) {
-			var contactObject = JSONCurlUtil.get("${curl}", "$");
+			var contactObject = JSONCurlUtil.get(${curl}, "$");
 
-			if (contains("${contactObject}", "languageId=")) {
-				var value = JSONCurlUtil.get("${curl}", "$.languageId");
+			if (contains(${contactObject}, "languageId=")) {
+				var value = JSONCurlUtil.get(${curl}, "$.languageId");
 
-				var languageId = "${value}";
+				var languageId = ${value};
 			}
 			else {
 				var languageId = "";
@@ -884,12 +884,12 @@ definition {
 		}
 
 		if (!(isSet(lastName))) {
-			var contactObject = JSONCurlUtil.get("${curl}", "$");
+			var contactObject = JSONCurlUtil.get(${curl}, "$");
 
-			if (contains("${contactObject}", "lastName=")) {
-				var value = JSONCurlUtil.get("${curl}", "$.lastName");
+			if (contains(${contactObject}, "lastName=")) {
+				var value = JSONCurlUtil.get(${curl}, "$.lastName");
 
-				var lastName = "${value}";
+				var lastName = ${value};
 			}
 			else {
 				var lastName = "";
@@ -897,12 +897,12 @@ definition {
 		}
 
 		if (!(isSet(middleName))) {
-			var contactObject = JSONCurlUtil.get("${curl}", "$");
+			var contactObject = JSONCurlUtil.get(${curl}, "$");
 
-			if (contains("${contactObject}", "middleName=")) {
-				var value = JSONCurlUtil.get("${curl}", "$.middleName");
+			if (contains(${contactObject}, "middleName=")) {
+				var value = JSONCurlUtil.get(${curl}, "$.middleName");
 
-				var middleName = "${value}";
+				var middleName = ${value};
 			}
 			else {
 				var middleName = "";
@@ -910,12 +910,12 @@ definition {
 		}
 
 		if (!(isSet(uuid))) {
-			var contactObject = JSONCurlUtil.get("${curl}", "$");
+			var contactObject = JSONCurlUtil.get(${curl}, "$");
 
-			if (contains("${contactObject}", "uuid=")) {
-				var value = JSONCurlUtil.get("${curl}", "$.uuid");
+			if (contains(${contactObject}, "uuid=")) {
+				var value = JSONCurlUtil.get(${curl}, "$.uuid");
 
-				var uuid = "${value}";
+				var uuid = ${value};
 			}
 			else {
 				var uuid = "";
@@ -924,53 +924,53 @@ definition {
 
 		var curl = '''
 			${koroneikiURL}/o/koroneiki-rest/v1.0/contacts/by-uuid/${contactUuid} --tlsv1.2
-			--header "API_Token: ${apiToken}"
-			-H "accept: application/json"
-			-H "Content-Type: application/json"
-			-d
-			{
-				"emailAddress": "${emailAddress}",
-				"emailAddressVerified": ${emailAddressVerified},
-				"firstName": "${firstName}",
-				"languageId": "${languageId}",
-				"lastName": "${lastName}",
-				"middleName": "${middleName}",
-				"uuid": "${uuid}"
-			}
-			''';
+				--header "API_Token: ${apiToken}"
+				-H "accept: application/json"
+				-H "Content-Type: application/json"
+				-d
+				{
+					"emailAddress": "${emailAddress}",
+					"emailAddressVerified": ${emailAddressVerified},
+					"firstName": "${firstName}",
+					"languageId": "${languageId}",
+					"lastName": "${lastName}",
+					"middleName": "${middleName}",
+					"uuid": "${uuid}"
+				}
+		''';
 
-		com.liferay.poshi.runner.util.JSONCurlUtil.put("${curl}");
+		com.liferay.poshi.runner.util.JSONCurlUtil.put(${curl});
 	}
 
 	@prose = "I attempt to update a koroneiki contact with the email address ${contactEmailAddress} via uuid to have the following values as a non permissioned user ${table}"
 	macro _updateContactViaUuidAttempt {
-		var contactUuid = KoroneikiContactAPI._getContactUuidViaContactEmailAddress(contactEmailAddress = "${contactEmailAddress}");
-		var  rawTable = TableUtil.newTable(${table});
+		var contactUuid = KoroneikiContactAPI._getContactUuidViaContactEmailAddress(contactEmailAddress = ${contactEmailAddress});
+		var rawTable = TableUtil.newTable(${table});
 
-		for (var row : table "${rawTable}") {
+		for (var row : table ${rawTable}) {
 			var field = "${row[0]}";
 			var value = "${row[1]}";
 
-			if ("${field}" == "Email Address") {
-				var emailAddress = "${value}";
+			if (${field} == "Email Address") {
+				var emailAddress = ${value};
 			}
-			else if ("${field}" == "Email Address Verified") {
-				var emailAddressVerified = "${value}";
+			else if (${field} == "Email Address Verified") {
+				var emailAddressVerified = ${value};
 			}
-			else if ("${field}" == "First Name") {
-				var firstName = "${value}";
+			else if (${field} == "First Name") {
+				var firstName = ${value};
 			}
-			else if ("${field}" == "Language") {
-				var languageId = "${value}";
+			else if (${field} == "Language") {
+				var languageId = ${value};
 			}
-			else if ("${field}" == "Last Name") {
-				var lastName = "${value}";
+			else if (${field} == "Last Name") {
+				var lastName = ${value};
 			}
-			else if ("${field}" == "Middle Name") {
-				var middleName = "${value}";
+			else if (${field} == "Middle Name") {
+				var middleName = ${value};
 			}
-			else if ("${field}" == "UUID") {
-				var uuid = "${value}";
+			else if (${field} == "UUID") {
+				var uuid = ${value};
 			}
 			else {
 				fail("No such contact field ${field}");
@@ -979,18 +979,18 @@ definition {
 
 		var curl = '''
 			${koroneikiURL}/o/koroneiki-rest/v1.0/contacts/by-uuid/${contactUuid} --tlsv1.2
-			--header "API_Token: ${apiToken}"
-			-H "accept: application/json"
-			-H "Content-Type: application/json"
-			''';
+				--header "API_Token: ${apiToken}"
+				-H "accept: application/json"
+				-H "Content-Type: application/json"
+		''';
 
 		if (!(isSet(emailAddress))) {
-			var contactObject = JSONCurlUtil.get("${curl}", "$");
+			var contactObject = JSONCurlUtil.get(${curl}, "$");
 
-			if (contains("${contactObject}", "emailAddress=")) {
-				var value = JSONCurlUtil.get("${curl}", "$.emailAddress");
+			if (contains(${contactObject}, "emailAddress=")) {
+				var value = JSONCurlUtil.get(${curl}, "$.emailAddress");
 
-				var emailAddress = "${value}";
+				var emailAddress = ${value};
 			}
 			else {
 				var emailAddress = "";
@@ -998,12 +998,12 @@ definition {
 		}
 
 		if (!(isSet(emailAddressVerified))) {
-			var contactObject = JSONCurlUtil.get("${curl}", "$");
+			var contactObject = JSONCurlUtil.get(${curl}, "$");
 
-			if (contains("${contactObject}", "emailAddressVerified=")) {
-				var value = JSONCurlUtil.get("${curl}", "$.emailAddressVerified");
+			if (contains(${contactObject}, "emailAddressVerified=")) {
+				var value = JSONCurlUtil.get(${curl}, "$.emailAddressVerified");
 
-				var emailAddressVerified = "${value}";
+				var emailAddressVerified = ${value};
 			}
 			else {
 				var emailAddressVerified = "false";
@@ -1011,12 +1011,12 @@ definition {
 		}
 
 		if (!(isSet(firstName))) {
-			var contactObject = JSONCurlUtil.get("${curl}", "$");
+			var contactObject = JSONCurlUtil.get(${curl}, "$");
 
-			if (contains("${contactObject}", "firstName=")) {
-				var value = JSONCurlUtil.get("${curl}", "$.firstName");
+			if (contains(${contactObject}, "firstName=")) {
+				var value = JSONCurlUtil.get(${curl}, "$.firstName");
 
-				var firstName = "${value}";
+				var firstName = ${value};
 			}
 			else {
 				var firstName = "";
@@ -1024,12 +1024,12 @@ definition {
 		}
 
 		if (!(isSet(languageId))) {
-			var contactObject = JSONCurlUtil.get("${curl}", "$");
+			var contactObject = JSONCurlUtil.get(${curl}, "$");
 
-			if (contains("${contactObject}", "languageId=")) {
-				var value = JSONCurlUtil.get("${curl}", "$.languageId");
+			if (contains(${contactObject}, "languageId=")) {
+				var value = JSONCurlUtil.get(${curl}, "$.languageId");
 
-				var languageId = "${value}";
+				var languageId = ${value};
 			}
 			else {
 				var languageId = "";
@@ -1037,12 +1037,12 @@ definition {
 		}
 
 		if (!(isSet(lastName))) {
-			var contactObject = JSONCurlUtil.get("${curl}", "$");
+			var contactObject = JSONCurlUtil.get(${curl}, "$");
 
-			if (contains("${contactObject}", "lastName=")) {
-				var value = JSONCurlUtil.get("${curl}", "$.lastName");
+			if (contains(${contactObject}, "lastName=")) {
+				var value = JSONCurlUtil.get(${curl}, "$.lastName");
 
-				var lastName = "${value}";
+				var lastName = ${value};
 			}
 			else {
 				var lastName = "";
@@ -1050,12 +1050,12 @@ definition {
 		}
 
 		if (!(isSet(middleName))) {
-			var contactObject = JSONCurlUtil.get("${curl}", "$");
+			var contactObject = JSONCurlUtil.get(${curl}, "$");
 
-			if (contains("${contactObject}", "middleName=")) {
-				var value = JSONCurlUtil.get("${curl}", "$.middleName");
+			if (contains(${contactObject}, "middleName=")) {
+				var value = JSONCurlUtil.get(${curl}, "$.middleName");
 
-				var middleName = "${value}";
+				var middleName = ${value};
 			}
 			else {
 				var middleName = "";
@@ -1063,12 +1063,12 @@ definition {
 		}
 
 		if (!(isSet(uuid))) {
-			var contactObject = JSONCurlUtil.get("${curl}", "$");
+			var contactObject = JSONCurlUtil.get(${curl}, "$");
 
-			if (contains("${contactObject}", "uuid=")) {
-				var value = JSONCurlUtil.get("${curl}", "$.uuid");
+			if (contains(${contactObject}, "uuid=")) {
+				var value = JSONCurlUtil.get(${curl}, "$.uuid");
 
-				var uuid = "${value}";
+				var uuid = ${value};
 			}
 			else {
 				var uuid = "";
@@ -1077,58 +1077,58 @@ definition {
 
 		var curl = '''
 			${koroneikiURL}/o/koroneiki-rest/v1.0/contacts/by-uuid/${contactUuid} --tlsv1.2
-			--header "API_Token: ${apiToken}"
-			-H "accept: application/json"
-			-H "Content-Type: application/json"
-			-d
-			{
-				"emailAddress": "${emailAddress}",
-				"emailAddressVerified": ${emailAddressVerified},
-				"firstName": "${firstName}",
-				"languageId": "${languageId}",
-				"lastName": "${lastName}",
-				"middleName": "${middleName}",
-				"uuid": "${uuid}"
-			}
-			''';
+				--header "API_Token: ${apiToken}"
+				-H "accept: application/json"
+				-H "Content-Type: application/json"
+				-d
+				{
+					"emailAddress": "${emailAddress}",
+					"emailAddressVerified": ${emailAddressVerified},
+					"firstName": "${firstName}",
+					"languageId": "${languageId}",
+					"lastName": "${lastName}",
+					"middleName": "${middleName}",
+					"uuid": "${uuid}"
+				}
+		''';
 
-		com.liferay.poshi.runner.util.JSONCurlUtil.put("${curl}");
+		com.liferay.poshi.runner.util.JSONCurlUtil.put(${curl});
 	}
 
 	@prose = "I should be able to view a koroneiki contact with the email address ${contactEmailAddress} and the following values as a permissioned user ${table}"
 	macro _viewContactViaEmailAddress {
 		var curl = '''
 			${koroneikiURL}/o/koroneiki-rest/v1.0/contacts/by-email-address/${contactEmailAddress} --tlsv1.2
-			--header "API_Token: ${apiToken}"
-			-H "accept: application/json"
-			-H "Content-Type: application/json"
-			''';
-		var  rawTable = TableUtil.newTable(${table});
+				--header "API_Token: ${apiToken}"
+				-H "accept: application/json"
+				-H "Content-Type: application/json"
+		''';
+		var rawTable = TableUtil.newTable(${table});
 
-		for (var row : table "${rawTable}") {
+		for (var row : table ${rawTable}) {
 			var field = "${row[0]}";
 			var value = "${row[1]}";
 
-			if ("${field}" == "Email Address") {
-				var valueFromAPI = JSONCurlUtil.get("${curl}", "$.emailAddress");
+			if (${field} == "Email Address") {
+				var valueFromAPI = JSONCurlUtil.get(${curl}, "$.emailAddress");
 			}
-			else if ("${field}" == "Email Address Verified") {
-				var valueFromAPI = JSONCurlUtil.get("${curl}", "$.emailAddressVerified");
+			else if (${field} == "Email Address Verified") {
+				var valueFromAPI = JSONCurlUtil.get(${curl}, "$.emailAddressVerified");
 			}
-			else if ("${field}" == "First Name") {
-				var valueFromAPI = JSONCurlUtil.get("${curl}", "$.firstName");
+			else if (${field} == "First Name") {
+				var valueFromAPI = JSONCurlUtil.get(${curl}, "$.firstName");
 			}
-			else if ("${field}" == "Language") {
-				var valueFromAPI = JSONCurlUtil.get("${curl}", "$.languageId");
+			else if (${field} == "Language") {
+				var valueFromAPI = JSONCurlUtil.get(${curl}, "$.languageId");
 			}
-			else if ("${field}" == "Last Name") {
-				var valueFromAPI = JSONCurlUtil.get("${curl}", "$.lastName");
+			else if (${field} == "Last Name") {
+				var valueFromAPI = JSONCurlUtil.get(${curl}, "$.lastName");
 			}
-			else if ("${field}" == "Middle Name") {
-				var valueFromAPI = JSONCurlUtil.get("${curl}", "$.middleName");
+			else if (${field} == "Middle Name") {
+				var valueFromAPI = JSONCurlUtil.get(${curl}, "$.middleName");
 			}
-			else if ("${field}" == "UUID") {
-				var valueFromAPI = JSONCurlUtil.get("${curl}", "$.uuid");
+			else if (${field} == "UUID") {
+				var valueFromAPI = JSONCurlUtil.get(${curl}, "$.uuid");
 			}
 			else {
 				fail("No such contact field ${field}");
@@ -1138,7 +1138,7 @@ definition {
 
 			echo("Actual ${field} Value: ${valueFromAPI}");
 
-			if (!(contains("${value}", "${valueFromAPI}"))) {
+			if (!(contains(${value}, ${valueFromAPI}))) {
 				fail("Actual ${field} value ${valueFromAPI} does not match expected ${field} value ${value}");
 			}
 		}
@@ -1146,40 +1146,40 @@ definition {
 
 	@prose = "I should be able to view a koroneiki contact with the email address ${contactEmailAddress} via uuid and the following values as a permissioned user ${table}"
 	macro _viewContactViaUuid {
-		var contactUuid = KoroneikiContactAPI._getContactUuidViaContactEmailAddress(contactEmailAddress = "${contactEmailAddress}");
+		var contactUuid = KoroneikiContactAPI._getContactUuidViaContactEmailAddress(contactEmailAddress = ${contactEmailAddress});
 
 		var curl = '''
 			${koroneikiURL}/o/koroneiki-rest/v1.0/contacts/by-uuid/${contactUuid} --tlsv1.2
-			--header "API_Token: ${apiToken}"
-			-H "accept: application/json"
-			-H "Content-Type: application/json"
-			''';
-		var  rawTable = TableUtil.newTable(${table});
+				--header "API_Token: ${apiToken}"
+				-H "accept: application/json"
+				-H "Content-Type: application/json"
+		''';
+		var rawTable = TableUtil.newTable(${table});
 
-		for (var row : table "${rawTable}") {
+		for (var row : table ${rawTable}) {
 			var field = "${row[0]}";
 			var value = "${row[1]}";
 
-			if ("${field}" == "Email Address") {
-				var valueFromAPI = JSONCurlUtil.get("${curl}", "$.emailAddress");
+			if (${field} == "Email Address") {
+				var valueFromAPI = JSONCurlUtil.get(${curl}, "$.emailAddress");
 			}
-			else if ("${field}" == "Email Address Verified") {
-				var valueFromAPI = JSONCurlUtil.get("${curl}", "$.emailAddressVerified");
+			else if (${field} == "Email Address Verified") {
+				var valueFromAPI = JSONCurlUtil.get(${curl}, "$.emailAddressVerified");
 			}
-			else if ("${field}" == "First Name") {
-				var valueFromAPI = JSONCurlUtil.get("${curl}", "$.firstName");
+			else if (${field} == "First Name") {
+				var valueFromAPI = JSONCurlUtil.get(${curl}, "$.firstName");
 			}
-			else if ("${field}" == "Language") {
-				var valueFromAPI = JSONCurlUtil.get("${curl}", "$.languageId");
+			else if (${field} == "Language") {
+				var valueFromAPI = JSONCurlUtil.get(${curl}, "$.languageId");
 			}
-			else if ("${field}" == "Last Name") {
-				var valueFromAPI = JSONCurlUtil.get("${curl}", "$.lastName");
+			else if (${field} == "Last Name") {
+				var valueFromAPI = JSONCurlUtil.get(${curl}, "$.lastName");
 			}
-			else if ("${field}" == "Middle Name") {
-				var valueFromAPI = JSONCurlUtil.get("${curl}", "$.middleName");
+			else if (${field} == "Middle Name") {
+				var valueFromAPI = JSONCurlUtil.get(${curl}, "$.middleName");
 			}
-			else if ("${field}" == "UUID") {
-				var valueFromAPI = JSONCurlUtil.get("${curl}", "$.uuid");
+			else if (${field} == "UUID") {
+				var valueFromAPI = JSONCurlUtil.get(${curl}, "$.uuid");
 			}
 			else {
 				fail("No such contact field ${field}");
@@ -1189,7 +1189,7 @@ definition {
 
 			echo("Actual ${field} Value: ${valueFromAPI}");
 
-			if (!(contains("${value}", "${valueFromAPI}"))) {
+			if (!(contains(${value}, ${valueFromAPI}))) {
 				fail("Actual ${field} value ${valueFromAPI} does not match expected ${field} value ${value}");
 			}
 		}
@@ -1199,99 +1199,99 @@ definition {
 	macro _viewNoContact {
 		var curl = '''
 			${koroneikiURL}/o/koroneiki-rest/v1.0/contacts?search=${contactEmailAddress} --tlsv1.2
-			--header "API_Token: ${apiToken}"
-			-H "accept: application/json"
-			-H "Content-Type: application/json"
-			''';
+				--header "API_Token: ${apiToken}"
+				-H "accept: application/json"
+				-H "Content-Type: application/json"
+		''';
 
-		var allContacts = JSONCurlUtil.get("${curl}", "$");
+		var allContacts = JSONCurlUtil.get(${curl}, "$");
 
-		if (contains("${allContacts}", "${contactEmailAddress}")) {
+		if (contains(${allContacts}, ${contactEmailAddress})) {
 			fail("The contact with the email address ${contactEmailAddress} is visible to a non permissioned user");
 		}
 
 		var curl = '''
 			${koroneikiURL}/o/koroneiki-rest/v1.0/contacts/by-email-address/${contactEmailAddress} --tlsv1.2
-			--header "API_Token: ${apiToken}"
-			-H "accept: application/json"
-			-H "Content-Type: application/json"
-			''';
+				--header "API_Token: ${apiToken}"
+				-H "accept: application/json"
+				-H "Content-Type: application/json"
+		''';
 
-		var contact = JSONCurlUtil.get("${curl}", "$");
+		var contact = JSONCurlUtil.get(${curl}, "$");
 
-		if (contains("${contact}", "${contactEmailAddress}")) {
+		if (contains(${contact}, ${contactEmailAddress})) {
 			fail("The contact with the email address ${contactEmailAddress} is visible to a non permissioned user");
 		}
 	}
 
 	@prose = "I should not be able to view an audit entry for a change to the contact with the email address ${contactEmailAddress} field ${fieldName} from the old value ${oldValue} to the new value ${newValue} as a non permissioned user"
 	macro _viewNoContactAuditEntry {
-		var contactUuid = KoroneikiContactAPI._getContactUuidViaContactEmailAddress(contactEmailAddress = "${contactEmailAddress}");
+		var contactUuid = KoroneikiContactAPI._getContactUuidViaContactEmailAddress(contactEmailAddress = ${contactEmailAddress});
 
 		var curl = '''
 			${koroneikiURL}/o/koroneiki-rest/v1.0/contacts/by-uuid/${contactUuid}/audit-entries --tlsv1.2
-			--header "API_Token: ${apiToken}"
-			-H "accept: application/json"
-			-H "Content-Type: application/json"
-			''';
+				--header "API_Token: ${apiToken}"
+				-H "accept: application/json"
+				-H "Content-Type: application/json"
+		''';
 
-		var contactAuditEntries = JSONCurlUtil.get("${curl}", "$");
+		var contactAuditEntries = JSONCurlUtil.get(${curl}, "$");
 
-		if (contains("${contactAuditEntries}", "${fieldName}") || contains("${contactAuditEntries}", "${oldValue}") || contains("${contactAuditEntries}", "${newValue}")) {
+		if (contains(${contactAuditEntries}, ${fieldName}) || contains(${contactAuditEntries}, ${oldValue}) || contains(${contactAuditEntries}, ${newValue})) {
 			fail("The contact audit entry for a change to the contact with the email address ${contactEmailAddress} field ${fieldName} from the old value ${oldValue} to the new value ${newValue} is visible to a non permissioned user");
 		}
 
 		var auditEntryKey = KoroneikiContactAPI._getContactAuditEntryKey(
-			contactEmailAddress = "${contactEmailAddress}",
-			fieldName = "${fieldName}",
-			newValue = "${newValue}",
-			oldValue = "${oldValue}");
+			contactEmailAddress = ${contactEmailAddress},
+			fieldName = ${fieldName},
+			newValue = ${newValue},
+			oldValue = ${oldValue});
 
 		var curl = '''
 			${koroneikiURL}/o/koroneiki-rest/v1.0/audit-entries/${auditEntryKey} --tlsv1.2
-			--header "API_Token: ${apiToken}"
-			-H "accept: application/json"
-			-H "Content-Type: application/json"
-			''';
+				--header "API_Token: ${apiToken}"
+				-H "accept: application/json"
+				-H "Content-Type: application/json"
+		''';
 
-		var contactAuditEntry = JSONCurlUtil.get("${curl}", "$");
+		var contactAuditEntry = JSONCurlUtil.get(${curl}, "$");
 
-		if (contains("${contactAuditEntry}", "${fieldName}") || contains("${contactAuditEntry}", "${oldValue}") || contains("${contactAuditEntry}", "${newValue}")) {
+		if (contains(${contactAuditEntry}, ${fieldName}) || contains(${contactAuditEntry}, ${oldValue}) || contains(${contactAuditEntry}, ${newValue})) {
 			fail("The contact audit entry for a change to the contact with the email address ${contactEmailAddress} field ${fieldName} from the old value ${oldValue} to the new value ${newValue} is visible to a non permissioned user");
 		}
 	}
 
 	@prose = "the external link with the entity id ${entityId} on the contact with the email address ${contactEmailAddress} should not be visible to a non permissioned user"
 	macro _viewNoContactExternalLink {
-		var contactUuid = KoroneikiContactAPI._getContactUuidViaContactEmailAddress(contactEmailAddress = "${contactEmailAddress}");
+		var contactUuid = KoroneikiContactAPI._getContactUuidViaContactEmailAddress(contactEmailAddress = ${contactEmailAddress});
 
 		var curl = '''
 			${koroneikiURL}/o/koroneiki-rest/v1.0/contacts/by-uuid/${contactUuid}/external-links --tlsv1.2
-			--header "API_Token: ${apiToken}"
-			-H "accept: application/json"
-			-H "Content-Type: application/json"
-			''';
+				--header "API_Token: ${apiToken}"
+				-H "accept: application/json"
+				-H "Content-Type: application/json"
+		''';
 
-		var allContactExternalLinks = JSONCurlUtil.get("${curl}", "$");
+		var allContactExternalLinks = JSONCurlUtil.get(${curl}, "$");
 
-		if (contains("${allContactExternalLinks}", "${entityId}")) {
+		if (contains(${allContactExternalLinks}, ${entityId})) {
 			fail("The external link with the entity id ${entityId} on the contact with the email address ${contactEmailAddress} is visible to a non permissioned user");
 		}
 
 		var externalLinkKey = KoroneikiContactAPI._getContactExternalLinkKey(
-			contactEmailAddress = "${contactEmailAddress}",
-			entityId = "${entityId}");
+			contactEmailAddress = ${contactEmailAddress},
+			entityId = ${entityId});
 
 		var curl = '''
 			${koroneikiURL}/o/koroneiki-rest/v1.0/external-links/${externalLinkKey} --tlsv1.2
-			--header "API_Token: ${apiToken}"
-			-H "accept: application/json"
-			-H "Content-Type: application/json"
-			''';
+				--header "API_Token: ${apiToken}"
+				-H "accept: application/json"
+				-H "Content-Type: application/json"
+		''';
 
-		var contactExternalLinks = JSONCurlUtil.get("${curl}", "$");
+		var contactExternalLinks = JSONCurlUtil.get(${curl}, "$");
 
-		if (contains("${contactExternalLinks}", "${entityId}")) {
+		if (contains(${contactExternalLinks}, ${entityId})) {
 			fail("The external link with the entity id ${entityId} on the contact with the email address ${contactEmailAddress} is visible to a non permissioned user");
 		}
 	}
@@ -1299,20 +1299,20 @@ definition {
 	@prose = "I should not be able to view a product consumption on koroneiki for a contact with the email address ${contactEmailAddress} on the account ${accountName} for the product ${productName} as a non permissioned user"
 	macro _viewNoContactProductConsumption {
 		var productConsumptionKey = KoroneikiAccountAPI._getAccountProductConsumptionKeyViaAccountAndProductName(
-			accountName = "${accountName}",
-			productName = "${productName}");
-		var contactUuid = KoroneikiContactAPI._getContactUuidViaContactEmailAddress(contactEmailAddress = "${contactEmailAddress}");
+			accountName = ${accountName},
+			productName = ${productName});
+		var contactUuid = KoroneikiContactAPI._getContactUuidViaContactEmailAddress(contactEmailAddress = ${contactEmailAddress});
 
 		var curl = '''
 			${koroneikiURL}/o/koroneiki-rest/v1.0/contacts/by-uuid/${contactUuid}/product-consumptions --tlsv1.2
-			--header "API_Token: ${apiToken}"
-			-H "accept: application/json"
-			-H "Content-Type: application/json"
-			''';
+				--header "API_Token: ${apiToken}"
+				-H "accept: application/json"
+				-H "Content-Type: application/json"
+		''';
 
-		var contactProductConsumptions = JSONCurlUtil.get("${curl}", "$");
+		var contactProductConsumptions = JSONCurlUtil.get(${curl}, "$");
 
-		if (contains("${contactProductConsumptions}", "${productName}")) {
+		if (contains(${contactProductConsumptions}, ${productName})) {
 			fail("The product consumption for the ${productName} for the contact with the email address ${contactEmailAddress} is visible to a non permissioned user");
 		}
 	}
@@ -1320,38 +1320,38 @@ definition {
 	@prose = "I should not be able to view a product purchase on koroneiki for a contact with the email address ${contactEmailAddress} on the account ${accountName} for the product ${productName} as a non permissioned user"
 	macro _viewNoContactProductPurchase {
 		var productPurchaseKey = KoroneikiAccountAPI._getAccountProductPurchaseKeyViaAccountAndProductName(
-			accountName = "${accountName}",
-			productName = "${productName}");
-		var contactUuid = KoroneikiContactAPI._getContactUuidViaContactEmailAddress(contactEmailAddress = "${contactEmailAddress}");
+			accountName = ${accountName},
+			productName = ${productName});
+		var contactUuid = KoroneikiContactAPI._getContactUuidViaContactEmailAddress(contactEmailAddress = ${contactEmailAddress});
 
 		var curl = '''
 			${koroneikiURL}/o/koroneiki-rest/v1.0/contacts/by-uuid/${contactUuid}/product-purchases --tlsv1.2
-			--header "API_Token: ${apiToken}"
-			-H "accept: application/json"
-			-H "Content-Type: application/json"
-			''';
+				--header "API_Token: ${apiToken}"
+				-H "accept: application/json"
+				-H "Content-Type: application/json"
+		''';
 
-		var contactProductPurchases = JSONCurlUtil.get("${curl}", "$");
+		var contactProductPurchases = JSONCurlUtil.get(${curl}, "$");
 
-		if (contains("${contactProductPurchases}", "${productName}")) {
+		if (contains(${contactProductPurchases}, ${productName})) {
 			fail("The product purchase for the ${productName} for the contact with the email address ${contactEmailAddress} is visible to a non permissioned user");
 		}
 	}
 
 	@prose = "I should not be able to view a koroneiki contact with the uuid of the contact with the email address ${contactEmailAddress} as a non permissioned user"
 	macro _viewNoContactViaUuid {
-		var contactUuid = KoroneikiContactAPI._getContactUuidViaContactEmailAddress(contactEmailAddress = "${contactEmailAddress}");
+		var contactUuid = KoroneikiContactAPI._getContactUuidViaContactEmailAddress(contactEmailAddress = ${contactEmailAddress});
 
 		var curl = '''
 			${koroneikiURL}/o/koroneiki-rest/v1.0/contacts/by-uuid/${contactUuid} --tlsv1.2
-			--header "API_Token: ${apiToken}"
-			-H "accept: application/json"
-			-H "Content-Type: application/json"
-			''';
+				--header "API_Token: ${apiToken}"
+				-H "accept: application/json"
+				-H "Content-Type: application/json"
+		''';
 
-		var contact = JSONCurlUtil.get("${curl}", "$");
+		var contact = JSONCurlUtil.get(${curl}, "$");
 
-		if (contains("${contact}", "${contactUuid}")) {
+		if (contains(${contact}, ${contactUuid})) {
 			fail("The contact with the uuid ${contactUuid} is visible to a non permissioned user");
 		}
 	}

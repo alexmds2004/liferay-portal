@@ -6,66 +6,63 @@ definition {
 
 	@prose = "I should be able to view product usage for the product ${productName} on the account ${accountName} with the following values ${table}"
 	macro _viewProductUsage {
-		var accountKey = KoroneikiAccountAPI._getAccountKeyViaAccountName(accountName = "${accountName}");
-		var productKey = KoroneikiProductAPI._getProductKeyViaProductName(productName = "${productName}");
+		var accountKey = KoroneikiAccountAPI._getAccountKeyViaAccountName(accountName = ${accountName});
+		var productKey = KoroneikiProductAPI._getProductKeyViaProductName(productName = ${productName});
 
 		var curl = '''
 			${provisioningURL}/o/provisioning-rest/v1.0/accounts/${accountKey}/product/${productKey}/usage --tlsv1.2
-			-u ${provisioningAdminEmail}:${provisioningAdminPassword}
-			-H "accept: application/json"
-			-H "Content-Type: application/json"
-			-H "Content-Length: 0"
-			''';
+				-u ${provisioningAdminEmail}:${provisioningAdminPassword}
+				-H "accept: application/json"
+				-H "Content-Type: application/json"
+				-H "Content-Length: 0"
+		''';
+		var rawTable = TableUtil.newTable(${table});
 
-		var  rawTable = TableUtil.newTable(${table});
-
-		for (var row : table "${rawTable}") {
+		for (var row : table ${rawTable}) {
 			var field1 = "${row[0]}";
 			var field2 = "${row[1]}";
 			var value = "${row[2]}";
 
-			if ("${field1}" == "Previous Year") {
-				var year = DateUtil.getYear("0");
+			if (${field1} == "Previous Year") {
+				var year = DateUtil.getYear(0);
 
 				var year = ${year} - 1;
 
 				echo("Year: ${year}");
 
-				var valueFromAPI = JSONCurlUtil.get("${curl}", "$.annualSubscriptions[?(@.year==${year})].${field2}");
+				var valueFromAPI = JSONCurlUtil.get(${curl}, "$.annualSubscriptions[?(@.year==${year})].${field2}");
 			}
-			else if ("${field1}" == "Current Year") {
-				var year = DateUtil.getYear("0");
+			else if (${field1} == "Current Year") {
+				var year = DateUtil.getYear(0);
 
-				var valueFromAPI = JSONCurlUtil.get("${curl}", "$.annualSubscriptions[?(@.year==${year})].${field2}");
+				var valueFromAPI = JSONCurlUtil.get(${curl}, "$.annualSubscriptions[?(@.year==${year})].${field2}");
 			}
-			else if ("${field1}" == "Next Year") {
-				var year = DateUtil.getYear("0");
+			else if (${field1} == "Next Year") {
+				var year = DateUtil.getYear(0);
 
 				var year = ${year} + 1;
 
-				var valueFromAPI = JSONCurlUtil.get("${curl}", "$.annualSubscriptions[?(@.year==${year})].${field2}");
-
+				var valueFromAPI = JSONCurlUtil.get(${curl}, "$.annualSubscriptions[?(@.year==${year})].${field2}");
 			}
-			else if ("${field1}" == "currentConsumption") {
+			else if (${field1} == "currentConsumption") {
 				var year = "";
-
-				var valueFromAPI = JSONCurlUtil.get("${curl}", "$.currentConsumption");
+				var valueFromAPI = JSONCurlUtil.get(${curl}, "$.currentConsumption");
 			}
 			else {
-				fail("No such top level field ${field1}. Please use Previous Year, Current Year, Next Year, or currentConsumption as the top level field");				
+				fail("No such top level field ${field1}. Please use Previous Year, Current Year, Next Year, or currentConsumption as the top level field");
 			}
 
-			if ("${year}" == "") {
-				if ("${valueFromAPI}" != "${value}") {
+			if (${year} == "") {
+				if (${valueFromAPI} != ${value}) {
 					fail("Actual ${field1} value name ${valueFromAPI} does not match expected value ${value}");
 				}
 			}
 			else {
-				if ("${valueFromAPI}" != "${value}") {
+				if (${valueFromAPI} != ${value}) {
 					fail("Actual ${year} ${field2} value name ${valueFromAPI} does not match expected value ${value}");
 				}
-			}	
-		}	
+			}
+		}
 	}
 
 }

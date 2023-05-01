@@ -7,15 +7,15 @@ definition {
 
 		SelectWindow(locator1 = "title=Control Panel");
 
-		Pause(locator1 = "3000");
+		Pause(locator1 = 3000);
 
-		if ("${licenseType}" == "Standard") {
+		if (${licenseType} == "Standard") {
 			ClickNoError(locator1 = "MPAdminCustomers#STANDARD_INSTANCE");
 		}
-		else if ("${licenseType}" == "Developer") {
+		else if (${licenseType} == "Developer") {
 			ClickNoError(locator1 = "MPAdminCustomers#DEVELOPER_INSTANCE");
 		}
-		else if ("${licenseType}" == "Trial") {
+		else if (${licenseType} == "Trial") {
 			ClickNoError(locator1 = "MPAdminCustomers#TRIAL_INSTANCE");
 		}
 
@@ -37,7 +37,7 @@ definition {
 
 		MarketplaceAdminNavigator.gotoEcommerce();
 
-		MarketplaceAdminNavigator.gotoEcommerceDocumentByID(purchaseID = "${purchaseID}");
+		MarketplaceAdminNavigator.gotoEcommerceDocumentByID(purchaseID = ${purchaseID});
 
 		MPButton.button1(buttonName = "Create Invoice");
 
@@ -45,9 +45,9 @@ definition {
 	}
 
 	macro customDenyOrApproveApp {
-		MPButton.button1(buttonName = "${denyOrApprove}");
+		MPButton.button1(buttonName = ${denyOrApprove});
 
-		if ("${denyOrApprove}" == "Deny App") {
+		if (${denyOrApprove} == "Deny App") {
 			MPButton.button1(buttonName = "Deny");
 		}
 
@@ -83,7 +83,7 @@ definition {
 
 		Select(
 			locator1 = "MPAdminDevelopers#SUBSCRIPTION_EXPIRATION_DATE_YEAR",
-			value1 = "2014");
+			value1 = 2014);
 
 		Click(locator1 = "MPButton#SAVE_BUTTON");
 
@@ -92,20 +92,20 @@ definition {
 
 	macro inputDossieraAccountKey {
 		if (!(isSet(inputDossieraAccountKey))) {
-			var dossieraAccountKey = StringUtil.randomString("18");
+			var dossieraAccountKey = StringUtil.randomString(18);
 		}
 
 		Type(
 			locator1 = "MPAdminDevelopers#DOSSIERA_ACCOUNT_KEY_FIELD",
-			value1 = "${dossieraAccountKey}");
+			value1 = ${dossieraAccountKey});
 	}
 
 	macro lookforCustomer {
-		var key_appTitle = "${appTitle}";
+		var key_appTitle = ${appTitle};
 
 		Type(
 			locator1 = "MPAdminCustomers#EMAIL_ADDRESS_FIELD",
-			value1 = "${userEmailAddress}");
+			value1 = ${userEmailAddress});
 
 		AssertClick(
 			locator1 = "MPAdminCustomers#LOOKUP_BUTTON",
@@ -113,32 +113,32 @@ definition {
 
 		AssertClick(
 			locator1 = "MPAdminCustomers#APP_ENTRY_NAME",
-			value1 = "${appTitle}");
+			value1 = ${appTitle});
 	}
 
 	macro reviewAppStatus {
-		MarketplaceAdminNavigator.gotoApp(appTitle = "${appTitle}");
+		MarketplaceAdminNavigator.gotoApp(appTitle = ${appTitle});
 
 		AssertTextEquals(
 			locator1 = "MPAdminReviewApps#STATUS_BAR",
-			value1 = "${appStatus}");
+			value1 = ${appStatus});
 	}
 
 	macro setupAppApprove {
 		MarketplaceAdminNavigator.gotoMPAdmin();
 
 		MarketplaceAdmin.workflowSubmittedApp(
-			appTitle = "${appTitle}",
+			appTitle = ${appTitle},
 			pendingQADenyOrApprove = "Approve",
 			requestDenyOrSendToQA = "Send to Manual and Auto QA");
 	}
 
 	macro teardownApp {
-		MarketplaceAdminNavigator.gotoApp(appTitle = "${appTitle}");
+		MarketplaceAdminNavigator.gotoApp(appTitle = ${appTitle});
 
 		var status = selenium.getText("MPAdminReviewApps#STATUS_BAR");
 
-		if (contains("${status}", "Approved")) {
+		if (contains(${status}, "Approved")) {
 			MPButton.button1(buttonName = "Reject App");
 
 			MPButton.button1(buttonName = "Deny");
@@ -146,14 +146,14 @@ definition {
 	}
 
 	macro teardownCompany {
-		MarketplaceAdminNavigator.searchDeveloper(companyName = "${companyName}");
+		MarketplaceAdminNavigator.searchDeveloper(companyName = ${companyName});
 
 		while (IsElementPresent(locator1 = "MPAdminDevelopers#STATUS_APPROVED")) {
 			Click(locator1 = "MPAdminDevelopers#STATUS_APPROVED");
 
 			MarketplaceAdmin.disableCompany();
 
-			MarketplaceAdminNavigator.searchDeveloper(companyName = "${companyName}");
+			MarketplaceAdminNavigator.searchDeveloper(companyName = ${companyName});
 		}
 
 		while (IsElementPresent(locator1 = "MPAdminDevelopers#STATUS_PENDING")) {
@@ -161,7 +161,7 @@ definition {
 
 			MarketplaceAdmin.denySubmission();
 
-			MarketplaceAdminNavigator.searchDeveloper(companyName = "${companyName}");
+			MarketplaceAdminNavigator.searchDeveloper(companyName = ${companyName});
 		}
 
 		while (IsElementPresent(locator1 = "MPAdminDevelopers#STATUS_DENIED")) {
@@ -169,7 +169,7 @@ definition {
 
 			MarketplaceAdmin.disableCompany();
 
-			MarketplaceAdminNavigator.searchDeveloper(companyName = "${companyName}");
+			MarketplaceAdminNavigator.searchDeveloper(companyName = ${companyName});
 		}
 	}
 
@@ -177,9 +177,9 @@ definition {
 		MarketplaceAdminNavigator.gotoAdminTab(adminTab = "Developers");
 
 		MarketplaceAdminNavigator.gotoDeveloperUser(
-			developerName = "${developerName}",
-			developerType = "${developerType}",
-			searchKeywords = "${searchKeywords}");
+			developerName = ${developerName},
+			developerType = ${developerType},
+			searchKeywords = ${searchKeywords});
 
 		Click(locator1 = "MPAdminDevelopers#EDIT_DEVELOPER_REGISTRATION");
 
@@ -197,9 +197,9 @@ definition {
 	macro workflowCompanyApprove {
 		MarketplaceAdminNavigator.gotoAdminTab(adminTab = "Developers");
 
-		MarketplaceAdminNavigator.gotoDeveloper(companyName = "${companyName}");
+		MarketplaceAdminNavigator.gotoDeveloper(companyName = ${companyName});
 
-		MarketplaceAdmin.inputDossieraAccountKey(dossieraAccountKey = "${dossieraAccountKey}");
+		MarketplaceAdmin.inputDossieraAccountKey(dossieraAccountKey = ${dossieraAccountKey});
 
 		MarketplaceAdmin.approveSubmission();
 	}
@@ -207,21 +207,21 @@ definition {
 	macro workflowCompanyApproveThenDisable {
 		MarketplaceAdminNavigator.gotoAdminTab(adminTab = "Developers");
 
-		MarketplaceAdminNavigator.gotoDeveloper(companyName = "${companyName}");
+		MarketplaceAdminNavigator.gotoDeveloper(companyName = ${companyName});
 
-		MarketplaceAdmin.inputDossieraAccountKey(dossieraAccountKey = "${dossieraAccountKey}");
+		MarketplaceAdmin.inputDossieraAccountKey(dossieraAccountKey = ${dossieraAccountKey});
 
 		MarketplaceAdmin.approveSubmission();
 
 		MarketplaceAdminNavigator.gotoAdminTab(adminTab = "Developers");
 
-		MarketplaceAdminNavigator.gotoDeveloper(companyName = "${companyName}");
+		MarketplaceAdminNavigator.gotoDeveloper(companyName = ${companyName});
 
 		MarketplaceAdmin.disableCompany();
 	}
 
 	macro workflowSubmittedApp {
-		MarketplaceAdminNavigator.gotoApp(appTitle = "${appTitle}");
+		MarketplaceAdminNavigator.gotoApp(appTitle = ${appTitle});
 
 		if (IsElementPresent(locator1 = "MPAdminReviewApps#REVIEW_DEVELOPER_PAGE")) {
 			AssertClick(
@@ -235,12 +235,12 @@ definition {
 			MPMessage.success();
 		}
 
-		MarketplaceAdmin.customDenyOrApproveApp(denyOrApprove = "${requestDenyOrSendToQA}");
+		MarketplaceAdmin.customDenyOrApproveApp(denyOrApprove = ${requestDenyOrSendToQA});
 
-		if ("${requestDenyOrSendToQA}" == "Send to Manual and Auto QA") {
-			MarketplaceAdminNavigator.gotoApp(appTitle = "${appTitle}");
+		if (${requestDenyOrSendToQA} == "Send to Manual and Auto QA") {
+			MarketplaceAdminNavigator.gotoApp(appTitle = ${appTitle});
 
-			MarketplaceAdmin.customDenyOrApproveApp(denyOrApprove = "${pendingQADenyOrApprove}");
+			MarketplaceAdmin.customDenyOrApproveApp(denyOrApprove = ${pendingQADenyOrApprove});
 		}
 	}
 

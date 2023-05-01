@@ -5,7 +5,7 @@ definition {
 
 	macro _addGroup {
 		if (isSet(groupDescription)) {
-			var groupDescriptionEncoded = URLUtil.encode("${groupDescription}", "UTF-8");
+			var groupDescriptionEncoded = URLUtil.encode(${groupDescription}, "UTF-8");
 
 			var groupDescriptionMap = '''{"en_US":"${groupDescriptionEncoded}"}''';
 		}
@@ -14,7 +14,7 @@ definition {
 		}
 
 		if (isSet(groupName)) {
-			var groupNameEncoded = URLUtil.encode("${groupName}", "UTF-8");
+			var groupNameEncoded = URLUtil.encode(${groupName}, "UTF-8");
 
 			var groupNameMap = '''{"en_US":"${groupNameEncoded}"}''';
 		}
@@ -48,12 +48,12 @@ definition {
 
 		echo("## * Group Name: ${groupName}");
 
-		var groupId = JSONCurlUtil.post("${curl}", "$['groupId']");
+		var groupId = JSONCurlUtil.post(${curl}, "$['groupId']");
 	}
 
 	macro _addUserGroup {
 		if (isSet(userGroupDescription)) {
-			var userGroupDescriptionEncoded = URLUtil.encode("${userGroupDescription}", "UTF-8");
+			var userGroupDescriptionEncoded = URLUtil.encode(${userGroupDescription}, "UTF-8");
 
 			var userGroupDescription = '''${userGroupDescriptionEncoded}''';
 		}
@@ -62,7 +62,7 @@ definition {
 		}
 
 		if (isSet(userGroupName)) {
-			var userGroupNameEncoded = URLUtil.encode("${userGroupName}", "UTF-8");
+			var userGroupNameEncoded = URLUtil.encode(${userGroupName}, "UTF-8");
 
 			var userGroupName = '''${userGroupNameEncoded}''';
 		}
@@ -87,9 +87,9 @@ definition {
 
 		echo("## * User Group Name: ${userGroupName}");
 
-		var userGroupId = JSONCurlUtil.post("${curl}", "$['userGroupId']");
+		var userGroupId = JSONCurlUtil.post(${curl}, "$['userGroupId']");
 
-		return "${userGroupId}";
+		return ${userGroupId};
 	}
 
 	macro _assignGroupRoleToUser {
@@ -140,7 +140,7 @@ definition {
 
 		<echo message="## * User Email Address: ${userEmailAddress}" />*/
 
-		var temp = JSONCurlUtil.post("${curl}", "$");
+		var temp = JSONCurlUtil.post(${curl}, "$");
 	}
 
 	macro _assignUserToGroup {
@@ -179,7 +179,7 @@ definition {
 
 		<echo message="## * User Email Address: ${userEmailAddress}" />*/
 
-		var temp = JSONCurlUtil.post("${curl}", "$");
+		var temp = JSONCurlUtil.post(${curl}, "$");
 	}
 
 	macro _deleteGroup {
@@ -187,7 +187,7 @@ definition {
 			fail("Please set 'groupId'.");
 		}
 
-		var groupName = JSONGroup.getGroupName(groupId = "${groupId}");
+		var groupName = JSONGroup.getGroupName(groupId = ${groupId});
 
 		echo("## Deleting a 'Group' with the following info using JSONWS:");
 
@@ -201,7 +201,7 @@ definition {
 				-d groupId=${groupId}
 		''';
 
-		var temp = JSONCurlUtil.post("${curl}", "$");
+		var temp = JSONCurlUtil.post(${curl}, "$");
 	}
 
 	macro addGroup {
@@ -210,8 +210,8 @@ definition {
 		}
 
 		JSONGroup._addGroup(
-			groupDescription = "${groupDescription}",
-			groupName = "${groupName}");
+			groupDescription = ${groupDescription},
+			groupName = ${groupName});
 	}
 
 	macro assignGroupRoleToUser {
@@ -243,9 +243,9 @@ definition {
 		</execute>*/
 
 		JSONGroup._assignGroupRoleToUser(
-			groupId = "${groupId}",
-			roleId = "${roleId}",
-			userId = "${userId}");
+			groupId = ${groupId},
+			roleId = ${roleId},
+			userId = ${userId});
 	}
 
 	macro assignUserToGroup {
@@ -257,12 +257,12 @@ definition {
 			fail("Please set 'userEmailAddress'.");
 		}
 
-		var groupId = JSONGroup.getGroupIdByName(groupName = "${groupName}");
-		var userId = JSONUser.getUserIdByEmailAddress(userEmailAddress = "${userEmailAddress}");
+		var groupId = JSONGroup.getGroupIdByName(groupName = ${groupName});
+		var userId = JSONUser.getUserIdByEmailAddress(userEmailAddress = ${userEmailAddress});
 
 		JSONGroup._assignUserToGroup(
-			groupId = "${groupId}",
-			userId = "${userId}");
+			groupId = ${groupId},
+			userId = ${userId});
 	}
 
 	macro deleteGroupByName {
@@ -270,9 +270,9 @@ definition {
 			fail("Please set 'groupName'.");
 		}
 
-		var groupId = JSONGroup.getGroupIdByName(groupName = "${groupName}");
+		var groupId = JSONGroup.getGroupIdByName(groupName = ${groupName});
 
-		JSONGroup._deleteGroup(groupId = "${groupId}");
+		JSONGroup._deleteGroup(groupId = ${groupId});
 	}
 
 	macro getGroupIdByName {
@@ -291,13 +291,13 @@ definition {
 				-d site=true
 		''';
 
-		var groupId = JSONCurlUtil.post("${curl}", "$.[?(@['nameCurrentValue'] == '${groupName}')]['groupId']");
+		var groupId = JSONCurlUtil.post(${curl}, "$.[?(@['nameCurrentValue'] == '${groupName}')]['groupId']");
 
-		var groupId = StringUtil.replace("${groupId}", "[\"", "");
+		var groupId = StringUtil.replace(${groupId}, "[\"", "");
 
-		var groupId = StringUtil.replace("${groupId}", "\"]", "");
+		var groupId = StringUtil.replace(${groupId}, "\"]", "");
 
-		return "${groupId}";
+		return ${groupId};
 	}
 
 	macro getGroupName {
@@ -314,9 +314,9 @@ definition {
 				-d groupId=${groupId}
 		''';
 
-		var groupName = JSONCurlUtil.post("${curl}", "$['nameCurrentValue']");
+		var groupName = JSONCurlUtil.post(${curl}, "$['nameCurrentValue']");
 
-		return "${groupName}";
+		return ${groupName};
 	}
 
 }

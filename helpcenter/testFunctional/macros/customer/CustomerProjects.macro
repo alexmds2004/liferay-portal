@@ -2,12 +2,58 @@ definition {
 
 	var customerURL = PropsUtil.get("customer.portal.url");
 
+	@prose = "I click on skip button on invite team members pop up"
+	macro _clickSkipInviteTeamMember {
+		Click(locator1 = "CustomerProjects#CUSTOMER_SKIP_INVITE_TEAM_MEMBERS_BUTTON");
+	}
+
+	@prose = "I click on start project setup on setup pop up"
+	macro _clickStartProjectSetup {
+		Click(locator1 = "CustomerProjects#CUSTOMER_START_PROJECT_SETUP_BUTTON");
+	}
+
+	@prose = "I should be able to view the following project ${projectName} values in the customer project details page ${table}"
+	macro _viewCustomerProjectDetails {
+		var key_projectName = ${projectName};
+		var rawTable = TableUtil.newTable(${table});
+
+		WaitForSPARefresh();
+
+		for (var row : table ${rawTable}) {
+			var field = "${row[0]}";
+			var value = "${row[1]}";
+
+			if (${field} == "Code") {
+				AssertElementPresent(locator1 = "CustomerProjects#PROJECT_CODE");
+			}
+			else if (${field} == "State") {
+				AssertElementPresent(locator1 = "CustomerProjects#PROJECT_STATE");
+			}
+			else if (${field} == "Ends On") {
+				AssertElementPresent(locator1 = "CustomerProjects#PROJECT_ENDS_ON");
+			}
+			else if (${field} == "Support Region") {
+				AssertElementPresent(locator1 = "CustomerProjects#PROJECT_SUPPORT_REGION");
+			}
+			else {
+				fail("No such customer project details field ${field} was located at the page");
+			}
+		}
+	}
+
+	@prose = "I should not be able to view the following project ${projectName} in the customer project details page"
+	macro _viewNoCustomerProjectDetails {
+		var key_projectName = ${projectName};
+
+		AssertElementNotPresent(locator1 = "CustomerProjects#PROJECT_NAME");
+	}
+
 	@prose = "I click on the project with the name ${projectName} on the customer project details page"
 	macro clickCustomerProject {
-		var key_projectName = "${projectName}";
+		var key_projectName = ${projectName};
 
 		while (IsElementNotPresent(locator1 = "CustomerProjects#PROJECT_NAME")) {
-			OSBAdmin.pause(timeInSeconds = "1");
+			OSBAdmin.pause(timeInSeconds = 1);
 		}
 
 		Click(locator1 = "CustomerProjects#PROJECT_NAME");
@@ -18,19 +64,9 @@ definition {
 		Click(locator1 = "CustomerProjects#SEARCH_PROJECTS_FIELD_BUTTON");
 	}
 
-	@prose = "I click on start project setup on setup pop up"
-	macro _clickStartProjectSetup {
-		Click(locator1 = "CustomerProjects#CUSTOMER_START_PROJECT_SETUP_BUTTON");
-	}
-
-	@prose = "I click on skip button on invite team members pop up"
-	macro _clickSkipInviteTeamMember {
-		Click(locator1 = "CustomerProjects#CUSTOMER_SKIP_INVITE_TEAM_MEMBERS_BUTTON");
-	}
-
 	@prose = "I search the customer projects page using the keyword ${keyword}"
 	macro searchCustomerProject {
-		CustomerProjects.typeKeywordViaSearchCustomerProjectField(keyword = "${keyword}");
+		CustomerProjects.typeKeywordViaSearchCustomerProjectField(keyword = ${keyword});
 
 		CustomerProjects.clickSearchCustomerProjectButton();
 
@@ -41,7 +77,7 @@ definition {
 	macro searchCustomerSubscriptionWithKeyword {
 		WaitForSPARefresh();
 
-		CustomerProjects.typeKeywordViaSearchCustomerProjectField(keyword = "${keyword}");
+		CustomerProjects.typeKeywordViaSearchCustomerProjectField(keyword = ${keyword});
 
 		CustomerProjects.clickSearchCustomerProjectButton();
 	}
@@ -56,43 +92,7 @@ definition {
 
 		Type(
 			locator1 = "CustomerProjects#SEARCH_PROJECTS_FIELD",
-			value1 = "${keyword}");
-	}
-
-	@prose = "I should be able to view the following project ${projectName} values in the customer project details page ${table}"
-	macro _viewCustomerProjectDetails {
-		var key_projectName = "${projectName}";
-		var  rawTable = TableUtil.newTable(${table});
-
-		WaitForSPARefresh();
-
-		for (var row : table "${rawTable}") {
-			var field = "${row[0]}";
-			var value = "${row[1]}";
-
-			if ("${field}" == "Code") {
-				AssertElementPresent(locator1 = "CustomerProjects#PROJECT_CODE");
-			}
-			else if ("${field}" == "State") {
-				AssertElementPresent(locator1 = "CustomerProjects#PROJECT_STATE");
-			}
-			else if ("${field}" == "Ends On") {
-				AssertElementPresent(locator1 = "CustomerProjects#PROJECT_ENDS_ON");
-			}
-			else if ("${field}" == "Support Region") {
-				AssertElementPresent(locator1 = "CustomerProjects#PROJECT_SUPPORT_REGION");
-			}
-			else {
-				fail("No such customer project details field ${field} was located at the page");
-			}
-		}
-	}
-
-	@prose = "I should not be able to view the following project ${projectName} in the customer project details page"
-	macro _viewNoCustomerProjectDetails {
-		var key_projectName = "${projectName}";
-
-		AssertElementNotPresent(locator1 = "CustomerProjects#PROJECT_NAME");
+			value1 = ${keyword});
 	}
 
 }

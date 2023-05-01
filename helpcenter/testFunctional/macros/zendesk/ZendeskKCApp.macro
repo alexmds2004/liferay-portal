@@ -4,14 +4,14 @@ definition {
 
 	@prose = "I tear down the articles with the following names from zendesk.liferay.com ${table}"
 	macro _tearDownArticlesByName {
-		var  rawTable = TableUtil.newTable(${table});
+		var rawTable = TableUtil.newTable(${table});
 
-		for (var row : table "${rawTable}") {
+		for (var row : table ${rawTable}) {
 			var articleName = "${row[0]}";
 
 			Open(locator1 = "${zendeskURL}/knowledge/lists/");
 
-			ZendeskHomepage.pause(timeInSeconds = "5");
+			ZendeskHomepage.pause(timeInSeconds = 5);
 
 			if (IsElementPresent(locator1 = "ZendeskKCApp#GOT_IT_BUTTON")) {
 				Click(locator1 = "ZendeskKCApp#GOT_IT_BUTTON");
@@ -19,15 +19,15 @@ definition {
 
 			Type(
 				locator1 = "ZendeskKCApp#SEARCH_ARTICLE_FIELD",
-				value1 = "${articleName}");
+				value1 = ${articleName});
 
 			KeyPress(
 				locator1 = "ZendeskKCApp#SEARCH_ARTICLE_FIELD",
 				value1 = "\ENTER");
 
-			if (IsElementPresent(key_articleName = "${articleName}", locator1 = "ZendeskKCApp#ARTICLE")) {
+			if (IsElementPresent(key_articleName = ${articleName}, locator1 = "ZendeskKCApp#ARTICLE")) {
 				Click(
-					key_articleName = "${articleName}",
+					key_articleName = ${articleName},
 					locator1 = "ZendeskKCApp#SELECT_ARTICLE");
 
 				Click(locator1 = "ZendeskKCApp#ARTICLE_SETTINGS");
@@ -43,7 +43,7 @@ definition {
 	macro checkArticleReviewStatus {
 		Open(locator1 = "${zendeskURL}/knowledge/lists/");
 
-		ZendeskHomepage.pause(timeInSeconds = "5");
+		ZendeskHomepage.pause(timeInSeconds = 5);
 
 		if (IsElementPresent(locator1 = "ZendeskKCApp#GOT_IT_BUTTON")) {
 			Click(locator1 = "ZendeskKCApp#GOT_IT_BUTTON");
@@ -51,21 +51,21 @@ definition {
 
 		Type(
 			locator1 = "ZendeskKCApp#SEARCH_ARTICLE_FIELD",
-			value1 = "${articleName}");
+			value1 = ${articleName});
 
 		KeyPress(
 			locator1 = "ZendeskKCApp#SEARCH_ARTICLE_FIELD",
 			value1 = "\ENTER");
 
 		AssertElementPresent(
-			key_articleName = "${articleName}",
-			key_reviewStatus = "${reviewStatus}",
+			key_articleName = ${articleName},
+			key_reviewStatus = ${reviewStatus},
 			locator1 = "ZendeskKCApp#ARTICLE_STATUS");
 	}
 
 	@prose = "I click on the apps button"
 	macro clickAppsbutton {
-		ZendeskHomepage.pause(timeInSeconds = "5");
+		ZendeskHomepage.pause(timeInSeconds = 5);
 
 		if (IsElementNotPresent(locator1 = "ZendeskTicketView#HIDE_APPS_BUTTON")) {
 			Click(locator1 = "ZendeskTicketView#APPS_BUTTON");
@@ -74,40 +74,40 @@ definition {
 
 	@prose = "I create an article with the following values ${table}"
 	macro createFastTrackArticle {
-		var  rawTable = TableUtil.newTable(${table});
+		var rawTable = TableUtil.newTable(${table});
 
-		for (var row : table "${rawTable}") {
+		for (var row : table ${rawTable}) {
 			var field = "${row[0]}";
 			var value = "${row[1]}";
 
-			if ("${field}" == "Ticket ID") {
-				var ticketId = "${value}";
+			if (${field} == "Ticket ID") {
+				var ticketId = ${value};
 			}
-			else if ("${field}" == "Template") {
-				var articleTemplate = "${value}";
+			else if (${field} == "Template") {
+				var articleTemplate = ${value};
 
-				if (("${articleTemplate}" == "DXPC Fast Track Article") || ("${articleTemplate}" == "Fast Track Article")) {
+				if ((${articleTemplate} == "DXPC Fast Track Article") || (${articleTemplate} == "Fast Track Article")) {
 					echo("${articleTemplate} is a valid template");
 				}
 				else {
 					fail("No such template ${field}");
 				}
 			}
-			else if ("${field}" == "Name") {
-				var articleName = "${value}";
+			else if (${field} == "Name") {
+				var articleName = ${value};
 			}
-			else if ("${field}" == "Description") {
-				var articleDescription = "${value}";
+			else if (${field} == "Description") {
+				var articleDescription = ${value};
 			}
-			else if ("${field}" == "Review Status") {
-				var reviewStatus = "${value}";
+			else if (${field} == "Review Status") {
+				var reviewStatus = ${value};
 			}
 			else {
 				fail("No such field ${field}");
 			}
 		}
 
-		ZendeskTicket.gotoViaId(ticketId = "${ticketId}");
+		ZendeskTicket.gotoViaId(ticketId = ${ticketId});
 
 		ZendeskKCApp.clickAppsbutton();
 
@@ -121,10 +121,10 @@ definition {
 
 		SelectFrame(locator1 = "ZendeskKCApp#KNOWLEDGE_CAPTURE_IFRAME");
 
-		if ("${articleTemplate}" == "DXPC Fast Track Article") {
+		if (${articleTemplate} == "DXPC Fast Track Article") {
 			Click(locator1 = "ZendeskKCApp#DXPC_FAST_TRACK_ARTICLE_TEMPLATE_LINK");
 		}
-		else if ("${articleTemplate}" == "Fast Track Article") {
+		else if (${articleTemplate} == "Fast Track Article") {
 			Click(locator1 = "ZendeskKCApp#FAST_TRACK_ARTICLE_TEMPLATE_LINK");
 		}
 
@@ -132,10 +132,10 @@ definition {
 
 		SelectFrameTop();
 
-		if ("${articleTemplate}" == "DXPC Fast Track Article") {
+		if (${articleTemplate} == "DXPC Fast Track Article") {
 			SelectWindow(locator1 = "New DXP Cloud Article");
 		}
-		else if ("${articleTemplate}" == "Fast Track Article") {
+		else if (${articleTemplate} == "Fast Track Article") {
 			SelectWindow(locator1 = "Fast Track Article");
 		}
 
@@ -153,7 +153,7 @@ definition {
 
 		Type.sendKeys(
 			locator1 = "ZendeskKBArticleCreate#ARTICLE_NAME_INPUT",
-			value1 = "${articleName}");
+			value1 = ${articleName});
 
 		KeyPress.keyUp(
 			locator1 = "ZendeskKBArticleCreate#ARTICLE_NAME_INPUT",
@@ -173,7 +173,7 @@ definition {
 
 		Type.sendKeys(
 			locator1 = "ZendeskKBArticleCreate#ARTICLE_DESCRIPTION_BODY",
-			value1 = "${articleDescription}");
+			value1 = ${articleDescription});
 
 		KeyPress.keyUp(
 			locator1 = "ZendeskKBArticleCreate#ARTICLE_DESCRIPTION_BODY",
@@ -181,11 +181,11 @@ definition {
 
 		SelectFrameTop();
 
-		SelectWindow(locator1 = "${articleName}");
+		SelectWindow(locator1 = ${articleName});
 
 		Click(locator1 = "ZendeskKBArticleCreate#SAVE_ARTICLE_BUTTON");
 
-		if ("${reviewStatus}" == "Published") {
+		if (${reviewStatus} == "Published") {
 			Click(locator1 = "ZendeskKBArticleCreate#UPDATE_ARTICLE_OPTION_DROPDOWN_BUTTON");
 
 			Click(locator1 = "ZendeskKBArticleCreate#PUBLISH_ARTICLE_OPTION_LINK");
@@ -194,26 +194,26 @@ definition {
 
 	@prose = "I edit an article with the following values ${table}"
 	macro editArticle {
-		var  rawTable = TableUtil.newTable(${table});
+		var rawTable = TableUtil.newTable(${table});
 
-		for (var row : table "${rawTable}") {
+		for (var row : table ${rawTable}) {
 			var field = "${row[0]}";
 			var value = "${row[1]}";
 
-			if ("${field}" == "Article Name") {
-				var articleName = "${value}";
+			if (${field} == "Article Name") {
+				var articleName = ${value};
 			}
-			else if ("${field}" == "Article Name Update") {
-				var articleNameUpdate = "${value}";
+			else if (${field} == "Article Name Update") {
+				var articleNameUpdate = ${value};
 			}
-			else if ("${field}" == "Article Description Update") {
-				var articleDescriptionUpdate = "${value}";
+			else if (${field} == "Article Description Update") {
+				var articleDescriptionUpdate = ${value};
 			}
-			else if ("${field}" == "Review Status") {
-				var reviewStatus = "${value}";
+			else if (${field} == "Review Status") {
+				var reviewStatus = ${value};
 			}
-			else if ("${field}" == "Review Status Update") {
-				var reviewStatusUpdate = "${value}";
+			else if (${field} == "Review Status Update") {
+				var reviewStatusUpdate = ${value};
 			}
 			else {
 				fail("No such field ${field}");
@@ -222,7 +222,7 @@ definition {
 
 		Open(locator1 = "${zendeskURL}/knowledge/lists/");
 
-		ZendeskHomepage.pause(timeInSeconds = "5");
+		ZendeskHomepage.pause(timeInSeconds = 5);
 
 		if (IsElementPresent(locator1 = "ZendeskKCApp#GOT_IT_BUTTON")) {
 			Click(locator1 = "ZendeskKCApp#GOT_IT_BUTTON");
@@ -230,15 +230,15 @@ definition {
 
 		Type(
 			locator1 = "ZendeskKCApp#SEARCH_ARTICLE_FIELD",
-			value1 = "${articleName}");
+			value1 = ${articleName});
 
 		KeyPress(
 			locator1 = "ZendeskKCApp#SEARCH_ARTICLE_FIELD",
 			value1 = "\ENTER");
 
 		Click(
-			key_articleName = "${articleName}",
-			key_reviewStatus = "${reviewStatus}",
+			key_articleName = ${articleName},
+			key_reviewStatus = ${reviewStatus},
 			locator1 = "ZendeskKCApp#ARTICLE_STATUS");
 
 		Click(locator1 = "ZendeskKBArticleCreate#ARTICLE_NAME_FIELD");
@@ -253,7 +253,7 @@ definition {
 
 		Type.sendKeys(
 			locator1 = "ZendeskKBArticleCreate#ARTICLE_NAME_INPUT",
-			value1 = "${articleNameUpdate}");
+			value1 = ${articleNameUpdate});
 
 		KeyPress.keyUp(
 			locator1 = "ZendeskKBArticleCreate#ARTICLE_NAME_INPUT",
@@ -273,7 +273,7 @@ definition {
 
 		Type.sendKeys(
 			locator1 = "ZendeskKBArticleCreate#ARTICLE_DESCRIPTION_BODY",
-			value1 = "${articleDescriptionUpdate}");
+			value1 = ${articleDescriptionUpdate});
 
 		KeyPress.keyUp(
 			locator1 = "ZendeskKBArticleCreate#ARTICLE_DESCRIPTION_BODY",
@@ -281,12 +281,12 @@ definition {
 
 		SelectFrameTop();
 
-		SelectWindow(locator1 = "${articleNameUpdate}");
+		SelectWindow(locator1 = ${articleNameUpdate});
 
 		Click(locator1 = "ZendeskKBArticleCreate#UPDATE_ARTICLE_BUTTON");
 
-		if ("${reviewStatusUpdate}" == "Published") {
-			ZendeskHomepage.pause(timeInSeconds = "10");
+		if (${reviewStatusUpdate} == "Published") {
+			ZendeskHomepage.pause(timeInSeconds = 10);
 
 			Click(locator1 = "ZendeskKBArticleCreate#UPDATE_ARTICLE_OPTION_DROPDOWN_BUTTON");
 
@@ -308,14 +308,14 @@ definition {
 
 		Type(
 			locator1 = "ZendeskKCApp#SEARCH_ARTICLE_IFRAME",
-			value1 = "${articleName}");
+			value1 = ${articleName});
 
 		KeyPress(
 			locator1 = "ZendeskKCApp#SEARCH_ARTICLE_IFRAME",
 			value1 = "\ENTER");
 
 		Click(
-			key_articleName = "${articleName}",
+			key_articleName = ${articleName},
 			locator1 = "ZendeskKCApp#ARTICLE_NAME");
 
 		SelectFrameTop();
@@ -323,11 +323,11 @@ definition {
 		SelectFrame(locator1 = "ZendeskKCApp#KNOWLEDGE_CAPTURE_POPUP_IFRAME");
 
 		AssertElementPresent(
-			key_articleName = "${articleName}",
+			key_articleName = ${articleName},
 			locator1 = "ZendeskKCApp#KNOWLEDGE_CAPTURE_POPUP_ARTICLE_NAME");
 
 		AssertElementPresent(
-			key_articleDescription = "${articleDescription}",
+			key_articleDescription = ${articleDescription},
 			locator1 = "ZendeskKCApp#KNOWLEDGE_CAPTURE_POPUP_ARTICLE_DESCRIPTION");
 
 		SelectFrameTop();
@@ -349,14 +349,14 @@ definition {
 
 		Type(
 			locator1 = "ZendeskKCApp#SEARCH_ARTICLE_IFRAME",
-			value1 = "${articleName}");
+			value1 = ${articleName});
 
 		KeyPress(
 			locator1 = "ZendeskKCApp#SEARCH_ARTICLE_IFRAME",
 			value1 = "\ENTER");
 
 		AssertElementNotPresent(
-			key_articleName = "${articleName}",
+			key_articleName = ${articleName},
 			locator1 = "ZendeskKCApp#ARTICLE_NAME");
 
 		SelectFrameTop();
@@ -366,7 +366,7 @@ definition {
 	macro viewNoArticleViaList {
 		Open(locator1 = "${zendeskURL}/knowledge/lists/");
 
-		ZendeskHomepage.pause(timeInSeconds = "5");
+		ZendeskHomepage.pause(timeInSeconds = 5);
 
 		if (IsElementPresent(locator1 = "ZendeskKCApp#GOT_IT_BUTTON")) {
 			Click(locator1 = "ZendeskKCApp#GOT_IT_BUTTON");
@@ -374,14 +374,14 @@ definition {
 
 		Type(
 			locator1 = "ZendeskKCApp#SEARCH_ARTICLE_FIELD",
-			value1 = "${articleName}");
+			value1 = ${articleName});
 
 		KeyPress(
 			locator1 = "ZendeskKCApp#SEARCH_ARTICLE_FIELD",
 			value1 = "\ENTER");
 
 		AssertElementNotPresent(
-			key_articleName = "${articleName}",
+			key_articleName = ${articleName},
 			locator1 = "ZendeskKCApp#ARTICLE");
 	}
 

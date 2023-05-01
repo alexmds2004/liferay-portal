@@ -2,94 +2,35 @@ definition {
 
 	var customerAdminEmailAddress = PropsUtil.get("customer.admin.email.address");
 	var customerAdminPassword = PropsUtil.get("customer.admin.password");
-    var customerURL = PropsUtil.get("customer.portal.url");
-
-	@prose = "I search the customer team member page using the keyword ${keyword}"
-	macro searchCustomerSubscription {
-		WaitForSPARefresh();
-
-		CustomerProjects.typeKeywordViaSearchCustomerProjectField(keyword = "${keyword}");
-
-		CustomerProjects.clickSearchCustomerProjectButton();
-	}
-
-	@prose = "I should be able to view the customer team member ${member} and the following values ${table}"
-	macro _viewCustomerTeamMember {
-		var  rawTable = TableUtil.newTable(${table});
-
-		for (var row : table "${rawTable}") {
-			var field = "${row[0]}";
-			var value = "${row[1]}";
-
-			if ("${field}" == "Name") {
-				AssertTextEquals(
-					locator1 = "CustomerProjectTeamMembers#TEAM_MEMBER_NAME",
-					value1 = "${value}");
-			}
-			else if ("${field}" == "Email") {
-				key_userEmailAddress = "${value}";
-				AssertTextEquals(
-					locator1 = "CustomerProjectTeamMembers#TEAM_MEMBER_EMAIL_ADDRESS",
-					value1 = "${value}");
-			}
-			else if ("${field}" == "Support Seat") {
-				if ("${value}" == "true") {
-				IsElementPresent(
-					locator1 = "CustomerProjectTeamMembers#TEAM_MEMBER_SUPPORT_SEAT"
-					);
-				}
-				else if ("${value}" == "false") {
-					IsElementNotPresent(
-					locator1 = "CustomerProjectTeamMembers#TEAM_MEMBER_SUPPORT_SEAT"
-					);
-				} 
-				else {
-					fail("No such value ${value} is valid");
-				}
-			}
-			else if ("${field}" == "Role") {
-				key_userRoles = "${value}";
-				AssertTextEquals(
-					locator1 = "CustomerProjectTeamMembers#TEAM_MEMBER_ROLE",
-					value1 = "${value}");
-			}
-			else if ("${field}" == "Status") {
-				key_userMemberStatus = "${value}";
-				AssertTextEquals(
-					locator1 = "CustomerProjectTeamMembers#TEAM_MEMBER_STATUS",
-					value1 = "${value}");
-			}
-			else {
-				fail("No such team member detail field ${field}");
-			}
-		}
-	}
+	var customerURL = PropsUtil.get("customer.portal.url");
 
 	@prose = "I should be able to view an user on the customer project index page with the name ${userName} and the following values ${table}"
 	macro _viewCustomerProjectTeamMembersViaIndex {
-		var key_userName = "${userName}";
-		var  rawTable = TableUtil.newTable(${table});
+		var key_userName = ${userName};
+		var rawTable = TableUtil.newTable(${table});
 
-		for (var row : table "${rawTable}") {
+		for (var row : table ${rawTable}) {
 			var field = "${row[0]}";
 			var value = "${row[1]}";
 
-			if ("${field}" == "Name") {
+			if (${field} == "Name") {
 				AssertTextEquals.assertPartialText(
 					locator1 = "CustomerProjectTeamMembers#TEAM_MEMBER_NAME",
-					value1 = "${value}");
+					value1 = ${value});
 			}
-			else if ("${field}" == "Email Address") {
-				var key_userEmailAddress = "${value}";
+			else if (${field} == "Email Address") {
+				var key_userEmailAddress = ${value};
+
 				AssertTextEquals(
 					locator1 = "CustomerProjectTeamMembers#TEAM_MEMBER_EMAIL_ADDRESS",
-					value1 = "${value}");
+					value1 = ${value});
 			}
-			else if ("${field}" == "Role") {
-				var key_userRoles = "${value}";
+			else if (${field} == "Role") {
+				var key_userRoles = ${value};
+
 				AssertTextEquals(
 					locator1 = "CustomerProjectTeamMembers#TEAM_MEMBER_ROLE",
-					value1 = "${value}");
+					value1 = ${value});
 			}
 			else {
 				fail("No such user field ${field}");
@@ -97,11 +38,71 @@ definition {
 		}
 	}
 
-    @prose = "I should not be able to view a user on the customer index with the name ${userName}"
+	@prose = "I should be able to view the customer team member ${member} and the following values ${table}"
+	macro _viewCustomerTeamMember {
+		var rawTable = TableUtil.newTable(${table});
+
+		for (var row : table ${rawTable}) {
+			var field = "${row[0]}";
+			var value = "${row[1]}";
+
+			if (${field} == "Name") {
+				AssertTextEquals(
+					locator1 = "CustomerProjectTeamMembers#TEAM_MEMBER_NAME",
+					value1 = ${value});
+			}
+			else if (${field} == "Email") {
+				var key_userEmailAddress = ${value};
+
+				AssertTextEquals(
+					locator1 = "CustomerProjectTeamMembers#TEAM_MEMBER_EMAIL_ADDRESS",
+					value1 = ${value});
+			}
+			else if (${field} == "Support Seat") {
+				if (${value} == "true") {
+					IsElementPresent(locator1 = "CustomerProjectTeamMembers#TEAM_MEMBER_SUPPORT_SEAT");
+				}
+				else if (${value} == "false") {
+					IsElementNotPresent(locator1 = "CustomerProjectTeamMembers#TEAM_MEMBER_SUPPORT_SEAT");
+				}
+				else {
+					fail("No such value ${value} is valid");
+				}
+			}
+			else if (${field} == "Role") {
+				var key_userRoles = ${value};
+
+				AssertTextEquals(
+					locator1 = "CustomerProjectTeamMembers#TEAM_MEMBER_ROLE",
+					value1 = ${value});
+			}
+			else if (${field} == "Status") {
+				var key_userMemberStatus = ${value};
+
+				AssertTextEquals(
+					locator1 = "CustomerProjectTeamMembers#TEAM_MEMBER_STATUS",
+					value1 = ${value});
+			}
+			else {
+				fail("No such team member detail field ${field}");
+			}
+		}
+	}
+
+	@prose = "I should not be able to view a user on the customer index with the name ${userName}"
 	macro _viewNoCustomerProjectTeamMembersViaIndex {
-		var key_userName = "${userName}";
+		var key_userName = ${userName};
 
 		AssertElementNotPresent(locator1 = "CustomerProjectTeamMembers#TEAM_MEMBER_NAME");
+	}
+
+	@prose = "I search the customer team member page using the keyword ${keyword}"
+	macro searchCustomerSubscription {
+		WaitForSPARefresh();
+
+		CustomerProjects.typeKeywordViaSearchCustomerProjectField(keyword = ${keyword});
+
+		CustomerProjects.clickSearchCustomerProjectButton();
 	}
 
 }

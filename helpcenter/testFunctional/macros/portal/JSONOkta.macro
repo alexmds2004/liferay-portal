@@ -6,97 +6,97 @@ definition {
 
 	@prose = "I assign the okta user with the email address ${userEmailAddress} to a different okta role ${roleName}"
 	macro assignUserToDifferentOktaRole {
-		var roleId = JSONOkta.getOktaRoleIdByName(roleName = "${roleName}");
-		var userId = JSONOkta.getOktaUserId(userEmailAddress = "${userEmailAddress}");
+		var roleId = JSONOkta.getOktaRoleIdByName(roleName = ${roleName});
+		var userId = JSONOkta.getOktaUserId(userEmailAddress = ${userEmailAddress});
 
 		var curl = '''
 			${oktaURL}/api/v1/users/${userId}/roles/${roleId}
-			-H "Authorization: SSWS ${oktaApiToken}"
-			-H "accept: application/json"
-			-H "Content-Type: application/json"
-			''';
+				-H "Authorization: SSWS ${oktaApiToken}"
+				-H "accept: application/json"
+				-H "Content-Type: application/json"
+		''';
 
-		com.liferay.poshi.runner.util.JSONCurlUtil.put("${curl}");
+		com.liferay.poshi.runner.util.JSONCurlUtil.put(${curl});
 	}
 
 	@prose = "I assign the okta user with the email address ${userEmailAddress} to the okta group ${groupName}"
 	macro assignUserToOktaGroup {
-		var groupId = JSONOkta.getOktaGroupIdWithNoQuotes(groupName = "${groupName}");
-		var userId = JSONOkta.getOktaUserId(userEmailAddress = "${userEmailAddress}");
+		var groupId = JSONOkta.getOktaGroupIdWithNoQuotes(groupName = ${groupName});
+		var userId = JSONOkta.getOktaUserId(userEmailAddress = ${userEmailAddress});
 
 		var curl = '''
 			${oktaURL}/api/v1/groups/${groupId}/users/${userId}
-			-H "Authorization: SSWS ${oktaApiToken}"
-			-H "accept: application/json"
-			-H "Content-Type: application/json"
-			''';
+				-H "Authorization: SSWS ${oktaApiToken}"
+				-H "accept: application/json"
+				-H "Content-Type: application/json"
+		''';
 
-		com.liferay.poshi.runner.util.JSONCurlUtil.put("${curl}");
+		com.liferay.poshi.runner.util.JSONCurlUtil.put(${curl});
 	}
 
 	@prose = "I assign the okta user with the email address ${userEmailAddress} to the okta role ${roleName}"
 	macro assignUserToOktaRole {
-		var userId = JSONOkta.getOktaUserId(userEmailAddress = "${userEmailAddress}");
+		var userId = JSONOkta.getOktaUserId(userEmailAddress = ${userEmailAddress});
 
 		var curl = '''
 			${oktaURL}/api/v1/users/${userId}
-			-H "Authorization: SSWS ${oktaApiToken}"
-			-H "accept: application/json"
-			-H "Content-Type: application/json"
-			-d 
-			{
-			"credentials":
+				-H "Authorization: SSWS ${oktaApiToken}"
+				-H "accept: application/json"
+				-H "Content-Type: application/json"
+				-d
 				{
-					"emails":
-					{[
-						"status": "${roleName}"
-					]}
+					"credentials":
+					{
+						"emails":
+						{[
+								"status": "${roleName}"
+								]}
+					}
 				}
-			}
-			''';
+		''';
 
-		com.liferay.poshi.runner.util.JSONCurlUtil.put("${curl}");
+		com.liferay.poshi.runner.util.JSONCurlUtil.put(${curl});
 	}
 
 	@prose = "I create a user with the following parameters ${table}"
 	macro createOktaUser {
 		var groupNames = "";
-		var  rawTable = TableUtil.newTable(${table});
+		var rawTable = TableUtil.newTable(${table});
 
-		for (var row : table "${rawTable}") {
+		for (var row : table ${rawTable}) {
 			var field = "${row[0]}";
 			var value = "${row[1]}";
 
-			if ("${field}" == "Screen Name") {
-				var userScreenName = "${value}";
+			if (${field} == "Screen Name") {
+				var userScreenName = ${value};
 			}
-			else if ("${field}" == "Email Address") {
-				var userEmailAddress = "${value}";
+			else if (${field} == "Email Address") {
+				var userEmailAddress = ${value};
 			}
-			else if ("${field}" == "First Name") {
-				var userFirstName = "${value}";
+			else if (${field} == "First Name") {
+				var userFirstName = ${value};
 			}
-			else if ("${field}" == "Last Name") {
-				var userLastName = "${value}";
+			else if (${field} == "Last Name") {
+				var userLastName = ${value};
 			}
-			else if ("${field}" == "Active") {
-				var userActiveStatus = "${value}";
+			else if (${field} == "Active") {
+				var userActiveStatus = ${value};
 			}
-			else if ("${field}" == "Email Status") {
-				var userEmailStatus = "${value}";
+			else if (${field} == "Email Status") {
+				var userEmailStatus = ${value};
 			}
-			else if ("${field}" == "Password") {
-				var password = "${value}";
+			else if (${field} == "Password") {
+				var password = ${value};
 			}
-			else if ("${field}" == "Mobile Number") {
-				var userMobilePhone = "${value}";
+			else if (${field} == "Mobile Number") {
+				var userMobilePhone = ${value};
 			}
-			else if ("${field}" == "Primary Number") {
-				var userPrimaryPhone = "${value}";
+			else if (${field} == "Primary Number") {
+				var userPrimaryPhone = ${value};
 			}
-			else if ("${field}" == "Group") {
-				if ("${groupNames}" == "") {
-					var groupNames = "${value}";
+			else if (${field} == "Group") {
+				if (${groupNames} == "") {
+					var groupNames = ${value};
 				}
 				else {
 					var groupNames = "${groupNames},${value}";
@@ -108,7 +108,7 @@ definition {
 		}
 
 		if (!(isSet(password))) {
-			var password = "${oktaUserPassword}";
+			var password = ${oktaUserPassword};
 		}
 
 		if (!(isSet(userScreenName))) {
@@ -143,370 +143,370 @@ definition {
 			var userEmailStatus = "VERIFIED";
 		}
 
-		var partialUuid1 = StringUtil.randomString("8");
-		var partialUuid2 = StringUtil.randomString("4");
-		var partialUuid3 = StringUtil.randomString("4");
-		var partialUuid4 = StringUtil.randomString("4");
-		var partialUuid5 = StringUtil.randomString("12");
+		var partialUuid1 = StringUtil.randomString(8);
+		var partialUuid2 = StringUtil.randomString(4);
+		var partialUuid3 = StringUtil.randomString(4);
+		var partialUuid4 = StringUtil.randomString(4);
+		var partialUuid5 = StringUtil.randomString(12);
 
 		var userUuid = "${partialUuid1}-${partialUuid2}-${partialUuid3}-${partialUuid4}-${partialUuid5}";
 
-		if ("${groupNames}" == "") {
+		if (${groupNames} == "") {
 			var curl = '''
 				${oktaURL}/api/v1/users?activate=${userActiveStatus}
-				-H "Authorization: SSWS ${oktaApiToken}"
-				-H "accept: application/json"
-				-H "Content-Type: application/json"
-				-d 
-				{
-				"profile":
+					-H "Authorization: SSWS ${oktaApiToken}"
+					-H "accept: application/json"
+					-H "Content-Type: application/json"
+					-d
 					{
-						"email": "${userEmailAddress}",
-						"login": "${userEmailAddress}",
-						"firstName": "${userFirstName}",
-						"lastName": "${userLastName}",
-						"screenName": "${userScreenName}",
-						"uuid": "${userUuid}",
-						"mobilePhone": "${userMobilePhone}",
-						"primaryPhone": "${userPrimaryPhone}"
-					},
-				"credentials":
-					{
-						"emails":
+						"profile":
+						{
+							"email": "${userEmailAddress}",
+							"login": "${userEmailAddress}",
+							"firstName": "${userFirstName}",
+							"lastName": "${userLastName}",
+							"screenName": "${userScreenName}",
+							"uuid": "${userUuid}",
+							"mobilePhone": "${userMobilePhone}",
+							"primaryPhone": "${userPrimaryPhone}"
+						},
+						"credentials":
+						{
+							"emails":
 							[{
 								"status": "${userEmailStatus}"
 							}],
-						"password":
+							"password":
 							{
 								"value": "${password}"
 							}
+						}
 					}
-				}
-				''';
+			''';
 		}
 		else {
 			var groupIds = "";
 
-			for (var groupName : list "${groupNames}") {
-				var groupId = JSONOkta.getOktaGroupId(groupName = "${groupName}");
+			for (var groupName : list ${groupNames}) {
+				var groupId = JSONOkta.getOktaGroupId(groupName = ${groupName});
 
-				if ("${groupIds}" == "") {
-					var groupIds = "&quot;${groupId}&quot;";
+				if (${groupIds} == "") {
+					var groupIds = "\"${groupId}\"";
 				}
 				else {
-					var groupIds = "${groupIds},&quot;${groupId}&quot;";
+					var groupIds = "${groupIds},\"${groupId}\"";
 				}
 			}
 
 			var curl = '''
 				${oktaURL}/api/v1/users?activate=${userActiveStatus}
-				-H "Authorization: SSWS ${oktaApiToken}"
-				-H "accept: application/json"
-				-H "Content-Type: application/json"
-				-d 
-				{
-				"profile":
+					-H "Authorization: SSWS ${oktaApiToken}"
+					-H "accept: application/json"
+					-H "Content-Type: application/json"
+					-d
 					{
-						"email": "${userEmailAddress}",
-						"login": "${userEmailAddress}",
-						"firstName": "${userFirstName}",
-						"lastName": "${userLastName}",
-						"screenName": "${userScreenName}",
-						"uuid": "${userUuid}",
-						"mobilePhone": "${userMobilePhone}",
-						"primaryPhone": "${userPrimaryPhone}"
-					},
-				"credentials":
-					{
-						"emails":
+						"profile":
+						{
+							"email": "${userEmailAddress}",
+							"login": "${userEmailAddress}",
+							"firstName": "${userFirstName}",
+							"lastName": "${userLastName}",
+							"screenName": "${userScreenName}",
+							"uuid": "${userUuid}",
+							"mobilePhone": "${userMobilePhone}",
+							"primaryPhone": "${userPrimaryPhone}"
+						},
+						"credentials":
+						{
+							"emails":
 							[{
 								"status": "${userEmailStatus}"
 							}],
-						"password":
+							"password":
 							{
 								"value": "${password}"
 							}
-					},
-				"groupIds":
-					[
-						${groupIds}
-					]
-				}
-				''';
+						},
+						"groupIds":
+						[
+							${groupIds}
+						]
+					}
+			''';
 		}
 
-		com.liferay.poshi.runner.util.JSONCurlUtil.post("${curl}");
+		com.liferay.poshi.runner.util.JSONCurlUtil.post(${curl});
 	}
 
 	@prose = "I deactivate the user with the email address ${userEmailAddress} from okta"
 	macro deactivateOktaUser {
-		var userId = JSONOkta.getOktaUserId(userEmailAddress = "${userEmailAddress}");
+		var userId = JSONOkta.getOktaUserId(userEmailAddress = ${userEmailAddress});
 
 		var curl = '''
 			${oktaURL}/api/v1/users/${userId}/lifecycle/deactivate
-			-H "Authorization: SSWS ${oktaApiToken}"
-			-H "accept: application/json"
-			-H "Content-Type: application/json"
-			''';
+				-H "Authorization: SSWS ${oktaApiToken}"
+				-H "accept: application/json"
+				-H "Content-Type: application/json"
+		''';
 
-		com.liferay.poshi.runner.util.JSONCurlUtil.post("${curl}");
+		com.liferay.poshi.runner.util.JSONCurlUtil.post(${curl});
 	}
 
 	@prose = "I delete the user with the email address ${userEmailAddress} from okta"
 	macro deleteOktaUser {
-		JSONOkta.deactivateOktaUser(userEmailAddress = "${userEmailAddress}");
+		JSONOkta.deactivateOktaUser(userEmailAddress = ${userEmailAddress});
 
 		var curl = '''
 			${oktaURL}/api/v1/users/${userEmailAddress}
-			-H "Authorization: SSWS ${oktaApiToken}"
-			-H "accept: application/json"
-			-H "Content-Type: application/json"
-			''';
+				-H "Authorization: SSWS ${oktaApiToken}"
+				-H "accept: application/json"
+				-H "Content-Type: application/json"
+		''';
 
-		com.liferay.poshi.runner.util.JSONCurlUtil.delete("${curl}");
+		com.liferay.poshi.runner.util.JSONCurlUtil.delete(${curl});
+	}
+
+	macro getOktaGroupId {
+		var groupNameNoSpaces = StringUtil.replace(${groupName}, " ", "+");
+
+		var curl = '''
+			${oktaURL}/api/v1/groups?q=${groupNameNoSpaces}
+				-H "Authorization: SSWS ${oktaApiToken}"
+				-H "accept: application/json"
+				-H "Content-Type: application/json"
+		''';
+
+		var groupId = JSONCurlUtil.get(${curl}, "$.[?(@.profile.name =='${groupName}')].id");
+
+		var groupId = StringUtil.replace(${groupId}, "[", "");
+
+		var groupId = StringUtil.replace(${groupId}, "]", "");
+
+		echo("Group ID: ${groupId}");
+
+		return ${groupId};
+	}
+
+	macro getOktaGroupIdWithNoQuotes {
+		var groupNameNoSpaces = StringUtil.replace(${groupName}, " ", "+");
+
+		var curl = '''
+			${oktaURL}/api/v1/groups?q=${groupNameNoSpaces}
+				-H "Authorization: SSWS ${oktaApiToken}"
+				-H "accept: application/json"
+				-H "Content-Type: application/json"
+		''';
+
+		var groupId = JSONCurlUtil.get(${curl}, "$.[?(@.profile.name =='${groupName}')].id");
+
+		var groupId = StringUtil.replace(${groupId}, "[", "");
+
+		var groupId = StringUtil.replace(${groupId}, "]", "");
+
+		var groupId = StringUtil.replace(${groupId}, "\"", "");
+
+		echo("Group ID: ${groupId}");
+
+		return ${groupId};
+	}
+
+	macro getOktaRoleIdByName {
+		var curl = '''
+			${oktaURL}/api/v1/users/${userId}/roles
+				-H "Authorization: SSWS ${oktaApiToken}"
+				-H "accept: application/json"
+				-H "Content-Type: application/json"
+		''';
+
+		var roleId = JSONCurlUtil.get(${curl}, "$.id");
+
+		return ${roleId};
 	}
 
 	@prose = "the following okta user json fields and their respective quantities should be present ${table}"
 	macro getOktaUserFields {
 		var curl = '''
 			${oktaURL}/api/v1/users/me
-			-H "Authorization: SSWS ${oktaApiToken}"
-			-H "accept: application/json"
-			-H "Content-Type: application/json"
+				-H "Authorization: SSWS ${oktaApiToken}"
+				-H "accept: application/json"
+				-H "Content-Type: application/json"
 		''';
 
-		var currentOktaUser = JSONCurlUtil.get("${curl}");
+		var currentOktaUser = JSONCurlUtil.get(${curl});
 
 		JSONAPI._checkJSONFields(
-			currentJson = "${currentOktaUser}",
-			table = "${table}");
-	}
-
-	macro getOktaGroupId {
-		var groupNameNoSpaces = StringUtil.replace("${groupName}", " ", "+");
-
-		var curl = '''
-			${oktaURL}/api/v1/groups?q=${groupNameNoSpaces}
-			-H "Authorization: SSWS ${oktaApiToken}"
-			-H "accept: application/json"
-			-H "Content-Type: application/json"
-			''';
-
-		var groupId = JSONCurlUtil.get("${curl}", "$.[?(@.profile.name =='${groupName}')].id");
-
-		var groupId = StringUtil.replace("${groupId}", "[", "");
-
-		var groupId = StringUtil.replace("${groupId}", "]", "");
-
-		echo("Group ID: ${groupId}");
-
-		return "${groupId}";
-	}
-
-	macro getOktaGroupIdWithNoQuotes {
-		var groupNameNoSpaces = StringUtil.replace("${groupName}", " ", "+");
-
-		var curl = '''
-			${oktaURL}/api/v1/groups?q=${groupNameNoSpaces}
-			-H "Authorization: SSWS ${oktaApiToken}"
-			-H "accept: application/json"
-			-H "Content-Type: application/json"
-			''';
-
-		var groupId = JSONCurlUtil.get("${curl}", "$.[?(@.profile.name =='${groupName}')].id");
-
-		var groupId = StringUtil.replace("${groupId}", "[", "");
-
-		var groupId = StringUtil.replace("${groupId}", "]", "");
-
-		var groupId = StringUtil.replace("${groupId}", "\"", "");
-
-		echo("Group ID: ${groupId}");
-
-		return "${groupId}";
-	}
-
-	macro getOktaRoleIdByName {
-		var curl = '''
-			${oktaURL}/api/v1/users/${userId}/roles
-			-H "Authorization: SSWS ${oktaApiToken}"
-			-H "accept: application/json"
-			-H "Content-Type: application/json"
-			''';
-
-		var roleId = JSONCurlUtil.get("${curl}", "$.id");
-
-		return "${roleId}";
+			currentJson = ${currentOktaUser},
+			table = ${table});
 	}
 
 	macro getOktaUserId {
 		var curl = '''
 			${oktaURL}/api/v1/users/${userEmailAddress}
-			-H "Authorization: SSWS ${oktaApiToken}"
-			-H "accept: application/json"
-			-H "Content-Type: application/json"
-			''';
+				-H "Authorization: SSWS ${oktaApiToken}"
+				-H "accept: application/json"
+				-H "Content-Type: application/json"
+		''';
 
-		var userId = JSONCurlUtil.get("${curl}", "$.id");
+		var userId = JSONCurlUtil.get(${curl}, "$.id");
 
 		echo("Okta User ID: ${userId}");
 
-		return "${userId}";
+		return ${userId};
 	}
 
 	macro getOktaUserUuid {
 		var curl = '''
 			${oktaURL}/api/v1/users/${userEmailAddress}
-			-H "Authorization: SSWS ${oktaApiToken}"
-			-H "accept: application/json"
-			-H "Content-Type: application/json"
-			''';
+				-H "Authorization: SSWS ${oktaApiToken}"
+				-H "accept: application/json"
+				-H "Content-Type: application/json"
+		''';
 
-		var userUuid = JSONCurlUtil.get("${curl}", "$.profile.uuid");
+		var userUuid = JSONCurlUtil.get(${curl}, "$.profile.uuid");
 
 		echo("Okta User Uuid: ${userUuid}");
 
-		return "${userUuid}";
+		return ${userUuid};
 	}
 
 	@prose = "I log out of the dev domain using api and okta session ID"
 	macro logoutOfDevDomainApi {
 		var curl = '''
 			${oktaURL}/api/v1/sessions/${staticOktaSessionId}
-			-H "Authorization: SSWS ${oktaApiToken}"
-			-H "accept: application/json"
-			-H "Content-Type: application/json"
-			''';
+				-H "Authorization: SSWS ${oktaApiToken}"
+				-H "accept: application/json"
+				-H "Content-Type: application/json"
+		''';
 
-		com.liferay.poshi.runner.util.JSONCurlUtil.delete("${curl}");
+		com.liferay.poshi.runner.util.JSONCurlUtil.delete(${curl});
 	}
 
 	@prose = "I remove the okta user with the email address ${userEmailAddress} from the okta group ${groupName}"
 	macro removeUserFromOktaGroup {
-		var groupId = JSONOkta.getOktaGroupIdWithNoQuotes(groupName = "${groupName}");
-		var userId = JSONOkta.getOktaUserId(userEmailAddress = "${userEmailAddress}");
+		var groupId = JSONOkta.getOktaGroupIdWithNoQuotes(groupName = ${groupName});
+		var userId = JSONOkta.getOktaUserId(userEmailAddress = ${userEmailAddress});
 
 		var curl = '''
 			${oktaURL}/api/v1/groups/${groupId}/users/${userId}
-			-H "Authorization: SSWS ${oktaApiToken}"
-			-H "accept: application/json"
-			-H "Content-Type: application/json"
-			''';
+				-H "Authorization: SSWS ${oktaApiToken}"
+				-H "accept: application/json"
+				-H "Content-Type: application/json"
+		''';
 
-		com.liferay.poshi.runner.util.JSONCurlUtil.delete("${curl}");
+		com.liferay.poshi.runner.util.JSONCurlUtil.delete(${curl});
 	}
 
 	@prose = "I tear down the users with the following email addresses from okta ${table}"
 	macro tearDownUsers {
-		var  rawTable = TableUtil.newTable(${table});
+		var rawTable = TableUtil.newTable(${table});
 
-		for (var row : table "${rawTable}") {
+		for (var row : table ${rawTable}) {
 			var userEmailAddress = "${row[0]}";
 
-			var userScreenName = StringUtil.extractFirst("${userEmailAddress}", "@");
+			var userScreenName = StringUtil.extractFirst(${userEmailAddress}, "@");
 			var curl = '''
 				${oktaURL}/api/v1/users/${userEmailAddress}
-				-H "Authorization: SSWS ${oktaApiToken}"
-				-H "accept: application/json"
-				-H "Content-Type: application/json"
-				''';
+					-H "Authorization: SSWS ${oktaApiToken}"
+					-H "accept: application/json"
+					-H "Content-Type: application/json"
+			''';
 
-			var userObject = JSONCurlUtil.get("${curl}");
+			var userObject = JSONCurlUtil.get(${curl});
 
-			if (contains("${userObject}", "${userEmailAddress}") && !(contains("${userObject}", "Resource not found"))) {
-				JSONOkta.deleteOktaUser(userEmailAddress = "${userEmailAddress}");
+			if (contains(${userObject}, ${userEmailAddress}) && !(contains(${userObject}, "Resource not found"))) {
+				JSONOkta.deleteOktaUser(userEmailAddress = ${userEmailAddress});
 			}
 		}
 	}
 
 	@prose = "I tear down the users with the following screen names from okta ${table}"
 	macro tearDownUsersByScreenName {
-		var  rawTable = TableUtil.newTable(${table});
+		var rawTable = TableUtil.newTable(${table});
 
-		for (var row : table "${rawTable}") {
+		for (var row : table ${rawTable}) {
 			var userScreenName = "${row[0]}";
 
 			var curl = '''
 				${oktaURL}/api/v1/users/${userScreenName}
-				-H "Authorization: SSWS ${oktaApiToken}"
-				-H "accept: application/json"
-				-H "Content-Type: application/json"
-				''';
+					-H "Authorization: SSWS ${oktaApiToken}"
+					-H "accept: application/json"
+					-H "Content-Type: application/json"
+			''';
 
-			var userObject = JSONCurlUtil.get("${curl}");
+			var userObject = JSONCurlUtil.get(${curl});
 
-			if (contains("${userObject}", "${userScreenName}") && !(contains("${userObject}", "Resource not found"))) {
-				var userEmailAddress = JSONCurlUtil.get("${curl}", "$.profile.email");
+			if (contains(${userObject}, ${userScreenName}) && !(contains(${userObject}, "Resource not found"))) {
+				var userEmailAddress = JSONCurlUtil.get(${curl}, "$.profile.email");
 
-				JSONOkta.deleteOktaUser(userEmailAddress = "${userEmailAddress}");
+				JSONOkta.deleteOktaUser(userEmailAddress = ${userEmailAddress});
 			}
 		}
 	}
 
 	@prose = "I update the okta password for the user with the email address ${userEmailAddress} to ${userPassword}"
 	macro updateOktaPassword {
-		var userId = JSONOkta.getOktaUserId(userEmailAddress = "${userEmailAddress}");
+		var userId = JSONOkta.getOktaUserId(userEmailAddress = ${userEmailAddress});
 
 		var curl = '''
 			${oktaURL}/api/v1/users/${userId}
-			-H "Authorization: SSWS ${oktaApiToken}"
-			-H "accept: application/json"
-			-H "Content-Type: application/json"
-			-d 
-			{
-			"credentials":
+				-H "Authorization: SSWS ${oktaApiToken}"
+				-H "accept: application/json"
+				-H "Content-Type: application/json"
+				-d
 				{
-					"password":
+					"credentials":
 					{
-						"value": "${userPassword}"
-					} 
+						"password":
+						{
+							"value": "${userPassword}"
+						}
+					}
 				}
-			}
-			''';
+		''';
 
-		com.liferay.poshi.runner.util.JSONCurlUtil.put("${curl}");
+		com.liferay.poshi.runner.util.JSONCurlUtil.put(${curl});
 	}
 
 	@prose = "I update a user with the email address ${userOriginalEmailAddress} to have the following parameters ${table}"
 	macro updateOktaUser {
 		var groupNames = "";
-		var userId = JSONOkta.getOktaUserId(userEmailAddress = "${userOriginalEmailAddress}");
-		var  rawTable = TableUtil.newTable(${table});
+		var userId = JSONOkta.getOktaUserId(userEmailAddress = ${userOriginalEmailAddress});
+		var rawTable = TableUtil.newTable(${table});
 
-		for (var row : table "${rawTable}") {
+		for (var row : table ${rawTable}) {
 			var field = "${row[0]}";
 			var value = "${row[1]}";
 
-			if ("${field}" == "Screen Name") {
-				var userScreenName = "${value}";
+			if (${field} == "Screen Name") {
+				var userScreenName = ${value};
 			}
-			else if ("${field}" == "Email Address") {
-				var userEmailAddress = "${value}";
+			else if (${field} == "Email Address") {
+				var userEmailAddress = ${value};
 			}
-			else if ("${field}" == "First Name") {
-				var userFirstName = "${value}";
+			else if (${field} == "First Name") {
+				var userFirstName = ${value};
 			}
-			else if ("${field}" == "Last Name") {
-				var userLastName = "${value}";
+			else if (${field} == "Last Name") {
+				var userLastName = ${value};
 			}
-			else if ("${field}" == "Active") {
-				var userActiveStatus = "${value}";
+			else if (${field} == "Active") {
+				var userActiveStatus = ${value};
 			}
-			else if ("${field}" == "Email Status") {
-				var userEmailStatus = "${value}";
+			else if (${field} == "Email Status") {
+				var userEmailStatus = ${value};
 			}
-			else if ("${field}" == "Mobile Number") {
-				var userMobilePhone = "${value}";
+			else if (${field} == "Mobile Number") {
+				var userMobilePhone = ${value};
 			}
-			else if ("${field}" == "Primary Number") {
-				var userPrimaryPhone = "${value}";
+			else if (${field} == "Primary Number") {
+				var userPrimaryPhone = ${value};
 			}
-			else if ("${field}" == "UUID") {
-				var userUuid = "${value}";
+			else if (${field} == "UUID") {
+				var userUuid = ${value};
 			}
-			else if ("${field}" == "Group") {
-				if ("${groupNames}" == "") {
-					var groupNames = "${value}";
+			else if (${field} == "Group") {
+				if (${groupNames} == "") {
+					var groupNames = ${value};
 				}
 				else {
 					var groupNames = "${groupNames},${value}";
@@ -519,18 +519,18 @@ definition {
 
 		var curl = '''
 			${oktaURL}/api/v1/users/${userOriginalEmailAddress}
-			-H "Authorization: SSWS ${oktaApiToken}"
-			-H "accept: application/json"
-			-H "Content-Type: application/json"
-			''';
+				-H "Authorization: SSWS ${oktaApiToken}"
+				-H "accept: application/json"
+				-H "Content-Type: application/json"
+		''';
 
 		if (!(isSet(userScreenName))) {
-			var userObject = JSONCurlUtil.get("${curl}", "$");
+			var userObject = JSONCurlUtil.get(${curl}, "$");
 
-			if (contains("${userObject}", "screenName=")) {
-				var value = JSONCurlUtil.get("${curl}", "$.profile.screenName");
+			if (contains(${userObject}, "screenName=")) {
+				var value = JSONCurlUtil.get(${curl}, "$.profile.screenName");
 
-				var userScreenName = "${value}";
+				var userScreenName = ${value};
 			}
 			else {
 				var userScreenName = "";
@@ -538,12 +538,12 @@ definition {
 		}
 
 		if (!(isSet(userEmailAddress))) {
-			var userObject = JSONCurlUtil.get("${curl}", "$");
+			var userObject = JSONCurlUtil.get(${curl}, "$");
 
-			if (contains("${userObject}", "email=")) {
-				var value = JSONCurlUtil.get("${curl}", "$.profile.email");
+			if (contains(${userObject}, "email=")) {
+				var value = JSONCurlUtil.get(${curl}, "$.profile.email");
 
-				var userEmailAddress = "${value}";
+				var userEmailAddress = ${value};
 			}
 			else {
 				var userEmailAddress = "";
@@ -551,12 +551,12 @@ definition {
 		}
 
 		if (!(isSet(userFirstName))) {
-			var userObject = JSONCurlUtil.get("${curl}", "$");
+			var userObject = JSONCurlUtil.get(${curl}, "$");
 
-			if (contains("${userObject}", "firstName=")) {
-				var value = JSONCurlUtil.get("${curl}", "$.profile.firstName");
+			if (contains(${userObject}, "firstName=")) {
+				var value = JSONCurlUtil.get(${curl}, "$.profile.firstName");
 
-				var userFirstName = "${value}";
+				var userFirstName = ${value};
 			}
 			else {
 				var userFirstName = "";
@@ -564,12 +564,12 @@ definition {
 		}
 
 		if (!(isSet(userLastName))) {
-			var userObject = JSONCurlUtil.get("${curl}", "$");
+			var userObject = JSONCurlUtil.get(${curl}, "$");
 
-			if (contains("${userObject}", "firstName=")) {
-				var value = JSONCurlUtil.get("${curl}", "$.profile.lastName");
+			if (contains(${userObject}, "firstName=")) {
+				var value = JSONCurlUtil.get(${curl}, "$.profile.lastName");
 
-				var userLastName = "${value}";
+				var userLastName = ${value};
 			}
 			else {
 				var userLastName = "";
@@ -577,9 +577,9 @@ definition {
 		}
 
 		if (!(isSet(userActiveStatus))) {
-			var value = JSONCurlUtil.get("${curl}", "$.status");
+			var value = JSONCurlUtil.get(${curl}, "$.status");
 
-			if ("${value}" == "ACTIVE") {
+			if (${value} == "ACTIVE") {
 				var userActiveStatus = "true";
 			}
 			else {
@@ -588,21 +588,21 @@ definition {
 		}
 
 		if (!(isSet(userEmailStatus))) {
-			var value = JSONCurlUtil.get("${curl}", "$.credentials.emails[0].status");
+			var value = JSONCurlUtil.get(${curl}, "$.credentials.emails[0].status");
 
-			var userEmailStatus = "${value}";
+			var userEmailStatus = ${value};
 		}
 
 		if (!(isSet(userMobilePhone))) {
-			var userObject = JSONCurlUtil.get("${curl}", "$");
+			var userObject = JSONCurlUtil.get(${curl}, "$");
 
-			if (contains("${userObject}", "mobilePhone=null")) {
+			if (contains(${userObject}, "mobilePhone=null")) {
 				var userMobilePhone = "";
 			}
-			else if (contains("${userObject}", "mobilePhone=")) {
-				var value = JSONCurlUtil.get("${curl}", "$.profile.mobilePhone");
+			else if (contains(${userObject}, "mobilePhone=")) {
+				var value = JSONCurlUtil.get(${curl}, "$.profile.mobilePhone");
 
-				var userMobilePhone = "${value}";
+				var userMobilePhone = ${value};
 			}
 			else {
 				var userMobilePhone = "";
@@ -610,35 +610,35 @@ definition {
 		}
 
 		if (!(isSet(userPrimaryPhone))) {
-			var userObject = JSONCurlUtil.get("${curl}", "$");
+			var userObject = JSONCurlUtil.get(${curl}, "$");
 
-			if (contains("${userObject}", "primaryPhone=null")) {
+			if (contains(${userObject}, "primaryPhone=null")) {
 				var userPrimaryPhone = "";
 			}
-			else if (contains("${userObject}", "primaryPhone=")) {
-				var value = JSONCurlUtil.get("${curl}", "$.profile.primaryPhone");
+			else if (contains(${userObject}, "primaryPhone=")) {
+				var value = JSONCurlUtil.get(${curl}, "$.profile.primaryPhone");
 
-				var userPrimaryPhone = "${value}";
+				var userPrimaryPhone = ${value};
 			}
 			else {
 				var userPrimaryPhone = "";
 			}
 		}
 
-		if ("${groupNames}" == "") {
-			var userObject = JSONCurlUtil.get("${curl}", "$");
+		if (${groupNames} == "") {
+			var userObject = JSONCurlUtil.get(${curl}, "$");
 
-			if (contains("${userObject}", "groupIds=null")) {
+			if (contains(${userObject}, "groupIds=null")) {
 				var groupIds = "";
 			}
-			else if (contains("${userObject}", "groupIds=")) {
-				var value = JSONCurlUtil.get("${curl}", "$.credentials.groupIds[0]");
+			else if (contains(${userObject}, "groupIds=")) {
+				var value = JSONCurlUtil.get(${curl}, "$.credentials.groupIds[0]");
 
-				var value = StringUtil.replace("${value}", "[", "");
+				var value = StringUtil.replace(${value}, "[", "");
 
-				var value = StringUtil.replace("${value}", "]", "");
+				var value = StringUtil.replace(${value}, "]", "");
 
-				var groupIds = "${value}";
+				var groupIds = ${value};
 			}
 			else {
 				var groupIds = "";
@@ -646,51 +646,51 @@ definition {
 		}
 
 		if (!(isSet(userUuid))) {
-			var userUuid = JSONCurlUtil.get("${curl}", "$.profile.uuid");
+			var userUuid = JSONCurlUtil.get(${curl}, "$.profile.uuid");
 		}
 
-		var password = "${oktaUserPassword}";
+		var password = ${oktaUserPassword};
 
-		if (("${groupNames}" == "") && ("${groupIds}" == "")) {
+		if ((${groupNames} == "") && (${groupIds} == "")) {
 			var curl = '''
 				${oktaURL}/api/v1/users/${userId}
-				-H "Authorization: SSWS ${oktaApiToken}"
-				-H "accept: application/json"
-				-H "Content-Type: application/json"
-				-d 
-				{
-				"profile":
+					-H "Authorization: SSWS ${oktaApiToken}"
+					-H "accept: application/json"
+					-H "Content-Type: application/json"
+					-d
 					{
-						"email": "${userEmailAddress}",
-						"login": "${userEmailAddress}",
-						"firstName": "${userFirstName}",
-						"lastName": "${userLastName}",
-						"screenName": "${userScreenName}",
-						"uuid": "${userUuid}",
-						"mobilePhone": "${userMobilePhone}",
-						"primaryPhone": "${userPrimaryPhone}"
-					},
-				"credentials":
-					{
-						"emails":
+						"profile":
+						{
+							"email": "${userEmailAddress}",
+							"login": "${userEmailAddress}",
+							"firstName": "${userFirstName}",
+							"lastName": "${userLastName}",
+							"screenName": "${userScreenName}",
+							"uuid": "${userUuid}",
+							"mobilePhone": "${userMobilePhone}",
+							"primaryPhone": "${userPrimaryPhone}"
+						},
+						"credentials":
+						{
+							"emails":
 							[{
 								"status": "${userEmailStatus}"
 							}],
-						"password":
+							"password":
 							{
 								"value": "${password}"
 							}
+						}
 					}
-				}
-				''';
+			''';
 		}
 		else {
-			if ("${groupNames}" != "") {
-				for (var groupName : list "${groupNames}") {
-					var groupId = JSONOkta.getOktaGroupId(groupName = "${groupName}");
+			if (${groupNames} != "") {
+				for (var groupName : list ${groupNames}) {
+					var groupId = JSONOkta.getOktaGroupId(groupName = ${groupName});
 
-					if ("${groupIds}" == "") {
-						var groupIds = "${groupId}";
+					if (${groupIds} == "") {
+						var groupIds = ${groupId};
 					}
 					else {
 						var groupIds = "${groupIds},${groupId}";
@@ -700,56 +700,56 @@ definition {
 
 			var curl = '''
 				${oktaURL}/api/v1/users/${userId}
-				-H "Authorization: SSWS ${oktaApiToken}"
-				-H "accept: application/json"
-				-H "Content-Type: application/json"
-				-d 
-				{
-				"profile":
+					-H "Authorization: SSWS ${oktaApiToken}"
+					-H "accept: application/json"
+					-H "Content-Type: application/json"
+					-d
 					{
-						"email": "${userEmailAddress}",
-						"login": "${userEmailAddress}",
-						"firstName": "${userFirstName}",
-						"lastName": "${userLastName}",
-						"screenName": "${userScreenName}",
-						"uuid": "${userUuid}",
-						"mobilePhone": "${userMobilePhone}",
-						"primaryPhone": "${userPrimaryPhone}"
-					},
-				"credentials":
-					{
-						"emails":
+						"profile":
+						{
+							"email": "${userEmailAddress}",
+							"login": "${userEmailAddress}",
+							"firstName": "${userFirstName}",
+							"lastName": "${userLastName}",
+							"screenName": "${userScreenName}",
+							"uuid": "${userUuid}",
+							"mobilePhone": "${userMobilePhone}",
+							"primaryPhone": "${userPrimaryPhone}"
+						},
+						"credentials":
+						{
+							"emails":
 							[{
 								"status": "${userEmailStatus}"
 							}],
-						"password":
+							"password":
 							{
 								"value": "${password}"
 							}
-					},
-				"groupIds":
-					[
-						${groupIds}
-					]
-				}
-				''';
+						},
+						"groupIds":
+						[
+							${groupIds}
+						]
+					}
+			''';
 		}
 
-		com.liferay.poshi.runner.util.JSONCurlUtil.put("${curl}");
+		com.liferay.poshi.runner.util.JSONCurlUtil.put(${curl});
 	}
 
 	@prose = "the user with the email address ${userEmailAddress} should not be present on okta"
 	macro viewNoOktaUser {
 		var curl = '''
 			${oktaURL}/api/v1/users/${userEmailAddress}
-			-H "Authorization: SSWS ${oktaApiToken}"
-			-H "accept: application/json"
-			-H "Content-Type: application/json"
-			''';
+				-H "Authorization: SSWS ${oktaApiToken}"
+				-H "accept: application/json"
+				-H "Content-Type: application/json"
+		''';
 
-		var oktaErrorMessage = JSONCurlUtil.get("${curl}");
+		var oktaErrorMessage = JSONCurlUtil.get(${curl});
 
-		if (contains("${oktaErrorMessage}", "Not found: Resource not found:")) {
+		if (contains(${oktaErrorMessage}, "Not found: Resource not found:")) {
 			echo("Actual email value ${userEmailAddress} is not present on okta");
 		}
 		else {
@@ -759,19 +759,19 @@ definition {
 
 	@prose = "the user with the email address ${userEmailAddress} should not be a member of the okta group ${groupName}"
 	macro viewNoOktaUserGroupMembership {
-		var groupId = JSONOkta.getOktaGroupId(groupName = "${groupName}");
-		var userId = JSONOkta.getOktaUserId(userEmailAddress = "${userEmailAddress}");
+		var groupId = JSONOkta.getOktaGroupId(groupName = ${groupName});
+		var userId = JSONOkta.getOktaUserId(userEmailAddress = ${userEmailAddress});
 
 		var curl = '''
 			${oktaURL}/api/v1/users/${userId}/groups
-			-H "Authorization: SSWS ${oktaApiToken}"
-			-H "accept: application/json"
-			-H "Content-Type: application/json"
-			''';
+				-H "Authorization: SSWS ${oktaApiToken}"
+				-H "accept: application/json"
+				-H "Content-Type: application/json"
+		''';
 
-		var groups = JSONCurlUtil.get("${curl}");
+		var groups = JSONCurlUtil.get(${curl});
 
-		if (contains("${groups}", "${groupId}")) {
+		if (contains(${groups}, ${groupId})) {
 			fail("The user with the email address ${userEmailAddress} appears to unexpectedly be a member of the okta group ${groupName}");
 		}
 		else {
@@ -783,40 +783,40 @@ definition {
 	macro viewOktaUser {
 		var curl = '''
 			${oktaURL}/api/v1/users/${userEmailAddress}
-			-H "Authorization: SSWS ${oktaApiToken}"
-			-H "accept: application/json"
-			-H "Content-Type: application/json"
-			''';
+				-H "Authorization: SSWS ${oktaApiToken}"
+				-H "accept: application/json"
+				-H "Content-Type: application/json"
+		''';
 
-		var oktaUserEmail = JSONCurlUtil.get("${curl}", "$.profile[?(@.email=='${userEmailAddress}')].email");
-		var oktaUserEmail = StringUtil.replace("${userEmailAddress}", "[", "");
-		var oktaUserEmail = StringUtil.replace("${userEmailAddress}", "]", "");
-		var oktaUserEmail = StringUtil.replace("${userEmailAddress}", "\"", "");
+		var oktaUserEmail = JSONCurlUtil.get(${curl}, "$.profile[?(@.email=='${userEmailAddress}')].email");
+		var oktaUserEmail = StringUtil.replace(${userEmailAddress}, "[", "");
+		var oktaUserEmail = StringUtil.replace(${userEmailAddress}, "]", "");
+		var oktaUserEmail = StringUtil.replace(${userEmailAddress}, "\"", "");
 
 		echo("Expected okta email address value: ${userEmailAddress}");
 
 		echo("Actual okta email address value: ${oktaUserEmail}");
 
-		if ("${userEmailAddress}" != "${oktaUserEmail}") {
+		if (${userEmailAddress} != ${oktaUserEmail}) {
 			fail("Actual okta email value ${userEmailAddress} does not match expected okta email value ${oktaUserEmail}");
 		}
 	}
 
 	@prose = "the user with the email address ${userEmailAddress} should be a member of the okta group ${groupName}"
 	macro viewOktaUserGroupMembership {
-		var groupId = JSONOkta.getOktaGroupId(groupName = "${groupName}");
-		var userId = JSONOkta.getOktaUserId(userEmailAddress = "${userEmailAddress}");
+		var groupId = JSONOkta.getOktaGroupId(groupName = ${groupName});
+		var userId = JSONOkta.getOktaUserId(userEmailAddress = ${userEmailAddress});
 
 		var curl = '''
 			${oktaURL}/api/v1/users/${userId}/groups
-			-H "Authorization: SSWS ${oktaApiToken}"
-			-H "accept: application/json"
-			-H "Content-Type: application/json"
-			''';
+				-H "Authorization: SSWS ${oktaApiToken}"
+				-H "accept: application/json"
+				-H "Content-Type: application/json"
+		''';
 
-		var groups = JSONCurlUtil.get("${curl}");
+		var groups = JSONCurlUtil.get(${curl});
 
-		if (!(contains("${groups}", "${groupId}"))) {
+		if (!(contains(${groups}, ${groupId}))) {
 			fail("The user with the email address ${userEmailAddress} appears to have not been added as member to the okta group ${groupName}");
 		}
 		else {

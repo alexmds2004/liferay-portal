@@ -7,57 +7,57 @@ definition {
 		var consoleOutputText = selenium.getText("Jenkins#CONSOLE_OUTPUT_TEXT");
 
 		if (isSet(staticFixPackBaseCommittish)) {
-			if (contains("${consoleOutputText}", "compileJava FAILED")) {
+			if (contains(${consoleOutputText}, "compileJava FAILED")) {
 				fail("Build ${jobBuildNumber} for the tag ${staticFixPackBaseCommittish} failed by Java Compile problems at the ${jobName} job.");
 			}
-			else if (contains("${consoleOutputText}", "RevertInstalledPatchTest > test portal without patches can be started FAILED")) {
+			else if (contains(${consoleOutputText}, "RevertInstalledPatchTest > test portal without patches can be started FAILED")) {
 				fail("Build ${jobBuildNumber} for the tag ${staticFixPackBaseCommittish} failed by Revert Install problems at the ${jobName} job.");
 			}
-			else if (contains("${consoleOutputText}", "@ERROR: Unknown module 'patcher'")) {
+			else if (contains(${consoleOutputText}, "@ERROR: Unknown module 'patcher'")) {
 				fail("Build ${jobBuildNumber} for the tag ${staticFixPackBaseCommittish} failed by not finding the build Patcher module at the ${jobName} job.");
 			}
-			else if (contains("${consoleOutputText}", "packageRunBuild FAILED")) {
+			else if (contains(${consoleOutputText}, "packageRunBuild FAILED")) {
 				fail("Build ${jobBuildNumber} for the tag ${staticFixPackBaseCommittish} failed by Package Run Build at the ${jobName} job.");
 			}
-			else if (contains("${consoleOutputText}", "yarnInstall FAILED")) {
+			else if (contains(${consoleOutputText}, "yarnInstall FAILED")) {
 				fail("Build ${jobBuildNumber} for the tag ${staticFixPackBaseCommittish} failed by Yarn Install problems at the ${jobName} job.");
 			}
-			else if (contains("${consoleOutputText}", "copyIvyDependencies FAILED")) {
+			else if (contains(${consoleOutputText}, "copyIvyDependencies FAILED")) {
 				fail("Build ${jobBuildNumber} for the tag ${staticFixPackBaseCommittish} failed 0on trying to copy ivy depedencies at the ${jobName} job.");
 			}
-			else if (contains("${consoleOutputText}", "compileJSP FAILED")) {
+			else if (contains(${consoleOutputText}, "compileJSP FAILED")) {
 				fail("Build ${jobBuildNumber} for the tag ${staticFixPackBaseCommittish} failed by JSP Compile problems at the ${jobName} job.");
 			}
-			else if (contains("${consoleOutputText}", "InstallPatchTest > test portal with patches can be started STANDARD_ERROR")) {
+			else if (contains(${consoleOutputText}, "InstallPatchTest > test portal with patches can be started STANDARD_ERROR")) {
 				fail("Build ${jobBuildNumber} for the tag ${staticFixPackBaseCommittish} failed on trying to start build after patching at the ${jobName} job.");
 			}
 			else {
 				fail("Build ${jobBuildNumber} for the tag ${staticFixPackBaseCommittish} failed by not mapped reasons at the ${jobName} job.");
 			}
-		} 
+		}
 		else {
-			if (contains("${consoleOutputText}", "compileJava FAILED")) {
+			if (contains(${consoleOutputText}, "compileJava FAILED")) {
 				fail("Build ${jobBuildNumber} failed by Java Compile problems at the ${jobName} job.");
 			}
-			else if (contains("${consoleOutputText}", "RevertInstalledPatchTest > test portal without patches can be started FAILED")) {
+			else if (contains(${consoleOutputText}, "RevertInstalledPatchTest > test portal without patches can be started FAILED")) {
 				fail("Build ${jobBuildNumber} failed by Revert Install problems at the ${jobName} job.");
 			}
-			else if (contains("${consoleOutputText}", "@ERROR: Unknown module 'patcher'")) {
+			else if (contains(${consoleOutputText}, "@ERROR: Unknown module 'patcher'")) {
 				fail("Build ${jobBuildNumber} failed by not finding the build Patcher module at the ${jobName} job.");
 			}
-			else if (contains("${consoleOutputText}", "packageRunBuild FAILED")) {
+			else if (contains(${consoleOutputText}, "packageRunBuild FAILED")) {
 				fail("Build ${jobBuildNumber} failed by Package Run Build at the ${jobName} job.");
 			}
-			else if (contains("${consoleOutputText}", "yarnInstall FAILED")) {
+			else if (contains(${consoleOutputText}, "yarnInstall FAILED")) {
 				fail("Build ${jobBuildNumber} failed by Yarn Install problems at the ${jobName} job.");
 			}
-			else if (contains("${consoleOutputText}", "copyIvyDependencies FAILED")) {
+			else if (contains(${consoleOutputText}, "copyIvyDependencies FAILED")) {
 				fail("Build ${jobBuildNumber} for the tag ${staticFixPackBaseCommittish} failed 0on trying to copy ivy depedencies at the ${jobName} job.");
 			}
-			else if (contains("${consoleOutputText}", "compileJSP FAILED")) {
+			else if (contains(${consoleOutputText}, "compileJSP FAILED")) {
 				fail("Build ${jobBuildNumber} failed by JSP Compile problems at the ${jobName} job.");
 			}
-			else if (contains("${consoleOutputText}", "InstallPatchTest > test portal with patches can be started STANDARD_ERROR")) {
+			else if (contains(${consoleOutputText}, "InstallPatchTest > test portal with patches can be started STANDARD_ERROR")) {
 				fail("Build ${jobBuildNumber} failed on trying to start build after patching at the ${jobName} job.");
 			}
 			else {
@@ -68,33 +68,33 @@ definition {
 
 	@prose = "I check the job with the name ${jobName} and build number ${jobBuildNumber} for completion"
 	macro checkForJobCompletion {
-		var currentIteration = "0";
+		var currentIteration = 0;
 		var jobInProgress = "true";
 
-		while (("${currentIteration}" != "${jobCompletionPollMaximumIterations}") && ("${jobInProgress}" == "true") && (maxIterations = "30")) {
+		while (((${currentIteration} != ${jobCompletionPollMaximumIterations}) && (${jobInProgress} == "true")) && (maxIterations = "30")) {
 			Jenkins.openJenkinsURL();
 
-			var key_jobBuildNumber = "${jobBuildNumber}";
+			var key_jobBuildNumber = ${jobBuildNumber};
 
-			Jenkins.clickJobLink(jobName = "${jobName}");
+			Jenkins.clickJobLink(jobName = ${jobName});
 
 			if (IsElementPresent(locator1 = "Jenkins#JENKINS_JOB_BUILD_STATUS_IN_PROGRESS")) {
 				var currentIteration = ${currentIteration} + 1;
 				var jobInProgress = "true";
 
-				Jenkins.pauseInMinutes(timeInMinutes = "${jobCompletionPollIntervalInMinutes}");
+				Jenkins.pauseInMinutes(timeInMinutes = ${jobCompletionPollIntervalInMinutes});
 			}
 			else {
 				var jobInProgress = "false";
 			}
 		}
 
-		if ("${jobInProgress}" == "true") {
+		if (${jobInProgress} == "true") {
 			Jenkins.openJenkinsURL();
 
-			var key_jobBuildNumber = "${jobBuildNumber}";
+			var key_jobBuildNumber = ${jobBuildNumber};
 
-			Jenkins.clickJobLink(jobName = "${jobName}");
+			Jenkins.clickJobLink(jobName = ${jobName});
 
 			if (IsElementPresent(locator1 = "Jenkins#JENKINS_JOB_BUILD_STATUS_IN_PROGRESS")) {
 				fail("After ${currentIteration} attempts while waiting at ${jobCompletionPollIntervalInMinutes} minutes in between each attempt, the Jenkins job still appears to be in progress.");
@@ -115,13 +115,13 @@ definition {
 	}
 
 	macro clickJobHealthLink {
-		var key_jobName = "${jobName}";
+		var key_jobName = ${jobName};
 
 		Click(locator1 = "Jenkins#JENKINS_JOB_HEALTH_LINK");
 	}
 
 	macro clickJobLink {
-		var key_jobName = "${jobName}";
+		var key_jobName = ${jobName};
 
 		Click(locator1 = "Jenkins#JENKINS_JOB_LINK");
 	}
@@ -132,7 +132,7 @@ definition {
 
 	@prose = "I get the current build number for the job titled ${jobName}"
 	macro getCurrentJobBuildNumber {
-		Jenkins.clickJobLink(jobName = "${jobName}");
+		Jenkins.clickJobLink(jobName = ${jobName});
 
 		WaitForElementPresent(locator1 = "Jenkins#CURRENT_JENKINS_JOB_BUILD_NUMBER");
 
@@ -145,19 +145,19 @@ definition {
 		var hasFoundTheCorrectBuild = "false";
 		var hasBuildsWainting = "true";
 		var hasBuildsWaintingTag = "true";
-		var count = "0";
+		var count = 0;
 
-		while (("${hasFoundTheCorrectBuild}" == "false") && ("${hasBuildsWainting}" == "true") && (maxIterations = "30")) {
+		while (((${hasFoundTheCorrectBuild} == "false") && (${hasBuildsWainting} == "true")) && (maxIterations = "30")) {
 			var count = ${count} + 1;
 			var firstJobBuildNumber = selenium.getText("Jenkins#JENKINS_JOB_BREADCRUMBS_BUILD_NUMBER");
 
-			var currentJobBuildNumber = "${firstJobBuildNumber}";
+			var currentJobBuildNumber = ${firstJobBuildNumber};
 
 			Click(
 				locator1 = "Jenkins#JENKINS_JOB_SIDE_MENU",
 				menuOption = "Parameters");
 
-			while ((IsElementNotPresent(key_content = "${staticGitRevision}", key_parameter = "git.revision", locator1 = "Jenkins#JENKINS_JOB_PARAMETERS_CONTENT")) && ("${currentJobBuildNumber}" != "${lastJobBuildNumber}")) {
+			while ((IsElementNotPresent(key_content = ${staticGitRevision}, key_parameter = "git.revision", locator1 = "Jenkins#JENKINS_JOB_PARAMETERS_CONTENT")) && (${currentJobBuildNumber} != ${lastJobBuildNumber})) {
 				Click(
 					locator1 = "Jenkins#JENKINS_JOB_SIDE_MENU",
 					menuOption = "Previous Build");
@@ -165,25 +165,25 @@ definition {
 				var currentJobBuildNumber = selenium.getText("Jenkins#JENKINS_JOB_BREADCRUMBS_BUILD_NUMBER");
 			}
 
-			var hasBuildsWainting = "${hasBuildsWaintingTag}";
+			var hasBuildsWainting = ${hasBuildsWaintingTag};
 
-			if (IsElementPresent(key_content = "${staticGitRevision}", key_parameter = "git.revision", locator1 = "Jenkins#JENKINS_JOB_PARAMETERS_CONTENT")) {
+			if (IsElementPresent(key_content = ${staticGitRevision}, key_parameter = "git.revision", locator1 = "Jenkins#JENKINS_JOB_PARAMETERS_CONTENT")) {
 				var hasFoundTheCorrectBuild = "true";
 
-				if(IsElementPresent(key_parameter = "fix.pack.baseCommittish", locator1 = "Jenkins#JENKINS_JOB_PARAMETERS")) {
+				if (IsElementPresent(key_parameter = "fix.pack.baseCommittish", locator1 = "Jenkins#JENKINS_JOB_PARAMETERS")) {
 					var fixPackBaseCommittish = selenium.getAttribute("//td[contains(text(),'fix.pack.baseCommittish')]/..//input@value");
 				}
 
-				static var staticFixPackBaseCommittish = "${fixPackBaseCommittish}";
+				static var staticFixPackBaseCommittish = ${fixPackBaseCommittish};
 			}
 			else {
-				var lastJobBuildNumber = "${firstJobBuildNumber}";
+				var lastJobBuildNumber = ${firstJobBuildNumber};
 
 				Click(
 					locator1 = "Jenkins#JENKINS_JOB_SIDE_MENU",
 					menuOption = "Back to Project");
 
-				if(IsElementNotPresent(locator1 = "Jenkins#JENKINS_JOB_BUILD_STATUS_WAINTING")) {
+				if (IsElementNotPresent(locator1 = "Jenkins#JENKINS_JOB_BUILD_STATUS_WAINTING")) {
 					var hasBuildsWaintingTag = "false";
 				}
 
@@ -191,25 +191,26 @@ definition {
 			}
 		}
 
-		if ("${hasFoundTheCorrectBuild}" == "false") {
+		if (${hasFoundTheCorrectBuild} == "false") {
 			fail("After ${count} attempts the build could not be found!");
 		}
 
 		AssertTextEquals(
-			key_content = "${staticGitRevision}",
+			key_content = ${staticGitRevision},
 			key_parameter = "git.revision",
 			locator1 = "Jenkins#JENKINS_JOB_PARAMETERS_CONTENT",
-			value1 = "${staticGitRevision}");
+			value1 = ${staticGitRevision});
 
 		static var staticJobBuildNumber = selenium.getText("Jenkins#JENKINS_JOB_BREADCRUMBS_BUILD_NUMBER");
 
-		return "${staticJobBuildNumber}";
-		return "${staticFixPackBaseCommittish}";
+		return ${staticJobBuildNumber};
+
+		return ${staticFixPackBaseCommittish};
 	}
 
 	@prose = "I get the current build number for the short job titled ${jobName}"
 	macro getCurrentJobBuildNumberForShortJob {
-		Jenkins.clickJobLink(jobName = "${jobName}");
+		Jenkins.clickJobLink(jobName = ${jobName});
 
 		if (IsElementPresent(locator1 = "Jenkins#CURRENT_JENKINS_JOB_BUILD_NUMBER")) {
 			AssertElementPresent(locator1 = "Jenkins#CURRENT_JENKINS_JOB_BUILD_NUMBER");
@@ -226,14 +227,14 @@ definition {
 			static var staticJobBuildNumber = selenium.getText("Jenkins#MOST_RECENT_JENKINS_JOB_BUILD_NUMBER");
 		}
 
-		return "${staticJobBuildNumber}";
+		return ${staticJobBuildNumber};
 	}
 
 	@prose = "I go to the console output for the job with the name ${jobName} and build number ${jobBuildNumber}"
 	macro gotoConsoleOutput {
-		var key_jobBuildNumber = "${jobBuildNumber}";
+		var key_jobBuildNumber = ${jobBuildNumber};
 
-		Jenkins.clickJobLink(jobName = "${jobName}");
+		Jenkins.clickJobLink(jobName = ${jobName});
 
 		Click(locator1 = "Jenkins#JENKINS_JOB_BUILD_LINK");
 
@@ -251,26 +252,26 @@ definition {
 		var mirrorUser = PropsUtil.get("mirror.user");
 		var mirrorPassword = PropsUtil.get("mirror.password");
 		var portalUrl = PropsUtil.get("portal.url");
-		var  rawTable = TableUtil.newTable(${table});
+		var rawTable = TableUtil.newTable(${table});
 
-		for (var row : table "${rawTable}") {
+		for (var row : table ${rawTable}) {
 			var field = "${row[0]}";
 			var value = "${row[1]}";
 
-			if ("${field}" == "bundle") {
-				var bundle = "${value}";
+			if (${field} == "bundle") {
+				var bundle = ${value};
 			}
-			else if ("${field}" == "fixPack") {
-				var fixPack = "${value}";
+			else if (${field} == "fixPack") {
+				var fixPack = ${value};
 			}
-			else if ("${field}" == "hotfix") {
-				var hotfix = "${value}";
+			else if (${field} == "hotfix") {
+				var hotfix = ${value};
 			}
-			else if ("${field}" == "patchingTool") {
-				var patchingTool = "${value}";
+			else if (${field} == "patchingTool") {
+				var patchingTool = ${value};
 			}
-			else if ("${field}" == "patchingToolMajorVersion") {
-				var patchingToolMajorVersion = "${value}";
+			else if (${field} == "patchingToolMajorVersion") {
+				var patchingToolMajorVersion = ${value};
 			}
 			else {
 				fail("No such Jenkins job field ${field} for ${value}");
@@ -293,19 +294,19 @@ definition {
 			var patchingTool = "";
 		}
 
-		if (contains("${patchingTool}", "LATEST")) {
+		if (contains(${patchingTool}, "LATEST")) {
 			var curlLatestPatchingTool = '''
 				http://mirrors.lax.liferay.com/files.liferay.com/private/ee/fix-packs/patching-tool/LATEST-${patchingToolMajorVersion}.0.txt
 				-u ${mirrorUser}:${mirrorPassword}
 			''';
 
-			var jsonResponse = JSONCurlUtil.get("${curlLatestPatchingTool}", "$");
+			var jsonResponse = JSONCurlUtil.get(${curlLatestPatchingTool}, "$");
 
-			var latestVersion = StringUtil.extractFirst("${jsonResponse}", "F");
+			var latestVersion = StringUtil.extractFirst(${jsonResponse}, "F");
 
-			var trimmedLatestVersion = StringUtil.trim("${latestVersion}");
+			var trimmedLatestVersion = StringUtil.trim(${latestVersion});
 
-			var patchingTool = StringUtil.replace("${patchingTool}", "LATEST", "${trimmedLatestVersion}");
+			var patchingTool = StringUtil.replace(${patchingTool}, "LATEST", ${trimmedLatestVersion});
 		}
 
 		var curl = '''
@@ -316,7 +317,7 @@ definition {
 				-d patchingTool=${patchingTool}
 		''';
 
-		com.liferay.poshi.runner.util.JSONCurlUtil.post("${curl}");
+		com.liferay.poshi.runner.util.JSONCurlUtil.post(${curl});
 
 		Jenkins.testFixPackBuilderJenkinsJob(jenkinsJobName = "test-fixpack-builder-install-revert(2x-uat)");
 	}
@@ -325,7 +326,7 @@ definition {
 	macro pause {
 		var timeInMilliseconds = ${timeInSeconds} * 1000;
 
-		Pause(locator1 = "${timeInMilliseconds}");
+		Pause(locator1 = ${timeInMilliseconds});
 	}
 
 	@prose = "I wait for ${timeInMinutes} minutes"
@@ -334,54 +335,54 @@ definition {
 
 		var timeInMilliseconds = ${timeInSeconds} * 1000;
 
-		Pause(locator1 = "${timeInMilliseconds}");
+		Pause(locator1 = ${timeInMilliseconds});
 	}
 
 	@prose = "I start the fixpack-builder-agent job with the following parameters ${table}"
 	macro startFixPackBuilderAgentJob {
 		var jenkinsAuthenticationToken = PropsUtil.get("jenkins.authentication.token");
 		var portalUrl = PropsUtil.get("portal.url");
-		var  rawTable = TableUtil.newTable(${table});
+		var rawTable = TableUtil.newTable(${table});
 
-		for (var row : table "${rawTable}") {
+		for (var row : table ${rawTable}) {
 			var field = "${row[0]}";
 			var value = "${row[1]}";
 
-			if ("${field}" == "osb.patcher.baseCommittish") {
-				var osbPatcherBaseCommittish = "${value}";
+			if (${field} == "osb.patcher.baseCommittish") {
+				var osbPatcherBaseCommittish = ${value};
 			}
-			else if ("${field}" == "osb.patcher.committish") {
-				var osbPatcherCommittish = "${value}";
+			else if (${field} == "osb.patcher.committish") {
+				var osbPatcherCommittish = ${value};
 			}
-			else if ("${field}" == "osb.patcher.fixIds") {
-				var osbPatcherFixIds = "${value}";
+			else if (${field} == "osb.patcher.fixIds") {
+				var osbPatcherFixIds = ${value};
 			}
-			else if ("${field}" == "osb.patcher.gitRemoteURL") {
-				var osbPatcherGitRemoteUrl = "${value}";
+			else if (${field} == "osb.patcher.gitRemoteURL") {
+				var osbPatcherGitRemoteUrl = ${value};
 			}
-			else if ("${field}" == "osb.patcher.patcherFixId") {
-				var osbPatcherPatcherFixId = "${value}";
+			else if (${field} == "osb.patcher.patcherFixId") {
+				var osbPatcherPatcherFixId = ${value};
 			}
-			else if ("${field}" == "osb.patcher.productVersion") {
-				var osbPatcherProductVersion = "${value}";
+			else if (${field} == "osb.patcher.productVersion") {
+				var osbPatcherProductVersion = ${value};
 			}
-			else if ("${field}" == "osb.patcher.rebase") {
-				var osbPatcherRebase = "${value}";
+			else if (${field} == "osb.patcher.rebase") {
+				var osbPatcherRebase = ${value};
 			}
-			else if ("${field}" == "osb.patcher.repository") {
-				var osbPatcherRepository = "${value}";
+			else if (${field} == "osb.patcher.repository") {
+				var osbPatcherRepository = ${value};
 			}
-			else if ("${field}" == "osb.patcher.type") {
-				var osbPatcherType = "${value}";
+			else if (${field} == "osb.patcher.type") {
+				var osbPatcherType = ${value};
 			}
-			else if ("${field}" == "patcher.fix.delivery.method") {
-				var patcherFixDeliveryMethod = "${value}";
+			else if (${field} == "patcher.fix.delivery.method") {
+				var patcherFixDeliveryMethod = ${value};
 			}
-			else if ("${field}" == "patcher.request.key") {
-				var patcherRequestKey = "${value}";
+			else if (${field} == "patcher.request.key") {
+				var patcherRequestKey = ${value};
 			}
-			else if ("${field}" == "patcher.user.id") {
-				var patcherUserId = "${value}";
+			else if (${field} == "patcher.user.id") {
+				var patcherUserId = ${value};
 			}
 			else {
 				fail("No such Jenkins job field ${field} for fixpack-builder-agent");
@@ -452,34 +453,35 @@ definition {
 				-d patcher.user.id=${patcherUserId}
 		''';
 
-		com.liferay.poshi.runner.util.JSONCurlUtil.post("${curl}");
+		com.liferay.poshi.runner.util.JSONCurlUtil.post(${curl});
 	}
 
 	@prose = "I start the fixpack-builder-fixpack-7x uat job with the following parameters ${table}"
 	macro startFixpackBuilderFixpack7xJob {
 		var jenkinsAuthenticationToken = PropsUtil.get("jenkins.authentication.token");
 		var portalUrl = PropsUtil.get("portal.url");
-		var  rawTable = TableUtil.newTable(${table});
+		var rawTable = TableUtil.newTable(${table});
 
-		for (var row : table "${rawTable}") {
+		for (var row : table ${rawTable}) {
 			var field = "${row[0]}";
 			var value = "${row[1]}";
 
-			if ("${field}" == "fix.pack.fixed.issues") {
-				var fixPackFixedIssues = "${value}";
+			if (${field} == "fix.pack.fixed.issues") {
+				var fixPackFixedIssues = ${value};
 			}
-			else if ("${field}" == "fix.pack.id") {
-				var fixPackId = "${value}";
+			else if (${field} == "fix.pack.id") {
+				var fixPackId = ${value};
 			}
-			else if ("${field}" == "git.revision") {
-				var gitRevision = "${value}";
-				static var staticGitRevision = "${gitRevision}";
+			else if (${field} == "git.revision") {
+				var gitRevision = ${value};
+
+				static var staticGitRevision = ${gitRevision};
 			}
-			else if ("${field}" == "runBuilderUpToPublishAppsOnly") {
-				var runBuilderUpToPublishAppsOnly = "${value}";
+			else if (${field} == "runBuilderUpToPublishAppsOnly") {
+				var runBuilderUpToPublishAppsOnly = ${value};
 			}
-			else if ("${field}" == "checkStaleArtifactsSkip") {
-				var checkStaleArtifactsSkip = "${value}";
+			else if (${field} == "checkStaleArtifactsSkip") {
+				var checkStaleArtifactsSkip = ${value};
 			}
 			else {
 				fail("No such Jenkins job field ${field} for fixpack-builder-fixpack-7x-uat");
@@ -515,66 +517,66 @@ definition {
 				-d checkStaleArtifactsSkip=${checkStaleArtifactsSkip}
 		''';
 
-		com.liferay.poshi.runner.util.JSONCurlUtil.post("${curl}");
+		com.liferay.poshi.runner.util.JSONCurlUtil.post(${curl});
 
-		return "${staticGitRevision}";
+		return ${staticGitRevision};
 	}
 
 	@prose = "I start the fixpack-builder-hotfix-7x job with the following parameters ${table}"
 	macro startFixPackBuilderHotfix7xJob {
 		var jenkinsAuthenticationToken = PropsUtil.get("jenkins.authentication.token");
 		var portalUrl = PropsUtil.get("portal.url");
-		var  rawTable = TableUtil.newTable(${table});
+		var rawTable = TableUtil.newTable(${table});
 
-		for (var row : table "${rawTable}") {
+		for (var row : table ${rawTable}) {
 			var field = "${row[0]}";
 			var value = "${row[1]}";
 
-			if ("${field}" == "fix.pack.customer.ticket") {
-				var fixPackCustomerTicket = "${value}";
+			if (${field} == "fix.pack.customer.ticket") {
+				var fixPackCustomerTicket = ${value};
 			}
-			else if ("${field}" == "fix.pack.built.for") {
-				var fixPackBuiltFor = "${value}";
+			else if (${field} == "fix.pack.built.for") {
+				var fixPackBuiltFor = ${value};
 			}
-			else if ("${field}" == "fix.pack.fixed.issues") {
-				var fixPackFixedIssues = "${value}";
+			else if (${field} == "fix.pack.fixed.issues") {
+				var fixPackFixedIssues = ${value};
 			}
-			else if ("${field}" == "fix.pack.hotfixed.issues") {
-				var fixPackHotfixedIssues = "${value}";
+			else if (${field} == "fix.pack.hotfixed.issues") {
+				var fixPackHotfixedIssues = ${value};
 			}
-			else if ("${field}" == "fix.pack.id") {
-				var fixPackId = "${value}";
+			else if (${field} == "fix.pack.id") {
+				var fixPackId = ${value};
 			}
-			else if ("${field}" == "git.revision") {
-				var gitRevision = "${value}";
-				static var staticGitRevision = "${value}";
+			else if (${field} == "git.revision") {
+				var gitRevision = ${value};
+				static var staticGitRevision = ${value};
 			}
-			else if ("${field}" == "patcher.build.id") {
-				var patcherBuildId = "${value}";
+			else if (${field} == "patcher.build.id") {
+				var patcherBuildId = ${value};
 			}
-			else if ("${field}" == "patcher.user.id") {
-				var patcherUserId = "${value}";
+			else if (${field} == "patcher.user.id") {
+				var patcherUserId = ${value};
 			}
-			else if ("${field}" == "patcher.fix.delivery.method") {
-				var patcherFixDeliveryMethod = "${value}";
+			else if (${field} == "patcher.fix.delivery.method") {
+				var patcherFixDeliveryMethod = ${value};
 			}
-			else if ("${field}" == "release.tool.git.remote.username") {
-				var releaseToolGitRemoteUserName = "${value}";
+			else if (${field} == "release.tool.git.remote.username") {
+				var releaseToolGitRemoteUserName = ${value};
 			}
-			else if ("${field}" == "release.tool.git.branch") {
-				var releaseToolGitBranch = "${value}";
+			else if (${field} == "release.tool.git.branch") {
+				var releaseToolGitBranch = ${value};
 			}
-			else if ("${field}" == "fix.pack.baseCommittish") {
-				var fixPackBaseCommittish = "${value}";
+			else if (${field} == "fix.pack.baseCommittish") {
+				var fixPackBaseCommittish = ${value};
 			}
-			else if ("${field}" == "patcher.combined.branch") {
-				var patcherCombinedBranch = "${value}";
+			else if (${field} == "patcher.combined.branch") {
+				var patcherCombinedBranch = ${value};
 			}
-			else if ("${field}" == "patcher.security.patch") {
-				var patcherSecurityPatch = "${value}";
+			else if (${field} == "patcher.security.patch") {
+				var patcherSecurityPatch = ${value};
 			}
-			else if ("${field}" == "patcher.request.key") {
-				var patcherRequestKey = "${value}";
+			else if (${field} == "patcher.request.key") {
+				var patcherRequestKey = ${value};
 			}
 			else {
 				fail("No such Jenkins job field ${field} for fixpack-builder-hotfix-7x");
@@ -660,26 +662,26 @@ definition {
 				-d patcher.request.key=${patcherRequestKey}
 		''';
 
-		com.liferay.poshi.runner.util.JSONCurlUtil.post("${curl}");
+		com.liferay.poshi.runner.util.JSONCurlUtil.post(${curl});
 
-		return "${staticGitRevision}";
+		return ${staticGitRevision};
 	}
 
 	@prose = "I start the test-fixpack-builder-hotfix-copy job with the following parameters ${table}"
 	macro startTestFixPackBuilderHotfixCopyJob {
 		var jenkinsAuthenticationToken = PropsUtil.get("jenkins.authentication.token");
 		var portalUrl = PropsUtil.get("portal.url");
-		var  rawTable = TableUtil.newTable(${table});
+		var rawTable = TableUtil.newTable(${table});
 
-		for (var row : table "${rawTable}") {
+		for (var row : table ${rawTable}) {
 			var field = "${row[0]}";
 			var value = "${row[1]}";
 
-			if ("${field}" == "destinationFilePath") {
-				var destinationFilePath = "${value}";
+			if (${field} == "destinationFilePath") {
+				var destinationFilePath = ${value};
 			}
-			else if ("${field}" == "originFilePath") {
-				var originFilePath = "${value}";
+			else if (${field} == "originFilePath") {
+				var originFilePath = ${value};
 			}
 			else {
 				fail("No such Jenkins job field ${field} for test-fixpack-builder-hotfix-copy");
@@ -700,24 +702,24 @@ definition {
 				-d destinationFilePath=${destinationFilePath}
 		''';
 
-		com.liferay.poshi.runner.util.JSONCurlUtil.post("${curl}");
+		com.liferay.poshi.runner.util.JSONCurlUtil.post(${curl});
 	}
 
 	@prose = "I start the test-fixpack-builder-main-smoke job with the following parameters ${table}"
 	macro startTestFixPackBuilderMainSmokeJob {
 		var jenkinsAuthenticationToken = PropsUtil.get("jenkins.authentication.token");
 		var portalUrl = PropsUtil.get("portal.url");
-		var  rawTable = TableUtil.newTable(${table});
+		var rawTable = TableUtil.newTable(${table});
 
-		for (var row : table "${rawTable}") {
+		for (var row : table ${rawTable}) {
 			var field = "${row[0]}";
 			var value = "${row[1]}";
 
-			if ("${field}" == "github.username") {
-				var githubUsername = "${value}";
+			if (${field} == "github.username") {
+				var githubUsername = ${value};
 			}
-			else if ("${field}" == "git.branch") {
-				var gitBranch = "${value}";
+			else if (${field} == "git.branch") {
+				var gitBranch = ${value};
 			}
 			else {
 				fail("No such Jenkins job field ${field} for test-fixpack-builder-main-smoke");
@@ -738,24 +740,24 @@ definition {
 				-d git.branch=${gitBranch}
 		''';
 
-		com.liferay.poshi.runner.util.JSONCurlUtil.post("${curl}");
+		com.liferay.poshi.runner.util.JSONCurlUtil.post(${curl});
 	}
 
 	@prose = "I start the test-fixpack-builder-patch-difference job with the following parameters ${table}"
 	macro startTestFixPackBuilderPatchDifferenceJob {
 		var jenkinsAuthenticationToken = PropsUtil.get("jenkins.authentication.token");
 		var portalUrl = PropsUtil.get("portal.url");
-		var  rawTable = TableUtil.newTable(${table});
+		var rawTable = TableUtil.newTable(${table});
 
-		for (var row : table "${rawTable}") {
+		for (var row : table ${rawTable}) {
 			var field = "${row[0]}";
 			var value = "${row[1]}";
 
-			if ("${field}" == "alphaPath") {
-				var alphaPath = "${value}";
+			if (${field} == "alphaPath") {
+				var alphaPath = ${value};
 			}
-			else if ("${field}" == "betaPath") {
-				var betaPath = "${value}";
+			else if (${field} == "betaPath") {
+				var betaPath = ${value};
 			}
 			else {
 				fail("No such Jenkins job field ${field} for test-fixpack-builder-patch-difference");
@@ -776,7 +778,7 @@ definition {
 				-d betaPath=${betaPath}
 		''';
 
-		com.liferay.poshi.runner.util.JSONCurlUtil.post("${curl}");
+		com.liferay.poshi.runner.util.JSONCurlUtil.post(${curl});
 	}
 
 	@prose = "I stop the job titled ${jobName}"
@@ -785,34 +787,34 @@ definition {
 		var jenkinsAdminUserToken = PropsUtil.get("jenkins.admin.user.token");
 		var jenkinsAuthenticationToken = PropsUtil.get("jenkins.authentication.token");
 		var portalUrl = PropsUtil.get("portal.url");
-		var jobName = StringUtil.replace("${jobName}", "(", "\(");
+		var jobName = StringUtil.replace(${jobName}, "(", "\(");
 
-		var jobName = StringUtil.replace("${jobName}", ")", "\)");
+		var jobName = StringUtil.replace(${jobName}, ")", "\)");
 
 		var curl = '''
 			${portalUrl}/view/All/job/${jobName}/lastBuild/stop?token=${jenkinsAuthenticationToken}
 				--user ${jenkinsAdminUserName}:${jenkinsAdminUserToken}
 		''';
 
-		com.liferay.poshi.runner.util.JSONCurlUtil.post("${curl}");
+		com.liferay.poshi.runner.util.JSONCurlUtil.post(${curl});
 	}
 
 	macro testFixPackBuilderJenkinsJob {
-		Jenkins.pause(timeInSeconds = "10");
+		Jenkins.pause(timeInSeconds = 10);
 
 		Jenkins.openJenkinsURL();
 
-		Jenkins.getCurrentJobBuildNumberForShortJob(jobName = "${jenkinsJobName}");
+		Jenkins.getCurrentJobBuildNumberForShortJob(jobName = ${jenkinsJobName});
 
 		Jenkins.checkForJobCompletion(
-			jobBuildNumber = "${staticJobBuildNumber}",
-			jobName = "${jenkinsJobName}");
+			jobBuildNumber = ${staticJobBuildNumber},
+			jobName = ${jenkinsJobName});
 
 		Jenkins.openJenkinsURL();
 
 		Jenkins.gotoConsoleOutput(
-			jobBuildNumber = "${staticJobBuildNumber}",
-			jobName = "${jenkinsJobName}");
+			jobBuildNumber = ${staticJobBuildNumber},
+			jobName = ${jenkinsJobName});
 
 		Jenkins.viewInstallRevertConsoleText();
 	}
@@ -820,7 +822,7 @@ definition {
 	macro viewConsoleText {
 		AssertTextEquals.assertPartialText(
 			locator1 = "Jenkins#CONSOLE_OUTPUT_TEXT",
-			value1 = "${consoleOutputText}");
+			value1 = ${consoleOutputText});
 	}
 
 	@prose = "the test-fixpack-builder-install-revert console log should not have any visible errors"
@@ -829,16 +831,16 @@ definition {
 
 		var consoleOutputText = selenium.getText("Jenkins#CONSOLE_OUTPUT_TEXT");
 
-		var errorCount = StringUtil.count("${consoleOutputText}", "ERROR");
+		var errorCount = StringUtil.count(${consoleOutputText}, "ERROR");
 
 		echo("Number of errors: ${errorCount}");
 
-		if ("${fileAddedCount}" != "0") {
-			var acceptableErrorCount = StringUtil.count("${consoleOutputText}", "ERROR [localhost-startStop-1][LicenseManager:?] No binary licenses found");
+		if (${fileAddedCount} != 0) {
+			var acceptableErrorCount = StringUtil.count(${consoleOutputText}, "ERROR [localhost-startStop-1][LicenseManager:?] No binary licenses found");
 
 			echo("Number of acceptable errors: ${acceptableErrorCount}");
 
-			if ("${errorCount}" != "${acceptableErrorCount}") {
+			if (${errorCount} != ${acceptableErrorCount}) {
 				fail("Unexpected errors may be present.  The test counted ${errorCount} errors but ${acceptableErrorCount} acceptable errors.  Please check the most recent fix pack revert and either apply fixes to the builder or update the test case as needed.");
 			}
 		}
@@ -852,11 +854,11 @@ definition {
 
 	@prose = "the job with the name ${jobName} and build number ${jobBuildNumber} should have been successful"
 	macro viewJobStatusSuccess {
-		var key_jobBuildNumber = "${jobBuildNumber}";
+		var key_jobBuildNumber = ${jobBuildNumber};
 
-		Jenkins.clickJobLink(jobName = "${jobName}");
+		Jenkins.clickJobLink(jobName = ${jobName});
 
-		if(IsElementPresent(locator1 = "Jenkins#JENKINS_JOB_BUILD_STATUS_SUCCESS")) {
+		if (IsElementPresent(locator1 = "Jenkins#JENKINS_JOB_BUILD_STATUS_SUCCESS")) {
 			echo("The build ${jobBuildNumber} compleated successfully!");
 		}
 		else {
@@ -867,15 +869,15 @@ definition {
 				menuOption = "Console Output");
 
 			Jenkins._findFailReason(
-				jobName = "${jobName}",
-				jobBuildNumber = "${jobBuildNumber}");
+				jobBuildNumber = ${jobBuildNumber},
+				jobName = ${jobName});
 		}
 	}
 
 	macro viewNoConsoleText {
 		AssertTextNotEquals.assertNotPartialText(
 			locator1 = "Jenkins#CONSOLE_OUTPUT_TEXT",
-			value1 = "${consoleOutputText}");
+			value1 = ${consoleOutputText});
 	}
 
 	@prose = "the test-fixpack-builder-patch-difference console log should not have any visible errors"
@@ -884,30 +886,30 @@ definition {
 
 		var consoleOutputText = selenium.getText("Jenkins#CONSOLE_OUTPUT_TEXT");
 
-		var fileAddedCount = StringUtil.count("${consoleOutputText}", "Added:");
+		var fileAddedCount = StringUtil.count(${consoleOutputText}, "Added:");
 
 		echo("Number of files added: ${fileAddedCount}");
 
-		if ("${fileAddedCount}" != "0") {
-			var acceptableFileAddedCount = StringUtil.count("${consoleOutputText}", "Added: binaries/MODULES_BASE_PATH/target-platform/target-platform-indexes");
+		if (${fileAddedCount} != 0) {
+			var acceptableFileAddedCount = StringUtil.count(${consoleOutputText}, "Added: binaries/MODULES_BASE_PATH/target-platform/target-platform-indexes");
 
 			echo("Number of acceptable files added: ${acceptableFileAddedCount}");
 
-			if ("${fileAddedCount}" != "${acceptableFileAddedCount}") {
+			if (${fileAddedCount} != ${acceptableFileAddedCount}) {
 				fail("Unexpected files may have been added.  The test counted ${fileAddedCount} added files but ${acceptableFileAddedCount} acceptable added files.  Please check the most recent fix pack comparison and either apply fixes to the builder or update the test case as needed.");
 			}
 		}
 
-		var fileRemovedCount = StringUtil.count("${consoleOutputText}", "Removed:");
+		var fileRemovedCount = StringUtil.count(${consoleOutputText}, "Removed:");
 
 		echo("Number of files removed: ${fileRemovedCount}");
 
-		if ("${fileRemovedCount}" != "0") {
-			var acceptableFileRemovedCount = StringUtil.count("${consoleOutputText}", "Removed: binaries/MODULES_BASE_PATH/target-platform/target-platform-indexes");
+		if (${fileRemovedCount} != 0) {
+			var acceptableFileRemovedCount = StringUtil.count(${consoleOutputText}, "Removed: binaries/MODULES_BASE_PATH/target-platform/target-platform-indexes");
 
 			echo("Number of acceptable files removed: ${acceptableFileRemovedCount}");
 
-			if ("${fileRemovedCount}" != "${acceptableFileRemovedCount}") {
+			if (${fileRemovedCount} != ${acceptableFileRemovedCount}) {
 				fail("Unexpected files may have been removed.  The test counted ${fileRemovedCount} removed files but ${acceptableFileRemovedCount} acceptable removed files.  Please check the most recent fix pack comparison and either apply fixes to the builder or update the test case as needed.");
 			}
 		}

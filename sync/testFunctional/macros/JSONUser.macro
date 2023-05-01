@@ -9,14 +9,14 @@ definition {
 		}
 
 		if (isSet(userFirstName)) {
-			var userFirstNameEncoded = URLUtil.encode("${userFirstName}", "UTF-8");
+			var userFirstNameEncoded = URLUtil.encode(${userFirstName}, "UTF-8");
 		}
 		else {
 			fail("Please set 'userFirstName'.");
 		}
 
 		if (isSet(userLastName)) {
-			var userLastNameEncoded = URLUtil.encode("${userLastName}", "UTF-8");
+			var userLastNameEncoded = URLUtil.encode(${userLastName}, "UTF-8");
 		}
 		else {
 			fail("Please set 'userLastName'.");
@@ -44,7 +44,7 @@ definition {
 			</then>
 		</if>*/
 
-		var openId = StringUtil.randomString("5");
+		var openId = StringUtil.randomString(5);
 
 		var curl = '''
 			${portalURL}/api/jsonws/user/add-user \
@@ -90,9 +90,9 @@ definition {
 
 		echo("## * Group IDs: ${groupId}");
 
-		var userId = JSONCurlUtil.post("${curl}", "$['userId']");
+		var userId = JSONCurlUtil.post(${curl}, "$['userId']");
 
-		return "${userId}";
+		return ${userId};
 	}
 
 	macro _deleteUser {
@@ -100,7 +100,7 @@ definition {
 			fail("Please set 'userId'.");
 		}
 
-		var userEmailAddress = JSONUser.getUserEmailAddress(userId = "${userId}");
+		var userEmailAddress = JSONUser.getUserEmailAddress(userId = ${userId});
 		var portalURL = JSONCompany.getPortalURL();
 
 		var curl = '''
@@ -113,7 +113,7 @@ definition {
 
 		echo("## * Email Address: ${userEmailAddress}");
 
-		var temporary = JSONCurlUtil.post("${curl}", "");
+		var temporary = JSONCurlUtil.post(${curl}, "");
 	}
 
 	macro addUser {
@@ -134,10 +134,10 @@ definition {
 		}
 
 		JSONUser._addUser(
-			userEmailAddress = "${userEmailAddress}",
-			userFirstName = "${userFirstName}",
-			userLastName = "${userLastName}",
-			userScreenName = "${userScreenName}");
+			userEmailAddress = ${userEmailAddress},
+			userFirstName = ${userFirstName},
+			userLastName = ${userLastName},
+			userScreenName = ${userScreenName});
 	}
 
 	macro deleteUserByEmailAddress {
@@ -145,9 +145,9 @@ definition {
 			fail("Please set 'userEmailAddress'.");
 		}
 
-		var userId = JSONUser.getUserIdByEmailAddress(userEmailAddress = "${userEmailAddress}");
+		var userId = JSONUser.getUserIdByEmailAddress(userEmailAddress = ${userEmailAddress});
 
-		JSONUser._deleteUser(userId = "${userId}");
+		JSONUser._deleteUser(userId = ${userId});
 	}
 
 	macro deleteUserByUserId {
@@ -155,7 +155,7 @@ definition {
 			fail("Please set 'userId'.");
 		}
 
-		JSONUser._deleteUser(userId = "${userId}");
+		JSONUser._deleteUser(userId = ${userId});
 	}
 
 	macro getUserEmailAddress {
@@ -173,9 +173,9 @@ definition {
 				-d userId=${userId}
 		''';
 
-		var userEmailAddress = JSONCurlUtil.post("${curl}", "$['emailAddress']");
+		var userEmailAddress = JSONCurlUtil.post(${curl}, "$['emailAddress']");
 
-		return "${userEmailAddress}";
+		return ${userEmailAddress};
 	}
 
 	macro getUserFirstName {
@@ -193,9 +193,9 @@ definition {
 				-d userId=${userId}
 		''';
 
-		var userFirstName = JSONCurlUtil.post("${curl}", "$['firstName']");
+		var userFirstName = JSONCurlUtil.post(${curl}, "$['firstName']");
 
-		return "${userFirstName}";
+		return ${userFirstName};
 	}
 
 	macro getUserIdByEmailAddress {
@@ -213,9 +213,9 @@ definition {
 				-d emailAddress=${userEmailAddress}
 		''';
 
-		var userId = JSONCurlUtil.post("${curl}", "$['userId']");
+		var userId = JSONCurlUtil.post(${curl}, "$['userId']");
 
-		return "${userId}";
+		return ${userId};
 	}
 
 	macro tearDownByFirstName {
@@ -232,7 +232,7 @@ definition {
 				-d companyId=${companyId}
 		''';
 
-		var userCount = JSONCurlUtil.post("${curl}", "$");
+		var userCount = JSONCurlUtil.post(${curl}, "$");
 
 		var curl = '''
 			${portalURL}/api/jsonws/user/get-company-users \
@@ -242,19 +242,19 @@ definition {
 				-d end=${userCount}
 		''';
 
-		var userIds = JSONCurlUtil.post("${curl}", "$..['userId']");
+		var userIds = JSONCurlUtil.post(${curl}, "$..['userId']");
 
-		var userIds = StringUtil.replace("${userIds}", "[", "");
+		var userIds = StringUtil.replace(${userIds}, "[", "");
 
-		var userIds = StringUtil.replace("${userIds}", "]", "");
+		var userIds = StringUtil.replace(${userIds}, "]", "");
 
-		var userIds = StringUtil.replace("${userIds}", "\"", "");
+		var userIds = StringUtil.replace(${userIds}, "\"", "");
 
-		for (var userId : list "${userIds}") {
-			var currentUserFirstName = JSONUser.getUserFirstName(userId = "${userId}");
+		for (var userId : list ${userIds}) {
+			var currentUserFirstName = JSONUser.getUserFirstName(userId = ${userId});
 
-			if (contains("${currentUserFirstName}", "${userFirstName}")) {
-				JSONUser.deleteUserByUserId(userId = "${userId}");
+			if (contains(${currentUserFirstName}, ${userFirstName})) {
+				JSONUser.deleteUserByUserId(userId = ${userId});
 			}
 		}
 	}

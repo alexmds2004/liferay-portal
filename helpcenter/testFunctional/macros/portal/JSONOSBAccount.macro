@@ -11,101 +11,101 @@ definition {
 	macro deleteOSBAccountEntry {
 		var curl = '''
 			${supportURL}/api/jsonws/osb-portlet.accountentry/delete-account-entry
-			-u ${supportAdminEmailAddress}:${supportAdminPassword}
-			-d accountEntryId=${accountEntryId}
-			''';
+				-u ${supportAdminEmailAddress}:${supportAdminPassword}
+				-d accountEntryId=${accountEntryId}
+		''';
 
-		com.liferay.poshi.runner.util.JSONCurlUtil.post("${curl}");
+		com.liferay.poshi.runner.util.JSONCurlUtil.post(${curl});
 	}
 
 	@prose = "the following account entry json fields and their respective quantities should be present ${table}"
 	macro getAccountEntryFields {
 		var curl = '''
 			${supportURL}/api/jsonws/osb.accountentry/get-account-entry-by-code --tlsv1.2
-			-u ${supportAdminEmailAddress}:${supportAdminPassword}
-			-d code='${testAccountCode}'
+				-u ${supportAdminEmailAddress}:${supportAdminPassword}
+				-d code='${testAccountCode}'
 		''';
 
-		var currentCustomerAccountEntry = JSONCurlUtil.post("${curl}");
+		var currentCustomerAccountEntry = JSONCurlUtil.post(${curl});
 
 		JSONAPI._checkJSONFields(
-			currentJson = "${currentCustomerAccountEntry}",
-			table = "${table}");
+			currentJson = ${currentCustomerAccountEntry},
+			table = ${table});
 	}
 
 	macro getOSBAccountEntryId {
 		var curl = '''
 			${supportURL}/api/jsonws/osb-portlet.accountentry/get-account-entry-by-code
-			-u ${supportAdminEmailAddress}:${supportAdminPassword}
-			-d code=${accountCode}
-			''';
+				-u ${supportAdminEmailAddress}:${supportAdminPassword}
+				-d code=${accountCode}
+		''';
 
-		var accountEntryId = JSONCurlUtil.post("${curl}", "$.accountEntryId");
+		var accountEntryId = JSONCurlUtil.post(${curl}, "$.accountEntryId");
 
 		echo("OSB Account Entry ID: ${accountEntryId}");
 
-		return "${accountEntryId}";
+		return ${accountEntryId};
 	}
 
 	macro getOSBAccountEntryName {
 		var curl = '''
 			${supportURL}/api/jsonws/osb-portlet.accountentry/get-account-entry-by-code
-			-u ${supportAdminEmailAddress}:${supportAdminPassword}
-			-d code=${accountCode}
-			''';
+				-u ${supportAdminEmailAddress}:${supportAdminPassword}
+				-d code=${accountCode}
+		''';
 
-		var accountEntryName = JSONCurlUtil.post("${curl}", "$.name");
+		var accountEntryName = JSONCurlUtil.post(${curl}, "$.name");
 
 		echo("OSB Account Entry Name: ${accountEntryName}");
 
-		return "${accountEntryName}";
+		return ${accountEntryName};
 	}
 
 	macro getOSBAccountEntryObject {
 		var curl = '''
 			${supportURL}/api/jsonws/osb-portlet.accountentry/get-account-entry-by-code
-			-u ${supportAdminEmailAddress}:${supportAdminPassword}
-			-d code=${accountCode}
-			''';
+				-u ${supportAdminEmailAddress}:${supportAdminPassword}
+				-d code=${accountCode}
+		''';
 
-		var accountEntryObject = JSONCurlUtil.post("${curl}");
+		var accountEntryObject = JSONCurlUtil.post(${curl});
 
-		return "${accountEntryObject}";
+		return ${accountEntryObject};
 	}
 
 	macro getOSBEmptyAccountEntryId {
 		var curl = '''
 			${supportURL}/api/jsonws/osb-portlet.accountentry/get-account-entry-by-code
-			-u ${supportAdminEmailAddress}:${supportAdminPassword}
-			-d code=${accountCode}
-			''';
+				-u ${supportAdminEmailAddress}:${supportAdminPassword}
+				-d code=${accountCode}
+		''';
 
-		var accountEntryId = JSONCurlUtil.post("${curl}", "$");
+		var accountEntryId = JSONCurlUtil.post(${curl}, "$");
 
 		echo("OSB Account Entry ID: ${accountEntryId}");
 
-		return "${accountEntryId}";
+		return ${accountEntryId};
 	}
 
 	@prose = "the support organization with the code ${accountCode} should not be part of the support site"
 	macro viewNoSupportOrganizationSync {
 		var curl = '''
 			${supportURL}/api/jsonws/osb-portlet.accountentry/get-account-entry-by-code
-			-u ${supportAdminEmailAddress}:${supportAdminPassword}
-			-d code=${accountCode}
-			''';
-		var accountEntryObject = JSONOSBAccount.getOSBAccountEntryObject(accountCode = "${accountCode}");
-		var currentIteration = "0";
+				-u ${supportAdminEmailAddress}:${supportAdminPassword}
+				-d code=${accountCode}
+		''';
+		var accountEntryObject = JSONOSBAccount.getOSBAccountEntryObject(accountCode = ${accountCode});
+		var currentIteration = 0;
 
-		while (("${currentIteration}" != "${pollMaximumIterations}") && contains("${accountEntryObject}", "${accountCode}")) {
+		while ((${currentIteration} != ${pollMaximumIterations}) && contains(${accountEntryObject}, ${accountCode})) {
 			var currentIteration = ${currentIteration} + 1;
 
-			OSBAdmin.pause(timeInSeconds = "${pollIntervalInSeconds}");
+			OSBAdmin.pause(timeInSeconds = ${pollIntervalInSeconds});
 
-			var accountEntryObject = JSONOSBAccount.getOSBAccountEntryObject(accountCode = "${accountCode}");
+			var accountEntryObject = JSONOSBAccount.getOSBAccountEntryObject(accountCode = ${accountCode});
 		}
 
-		if (contains("${accountEntryObject}", "${accountCode}")) {
+		if (contains(${accountEntryObject}, ${accountCode})) {
 			fail("After ${currentIteration} checks, the support organization with code ${accountCode} appears to be a part of the support site");
 		}
 	}
@@ -114,21 +114,21 @@ definition {
 	macro viewSupportOrganizationSync {
 		var curl = '''
 			${supportURL}/api/jsonws/osb-portlet.accountentry/get-account-entry-by-code
-			-u ${supportAdminEmailAddress}:${supportAdminPassword}
-			-d code=${accountCode}
-			''';
-		var accountEntryObject = JSONOSBAccount.getOSBAccountEntryObject(accountCode = "${accountCode}");
-		var currentIteration = "0";
+				-u ${supportAdminEmailAddress}:${supportAdminPassword}
+				-d code=${accountCode}
+		''';
+		var accountEntryObject = JSONOSBAccount.getOSBAccountEntryObject(accountCode = ${accountCode});
+		var currentIteration = 0;
 
-		while (("${currentIteration}" != "${pollMaximumIterations}") && !(contains("${accountEntryObject}", "${accountCode}"))) {
+		while ((${currentIteration} != ${pollMaximumIterations}) && !(contains(${accountEntryObject}, ${accountCode}))) {
 			var currentIteration = ${currentIteration} + 1;
 
-			OSBAdmin.pause(timeInSeconds = "${pollIntervalInSeconds}");
+			OSBAdmin.pause(timeInSeconds = ${pollIntervalInSeconds});
 
-			var accountEntryObject = JSONOSBAccount.getOSBAccountEntryObject(accountCode = "${accountCode}");
+			var accountEntryObject = JSONOSBAccount.getOSBAccountEntryObject(accountCode = ${accountCode});
 		}
 
-		if (!(contains("${accountEntryObject}", "${accountCode}"))) {
+		if (!(contains(${accountEntryObject}, ${accountCode}))) {
 			fail("After ${currentIteration} checks, the support organization with code ${accountCode} appears to have not been added to the support site");
 		}
 	}

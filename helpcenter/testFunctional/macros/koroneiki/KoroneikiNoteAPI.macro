@@ -9,66 +9,66 @@ definition {
 	@prose = "I delete a note on koroneiki for the account ${accountName} with the content ${content}"
 	macro _deleteNote {
 		var noteKey = KoroneikiAccountAPI._getAccountNoteKeyViaAccountNameAndContent(
-			accountName = "${accountName}",
-			content = "${content}");
+			accountName = ${accountName},
+			content = ${content});
 
 		var curl = '''
 			${koroneikiURL}/o/koroneiki-rest/v1.0/notes/${noteKey} --tlsv1.2
-			--header "API_Token: ${apiToken}"
-			-H "accept: application/json"
-			-H "Content-Type: application/json"
-			''';
+				--header "API_Token: ${apiToken}"
+				-H "accept: application/json"
+				-H "Content-Type: application/json"
+		''';
 
-		com.liferay.poshi.runner.util.JSONCurlUtil.delete("${curl}");
+		com.liferay.poshi.runner.util.JSONCurlUtil.delete(${curl});
 	}
 
 	@prose = "I delete a note on koroneiki for the account ${accountName} with the content ${content} executed by ${agentName}"
 	macro _deleteNoteExecutedByAgent {
 		var noteKey = KoroneikiAccountAPI._getAccountNoteKeyViaAccountNameAndContent(
-			accountName = "${accountName}",
-			content = "${content}");
-		var agentName = StringUtil.replace("${agentName}", " ", "%20");
+			accountName = ${accountName},
+			content = ${content});
+		var agentName = StringUtil.replace(${agentName}, " ", "%20");
 
 		var curl = '''
 			${koroneikiURL}/o/koroneiki-rest/v1.0/notes/${noteKey}?agentName=${agentName}\&agentUID=a1b2c3d4-e5f6-g7h8-i9j1-0k11l12m13n1 --tlsv1.2
-			--header "API_Token: ${apiToken}"
-			-H "accept: application/json"
-			-H "Content-Type: application/json"
-			''';
+				--header "API_Token: ${apiToken}"
+				-H "accept: application/json"
+				-H "Content-Type: application/json"
+		''';
 
-		com.liferay.poshi.runner.util.JSONCurlUtil.delete("${curl}");
+		com.liferay.poshi.runner.util.JSONCurlUtil.delete(${curl});
 	}
 
 	@prose = "I update a note on koroneiki for the account ${accountName} with the content ${content} to have the following values ${table}"
 	macro _updateNote {
 		var noteKey = KoroneikiAccountAPI._getAccountNoteKeyViaAccountNameAndContent(
-			accountName = "${accountName}",
-			content = "${content}");
-		var  rawTable = TableUtil.newTable(${table});
+			accountName = ${accountName},
+			content = ${content});
+		var rawTable = TableUtil.newTable(${table});
 
-		for (var row : table "${rawTable}") {
+		for (var row : table ${rawTable}) {
 			var field = "${row[0]}";
 			var value = "${row[1]}";
 
-			if ("${field}" == "Agent Name") {
-				var value = StringUtil.replace("${value}", " ", "%20");
+			if (${field} == "Agent Name") {
+				var value = StringUtil.replace(${value}, " ", "%20");
 
-				var agentName = "${value}";
+				var agentName = ${value};
 			}
-			else if ("${field}" == "Content") {
-				var content = "${value}";
+			else if (${field} == "Content") {
+				var content = ${value};
 			}
-			else if ("${field}" == "Format") {
-				var format = "${value}";
+			else if (${field} == "Format") {
+				var format = ${value};
 			}
-			else if ("${field}" == "Priority") {
-				var priority = "${value}";
+			else if (${field} == "Priority") {
+				var priority = ${value};
 			}
-			else if ("${field}" == "Status") {
-				var status = "${value}";
+			else if (${field} == "Status") {
+				var status = ${value};
 			}
-			else if ("${field}" == "Type") {
-				var type = "${value}";
+			else if (${field} == "Type") {
+				var type = ${value};
 			}
 			else {
 				fail("No such note field ${field}");
@@ -77,22 +77,22 @@ definition {
 
 		var curl = '''
 			${koroneikiURL}/o/koroneiki-rest/v1.0/notes/${noteKey} --tlsv1.2
-			--header "API_Token: ${apiToken}"
-			-H "accept: application/json"
-			-H "Content-Type: application/json"
-			''';
+				--header "API_Token: ${apiToken}"
+				-H "accept: application/json"
+				-H "Content-Type: application/json"
+		''';
 
 		if (!(isSet(agentName))) {
 			var agentName = "";
 		}
 
 		if (!(isSet(content))) {
-			var noteObject = JSONCurlUtil.get("${curl}", "$");
+			var noteObject = JSONCurlUtil.get(${curl}, "$");
 
-			if (contains("${noteObject}", "content=")) {
-				var value = JSONCurlUtil.get("${curl}", "$.content");
+			if (contains(${noteObject}, "content=")) {
+				var value = JSONCurlUtil.get(${curl}, "$.content");
 
-				var content = "${value}";
+				var content = ${value};
 			}
 			else {
 				var content = "";
@@ -100,12 +100,12 @@ definition {
 		}
 
 		if (!(isSet(format))) {
-			var noteObject = JSONCurlUtil.get("${curl}", "$");
+			var noteObject = JSONCurlUtil.get(${curl}, "$");
 
-			if (contains("${noteObject}", "format=")) {
-				var value = JSONCurlUtil.get("${curl}", "$.format");
+			if (contains(${noteObject}, "format=")) {
+				var value = JSONCurlUtil.get(${curl}, "$.format");
 
-				var format = "${value}";
+				var format = ${value};
 			}
 			else {
 				var format = "";
@@ -113,12 +113,12 @@ definition {
 		}
 
 		if (!(isSet(priority))) {
-			var noteObject = JSONCurlUtil.get("${curl}", "$");
+			var noteObject = JSONCurlUtil.get(${curl}, "$");
 
-			if (contains("${noteObject}", "priority=")) {
-				var value = JSONCurlUtil.get("${curl}", "$.priority");
+			if (contains(${noteObject}, "priority=")) {
+				var value = JSONCurlUtil.get(${curl}, "$.priority");
 
-				var priority = "${value}";
+				var priority = ${value};
 			}
 			else {
 				var priority = "true";
@@ -126,12 +126,12 @@ definition {
 		}
 
 		if (!(isSet(status))) {
-			var noteObject = JSONCurlUtil.get("${curl}", "$");
+			var noteObject = JSONCurlUtil.get(${curl}, "$");
 
-			if (contains("${noteObject}", "status=")) {
-				var value = JSONCurlUtil.get("${curl}", "$.status");
+			if (contains(${noteObject}, "status=")) {
+				var value = JSONCurlUtil.get(${curl}, "$.status");
 
-				var status = "${value}";
+				var status = ${value};
 			}
 			else {
 				var status = "";
@@ -139,68 +139,68 @@ definition {
 		}
 
 		if (!(isSet(type))) {
-			var noteObject = JSONCurlUtil.get("${curl}", "$");
+			var noteObject = JSONCurlUtil.get(${curl}, "$");
 
-			if (contains("${noteObject}", "properties=")) {
-				var value = JSONCurlUtil.get("${curl}", "$.type");
+			if (contains(${noteObject}, "properties=")) {
+				var value = JSONCurlUtil.get(${curl}, "$.type");
 
-				var type = "${value}";
+				var type = ${value};
 			}
 			else {
 				var type = "";
 			}
 		}
 
-		if ("${agentName}" == "") {
+		if (${agentName} == "") {
 			var curl = '''
 				${koroneikiURL}/o/koroneiki-rest/v1.0/notes/${noteKey} --tlsv1.2
-				--header "API_Token: ${apiToken}"
-				-H "accept: application/json"
-				-H "Content-Type: application/json"
-				-d
-				{
-					"content": "${content}",
-					"format": "${format}",
-					"priority": ${priority},
-					"status": "${status}",
-					"type": "${type}"
-				}
-				''';
+					--header "API_Token: ${apiToken}"
+					-H "accept: application/json"
+					-H "Content-Type: application/json"
+					-d
+					{
+						"content": "${content}",
+						"format": "${format}",
+						"priority": ${priority},
+						"status": "${status}",
+						"type": "${type}"
+					}
+			''';
 		}
 		else {
 			var curl = '''
 				${koroneikiURL}/o/koroneiki-rest/v1.0/notes/${noteKey}?agentName=${agentName}\&agentUID=a1b2c3d4-e5f6-g7h8-i9j1-0k11l12m13n1 --tlsv1.2
-				--header "API_Token: ${apiToken}"
-				-H "accept: application/json"
-				-H "Content-Type: application/json"
-				-d
-				{
-					"content": "${content}",
-					"format": "${format}",
-					"priority": ${priority},
-					"status": "${status}",
-					"type": "${type}"
-				}
-				''';
+					--header "API_Token: ${apiToken}"
+					-H "accept: application/json"
+					-H "Content-Type: application/json"
+					-d
+					{
+						"content": "${content}",
+						"format": "${format}",
+						"priority": ${priority},
+						"status": "${status}",
+						"type": "${type}"
+					}
+			''';
 		}
 
-		com.liferay.poshi.runner.util.JSONCurlUtil.put("${curl}");
+		com.liferay.poshi.runner.util.JSONCurlUtil.put(${curl});
 	}
 
 	@prose = "I should not be able to view a note on koroneiki for the account ${accountName} with the content ${content}"
 	macro _viewNoNote {
-		var accountKey = KoroneikiAccountAPI._getAccountKeyViaAccountName(accountName = "${accountName}");
+		var accountKey = KoroneikiAccountAPI._getAccountKeyViaAccountName(accountName = ${accountName});
 
 		var curl = '''
 			${koroneikiURL}/o/koroneiki-rest/v1.0/accounts/${accountKey}/notes --tlsv1.2
-			--header "API_Token: ${apiToken}"
-			-H "accept: application/json"
-			-H "Content-Type: application/json"
-			''';
+				--header "API_Token: ${apiToken}"
+				-H "accept: application/json"
+				-H "Content-Type: application/json"
+		''';
 
-		var allAccountNotes = JSONCurlUtil.get("${curl}", "$");
+		var allAccountNotes = JSONCurlUtil.get(${curl}, "$");
 
-		if (contains("${allAccountNotes}", "${content}")) {
+		if (contains(${allAccountNotes}, ${content})) {
 			fail("The note with the content ${content} is still present on the account ${accountName}");
 		}
 	}
@@ -208,35 +208,35 @@ definition {
 	@prose = "I should be able to view a note on koroneiki for the account ${accountName} with the content ${content} and the following values ${table}"
 	macro _viewNote {
 		var noteKey = KoroneikiAccountAPI._getAccountNoteKeyViaAccountNameAndContent(
-			accountName = "${accountName}",
-			content = "${content}");
+			accountName = ${accountName},
+			content = ${content});
 
 		var curl = '''
 			${koroneikiURL}/o/koroneiki-rest/v1.0/notes/${noteKey} --tlsv1.2
-			--header "API_Token: ${apiToken}"
-			-H "accept: application/json"
-			-H "Content-Type: application/json"
-			''';
-		var  rawTable = TableUtil.newTable(${table});
+				--header "API_Token: ${apiToken}"
+				-H "accept: application/json"
+				-H "Content-Type: application/json"
+		''';
+		var rawTable = TableUtil.newTable(${table});
 
-		for (var row : table "${rawTable}") {
+		for (var row : table ${rawTable}) {
 			var field = "${row[0]}";
 			var value = "${row[1]}";
 
-			if ("${field}" == "Content") {
-				var valueFromAPI = JSONCurlUtil.get("${curl}", "$.content");
+			if (${field} == "Content") {
+				var valueFromAPI = JSONCurlUtil.get(${curl}, "$.content");
 			}
-			else if ("${field}" == "Format") {
-				var valueFromAPI = JSONCurlUtil.get("${curl}", "$.format");
+			else if (${field} == "Format") {
+				var valueFromAPI = JSONCurlUtil.get(${curl}, "$.format");
 			}
-			else if ("${field}" == "Priority") {
-				var valueFromAPI = JSONCurlUtil.get("${curl}", "$.priority");
+			else if (${field} == "Priority") {
+				var valueFromAPI = JSONCurlUtil.get(${curl}, "$.priority");
 			}
-			else if ("${field}" == "Status") {
-				var valueFromAPI = JSONCurlUtil.get("${curl}", "$.status");
+			else if (${field} == "Status") {
+				var valueFromAPI = JSONCurlUtil.get(${curl}, "$.status");
 			}
-			else if ("${field}" == "Type") {
-				var valueFromAPI = JSONCurlUtil.get("${curl}", "$.type");
+			else if (${field} == "Type") {
+				var valueFromAPI = JSONCurlUtil.get(${curl}, "$.type");
 			}
 			else {
 				fail("No such note field ${field}");
@@ -246,7 +246,7 @@ definition {
 
 			echo("Actual ${field} Value: ${valueFromAPI}");
 
-			if (!(contains("${value}", "${valueFromAPI}"))) {
+			if (!(contains(${value}, ${valueFromAPI}))) {
 				fail("Actual ${field} value ${valueFromAPI} does not match expected ${field} value ${value}");
 			}
 		}

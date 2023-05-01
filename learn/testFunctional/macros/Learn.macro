@@ -17,7 +17,7 @@ definition {
 			var url = selenium.getAttribute("//link[contains(@href,'http')][1]@href");
 		}
 
-		return "${url}";
+		return ${url};
 	}
 
 	@prose = "I go to the www page with the relative url ${url}"
@@ -28,72 +28,30 @@ definition {
 
 		var currentUrl = Learn.getURL();
 
-		if ("${currentUrl}" != "http://learn-uat.liferay.com/${url}") {
+		if (${currentUrl} != "http://learn-uat.liferay.com/${url}") {
 			Open(locator1 = "${learnURL}/${url}");
 
 			WaitForSPARefresh();
 		}
 	}
 
-	macro viewTopLanguageDropdown {
-		var key_positionValue = "1";
-		var languagesRemain = "true";
-
-		var pageElementsFound = ${pageElementsFound} + 1;
-
-		if(IsElementPresent(locator1 = "Learn#TOP_LANGUAGE_DROPDOWN")) {
-
-			while ("${languagesRemain}" == "true") {
-				while (IsElementPresent(locator1 = "Learn#TOP_DROPDOWN_LANGUAGE_LINK")) {
-					var currentLang = selenium.getAttribute("//html@lang");
-
-					ScrollWebElementIntoView(locator1 = "Learn#TOP_LANGUAGE_DROPDOWN");
-
-					Click.pauseMakeVisibleClickAt(locator1 = "Learn#TOP_LANGUAGE_DROPDOWN");
-
-					Click.pauseMakeVisibleClickAt(locator1 = "Learn#TOP_DROPDOWN_LANGUAGE_LINK");
-
-					WaitForSPARefresh();
-
-					Learn.viewNoErrors();
-
-					if (contains("${currentLang}", "en-US") || (contains("${currentLang}", "ja-JP")) || (contains("${currentLang}", "de-De"))) {
-						echo("${currentLang} is the actual page language.");
-					}
-					else {
-						echo("The current ${currentLang} page language doesn't correspond with the selected one. Please investigate or update the test if changes are necessary.");
-
-						static var staticErrorCount = ${staticErrorCount} + 1;
-					}
-
-					var key_positionValue = ${key_positionValue} + 1;
-				}
-
-				var languagesRemain = "false";
-			}
-		}
-	}
-
 	macro viewLearnHomepageLinks {
-		var key_positionValue = "1";
+		var key_positionValue = 1;
 		var linksRemain = "true";
-
 		var pageElementsFound = ${pageElementsFound} + 1;
 
 		if (IsElementPresent(locator1 = "Learn#HOMEPAGE_LINK")) {
-
-			while (("${linksRemain}" == "true") && ("${key_positionValue}" != "11")) {
+			while ((${linksRemain} == "true") && (${key_positionValue} != 11)) {
 				while (IsElementPresent(locator1 = "Learn#HOMEPAGE_LINK")) {
-
 					var homepageLink = selenium.getAttribute("xpath=(//*[contains(@class,'row')]//a)[${key_positionValue}]@href");
 
 					var curl = '''
 						${homepageLink} -I
-						''';
+					''';
 
-					var httpResponseStatusCode = JSONCurlUtil.get("${curl}");
+					var httpResponseStatusCode = JSONCurlUtil.get(${curl});
 
-					if (contains("${httpResponseStatusCode}", "HTTP/2 400") || (contains("${httpResponseStatusCode}", "HTTP/2 404"))) {
+					if (contains(${httpResponseStatusCode}, "HTTP/2 400") || contains(${httpResponseStatusCode}, "HTTP/2 404")) {
 						echo("The ${homepageLink} page is not working properly.");
 
 						static var staticErrorCount = ${staticErrorCount} + 1;
@@ -109,17 +67,16 @@ definition {
 
 	@prose = "I should be able to view the learn page with the relative url ${url}"
 	macro viewLearnPage {
-		static var pageElementsFound = "0";
+		static var pageElementsFound = 0;
+		static var staticErrorCount = 0;
 
-		static var staticErrorCount = "0";
-
-		Learn.gotoRelativeURL(url = "${url}");
+		Learn.gotoRelativeURL(url = ${url});
 
 		if (IsElementPresent(locator1 = "Learn#INFO_MESSAGE_CLOSE_BUTTON")) {
 			Click(locator1 = "Learn#INFO_MESSAGE_CLOSE_BUTTON");
 		}
 
-		if ("${url}" == "") {
+		if (${url} == "") {
 			Learn.viewLearnPageTopNavigationLinks();
 
 			Learn.viewLearnHomepageLinks();
@@ -139,43 +96,39 @@ definition {
 
 		echo("Total page elements found: ${pageElementsFound}");
 
-		if ("${pageElementsFound}" == "0") {
+		if (${pageElementsFound} == 0) {
 			fail("No page elements were found on the page with the relative url ${url}. This could mean that the page element paths need to be updated or it could indicate a problem with the site page. Please investigate.");
 		}
 
-		if ("${staticErrorCount}" != "0") {
+		if (${staticErrorCount} != 0) {
 			fail("A total of ${staticErrorCount} errors were found. Please investigate.");
 		}
 	}
 
 	macro viewLearnPageCardLinks {
-		var key_positionValue = "1";
+		var key_positionValue = 1;
 		var linksRemain = "true";
-
 		var pageElementsFound = ${pageElementsFound} + 1;
 
 		if (IsElementPresent(locator1 = "Learn#PAGE_CARD_LINK")) {
-
-			while (("${linksRemain}" == "true") && (maxIterations = "100")) {
-				while (IsElementPresent(locator1 = "Learn#PAGE_CARD_LINK") && (maxIterations = "100")) {
-
+			while ((${linksRemain} == "true") && (maxIterations = "100")) {
+				while ((IsElementPresent(locator1 = "Learn#PAGE_CARD_LINK")) && (maxIterations = "100")) {
 					var pageLink = selenium.getAttribute("xpath=(//div/ul[contains(@class,'subsection') and not(contains(@style,'display'))]/li[not(contains(@style,'display'))]//a)[${key_positionValue}]@href");
 
-					if (contains("${pageLink}", "&")) {
-							var pageLink = StringUtil.replace("${pageLink}", "&", "%26");
-						}
+					if (contains(${pageLink}, "&")) {
+						var pageLink = StringUtil.replace(${pageLink}, "&", "%26");
+					}
 
 					var curl = '''
 						${pageLink} -I
-						''';
+					''';
 
-					var httpResponseStatusCode = JSONCurlUtil.get("${curl}");
+					var httpResponseStatusCode = JSONCurlUtil.get(${curl});
 
-					if (contains("${httpResponseStatusCode}", "HTTP/2 400") || (contains("${httpResponseStatusCode}", "HTTP/2 404"))) {
+					if (contains(${httpResponseStatusCode}, "HTTP/2 400") || contains(${httpResponseStatusCode}, "HTTP/2 404")) {
 						echo("The ${pageLink} page is not working properly.");
 
 						static var staticErrorCount = ${staticErrorCount} + 1;
-
 						var key_positionValue = ${key_positionValue} + 1;
 					}
 					else {
@@ -191,16 +144,13 @@ definition {
 	}
 
 	macro viewLearnPageImages {
-		var key_positionValue = "1";
+		var key_positionValue = 1;
 		var ImagesRemain = "true";
-
 		var pageElementsFound = ${pageElementsFound} + 1;
 
 		if (IsElementPresent(locator1 = "Learn#PAGE_IMAGE")) {
-
-			while (("${ImagesRemain}" == "true") && (maxIterations = "100")) {
-				while (IsElementPresent(locator1 = "Learn#PAGE_IMAGE") && (maxIterations = "100")) {
-
+			while ((${ImagesRemain} == "true") && (maxIterations = "100")) {
+				while ((IsElementPresent(locator1 = "Learn#PAGE_IMAGE")) && (maxIterations = "100")) {
 					ScrollWebElementIntoView(locator1 = "Learn#PAGE_IMAGE");
 
 					AssertVisible(locator1 = "Learn#PAGE_IMAGE");
@@ -214,31 +164,27 @@ definition {
 	}
 
 	macro viewLearnPageLinks {
-		var key_positionValue = "1";
+		var key_positionValue = 1;
 		var linksRemain = "true";
-
 		var pageElementsFound = ${pageElementsFound} + 1;
 
 		if (IsElementPresent(locator1 = "Learn#PAGE_LINKS")) {
-
-			while (("${linksRemain}" == "true") && (maxIterations = "100")) {
-				while (IsElementPresent(locator1 = "Learn#PAGE_LINKS") && (maxIterations = "100")) {
-
+			while ((${linksRemain} == "true") && (maxIterations = "100")) {
+				while ((IsElementPresent(locator1 = "Learn#PAGE_LINKS")) && (maxIterations = "100")) {
 					if (IsVisible(locator1 = "Learn#PAGE_LINKS")) {
-
 						var pageLink = selenium.getAttribute("xpath=(//div[contains(@class,'article-body')]//a)[${key_positionValue}]@href");
 
-						if (contains("${pageLink}", "&")) {
-							var pageLink = StringUtil.replace("${pageLink}", "&", "%26");
+						if (contains(${pageLink}, "&")) {
+							var pageLink = StringUtil.replace(${pageLink}, "&", "%26");
 						}
 
 						var curl = '''
 							${pageLink} -I
-							''';
+						''';
 
-						var httpResponseStatusCode = JSONCurlUtil.get("${curl}");
+						var httpResponseStatusCode = JSONCurlUtil.get(${curl});
 
-						if (contains("${httpResponseStatusCode}", "HTTP/2 400") || (contains("${httpResponseStatusCode}", "HTTP/2 404"))) {
+						if (contains(${httpResponseStatusCode}, "HTTP/2 400") || contains(${httpResponseStatusCode}, "HTTP/2 404")) {
 							echo("The ${pageLink} page is not working properly.");
 
 							static var staticErrorCount = ${staticErrorCount} + 1;
@@ -257,33 +203,29 @@ definition {
 	}
 
 	macro viewLearnPageSidePanelNavigationLinks {
-		var key_positionValue = "1";
+		var key_positionValue = 1;
 		var linksRemain = "true";
-
 		var pageElementsFound = ${pageElementsFound} + 1;
 
 		if (IsElementPresent(locator1 = "Learn#PAGE_SIDE_PANEL_NAVIGATION_LINKS")) {
-
-			while (("${linksRemain}" == "true") && (maxIterations = "100")) {
-				while (IsElementPresent(locator1 = "Learn#PAGE_SIDE_PANEL_NAVIGATION_LINKS") && (maxIterations = "100")) {
-
+			while ((${linksRemain} == "true") && (maxIterations = "100")) {
+				while ((IsElementPresent(locator1 = "Learn#PAGE_SIDE_PANEL_NAVIGATION_LINKS")) && (maxIterations = "100")) {
 					var pageLink = selenium.getAttribute("xpath=(//div[contains(@class,'doc-nav')]//ul[not(contains(@aria-labelledby,'languageSelector'))]/li/a)[${key_positionValue}]@href");
 
-					if (contains("${pageLink}", "&")) {
-							var pageLink = StringUtil.replace("${pageLink}", "&", "%26");
-						}
+					if (contains(${pageLink}, "&")) {
+						var pageLink = StringUtil.replace(${pageLink}, "&", "%26");
+					}
 
 					var curl = '''
 						${pageLink} -I
-						''';
+					''';
 
-					var httpResponseStatusCode = JSONCurlUtil.get("${curl}");
+					var httpResponseStatusCode = JSONCurlUtil.get(${curl});
 
-					if (contains("${httpResponseStatusCode}", "HTTP/2 400") || (contains("${httpResponseStatusCode}", "HTTP/2 404"))) {
+					if (contains(${httpResponseStatusCode}, "HTTP/2 400") || contains(${httpResponseStatusCode}, "HTTP/2 404")) {
 						echo("The ${pageLink} page is not working properly.");
 
 						static var staticErrorCount = ${staticErrorCount} + 1;
-
 						var key_positionValue = ${key_positionValue} + 1;
 					}
 					else {
@@ -299,25 +241,22 @@ definition {
 	}
 
 	macro viewLearnPageTopNavigationLinks {
-		var key_positionValue = "1";
+		var key_positionValue = 1;
 		var linksRemain = "true";
-
 		var pageElementsFound = ${pageElementsFound} + 1;
 
 		if (IsElementPresent(locator1 = "Learn#TOP_NAVIGATION_LINKS")) {
-
-			while (("${linksRemain}" == "true") && ("${key_positionValue}" != "5")) {
+			while ((${linksRemain} == "true") && (${key_positionValue} != 5)) {
 				while (IsElementPresent(locator1 = "Learn#TOP_NAVIGATION_LINKS")) {
-
 					var topNavigationLink = selenium.getAttribute("//div[contains(@class,'header-links') and contains(@aria-label,'navigation')]/a[${key_positionValue}]@href");
 
 					var curl = '''
 						${topNavigationLink} -I
-						''';
+					''';
 
-					var httpResponseStatusCode = JSONCurlUtil.get("${curl}");
+					var httpResponseStatusCode = JSONCurlUtil.get(${curl});
 
-					if (contains("${httpResponseStatusCode}", "HTTP/2 400") || (contains("${httpResponseStatusCode}", "HTTP/2 404"))) {
+					if (contains(${httpResponseStatusCode}, "HTTP/2 400") || contains(${httpResponseStatusCode}, "HTTP/2 404")) {
 						echo("The ${topNavigationLink} page is not working properly.");
 
 						static var staticErrorCount = ${staticErrorCount} + 1;
@@ -378,6 +317,43 @@ definition {
 			static var staticErrorCount = ${staticErrorCount} + 1;
 
 			echo("An unexpected error has occurred.");
+		}
+	}
+
+	macro viewTopLanguageDropdown {
+		var key_positionValue = 1;
+		var languagesRemain = "true";
+		var pageElementsFound = ${pageElementsFound} + 1;
+
+		if (IsElementPresent(locator1 = "Learn#TOP_LANGUAGE_DROPDOWN")) {
+			while ((${languagesRemain} == "true")) {
+				while (IsElementPresent(locator1 = "Learn#TOP_DROPDOWN_LANGUAGE_LINK")) {
+					var currentLang = selenium.getAttribute("//html@lang");
+
+					ScrollWebElementIntoView(locator1 = "Learn#TOP_LANGUAGE_DROPDOWN");
+
+					Click.pauseMakeVisibleClickAt(locator1 = "Learn#TOP_LANGUAGE_DROPDOWN");
+
+					Click.pauseMakeVisibleClickAt(locator1 = "Learn#TOP_DROPDOWN_LANGUAGE_LINK");
+
+					WaitForSPARefresh();
+
+					Learn.viewNoErrors();
+
+					if (contains(${currentLang}, "en-US") || contains(${currentLang}, "ja-JP") || contains(${currentLang}, "de-De")) {
+						echo("${currentLang} is the actual page language.");
+					}
+					else {
+						echo("The current ${currentLang} page language doesn't correspond with the selected one. Please investigate or update the test if changes are necessary.");
+
+						static var staticErrorCount = ${staticErrorCount} + 1;
+					}
+
+					var key_positionValue = ${key_positionValue} + 1;
+				}
+
+				var languagesRemain = "false";
+			}
 		}
 	}
 

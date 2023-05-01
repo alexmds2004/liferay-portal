@@ -4,31 +4,155 @@ definition {
 	var wwwAdminPassword = PropsUtil.get("www.admin.password");
 	var wwwURL = PropsUtil.get("www.liferay.url");
 
-    macro viewDropdownTab {
-		var key_linkPositionValue = "1";
-		var key_tabPositionValue = "1";
+	macro populateAndSubmitForm {
+		var key_inputPositionValue = 1;
+		var key_textAreaPositionValue = 1;
+		var key_selectPositionValue = 1;
 
-		if (IsElementPresent(locator1 = "WWWPage#TAB_DROPDOWN") && (IsElementPresent(locator1 = "WWWPage#DROPDOWN_LINK"))) {
+		WaitForSPARefresh();
 
+		Pause(locator1 = 5000);
+
+		if (IsElementPresent(locator1 = "WWWPage#MARKETING_FORM")) {
 			var pageElementsFound = ${pageElementsFound} + 1;
 
-			while (IsElementPresent(locator1 = "WWWPage#TAB_DROPDOWN") && (maxIterations = "50")) {
+			while (IsElementPresent(locator1 = "WWWPage#MARKETING_FORM_INPUT_FIELD")) {
+				var key_inputPositionValue = ${key_inputPositionValue} + 1;
+
+				var nonExistentPathPositionValueInput = ${key_inputPositionValue};
+			}
+
+			while (IsElementPresent(locator1 = "WWWPage#MARKETING_FORM_TEXT_AREA")) {
+				var key_textAreaPositionValue = ${key_textAreaPositionValue} + 1;
+
+				var nonExistentPathPositionValueTextArea = ${key_textAreaPositionValue};
+			}
+
+			while (IsElementPresent(locator1 = "WWWPage#MARKETING_FORM_SELECT_FIELD")) {
+				var key_selectPositionValue = ${key_selectPositionValue} + 1;
+
+				var nonExistentPathPositionValueSelect = ${key_selectPositionValue};
+			}
+
+			var key_inputPositionValue = 1;
+			var key_textAreaPositionValue = 1;
+			var key_selectPositionValue = 1;
+
+			while (${key_inputPositionValue} != ${nonExistentPathPositionValueInput}) {
+				WaitForSPARefresh();
+
+				AssertElementPresent(locator1 = "WWWPage#MARKETING_FORM_INPUT_FIELD");
+
+				var inputFieldName = selenium.getAttribute("xpath=(//input[contains(@class,'mktoRequired')])[${key_inputPositionValue}]@name");
+
+				if (${inputFieldName} == "Email") {
+					Type(
+						locator1 = "WWWPage#MARKETING_FORM_INPUT_FIELD",
+						value1 = "usr.liferay@lrcustomer.com.broken");
+				}
+				else if (${inputFieldName} == "Phone") {
+					ScrollWebElementIntoView(locator1 = "WWWPage#MARKETING_FORM_INPUT_FIELD");
+
+					Type(
+						locator1 = "WWWPage#MARKETING_FORM_INPUT_FIELD",
+						value1 = "555-555-5678");
+				}
+				else {
+					ScrollWebElementIntoView(locator1 = "WWWPage#MARKETING_FORM_INPUT_FIELD");
+
+					if (IsElementPresent(locator1 = "WWWPage#REQUEST_A_LIVE_DEMO_FOOTER_ROW")) {
+						ScrollBy(value1 = "0,100");
+					}
+
+					Type(
+						locator1 = "WWWPage#MARKETING_FORM_INPUT_FIELD",
+						value1 = "Test Form");
+				}
+
+				var key_inputPositionValue = ${key_inputPositionValue} + 1;
+			}
+
+			if (IsElementPresent(locator1 = "WWWPage#MARKETING_FORM_TEXT_AREA")) {
+				while (${key_textAreaPositionValue} != ${nonExistentPathPositionValueTextArea}) {
+					AssertElementPresent(locator1 = "WWWPage#MARKETING_FORM_TEXT_AREA");
+
+					ScrollWebElementIntoView(locator1 = "WWWPage#MARKETING_FORM_TEXT_AREA");
+
+					Type(
+						locator1 = "WWWPage#MARKETING_FORM_TEXT_AREA",
+						value1 = "Test Form");
+
+					var key_textAreaPositionValue = ${key_textAreaPositionValue} + 1;
+				}
+			}
+
+			while (${key_selectPositionValue} != ${nonExistentPathPositionValueSelect}) {
+				ScrollWebElementIntoView(locator1 = "WWWPage#MARKETING_FORM_SELECT_FIELD");
+
+				if (IsElementPresent(locator1 = "WWWPage#REQUEST_A_LIVE_DEMO_FOOTER_ROW")) {
+					ScrollBy(value1 = "0,100");
+				}
+
+				var selectOptionValue = selenium.getText("xpath=(//select[contains(@class,'mktoField')])[${key_selectPositionValue}]/option[2]");
+				var selectFieldName = selenium.getAttribute("xpath=(//select[contains(@class,'mktoField')])[${key_selectPositionValue}]@name");
+
+				if (${selectFieldName} == "Country") {
+					Select(
+						locator1 = "WWWPage#MARKETING_FORM_SELECT_FIELD",
+						value1 = "Australia");
+
+					var key_selectPositionValue = ${key_selectPositionValue} + 1;
+					var nonExistentPathPositionValueSelect = ${nonExistentPathPositionValueSelect} + 1;
+					var selectOptionValue = selenium.getText("xpath=(//select[contains(@class,'mktoField')])[${key_selectPositionValue}]/option[2]");
+
+					Select(
+						locator1 = "WWWPage#MARKETING_FORM_SELECT_FIELD",
+						value1 = ${selectOptionValue});
+				}
+				else {
+					Select(
+						locator1 = "WWWPage#MARKETING_FORM_SELECT_FIELD",
+						value1 = ${selectOptionValue});
+				}
+
+				var key_selectPositionValue = ${key_selectPositionValue} + 1;
+			}
+
+			ScrollWebElementIntoView(locator1 = "WWWPage#MARKETING_FORM_SUBMIT_BUTTON");
+
+			Click(locator1 = "WWWPage#MARKETING_FORM_SUBMIT_BUTTON");
+
+			Pause(locator1 = 30000);
+
+			WWWHomepage.viewNoErrors();
+
+			GoBack();
+		}
+	}
+
+	macro viewDropdownTab {
+		var key_linkPositionValue = 1;
+		var key_tabPositionValue = 1;
+
+		if ((IsElementPresent(locator1 = "WWWPage#TAB_DROPDOWN")) && (IsElementPresent(locator1 = "WWWPage#DROPDOWN_LINK"))) {
+			var pageElementsFound = ${pageElementsFound} + 1;
+
+			while ((IsElementPresent(locator1 = "WWWPage#TAB_DROPDOWN")) && (maxIterations = "50")) {
 				var key_tabPositionValue = ${key_tabPositionValue} + 1;
 
-				var nonExistentPathPositionValueTab = "${key_tabPositionValue}";
+				var nonExistentPathPositionValueTab = ${key_tabPositionValue};
 			}
 
-			while (IsElementPresent(locator1 = "WWWPage#DROPDOWN_LINK") && (maxIterations = "50")) {
+			while ((IsElementPresent(locator1 = "WWWPage#DROPDOWN_LINK")) && (maxIterations = "50")) {
 				var key_linkPositionValue = ${key_linkPositionValue} + 1;
 
-				var nonExistentPathPositionValueLink = "${key_linkPositionValue}";
+				var nonExistentPathPositionValueLink = ${key_linkPositionValue};
 			}
 
-			var key_linkPositionValue = "1";
+			var key_linkPositionValue = 1;
+			var key_tabPositionValue = 1;
 
-			var key_tabPositionValue = "1";
-
-			while (("${key_tabPositionValue}" != "${nonExistentPathPositionValueTab}") && ("${key_linkPositionValue}" != "${nonExistentPathPositionValueLink}") && (maxIterations = "50")) {
+			while (((${key_tabPositionValue} != ${nonExistentPathPositionValueTab}) && (${key_linkPositionValue} != ${nonExistentPathPositionValueLink})) && (maxIterations = "50")) {
 				WaitForSPARefresh();
 
 				AssertElementPresent(locator1 = "WWWPage#TAB_DROPDOWN");
@@ -44,7 +168,7 @@ definition {
 
 					WWWHomepage.viewNoErrors();
 
-					WWWHomepage.gotoRelativeURL(url = "${url}");
+					WWWHomepage.gotoRelativeURL(url = ${url});
 
 					var key_linkPositionValue = ${key_linkPositionValue} + 1;
 				}
@@ -55,11 +179,10 @@ definition {
 		}
 	}
 
-    macro viewFooterLanguageDropdown {
-		var key_positionValue = "1";
+	macro viewFooterLanguageDropdown {
+		var key_positionValue = 1;
 
 		if (IsElementPresent(locator1 = "WWWPage#FOOTER_LANGUAGE_DROPDOWN")) {
-
 			var pageElementsFound = ${pageElementsFound} + 1;
 
 			ScrollBy(value1 = "0, 9999");
@@ -69,14 +192,13 @@ definition {
 			while (IsElementPresent(locator1 = "WWWPage#FOOTER_DROPDOWN_LANGUAGE_LINK", value1 = "")) {
 				var key_positionValue = ${key_positionValue} + 1;
 
-				var nonExistentPathPositionValue = "${key_positionValue}";
+				var nonExistentPathPositionValue = ${key_positionValue};
 			}
 
-			var key_positionValue = "1";
+			var key_positionValue = 1;
 
-			while ("${key_positionValue}" != "${nonExistentPathPositionValue}") {
-
-				if ("${key_positionValue}" == "7") {
+			while (${key_positionValue} != ${nonExistentPathPositionValue}) {
+				if (${key_positionValue} == 7) {
 					var key_positionValue = ${key_positionValue} + 1;
 				}
 
@@ -99,7 +221,7 @@ definition {
 				var key_positionValue = ${key_positionValue} + 1;
 			}
 
-			var key_positionValue = "3";
+			var key_positionValue = 3;
 
 			Click.pauseMakeVisibleClickAt(locator1 = "WWWPage#LANGUAGE_DROPDOWN");
 
@@ -107,26 +229,24 @@ definition {
 		}
 	}
 
-    macro viewFooterNavigationLinks {
-		var key_positionValue = "1";
+	macro viewFooterNavigationLinks {
+		var key_positionValue = 1;
 		var linksRemain = "true";
 
 		if (IsElementPresent(locator1 = "WWWPage#FOOTER_LINK")) {
-
 			var pageElementsFound = ${pageElementsFound} + 1;
 
-			while (("${linksRemain}" == "true") && ("${key_positionValue}" != "15")) {
+			while ((${linksRemain} == "true") && (${key_positionValue} != 15)) {
 				while (IsElementPresent(locator1 = "WWWPage#FOOTER_LINK")) {
-
 					var footerNavigationLink = selenium.getAttribute("xpath=(//h4[contains(@class,'nav-item-header')]/following-sibling::ul//a)[${key_positionValue}]@href");
 
 					var curl = '''
 						${footerNavigationLink} -I
-						''';
+					''';
 
-					var httpResponseStatusCode = JSONCurlUtil.get("${curl}");
+					var httpResponseStatusCode = JSONCurlUtil.get(${curl});
 
-					if (contains("${httpResponseStatusCode}", "HTTP/2 400") || (contains("${httpResponseStatusCode}", "HTTP/2 404"))) {
+					if (contains(${httpResponseStatusCode}, "HTTP/2 400") || contains(${httpResponseStatusCode}, "HTTP/2 404")) {
 						echo("The ${footerNavigationLink} page is not working properly.");
 
 						var key_positionValue = ${key_positionValue} + 1;
@@ -143,31 +263,31 @@ definition {
 		}
 	}
 
-    @prose = "I should be able to view the page with the relative url ${url}"
+	@prose = "I should be able to view the page with the relative url ${url}"
 	macro viewPage {
-		static var pageElementsFound = "0";
+		static var pageElementsFound = 0;
 
-		WWWHomepage.gotoRelativeURL(url = "${url}");
+		WWWHomepage.gotoRelativeURL(url = ${url});
 
-		if ("${url}" == "") {
+		if (${url} == "") {
 			WWWPage.viewTopInfoNavigationLinks();
 		}
 
-		if ("${url}" == "") {
-			WWWPage.viewDropdownTab(url = "${url}");
+		if (${url} == "") {
+			WWWPage.viewDropdownTab(url = ${url});
 		}
 
 		WWWPage.viewPageImages();
 
 		WWWPage.viewPageLinks();
 
-		WWWPage.populateAndSubmitForm(url = "${url}");
+		WWWPage.populateAndSubmitForm(url = ${url});
 
-		if ("${url}" == "") {
+		if (${url} == "") {
 			WWWPage.viewFooterNavigationLinks();
 		}
 
-		if ("${url}" == "") {
+		if (${url} == "") {
 			WWWPage.viewSocialMediaFooterNavigationLinks();
 		}
 
@@ -177,22 +297,20 @@ definition {
 
 		echo("Total page elements found: ${pageElementsFound}");
 
-		if ("${pageElementsFound}" == "0") {
+		if (${pageElementsFound} == 0) {
 			fail("No page elements were found on the page with the relative url ${url}. This could mean that the page element paths need to be updated or it could indicate a problem with the site page. Please investigate.");
 		}
 	}
 
-    macro viewPageImages {
-		var key_positionValue = "1";
+	macro viewPageImages {
+		var key_positionValue = 1;
 		var imagesRemain = "true";
 
 		if (IsElementPresent(locator1 = "WWWPage#PAGE_IMAGE")) {
-
 			var pageElementsFound = ${pageElementsFound} + 1;
 
-			while (("${imagesRemain}" == "true") && (maxIterations = "50")) {
-				while (IsElementPresent(locator1 = "WWWPage#PAGE_IMAGE") && (maxIterations = "50")) {
-
+			while ((${imagesRemain} == "true") && (maxIterations = "50")) {
+				while ((IsElementPresent(locator1 = "WWWPage#PAGE_IMAGE")) && (maxIterations = "50")) {
 					AssertElementPresent(locator1 = "WWWPage#PAGE_IMAGE");
 
 					ScrollWebElementIntoView(locator1 = "WWWPage#PAGE_IMAGE");
@@ -207,38 +325,37 @@ definition {
 					var key_positionValue = ${key_positionValue} + 1;
 				}
 			}
+
 			var imagesRemain = "false";
 		}
 	}
 
 	macro viewPageLinks {
-		var key_positionValue = "1";
+		var key_positionValue = 1;
 		var linksRemain = "true";
 
 		if (IsElementPresent(locator1 = "WWWPage#PAGE_LINK")) {
-
 			var pageElementsFound = ${pageElementsFound} + 1;
 
-			while (("${linksRemain}" == "true") && (maxIterations = "100")) {
-				while (IsElementPresent(locator1 = "WWWPage#PAGE_LINK") && (maxIterations = "100")) {
-
+			while ((${linksRemain} == "true") && (maxIterations = "100")) {
+				while ((IsElementPresent(locator1 = "WWWPage#PAGE_LINK")) && (maxIterations = "100")) {
 					var pageLink = selenium.getAttribute("xpath=(//div[contains(@class,'d-lg-block container-fluid')]//a)[${key_positionValue}]@href");
 
-					if (contains("${pageLink}", "mailto")) {
+					if (contains(${pageLink}, "mailto")) {
 						var key_positionValue = ${key_positionValue} + 1;
 					}
 					else {
-						if (contains("${pageLink}", "&")) {
-							var pageLink = StringUtil.replace("${pageLink}", "&", "%26");
+						if (contains(${pageLink}, "&")) {
+							var pageLink = StringUtil.replace(${pageLink}, "&", "%26");
 						}
 
 						var curl = '''
 							${pageLink} -I
-							''';
+						''';
 
-						var httpResponseStatusCode = JSONCurlUtil.get("${curl}");
+						var httpResponseStatusCode = JSONCurlUtil.get(${curl});
 
-						if (contains("${httpResponseStatusCode}", "HTTP/2 400") || (contains("${httpResponseStatusCode}", "HTTP/2 404"))) {
+						if (contains(${httpResponseStatusCode}, "HTTP/2 400") || contains(${httpResponseStatusCode}, "HTTP/2 404")) {
 							echo("The ${pageLink} page is not working properly.");
 
 							var key_positionValue = ${key_positionValue} + 1;
@@ -256,28 +373,26 @@ definition {
 		}
 	}
 
-    macro viewSocialMediaFooterNavigationLinks {
-		var key_positionValue = "1";
+	macro viewSocialMediaFooterNavigationLinks {
+		var key_positionValue = 1;
 		var linksRemain = "true";
 
 		if (IsElementPresent(locator1 = "WWWPage#FOOTER_SOCIAL_MEDIA_LINK")) {
-
 			var pageElementsFound = ${pageElementsFound} + 1;
 
-			while (("${linksRemain}" == "true") && ("${key_positionValue}" != "6")) {
+			while ((${linksRemain} == "true") && (${key_positionValue} != 6)) {
 				while (IsElementPresent(locator1 = "WWWPage#FOOTER_SOCIAL_MEDIA_LINK")) {
-
 					var socialMediaFooterLink = selenium.getAttribute("xpath=(//div[contains(@class,'social-nav')]//li/a)[${key_positionValue}]@href");
 
 					echo("PAGE LINK: ${socialMediaFooterLink}");
 
 					var curl = '''
 						${socialMediaFooterLink} -I
-						''';
+					''';
 
-					var httpResponseStatusCode = JSONCurlUtil.get("${curl}");
+					var httpResponseStatusCode = JSONCurlUtil.get(${curl});
 
-					if (contains("${httpResponseStatusCode}", "HTTP/2 400") || (contains("${httpResponseStatusCode}", "HTTP/2 404"))) {
+					if (contains(${httpResponseStatusCode}, "HTTP/2 400") || contains(${httpResponseStatusCode}, "HTTP/2 404")) {
 						echo("The ${socialMediaFooterLink} page is not working properly.");
 
 						var key_positionValue = ${key_positionValue} + 1;
@@ -294,28 +409,26 @@ definition {
 		}
 	}
 
-    macro viewTopInfoNavigationLinks {
-		var key_positionValue = "1";
+	macro viewTopInfoNavigationLinks {
+		var key_positionValue = 1;
 		var linksRemain = "true";
 
 		if (IsElementPresent(locator1 = "WWWPage#TOP_INFO_NAVIGATION_LINK")) {
-
 			var pageElementsFound = ${pageElementsFound} + 1;
 
-			while (("${linksRemain}" == "true") && ("${key_positionValue}" != "3")) {
+			while ((${linksRemain} == "true") && (${key_positionValue} != 3)) {
 				while (IsElementPresent(locator1 = "WWWPage#TOP_INFO_NAVIGATION_LINK")) {
-
 					var topInfoNavigationLink = selenium.getAttribute("xpath=(//div[contains(@class,'utility-nav-left')])[1]//a[${key_positionValue}]@href");
 
 					echo("PAGE LINK: ${topInfoNavigationLink}");
 
 					var curl = '''
 						${topInfoNavigationLink} -I
-						''';
+					''';
 
-					var httpResponseStatusCode = JSONCurlUtil.get("${curl}");
+					var httpResponseStatusCode = JSONCurlUtil.get(${curl});
 
-					if (contains("${httpResponseStatusCode}", "HTTP/2 400") || (contains("${httpResponseStatusCode}", "HTTP/2 404"))) {
+					if (contains(${httpResponseStatusCode}, "HTTP/2 400") || contains(${httpResponseStatusCode}, "HTTP/2 404")) {
 						echo("The ${topInfoNavigationLink} page is not working properly.");
 
 						var key_positionValue = ${key_positionValue} + 1;
@@ -332,11 +445,10 @@ definition {
 		}
 	}
 
-    macro viewTopLanguageDropdown {
-		var key_positionValue = "1";
+	macro viewTopLanguageDropdown {
+		var key_positionValue = 1;
 
 		if (IsElementPresent(locator1 = "WWWPage#LANGUAGE_DROPDOWN")) {
-
 			var pageElementsFound = ${pageElementsFound} + 1;
 
 			AssertElementPresent(locator1 = "WWWPage#LANGUAGE_DROPDOWN");
@@ -344,13 +456,13 @@ definition {
 			while (IsElementPresent(locator1 = "WWWPage#DROPDOWN_LANGUAGE_LINK", value1 = "")) {
 				var key_positionValue = ${key_positionValue} + 1;
 
-				var nonExistentPathPositionValue = "${key_positionValue}";
+				var nonExistentPathPositionValue = ${key_positionValue};
 			}
 
-			var key_positionValue = "1";
+			var key_positionValue = 1;
 
-			while ("${key_positionValue}" != "${nonExistentPathPositionValue}") {
-				if ("${key_positionValue}" == "7") {
+			while (${key_positionValue} != ${nonExistentPathPositionValue}) {
+				if (${key_positionValue} == 7) {
 					var key_positionValue = ${key_positionValue} + 1;
 				}
 
@@ -369,143 +481,11 @@ definition {
 				var key_positionValue = ${key_positionValue} + 1;
 			}
 
-			var key_positionValue = "3";
+			var key_positionValue = 3;
 
 			Click.pauseMakeVisibleClickAt(locator1 = "WWWPage#LANGUAGE_DROPDOWN");
 
 			Click.pauseMakeVisibleClickAt(locator1 = "WWWPage#DROPDOWN_LANGUAGE_LINK");
-		}
-	}
-
-    macro populateAndSubmitForm {
-		var key_inputPositionValue = "1";
-		var key_textAreaPositionValue = "1";
-		var key_selectPositionValue = "1";
-
-		WaitForSPARefresh();
-
-		Pause(locator1 = "5000");
-
-		if (IsElementPresent(locator1 = "WWWPage#MARKETING_FORM")) {
-
-			var pageElementsFound = ${pageElementsFound} + 1;
-
-			while (IsElementPresent(locator1 = "WWWPage#MARKETING_FORM_INPUT_FIELD")) {
-				var key_inputPositionValue = ${key_inputPositionValue} + 1;
-
-				var nonExistentPathPositionValueInput = "${key_inputPositionValue}";
-			}
-
-			while (IsElementPresent(locator1 = "WWWPage#MARKETING_FORM_TEXT_AREA")) {
-				var key_textAreaPositionValue = ${key_textAreaPositionValue} + 1;
-
-				var nonExistentPathPositionValueTextArea = "${key_textAreaPositionValue}";
-			}
-
-			while (IsElementPresent(locator1 = "WWWPage#MARKETING_FORM_SELECT_FIELD")) {
-				var key_selectPositionValue = ${key_selectPositionValue} + 1;
-
-				var nonExistentPathPositionValueSelect = "${key_selectPositionValue}";
-			}
-
-			var key_inputPositionValue = "1";
-
-			var key_textAreaPositionValue = "1";
-
-			var key_selectPositionValue = "1";
-
-			while ("${key_inputPositionValue}" != "${nonExistentPathPositionValueInput}") {
-				WaitForSPARefresh();
-
-				AssertElementPresent(locator1 = "WWWPage#MARKETING_FORM_INPUT_FIELD");
-
-				var inputFieldName = selenium.getAttribute("xpath=(//input[contains(@class,'mktoRequired')])[${key_inputPositionValue}]@name");
-
-				if ("${inputFieldName}" == "Email") {
-					Type(
-						locator1 = "WWWPage#MARKETING_FORM_INPUT_FIELD",
-						value1 = "usr.liferay@lrcustomer.com.broken");
-				}
-				else if ("${inputFieldName}" == "Phone") {
-					ScrollWebElementIntoView(locator1 = "WWWPage#MARKETING_FORM_INPUT_FIELD");
-
-					Type(
-						locator1 = "WWWPage#MARKETING_FORM_INPUT_FIELD",
-						value1 = "555-555-5678");
-				}
-				else {
-					ScrollWebElementIntoView(locator1 = "WWWPage#MARKETING_FORM_INPUT_FIELD");
-
-					if (IsElementPresent(locator1 = "WWWPage#REQUEST_A_LIVE_DEMO_FOOTER_ROW")) {
-                        ScrollBy(value1 = "0,100");
-                    }
-
-					Type(
-						locator1 = "WWWPage#MARKETING_FORM_INPUT_FIELD",
-						value1 = "Test Form");
-				}
-
-				var key_inputPositionValue = ${key_inputPositionValue} + 1;
-			}
-			if (IsElementPresent(locator1 = "WWWPage#MARKETING_FORM_TEXT_AREA")) {
-
-				while ("${key_textAreaPositionValue}" != "${nonExistentPathPositionValueTextArea}") {
-					AssertElementPresent(locator1 = "WWWPage#MARKETING_FORM_TEXT_AREA");
-
-					ScrollWebElementIntoView(locator1 = "WWWPage#MARKETING_FORM_TEXT_AREA");
-
-					Type(
-						locator1 = "WWWPage#MARKETING_FORM_TEXT_AREA",
-						value1 = "Test Form");
-
-					var key_textAreaPositionValue = ${key_textAreaPositionValue} + 1;
-				}
-			}
-
-			while ("${key_selectPositionValue}" != "${nonExistentPathPositionValueSelect}") {
-				ScrollWebElementIntoView(locator1= "WWWPage#MARKETING_FORM_SELECT_FIELD");
-
-				if (IsElementPresent(locator1 = "WWWPage#REQUEST_A_LIVE_DEMO_FOOTER_ROW")) {
-                        ScrollBy(value1 = "0,100");
-                    }
-
-				var selectOptionValue = selenium.getText("xpath=(//select[contains(@class,'mktoField')])[${key_selectPositionValue}]/option[2]");
-
-				var selectFieldName = selenium.getAttribute("xpath=(//select[contains(@class,'mktoField')])[${key_selectPositionValue}]@name");
-
-				if ("${selectFieldName}" == "Country") {
-					Select(
-						locator1 = "WWWPage#MARKETING_FORM_SELECT_FIELD", 
-						value1 = "Australia");
-
-					var key_selectPositionValue = ${key_selectPositionValue} + 1;
-
-					var nonExistentPathPositionValueSelect = ${nonExistentPathPositionValueSelect} + 1;
-
-					var selectOptionValue = selenium.getText("xpath=(//select[contains(@class,'mktoField')])[${key_selectPositionValue}]/option[2]");
-
-					Select(
-						locator1 = "WWWPage#MARKETING_FORM_SELECT_FIELD", 
-						value1 = "${selectOptionValue}");
-				}
-				else {
-					Select(
-						locator1 = "WWWPage#MARKETING_FORM_SELECT_FIELD", 
-						value1 = "${selectOptionValue}");
-				}
-
-				var key_selectPositionValue = ${key_selectPositionValue} + 1;
-			}
-
-			ScrollWebElementIntoView(locator1 = "WWWPage#MARKETING_FORM_SUBMIT_BUTTON");
-
-			Click(locator1 = "WWWPage#MARKETING_FORM_SUBMIT_BUTTON");
-
-			Pause(locator1 = "30000");
-
-			WWWHomepage.viewNoErrors();
-
-			GoBack();
 		}
 	}
 

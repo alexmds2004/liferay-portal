@@ -7,24 +7,24 @@ definition {
 	macro _getTicketId {
 		var curl = '''
 			${zendeskURL}/api/v2/search.json --tlsv1.2
-			-u ${zendeskAdminEmail}/token:${apiToken}
-			-G --data-urlencode "query=type:ticket subject:${subject}"
-			''';
+				-u ${zendeskAdminEmail}/token:${apiToken}
+				-G --data-urlencode "query=type:ticket subject:${subject}"
+		''';
 
-		var ticketId = JSONCurlUtil.get("${curl}", "$.results[0].id");
+		var ticketId = JSONCurlUtil.get(${curl}, "$.results[0].id");
 
-		return "${ticketId}";
+		return ${ticketId};
 	}
 
 	@prose = "I teardown the tickets with ticketIds ${ticketIdList} from zendesk.liferay.com"
 	macro _tearDownTicketByIds {
 		if (isSet(ticketIdList)) {
 			var curl = '''
-			${zendeskURL}/api/v2/tickets/destroy_many.json?ids=${ticketIdList} --tlsv1.2
-			-u ${zendeskAdminEmail}/token:${apiToken}
+				${zendeskURL}/api/v2/tickets/destroy_many.json?ids=${ticketIdList} --tlsv1.2
+					-u ${zendeskAdminEmail}/token:${apiToken}
 			''';
 
-			com.liferay.poshi.runner.util.JSONCurlUtil.delete("${curl}");
+			com.liferay.poshi.runner.util.JSONCurlUtil.delete(${curl});
 		}
 	}
 
@@ -32,16 +32,15 @@ definition {
 	macro _verifyNoRecentTicketComment {
 		var curl = '''
 			${zendeskURL}/api/v2/tickets/${ticketId}/comments.json --tlsv1.2
-			-u ${zendeskAdminEmail}/token:${apiToken}
-			''';
+				-u ${zendeskAdminEmail}/token:${apiToken}
+		''';
 
-		var commentCount = JSONCurlUtil.get("${curl}", "$.count");
+		var commentCount = JSONCurlUtil.get(${curl}, "$.count");
+		var commentsFromAPI = JSONCurlUtil.get(${curl}, "$.comments");
 
-		var commentsFromAPI = JSONCurlUtil.get("${curl}", "$.comments");
+		var commentsFromAPI = StringUtil.replace(${commentsFromAPI}, "\"", "");
 
-		var commentsFromAPI = StringUtil.replace("${commentsFromAPI}", "\"", "");
-
-		if (contains("${commentsFromAPI}", "${commentContent}")) {
+		if (contains(${commentsFromAPI}, ${commentContent})) {
 			fail("Actual comment ${commentFromAPI} as the most recent comment body contains the comment body content ${commentContent}.");
 		}
 	}
@@ -50,18 +49,18 @@ definition {
 	macro _verifyRecentTicketComment {
 		var curl = '''
 			${zendeskURL}/api/v2/tickets/${ticketId}/comments.json --tlsv1.2
-			-u ${zendeskAdminEmail}/token:${apiToken}
-			''';
+				-u ${zendeskAdminEmail}/token:${apiToken}
+		''';
 
-		var commentCount = JSONCurlUtil.get("${curl}", "$.count");
+		var commentCount = JSONCurlUtil.get(${curl}, "$.count");
 
 		var commentArrayValue = ${commentCount} - 1;
 
-		var commentFromAPI = JSONCurlUtil.get("${curl}", "$.comments[${commentArrayValue}].body");
+		var commentFromAPI = JSONCurlUtil.get(${curl}, "$.comments[${commentArrayValue}].body");
 
-		var commentFromAPI = StringUtil.replace("${commentFromAPI}", "\"", "");
+		var commentFromAPI = StringUtil.replace(${commentFromAPI}, "\"", "");
 
-		if (!(contains("${commentFromAPI}", "${commentContent}"))) {
+		if (!(contains(${commentFromAPI}, ${commentContent}))) {
 			fail("Actual comment ${commentFromAPI} as the most recent comment body does not contain the expected comment body content ${commentContent}.");
 		}
 	}

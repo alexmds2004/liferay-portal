@@ -20,11 +20,11 @@ definition {
 			return getWebElement("//textarea[contains(@id,'osbpatcherportlet_patcherBuildName')]")["value"];
 		''';
 
-		var propertyValue = selenium.getEval("${javascript}");
+		var propertyValue = selenium.getEval(${javascript});
 
 		TestUtils.assertEquals(
-			actual = "${propertyValue}",
-			expected = "${expectedValue}");
+			actual = ${propertyValue},
+			expected = ${expectedValue});
 	}
 
 	macro assertTroubleshootingSuggestionsValue {
@@ -37,11 +37,11 @@ definition {
 			return getWebElement("//textarea[contains(@id,'osbpatcherportlet_troubleshootingTicketList')]")["value"];
 		''';
 
-		var propertyValue = selenium.getEval("${javascript}");
+		var propertyValue = selenium.getEval(${javascript});
 
 		TestUtils.assertEquals(
-			actual = "${propertyValue}",
-			expected = "${expectedValue}");
+			actual = ${propertyValue},
+			expected = ${expectedValue});
 	}
 
 	@prose = "I check build for new account with Troubleshooting tickets with the following values ${table}"
@@ -52,112 +52,112 @@ definition {
 			locator1 = "Patcher#CREATE_BUTTON",
 			value1 = "Create Build for New Account");
 
-		Patcher.pause(timeInSeconds = "1");
+		Patcher.pause(timeInSeconds = 1);
 
-		var  rawTable = TableUtil.newTable(${table});
+		var rawTable = TableUtil.newTable(${table});
 		var initialTicketsList = "";
 		var ticketSuggestions = "";
 
-		for (var row : table "${rawTable}") {
+		for (var row : table ${rawTable}) {
 			var field = "${row[0]}";
 			var value = "${row[1]}";
 
-			if ("${field}" == "Product") {
+			if (${field} == "Product") {
 				Select(
 					locator1 = "PatcherBuildAdd#PRODUCT_VERSION_SELECT",
-					value1 = "${value}");
+					value1 = ${value});
 
-				Patcher.pause(timeInSeconds = "5");
+				Patcher.pause(timeInSeconds = 5);
 			}
-			else if ("${field}" == "Project Version") {
+			else if (${field} == "Project Version") {
 				Select(
 					locator1 = "PatcherBuildAdd#PROJECT_VERSION_SELECT",
-					value1 = "${value}");
+					value1 = ${value});
 
-				Patcher.pause(timeInSeconds = "5");
+				Patcher.pause(timeInSeconds = 5);
 			}
-			else if ("${field}" == "Tickets List") {
+			else if (${field} == "Tickets List") {
 				Type(
 					locator1 = "PatcherBuildAdd#TICKETS_LIST_FIELD",
-					value1 = "${value}");
+					value1 = ${value});
 
-				var initialTicketsList = "${value}";
+				var initialTicketsList = ${value};
 
-				Patcher.pause(timeInSeconds = "1");
+				Patcher.pause(timeInSeconds = 1);
 			}
-			else if ("${field}" == "Troubleshooting Ticket Suggestions") {
-				var ticketSuggestions = "${value}";
+			else if (${field} == "Troubleshooting Ticket Suggestions") {
+				var ticketSuggestions = ${value};
 			}
 		}
 
-		Patcher.pause(timeInSeconds = "5");
+		Patcher.pause(timeInSeconds = 5);
 
-		PatcherBuild.assertTroubleshootingSuggestionsValue(expectedValue = "${ticketSuggestions}");
+		PatcherBuild.assertTroubleshootingSuggestionsValue(expectedValue = ${ticketSuggestions});
 
 		Click(locator1 = "PatcherBuildAdd#ADD_TROUBLESHOOTING_TICKET_SUGGESTIONS");
 
-		Patcher.pause(timeInSeconds = "1");
+		Patcher.pause(timeInSeconds = 1);
 
-		if ("${initialTicketsList}" != "") {
+		if (${initialTicketsList} != "") {
 			PatcherBuild.assertTicketListValue(expectedValue = "${initialTicketsList},${ticketSuggestions}");
 		}
 		else {
-			PatcherBuild.assertTicketListValue(expectedValue = "${ticketSuggestions}");
+			PatcherBuild.assertTicketListValue(expectedValue = ${ticketSuggestions});
 		}
 	}
 
 	@prose = "I check the Patcher build for the ticket ${supportTicket} on the account ${accountCode} for compile completion using the ${jenkinsValue} Jenkins job"
 	macro checkForCompileCompletion {
-		PatcherAccount.gotoAccount(accountCode = "${accountCode}");
+		PatcherAccount.gotoAccount(accountCode = ${accountCode});
 
 		PatcherSearch.searchAdvanced(
-			accountCodeKeyword = "${accountCode}",
-			supportTicketKeyword = "${supportTicket}");
+			accountCodeKeyword = ${accountCode},
+			supportTicketKeyword = ${supportTicket});
 
-		var key_supportTicket = "${supportTicket}";
+		var key_supportTicket = ${supportTicket};
 
 		while (IsElementNotPresent(locator1 = "Patcher#BUILD_ID")) {
 			Refresh();
 
 			PatcherSearch.searchAdvanced(
-				accountCodeKeyword = "${accountCode}",
-				supportTicketKeyword = "${supportTicket}");
+				accountCodeKeyword = ${accountCode},
+				supportTicketKeyword = ${supportTicket});
 		}
 
 		var buildPatcherStatus = selenium.getText("Patcher#BUILD_PATCHER_STATUS");
-		var currentIteration = "0";
+		var currentIteration = 0;
 		var jenkinsJobStatus = "In Progress";
 
-		while (("${currentIteration}" != "${buildCompletionPollMaximumIterations}") && ("${buildPatcherStatus}" == "Compiling") && (("${jenkinsJobStatus}" == "In Progress") || ("${jenkinsJobStatus}" == "Not Found") || ("${jenkinsJobStatus}" == "Jenkins link not present")) && (maxIterations = "30")) {
+		while (((${currentIteration} != ${buildCompletionPollMaximumIterations}) && (${buildPatcherStatus} == "Compiling") && ((${jenkinsJobStatus} == "In Progress") || (${jenkinsJobStatus} == "Not Found") || (${jenkinsJobStatus} == "Jenkins link not present"))) && (maxIterations = "30")) {
 			var currentIteration = ${currentIteration} + 1;
 
-			Patcher.pauseInMinutes(timeInMinutes = "${buildCompileCompletionPollIntervalInMinutes}");
+			Patcher.pauseInMinutes(timeInMinutes = ${buildCompileCompletionPollIntervalInMinutes});
 
-			PatcherAccount.gotoAccount(accountCode = "${accountCode}");
+			PatcherAccount.gotoAccount(accountCode = ${accountCode});
 
 			PatcherSearch.searchAdvanced(
-				accountCodeKeyword = "${accountCode}",
-				supportTicketKeyword = "${supportTicket}");
+				accountCodeKeyword = ${accountCode},
+				supportTicketKeyword = ${supportTicket});
 
-			var key_supportTicket = "${supportTicket}";
+			var key_supportTicket = ${supportTicket};
 
 			while (IsElementNotPresent(locator1 = "Patcher#BUILD_ID")) {
 				Refresh();
 
 				PatcherSearch.searchAdvanced(
-					accountCodeKeyword = "${accountCode}",
-					supportTicketKeyword = "${supportTicket}");
+					accountCodeKeyword = ${accountCode},
+					supportTicketKeyword = ${supportTicket});
 			}
 
 			var buildPatcherStatus = selenium.getText("Patcher#BUILD_PATCHER_STATUS");
-			var key_jenkinsValue = "${jenkinsValue}";
+			var key_jenkinsValue = ${jenkinsValue};
 
 			if (IsElementPresent(locator1 = "Patcher#BUILD_JENKINS_SPECIFIC")) {
 				var jenkinsLinkUrl = selenium.getAttribute("//tr[contains(.,'${key_supportTicket}')]/td[9]/a[contains(.,'${key_jenkinsValue}')]@href");
 
-				var jenkinsLinkUrl = StringUtil.replace("${jenkinsLinkUrl}", "${builderURL}", "${builderURL}.liferay.com");
+				var jenkinsLinkUrl = StringUtil.replace(${jenkinsLinkUrl}, ${builderURL}, "${builderURL}.liferay.com");
 
-				Open(locator1 = "${jenkinsLinkUrl}");
+				Open(locator1 = ${jenkinsLinkUrl});
 
 				if (IsElementPresent(locator1 = "Jenkins#JENKINS_JOB_STATUS_FAILED")) {
 					var jenkinsJobStatus = "Failed";
@@ -177,11 +177,11 @@ definition {
 
 				Patcher.openURL();
 
-				PatcherAccount.gotoAccount(accountCode = "${accountCode}");
+				PatcherAccount.gotoAccount(accountCode = ${accountCode});
 
 				PatcherSearch.searchAdvanced(
-					accountCodeKeyword = "${accountCode}",
-					supportTicketKeyword = "${supportTicket}");
+					accountCodeKeyword = ${accountCode},
+					supportTicketKeyword = ${supportTicket});
 
 				echo("Jenkins Job Status: ${jenkinsJobStatus}");
 			}
@@ -194,12 +194,12 @@ definition {
 			echo("Builder Patcher Status: ${buildPatcherStatus}");
 		}
 
-		if (("${buildPatcherStatus}" == "Compiling") && (("${jenkinsJobStatus}" == "Failed") || ("${jenkinsJobStatus}" == "Not Found") || ("${jenkinsJobStatus}" == "Jenkins link not present") || ("${jenkinsJobStatus}" == "Aborted"))) {
+		if ((${buildPatcherStatus} == "Compiling") && ((${jenkinsJobStatus} == "Failed") || (${jenkinsJobStatus} == "Not Found") || (${jenkinsJobStatus} == "Jenkins link not present") || (${jenkinsJobStatus} == "Aborted"))) {
 			echo("The Patcher build failed to compile after one attempt. Will restart the compile process to assert the failure is not a fluke.");
 
 			PatcherBuild.clickActions(
-				accountCode = "${accountCode}",
-				supportTicket = "${supportTicket}");
+				accountCode = ${accountCode},
+				supportTicket = ${supportTicket});
 
 			AssertClick(
 				locator1 = "Patcher#MENULIST_BUILD",
@@ -207,56 +207,56 @@ definition {
 
 			Message.success();
 
-			PatcherAccount.gotoAccount(accountCode = "${accountCode}");
+			PatcherAccount.gotoAccount(accountCode = ${accountCode});
 
 			PatcherSearch.searchAdvanced(
-				accountCodeKeyword = "${accountCode}",
-				supportTicketKeyword = "${supportTicket}");
+				accountCodeKeyword = ${accountCode},
+				supportTicketKeyword = ${supportTicket});
 
-			var key_supportTicket = "${supportTicket}";
+			var key_supportTicket = ${supportTicket};
 
 			while (IsElementNotPresent(locator1 = "Patcher#BUILD_ID")) {
 				Refresh();
 
 				PatcherSearch.searchAdvanced(
-					accountCodeKeyword = "${accountCode}",
-					supportTicketKeyword = "${supportTicket}");
+					accountCodeKeyword = ${accountCode},
+					supportTicketKeyword = ${supportTicket});
 			}
 
 			var buildPatcherStatus = selenium.getText("Patcher#BUILD_PATCHER_STATUS");
-			var currentIteration = "0";
+			var currentIteration = 0;
 			var jenkinsJobStatus = "In Progress";
 
-			while (("${currentIteration}" != "${buildCompletionPollMaximumIterations}") && ("${buildPatcherStatus}" == "Compiling") && (("${jenkinsJobStatus}" == "In Progress") || ("${jenkinsJobStatus}" == "Not Found") || ("${jenkinsJobStatus}" == "Jenkins link not present")) && (maxIterations = "30")) {
+			while (((${currentIteration} != ${buildCompletionPollMaximumIterations}) && (${buildPatcherStatus} == "Compiling") && ((${jenkinsJobStatus} == "In Progress") || (${jenkinsJobStatus} == "Not Found") || (${jenkinsJobStatus} == "Jenkins link not present"))) && (maxIterations = "30")) {
 				var currentIteration = ${currentIteration} + 1;
 
-				Patcher.pauseInMinutes(timeInMinutes = "${buildCompileCompletionPollIntervalInMinutes}");
+				Patcher.pauseInMinutes(timeInMinutes = ${buildCompileCompletionPollIntervalInMinutes});
 
-				PatcherAccount.gotoAccount(accountCode = "${accountCode}");
+				PatcherAccount.gotoAccount(accountCode = ${accountCode});
 
 				PatcherSearch.searchAdvanced(
-					accountCodeKeyword = "${accountCode}",
-					supportTicketKeyword = "${supportTicket}");
+					accountCodeKeyword = ${accountCode},
+					supportTicketKeyword = ${supportTicket});
 
-				var key_supportTicket = "${supportTicket}";
+				var key_supportTicket = ${supportTicket};
 
 				while (IsElementNotPresent(locator1 = "Patcher#BUILD_ID")) {
 					Refresh();
 
 					PatcherSearch.searchAdvanced(
-						accountCodeKeyword = "${accountCode}",
-						supportTicketKeyword = "${supportTicket}");
+						accountCodeKeyword = ${accountCode},
+						supportTicketKeyword = ${supportTicket});
 				}
 
 				var buildPatcherStatus = selenium.getText("Patcher#BUILD_PATCHER_STATUS");
-				var key_jenkinsValue = "${jenkinsValue}";
+				var key_jenkinsValue = ${jenkinsValue};
 
 				if (IsElementPresent(locator1 = "Patcher#BUILD_JENKINS_SPECIFIC")) {
 					var jenkinsLinkUrl = selenium.getAttribute("//tr[contains(.,'${key_supportTicket}')]/td[9]/a[contains(.,'${key_jenkinsValue}')]@href");
 
-					var jenkinsLinkUrl = StringUtil.replace("${jenkinsLinkUrl}", "${builderURL}", "${builderURL}.liferay.com");
+					var jenkinsLinkUrl = StringUtil.replace(${jenkinsLinkUrl}, ${builderURL}, "${builderURL}.liferay.com");
 
-					Open(locator1 = "${jenkinsLinkUrl}");
+					Open(locator1 = ${jenkinsLinkUrl});
 
 					if (IsElementPresent(locator1 = "Jenkins#JENKINS_JOB_STATUS_FAILED")) {
 						var jenkinsJobStatus = "Failed";
@@ -276,11 +276,11 @@ definition {
 
 					Patcher.openURL();
 
-					PatcherAccount.gotoAccount(accountCode = "${accountCode}");
+					PatcherAccount.gotoAccount(accountCode = ${accountCode});
 
 					PatcherSearch.searchAdvanced(
-						accountCodeKeyword = "${accountCode}",
-						supportTicketKeyword = "${supportTicket}");
+						accountCodeKeyword = ${accountCode},
+						supportTicketKeyword = ${supportTicket});
 
 					echo("Jenkins Job Status: ${jenkinsJobStatus}");
 				}
@@ -293,31 +293,31 @@ definition {
 				echo("Builder Patcher Status: ${buildPatcherStatus}");
 			}
 
-			if (("${buildPatcherStatus}" == "Compiling") && (("${jenkinsJobStatus}" == "Failed") || ("${jenkinsJobStatus}" == "Not Found") || ("${jenkinsJobStatus}" == "Jenkins link not present") || ("${jenkinsJobStatus}" == "Aborted"))) {
+			if ((${buildPatcherStatus} == "Compiling") && ((${jenkinsJobStatus} == "Failed") || (${jenkinsJobStatus} == "Not Found") || (${jenkinsJobStatus} == "Jenkins link not present") || (${jenkinsJobStatus} == "Aborted"))) {
 				fail("The Patcher build failed to compile after two attempts. Please investigate.");
 			}
-			else if (("${buildPatcherStatus}" == "Compiling") && ("${jenkinsJobStatus}" == "Success")) {
+			else if ((${buildPatcherStatus} == "Compiling") && (${jenkinsJobStatus} == "Success")) {
 				echo("The Patcher build has completed and is currently sending the status file");
 
-				while (("${currentIteration}" != "${buildCompletionPollMaximumIterations}") && ("${buildPatcherStatus}" == "Compiling") && (maxIterations = "30")) {
+				while (((${currentIteration} != ${buildCompletionPollMaximumIterations}) && (${buildPatcherStatus} == "Compiling")) && (maxIterations = "30")) {
 					var currentIteration = ${currentIteration} + 1;
 
-					Patcher.pauseInMinutes(timeInMinutes = "${buildCompileCompletionPollIntervalInMinutes}");
+					Patcher.pauseInMinutes(timeInMinutes = ${buildCompileCompletionPollIntervalInMinutes});
 
-					PatcherAccount.gotoAccount(accountCode = "${accountCode}");
+					PatcherAccount.gotoAccount(accountCode = ${accountCode});
 
 					PatcherSearch.searchAdvanced(
-						accountCodeKeyword = "${accountCode}",
-						supportTicketKeyword = "${supportTicket}");
+						accountCodeKeyword = ${accountCode},
+						supportTicketKeyword = ${supportTicket});
 
-					var key_supportTicket = "${supportTicket}";
+					var key_supportTicket = ${supportTicket};
 
 					while (IsElementNotPresent(locator1 = "Patcher#BUILD_ID")) {
 						Refresh();
 
 						PatcherSearch.searchAdvanced(
-							accountCodeKeyword = "${accountCode}",
-							supportTicketKeyword = "${supportTicket}");
+							accountCodeKeyword = ${accountCode},
+							supportTicketKeyword = ${supportTicket});
 					}
 
 					var buildPatcherStatus = selenium.getText("Patcher#BUILD_PATCHER_STATUS");
@@ -325,32 +325,32 @@ definition {
 					echo("Builder Patcher Status: ${buildPatcherStatus}");
 				}
 
-				if ("${buildPatcherStatus}" == "Compiling") {
+				if (${buildPatcherStatus} == "Compiling") {
 					fail("After ${currentIteration} attempts while waiting at ${buildCompileCompletionPollIntervalInMinutes} minutes in between each attempt, the Patcher build is still in Compiling status despite a successful build completion from Jenkins. This could mean that the Jenkins status file was not sent correctly. Please investigate.");
 				}
 			}
-			else if (("${buildPatcherStatus}" == "Complete") && ("${jenkinsJobStatus}" == "In Progress")) {
+			else if ((${buildPatcherStatus} == "Complete") && (${jenkinsJobStatus} == "In Progress")) {
 				echo("The Patcher Build is returning a complete status but the Jenkins job may still need to finish");
 
-				while (("${currentIteration}" != "${buildCompletionPollMaximumIterations}") && ("${buildPatcherStatus}" == "Compiling") && (maxIterations = "30")) {
+				while (((${currentIteration} != ${buildCompletionPollMaximumIterations}) && (${buildPatcherStatus} == "Compiling")) && (maxIterations = "30")) {
 					var currentIteration = ${currentIteration} + 1;
 
-					Patcher.pauseInMinutes(timeInMinutes = "${buildCompileCompletionPollIntervalInMinutes}");
+					Patcher.pauseInMinutes(timeInMinutes = ${buildCompileCompletionPollIntervalInMinutes});
 
-					PatcherAccount.gotoAccount(accountCode = "${accountCode}");
+					PatcherAccount.gotoAccount(accountCode = ${accountCode});
 
 					PatcherSearch.searchAdvanced(
-						accountCodeKeyword = "${accountCode}",
-						supportTicketKeyword = "${supportTicket}");
+						accountCodeKeyword = ${accountCode},
+						supportTicketKeyword = ${supportTicket});
 
-					var key_supportTicket = "${supportTicket}";
+					var key_supportTicket = ${supportTicket};
 
 					while (IsElementNotPresent(locator1 = "Patcher#BUILD_ID")) {
 						Refresh();
 
 						PatcherSearch.searchAdvanced(
-							accountCodeKeyword = "${accountCode}",
-							supportTicketKeyword = "${supportTicket}");
+							accountCodeKeyword = ${accountCode},
+							supportTicketKeyword = ${supportTicket});
 					}
 
 					var buildPatcherStatus = selenium.getText("Patcher#BUILD_PATCHER_STATUS");
@@ -358,32 +358,32 @@ definition {
 					echo("Builder Patcher Status: ${buildPatcherStatus}");
 				}
 			}
-			else if ("${buildPatcherStatus}" == "Compiling") {
+			else if (${buildPatcherStatus} == "Compiling") {
 				fail("After ${currentIteration} attempts while waiting at ${buildCompileCompletionPollIntervalInMinutes} minutes in between each attempt for the second compile attempt, the Patcher build is still in Compiling status. The Jenkins status is ${jenkinsJobStatus}");
 			}
 		}
-		else if (("${buildPatcherStatus}" == "Compiling") && ("${jenkinsJobStatus}" == "Success")) {
+		else if ((${buildPatcherStatus} == "Compiling") && (${jenkinsJobStatus} == "Success")) {
 			echo("The Patcher build has completed and is currently sending the status file");
 
-			while (("${currentIteration}" != "${buildCompletionPollMaximumIterations}") && ("${buildPatcherStatus}" == "Compiling") && (maxIterations = "30")) {
+			while (((${currentIteration} != ${buildCompletionPollMaximumIterations}) && (${buildPatcherStatus} == "Compiling")) && (maxIterations = "30")) {
 				var currentIteration = ${currentIteration} + 1;
 
-				Patcher.pauseInMinutes(timeInMinutes = "${buildCompileCompletionPollIntervalInMinutes}");
+				Patcher.pauseInMinutes(timeInMinutes = ${buildCompileCompletionPollIntervalInMinutes});
 
-				PatcherAccount.gotoAccount(accountCode = "${accountCode}");
+				PatcherAccount.gotoAccount(accountCode = ${accountCode});
 
 				PatcherSearch.searchAdvanced(
-					accountCodeKeyword = "${accountCode}",
-					supportTicketKeyword = "${supportTicket}");
+					accountCodeKeyword = ${accountCode},
+					supportTicketKeyword = ${supportTicket});
 
-				var key_supportTicket = "${supportTicket}";
+				var key_supportTicket = ${supportTicket};
 
 				while (IsElementNotPresent(locator1 = "Patcher#BUILD_ID")) {
 					Refresh();
 
 					PatcherSearch.searchAdvanced(
-						accountCodeKeyword = "${accountCode}",
-						supportTicketKeyword = "${supportTicket}");
+						accountCodeKeyword = ${accountCode},
+						supportTicketKeyword = ${supportTicket});
 				}
 
 				var buildPatcherStatus = selenium.getText("Patcher#BUILD_PATCHER_STATUS");
@@ -391,32 +391,32 @@ definition {
 				echo("Builder Patcher Status: ${buildPatcherStatus}");
 			}
 
-			if ("${buildPatcherStatus}" == "Compiling") {
+			if (${buildPatcherStatus} == "Compiling") {
 				fail("After ${currentIteration} attempts while waiting at ${buildCompileCompletionPollIntervalInMinutes} minutes in between each attempt, the Patcher build is still in Compiling status despite a successful build completion from Jenkins. This could mean that the Jenkins status file was not sent correctly. Please investigate.");
 			}
 		}
-		else if (("${buildPatcherStatus}" == "Complete") && ("${jenkinsJobStatus}" == "In Progress")) {
+		else if ((${buildPatcherStatus} == "Complete") && (${jenkinsJobStatus} == "In Progress")) {
 			echo("The Patcher Build is returning a complete status but the Jenkins job may still need to finish");
 
-			while (("${currentIteration}" != "${buildCompletionPollMaximumIterations}") && ("${buildPatcherStatus}" == "Compiling") && (maxIterations = "30")) {
+			while (((${currentIteration} != ${buildCompletionPollMaximumIterations}) && (${buildPatcherStatus} == "Compiling")) && (maxIterations = "30")) {
 				var currentIteration = ${currentIteration} + 1;
 
-				Patcher.pauseInMinutes(timeInMinutes = "${buildCompileCompletionPollIntervalInMinutes}");
+				Patcher.pauseInMinutes(timeInMinutes = ${buildCompileCompletionPollIntervalInMinutes});
 
-				PatcherAccount.gotoAccount(accountCode = "${accountCode}");
+				PatcherAccount.gotoAccount(accountCode = ${accountCode});
 
 				PatcherSearch.searchAdvanced(
-					accountCodeKeyword = "${accountCode}",
-					supportTicketKeyword = "${supportTicket}");
+					accountCodeKeyword = ${accountCode},
+					supportTicketKeyword = ${supportTicket});
 
-				var key_supportTicket = "${supportTicket}";
+				var key_supportTicket = ${supportTicket};
 
 				while (IsElementNotPresent(locator1 = "Patcher#BUILD_ID")) {
 					Refresh();
 
 					PatcherSearch.searchAdvanced(
-						accountCodeKeyword = "${accountCode}",
-						supportTicketKeyword = "${supportTicket}");
+						accountCodeKeyword = ${accountCode},
+						supportTicketKeyword = ${supportTicket});
 				}
 
 				var buildPatcherStatus = selenium.getText("Patcher#BUILD_PATCHER_STATUS");
@@ -424,31 +424,31 @@ definition {
 				echo("Builder Patcher Status: ${buildPatcherStatus}");
 			}
 		}
-		else if ("${buildPatcherStatus}" == "Compiling") {
+		else if (${buildPatcherStatus} == "Compiling") {
 			fail("After ${currentIteration} attempts while waiting at ${buildCompileCompletionPollIntervalInMinutes} minutes in between each attempt for the first compile attempt, the Patcher build is still in Compiling status. The Jenkins status is ${jenkinsJobStatus}");
 		}
 	}
 
 	@prose = "I check the Patcher build for the ticket ${supportTicket} on the account ${accountCode} and ${jenkinsValue} Jenkins job"
 	macro checkForJenkinsLink {
-		PatcherAccount.gotoAccount(accountCode = "${accountCode}");
+		PatcherAccount.gotoAccount(accountCode = ${accountCode});
 
-		var key_supportTicket = "${supportTicket}";
-		var key_jenkinsValue = "${jenkinsValue}";
+		var key_supportTicket = ${supportTicket};
+		var key_jenkinsValue = ${jenkinsValue};
 
 		while (IsElementNotPresent(locator1 = "Patcher#BUILD_ID")) {
 			Refresh();
 
 			PatcherSearch.searchAdvanced(
-				accountCodeKeyword = "${accountCode}",
-				supportTicketKeyword = "${supportTicket}");
+				accountCodeKeyword = ${accountCode},
+				supportTicketKeyword = ${supportTicket});
 		}
 
 		var jenkinsLinkUrl = selenium.getAttribute("//tr[contains(.,'${key_supportTicket}')]/td[9]/a[contains(.,'${key_jenkinsValue}')]@href");
 		var jenkinsJobStatus = "Not Found";
 
-		while (("${jenkinsJobStatus}" == "In Progress") || ("${jenkinsJobStatus}" == "Not Found")) {
-			Open(locator1 = "${jenkinsLinkUrl}");
+		while ((${jenkinsJobStatus} == "In Progress") || (${jenkinsJobStatus} == "Not Found")) {
+			Open(locator1 = ${jenkinsLinkUrl});
 
 			if (IsElementPresent(locator1 = "Jenkins#JENKINS_JOB_STATUS_FAILED")) {
 				var jenkinsJobStatus = "Failed";
@@ -472,117 +472,117 @@ definition {
 
 	@prose = "I check the Patcher build for the ticket ${supportTicket} on the account ${accountCode} for merge completion"
 	macro checkForMergeCompletion {
-		PatcherAccount.gotoAccount(accountCode = "${accountCode}");
+		PatcherAccount.gotoAccount(accountCode = ${accountCode});
 
 		PatcherSearch.searchAdvanced(
-			accountCodeKeyword = "${accountCode}",
-			supportTicketKeyword = "${supportTicket}");
+			accountCodeKeyword = ${accountCode},
+			supportTicketKeyword = ${supportTicket});
 
-		var key_supportTicket = "${supportTicket}";
+		var key_supportTicket = ${supportTicket};
 
 		while (IsElementNotPresent(locator1 = "Patcher#BUILD_ID")) {
 			Refresh();
 
 			PatcherSearch.searchAdvanced(
-				accountCodeKeyword = "${accountCode}",
-				supportTicketKeyword = "${supportTicket}");
+				accountCodeKeyword = ${accountCode},
+				supportTicketKeyword = ${supportTicket});
 		}
 
 		var buildPatcherStatus = selenium.getText("Patcher#BUILD_PATCHER_STATUS");
-		var currentIteration = "0";
+		var currentIteration = 0;
 
-		while (("${currentIteration}" != "${buildCompletionPollMaximumIterations}") && (("${buildPatcherStatus}" == "Merging") || ("${buildPatcherStatus}" == "Merging Only")) && (maxIterations = "30")) {
+		while (((${currentIteration} != ${buildCompletionPollMaximumIterations}) && ((${buildPatcherStatus} == "Merging") || (${buildPatcherStatus} == "Merging Only"))) && (maxIterations = "30")) {
 			var currentIteration = ${currentIteration} + 1;
 
-			Patcher.pause(timeInSeconds = "${buildMergeCompletionPollIntervalInSeconds}");
+			Patcher.pause(timeInSeconds = ${buildMergeCompletionPollIntervalInSeconds});
 
-			PatcherAccount.gotoAccount(accountCode = "${accountCode}");
+			PatcherAccount.gotoAccount(accountCode = ${accountCode});
 
 			PatcherSearch.searchAdvanced(
-				accountCodeKeyword = "${accountCode}",
-				supportTicketKeyword = "${supportTicket}");
+				accountCodeKeyword = ${accountCode},
+				supportTicketKeyword = ${supportTicket});
 
-			var key_supportTicket = "${supportTicket}";
+			var key_supportTicket = ${supportTicket};
 
 			while (IsElementNotPresent(locator1 = "Patcher#BUILD_ID")) {
 				Refresh();
 
 				PatcherSearch.searchAdvanced(
-					accountCodeKeyword = "${accountCode}",
-					supportTicketKeyword = "${supportTicket}");
+					accountCodeKeyword = ${accountCode},
+					supportTicketKeyword = ${supportTicket});
 			}
 
 			var buildPatcherStatus = selenium.getText("Patcher#BUILD_PATCHER_STATUS");
 		}
 
-		if ("${buildPatcherStatus}" == "Merging") {
+		if (${buildPatcherStatus} == "Merging") {
 			fail("After ${currentIteration} attempts while waiting at ${buildMergeCompletionPollIntervalInSeconds} seconds in between each attempt, the Patcher build is still in Merging status.");
 		}
 	}
 
 	@prose = "I check the Patcher build for the ticket ${supportTicket} on the account ${accountCode} for rebase completion"
 	macro checkForRebaseCompletion {
-		PatcherAccount.gotoAccount(accountCode = "${accountCode}");
+		PatcherAccount.gotoAccount(accountCode = ${accountCode});
 
 		PatcherSearch.searchAdvanced(
-			accountCodeKeyword = "${accountCode}",
-			supportTicketKeyword = "${supportTicket}");
+			accountCodeKeyword = ${accountCode},
+			supportTicketKeyword = ${supportTicket});
 
-		var key_supportTicket = "${supportTicket}";
+		var key_supportTicket = ${supportTicket};
 
 		while (IsElementNotPresent(locator1 = "Patcher#BUILD_ID")) {
 			Refresh();
 
 			PatcherSearch.searchAdvanced(
-				accountCodeKeyword = "${accountCode}",
-				supportTicketKeyword = "${supportTicket}");
+				accountCodeKeyword = ${accountCode},
+				supportTicketKeyword = ${supportTicket});
 		}
 
 		var buildPatcherStatus = selenium.getText("Patcher#BUILD_PATCHER_STATUS");
-		var currentIteration = "0";
+		var currentIteration = 0;
 
-		while (("${currentIteration}" != "${buildCompletionPollMaximumIterations}") && (("${buildPatcherStatus}" == "Rebasing") || ("${buildPatcherStatus}" == "Rebasing Merging Only")) && (maxIterations = "30")) {
+		while (((${currentIteration} != ${buildCompletionPollMaximumIterations}) && ((${buildPatcherStatus} == "Rebasing") || (${buildPatcherStatus} == "Rebasing Merging Only"))) && (maxIterations = "30")) {
 			var currentIteration = ${currentIteration} + 1;
 
-			Patcher.pause(timeInSeconds = "${buildRebaseCompletionPollIntervalInSeconds}");
+			Patcher.pause(timeInSeconds = ${buildRebaseCompletionPollIntervalInSeconds});
 
-			PatcherAccount.gotoAccount(accountCode = "${accountCode}");
+			PatcherAccount.gotoAccount(accountCode = ${accountCode});
 
 			PatcherSearch.searchAdvanced(
-				accountCodeKeyword = "${accountCode}",
-				supportTicketKeyword = "${supportTicket}");
+				accountCodeKeyword = ${accountCode},
+				supportTicketKeyword = ${supportTicket});
 
-			var key_supportTicket = "${supportTicket}";
+			var key_supportTicket = ${supportTicket};
 
 			while (IsElementNotPresent(locator1 = "Patcher#BUILD_ID")) {
 				Refresh();
 
 				PatcherSearch.searchAdvanced(
-					accountCodeKeyword = "${accountCode}",
-					supportTicketKeyword = "${supportTicket}");
+					accountCodeKeyword = ${accountCode},
+					supportTicketKeyword = ${supportTicket});
 			}
 
 			var buildPatcherStatus = selenium.getText("Patcher#BUILD_PATCHER_STATUS");
 		}
 
-		if ("${buildPatcherStatus}" == "Rebasing") {
+		if (${buildPatcherStatus} == "Rebasing") {
 			fail("After ${currentIteration} attempts while waiting at ${buildRebaseCompletionPollIntervalInSeconds} seconds in between each attempt, the Patcher build is still in Rebasing status.");
 		}
 	}
 
 	macro clickActions {
 		PatcherSearch.searchAdvanced(
-			accountCodeKeyword = "${accountCode}",
-			supportTicketKeyword = "${supportTicket}");
+			accountCodeKeyword = ${accountCode},
+			supportTicketKeyword = ${supportTicket});
 
-		var key_supportTicket = "${supportTicket}";
+		var key_supportTicket = ${supportTicket};
 
 		while (IsElementNotPresent(locator1 = "Patcher#BUILD_ID")) {
 			Refresh();
 
 			PatcherSearch.searchAdvanced(
-				accountCodeKeyword = "${accountCode}",
-				supportTicketKeyword = "${supportTicket}");
+				accountCodeKeyword = ${accountCode},
+				supportTicketKeyword = ${supportTicket});
 		}
 
 		AssertClick(
@@ -598,85 +598,85 @@ definition {
 			locator1 = "Patcher#CREATE_BUTTON",
 			value1 = "Create Build for New Account");
 
-		Patcher.pause(timeInSeconds = "1");
+		Patcher.pause(timeInSeconds = 1);
 
-		var  rawTable = TableUtil.newTable(${table});
+		var rawTable = TableUtil.newTable(${table});
 		var initialTicketsList = "";
 		var ticketSuggestions = "";
 
-		for (var row : table "${rawTable}") {
+		for (var row : table ${rawTable}) {
 			var field = "${row[0]}";
 			var value = "${row[1]}";
 
-			if ("${field}" == "Product") {
+			if (${field} == "Product") {
 				Select(
 					locator1 = "PatcherBuildAdd#PRODUCT_VERSION_SELECT",
-					value1 = "${value}");
+					value1 = ${value});
 
-				Patcher.pause(timeInSeconds = "5");
+				Patcher.pause(timeInSeconds = 5);
 			}
-			else if ("${field}" == "Project Version") {
+			else if (${field} == "Project Version") {
 				Select(
 					locator1 = "PatcherBuildAdd#PROJECT_VERSION_SELECT",
-					value1 = "${value}");
+					value1 = ${value});
 
-				Patcher.pause(timeInSeconds = "5");
+				Patcher.pause(timeInSeconds = 5);
 			}
-			else if ("${field}" == "Tickets List") {
+			else if (${field} == "Tickets List") {
 				Type(
 					locator1 = "PatcherBuildAdd#TICKETS_LIST_FIELD",
-					value1 = "${value}");
+					value1 = ${value});
 
-				var initialTicketsList = "${value}";
+				var initialTicketsList = ${value};
 
-				Patcher.pause(timeInSeconds = "1");
+				Patcher.pause(timeInSeconds = 1);
 			}
-			else if ("${field}" == "Troubleshooting Ticket Suggestions") {
-				var ticketSuggestions = "${value}";
+			else if (${field} == "Troubleshooting Ticket Suggestions") {
+				var ticketSuggestions = ${value};
 			}
-			else if ("${field}" == "Account Code") {
+			else if (${field} == "Account Code") {
 				Type(
 					locator1 = "PatcherBuildAdd#ACCOUNT_CODE_FIELD",
-					value1 = "${value}");
+					value1 = ${value});
 
-				Patcher.pause(timeInSeconds = "1");
+				Patcher.pause(timeInSeconds = 1);
 			}
-			else if ("${field}" == "Support Ticket") {
+			else if (${field} == "Support Ticket") {
 				Type(
 					locator1 = "PatcherBuildAdd#SUPPORT_TICKET_FIELD",
-					value1 = "${value}");
+					value1 = ${value});
 
-				Patcher.pause(timeInSeconds = "1");
+				Patcher.pause(timeInSeconds = 1);
 			}
-			else if ("${field}" == "Type") {
+			else if (${field} == "Type") {
 				Select(
 					locator1 = "PatcherBuildAdd#TYPE_SELECT",
-					value1 = "${value}");
+					value1 = ${value});
 
-				Patcher.pause(timeInSeconds = "1");
+				Patcher.pause(timeInSeconds = 1);
 			}
-			else if ("${field}" == "Merge Only") {
-				if ("${value}" == "true") {
+			else if (${field} == "Merge Only") {
+				if (${value} == "true") {
 					Check(locator1 = "PatcherBuildAdd#MERGE_ONLY_CHECKBOX");
 
-					Patcher.pause(timeInSeconds = "1");
+					Patcher.pause(timeInSeconds = 1);
 				}
 				else {
 					Uncheck(locator1 = "PatcherBuildAdd#MERGE_ONLY_CHECKBOX");
 
-					Patcher.pause(timeInSeconds = "1");
+					Patcher.pause(timeInSeconds = 1);
 				}
 			}
-			else if ("${field}" == "Smoke Test Only") {
-				if ("${value}" == "true") {
+			else if (${field} == "Smoke Test Only") {
+				if (${value} == "true") {
 					Check(locator1 = "PatcherBuildAdd#SMOKE_TEST_CHECKBOX");
 
-					Patcher.pause(timeInSeconds = "1");
+					Patcher.pause(timeInSeconds = 1);
 				}
 				else {
 					Uncheck(locator1 = "PatcherBuildAdd#SMOKE_TEST_CHECKBOX");
 
-					Patcher.pause(timeInSeconds = "1");
+					Patcher.pause(timeInSeconds = 1);
 				}
 			}
 			else {
@@ -684,14 +684,14 @@ definition {
 			}
 		}
 
-		if ("${ticketSuggestions}" != "") {
-			Patcher.pause(timeInSeconds = "5");
+		if (${ticketSuggestions} != "") {
+			Patcher.pause(timeInSeconds = 5);
 
-			PatcherBuild.assertTroubleshootingSuggestionsValue(expectedValue = "${ticketSuggestions}");
+			PatcherBuild.assertTroubleshootingSuggestionsValue(expectedValue = ${ticketSuggestions});
 
 			Click(locator1 = "PatcherBuildAdd#ADD_TROUBLESHOOTING_TICKET_SUGGESTIONS");
 
-			Patcher.pause(timeInSeconds = "1");
+			Patcher.pause(timeInSeconds = 1);
 
 			PatcherBuild.assertTicketListValue(expectedValue = "${initialTicketsList},${ticketSuggestions}");
 		}
@@ -704,11 +704,11 @@ definition {
 	}
 
 	macro editFix {
-		PatcherAccount.gotoAccount(accountCode = "${accountCode}");
+		PatcherAccount.gotoAccount(accountCode = ${accountCode});
 
 		PatcherBuild.clickActions(
-			accountCode = "${accountCode}",
-			supportTicket = "${supportTicket}");
+			accountCode = ${accountCode},
+			supportTicket = ${supportTicket});
 
 		AssertClick(
 			locator1 = "Patcher#MENULIST_VIEW_FIXES",
@@ -716,27 +716,27 @@ definition {
 
 		SelectFrame(locator1 = "PatcherBuildViewFixes#VIEW_FIXES_IFRAME");
 
-		var key_fixContent = "${fixContent}";
+		var key_fixContent = ${fixContent};
 
 		AssertClick(
 			locator1 = "Patcher#FIX_EDIT_LINK",
 			value1 = "Edit");
 
-		var  rawTable = TableUtil.newTable(${table});
+		var rawTable = TableUtil.newTable(${table});
 
-		for (var row : table "${rawTable}") {
+		for (var row : table ${rawTable}) {
 			var field = "${row[0]}";
 			var value = "${row[1]}";
 
-			if ("${field}" == "Branch Name") {
+			if (${field} == "Branch Name") {
 				Type(
 					locator1 = "PatcherFixUpdate#BRANCH_NAME_FIELD",
-					value1 = "${value}");
+					value1 = ${value});
 			}
-			else if ("${field}" == "Github URL") {
+			else if (${field} == "Github URL") {
 				Type(
 					locator1 = "PatcherFixUpdate#GITHUB_URL_FIELD",
-					value1 = "${value}");
+					value1 = ${value});
 			}
 			else {
 				fail("No such Patcher build edit fix field ${field}");
@@ -754,11 +754,11 @@ definition {
 
 	@prose = "I edit a Patcher child build fix with the name ${fixName} for the child build with the name ${childBuildName} for the ticket ${supportTicket} on the account ${accountCode} to have the following values ${table}"
 	macro editFixForChildBuild {
-		PatcherAccount.gotoAccount(accountCode = "${accountCode}");
+		PatcherAccount.gotoAccount(accountCode = ${accountCode});
 
 		PatcherBuild.clickActions(
-			accountCode = "${accountCode}",
-			supportTicket = "${supportTicket}");
+			accountCode = ${accountCode},
+			supportTicket = ${supportTicket});
 
 		AssertClick(
 			locator1 = "Patcher#MENULIST_VIEW_CHILD_BUILDS",
@@ -766,33 +766,33 @@ definition {
 
 		SelectFrame(locator1 = "PatcherBuildViewChildBuilds#VIEW_CHILD_BUILDS_IFRAME");
 
-		var key_childBuildName = "${childBuildName}";
+		var key_childBuildName = ${childBuildName};
 
 		AssertClick(
 			locator1 = "PatcherBuildViewChildBuilds#VIEW_CHILD_BUILDS_VIEW_FIXES_LINK",
 			value1 = "View Fixes");
 
-		var key_fixContent = "${fixName}";
+		var key_fixContent = ${fixName};
 
 		AssertClick(
 			locator1 = "Patcher#FIX_EDIT_LINK",
 			value1 = "Edit");
 
-		var  rawTable = TableUtil.newTable(${table});
+		var rawTable = TableUtil.newTable(${table});
 
-		for (var row : table "${rawTable}") {
+		for (var row : table ${rawTable}) {
 			var field = "${row[0]}";
 			var value = "${row[1]}";
 
-			if ("${field}" == "Branch Name") {
+			if (${field} == "Branch Name") {
 				Type(
 					locator1 = "PatcherFixUpdate#BRANCH_NAME_FIELD",
-					value1 = "${value}");
+					value1 = ${value});
 			}
-			else if ("${field}" == "Github URL") {
+			else if (${field} == "Github URL") {
 				Type(
 					locator1 = "PatcherFixUpdate#GITHUB_URL_FIELD",
-					value1 = "${value}");
+					value1 = ${value});
 			}
 			else {
 				fail("No such Patcher child build edit fix field ${field}");
@@ -809,106 +809,106 @@ definition {
 	}
 
 	macro getBuildId {
-		PatcherAccount.gotoAccount(accountCode = "${accountCode}");
+		PatcherAccount.gotoAccount(accountCode = ${accountCode});
 
 		PatcherSearch.searchAdvanced(
-			accountCodeKeyword = "${accountCode}",
-			supportTicketKeyword = "${supportTicket}");
+			accountCodeKeyword = ${accountCode},
+			supportTicketKeyword = ${supportTicket});
 
-		var key_supportTicket = "${supportTicket}";
+		var key_supportTicket = ${supportTicket};
 
 		if (IsElementPresent(locator1 = "Patcher#BUILD_ID")) {
 			var buildId = selenium.getText("Patcher#BUILD_ID");
 
-			return "${buildId}";
+			return ${buildId};
 		}
 		else {
 			var buildId = "";
 
-			return "${buildId}";
+			return ${buildId};
 		}
 	}
 
 	macro getFirstUATBuildId {
-		PatcherAccount.gotoAccount(accountCode = "${accountCode}");
+		PatcherAccount.gotoAccount(accountCode = ${accountCode});
 
 		if (IsElementPresent(locator1 = "Patcher#PATCHER_UAT_BUILD_ID")) {
 			var buildId = selenium.getText("Patcher#PATCHER_UAT_BUILD_ID");
 
-			return "${buildId}";
+			return ${buildId};
 		}
 		else {
 			var buildId = "";
 
-			return "${buildId}";
+			return ${buildId};
 		}
 	}
 
 	macro getFirstUATBuildSupportTicket {
-		PatcherAccount.gotoAccount(accountCode = "${accountCode}");
+		PatcherAccount.gotoAccount(accountCode = ${accountCode});
 
 		if (IsElementPresent(locator1 = "Patcher#PATCHER_UAT_BUILD_SUPPORT_TICKET")) {
 			var buildSupportTicket = selenium.getText("Patcher#PATCHER_UAT_BUILD_SUPPORT_TICKET");
 
-			return "${buildSupportTicket}";
+			return ${buildSupportTicket};
 		}
 		else {
 			var buildSupportTicket = "";
 
-			return "${buildSupportTicket}";
+			return ${buildSupportTicket};
 		}
 	}
 
 	macro getFirstUATConflictBuildId {
-		PatcherAccount.gotoAccount(accountCode = "${accountCode}");
+		PatcherAccount.gotoAccount(accountCode = ${accountCode});
 
 		if (IsElementPresent(locator1 = "Patcher#PATCHER_CONFLICT_BUILD_ID")) {
 			var buildId = selenium.getText("Patcher#PATCHER_CONFLICT_BUILD_ID");
 
-			return "${buildId}";
+			return ${buildId};
 		}
 		else {
 			var buildId = "";
 
-			return "${buildId}";
+			return ${buildId};
 		}
 	}
 
 	macro getFirstUATConflictBuildProjectVersion {
-		PatcherAccount.gotoAccount(accountCode = "${accountCode}");
+		PatcherAccount.gotoAccount(accountCode = ${accountCode});
 
 		if (IsElementPresent(locator1 = "Patcher#PATCHER_CONFLICT_BUILD_PROJECT_VERSION")) {
 			var buildProjectVersion = selenium.getText("Patcher#PATCHER_CONFLICT_BUILD_PROJECT_VERSION");
 
-			return "${buildProjectVersion}";
+			return ${buildProjectVersion};
 		}
 		else {
 			var buildProjectVersion = "";
 
-			return "${buildProjectVersion}";
+			return ${buildProjectVersion};
 		}
 	}
 
 	@prose = "I get the security hotfix counter value for a build for the ticket ${supportTicket} on the account ${accountCode} that is built on the version ${projectVersion} on the root ${rootProjectVersion}"
 	macro getSecurityHotfixCounterValue {
-		PatcherAccount.gotoAccount(accountCode = "${accountCode}");
+		PatcherAccount.gotoAccount(accountCode = ${accountCode});
 
 		PatcherSearch.searchAdvanced(
-			accountCodeKeyword = "${accountCode}",
-			supportTicketKeyword = "${supportTicket}");
+			accountCodeKeyword = ${accountCode},
+			supportTicketKeyword = ${supportTicket});
 
-		var key_supportTicket = "${supportTicket}";
+		var key_supportTicket = ${supportTicket};
 		var hotfixValue = selenium.getText("Patcher#BUILD_HOTFIX");
 
-		var hotfixValue = StringUtil.replace("${hotfixValue}", "liferay-security-${projectVersion}-${supportTicket}-", "");
+		var hotfixValue = StringUtil.replace(${hotfixValue}, "liferay-security-${projectVersion}-${supportTicket}-", "");
 
-		var hotfixCounterValue = StringUtil.replace("${hotfixValue}", "-${rootProjectVersion}.zip", "");
+		var hotfixCounterValue = StringUtil.replace(${hotfixValue}, "-${rootProjectVersion}.zip", "");
 
 		echo("Hotfix Counter Value: ${hotfixCounterValue}");
 
-		static var staticHotfixCounterValue = "${hotfixCounterValue}";
+		static var staticHotfixCounterValue = ${hotfixCounterValue};
 
-		return "${staticHotfixCounterValue}";
+		return ${staticHotfixCounterValue};
 	}
 
 	@prose = "I increase the security hotfix counter value ${hotfixCounterValue} by one"
@@ -917,18 +917,18 @@ definition {
 
 		echo("Updated Hotfix Counter Value: ${updatedHotfixCounterValue}");
 
-		static var staticUpdatedHotfixCounterValue = "${updatedHotfixCounterValue}";
+		static var staticUpdatedHotfixCounterValue = ${updatedHotfixCounterValue};
 
-		return "${staticUpdatedHotfixCounterValue}";
+		return ${staticUpdatedHotfixCounterValue};
 	}
 
 	@prose = "I change a Patcher build status to ready for release for the ticket ${supportTicket} on the account ${accountCode}"
 	macro readyBuildForRelease {
-		PatcherAccount.gotoAccount(accountCode = "${accountCode}");
+		PatcherAccount.gotoAccount(accountCode = ${accountCode});
 
 		PatcherBuild.clickActions(
-			accountCode = "${accountCode}",
-			supportTicket = "${supportTicket}");
+			accountCode = ${accountCode},
+			supportTicket = ${supportTicket});
 
 		AssertClick(
 			locator1 = "Patcher#MENULIST_READY_FOR_RELEASE",
@@ -941,11 +941,11 @@ definition {
 
 	@prose = "I release a Patcher build for the ticket ${supportTicket} on the account ${accountCode} manually"
 	macro releaseBuildManually {
-		PatcherAccount.gotoAccount(accountCode = "${accountCode}");
+		PatcherAccount.gotoAccount(accountCode = ${accountCode});
 
 		PatcherBuild.clickActions(
-			accountCode = "${accountCode}",
-			supportTicket = "${supportTicket}");
+			accountCode = ${accountCode},
+			supportTicket = ${supportTicket});
 
 		AssertClick(
 			locator1 = "Patcher#MENULIST_RELEASE_MANUALLY",
@@ -958,11 +958,11 @@ definition {
 
 	@prose = "I release a Patcher build to Help Center for the ticket ${supportTicket} on the account ${accountCode}"
 	macro releaseBuildToHelpCenter {
-		PatcherAccount.gotoAccount(accountCode = "${accountCode}");
+		PatcherAccount.gotoAccount(accountCode = ${accountCode});
 
 		PatcherBuild.clickActions(
-			accountCode = "${accountCode}",
-			supportTicket = "${supportTicket}");
+			accountCode = ${accountCode},
+			supportTicket = ${supportTicket});
 
 		AssertClick(
 			locator1 = "Patcher#MENULIST_RELEASE_TO_HELP_CENTER",
@@ -975,9 +975,9 @@ definition {
 
 	@prose = "I set the account code ${accountCode} as a static variable"
 	macro setAccountCodeAsStaticVariable {
-		static var staticAccountCode = "${accountCode}";
+		static var staticAccountCode = ${accountCode};
 
-		return "${staticAccountCode}";
+		return ${staticAccountCode};
 	}
 
 	@prose = "I tear down all Patcher UAT builds and zendesk tickets on the account ${accountCode}"
@@ -985,30 +985,30 @@ definition {
 		var uatBuildsForAccountExists = "true";
 		var uatTicketsForAccountExists = "true";
 
-		while (("${uatBuildsForAccountExists}" != "false") || ("${uatTicketsForAccountExists}" != "false")) {
-			var buildSupportTicket = PatcherBuild.getFirstUATBuildSupportTicket(accountCode = "${accountCode}");
+		while ((${uatBuildsForAccountExists} != "false") || (${uatTicketsForAccountExists} != "false")) {
+			var buildSupportTicket = PatcherBuild.getFirstUATBuildSupportTicket(accountCode = ${accountCode});
 
-			if (isSet(buildSupportTicket) && ("${buildSupportTicket}" != "")) {
+			if (isSet(buildSupportTicket) && (${buildSupportTicket} != "")) {
 				var curl = '''
 					${zendeskURL}/api/v2/tickets/destroy_many.json?ids=${buildSupportTicket} --tlsv1.2
-					-u ${zendeskAdminEmail}/token:${apiToken}
-					''';
+						-u ${zendeskAdminEmail}/token:${apiToken}
+				''';
 
-				com.liferay.poshi.runner.util.JSONCurlUtil.delete("${curl}");
+				com.liferay.poshi.runner.util.JSONCurlUtil.delete(${curl});
 			}
 			else {
 				var uatTicketsForAccountExists = "false";
 			}
 
-			var buildId = PatcherBuild.getFirstUATBuildId(accountCode = "${accountCode}");
+			var buildId = PatcherBuild.getFirstUATBuildId(accountCode = ${accountCode});
 
-			if (isSet(buildId) && ("${buildId}" != "")) {
+			if (isSet(buildId) && (${buildId} != "")) {
 				var curl = '''
 					${portalURL}/group/guest/patching/-/osb_patcher/builds/${buildId}/delete.json
-					-u ${patcherAdminEmailAddress}:${patcherAdminPassword}
-					''';
+						-u ${patcherAdminEmailAddress}:${patcherAdminPassword}
+				''';
 
-				com.liferay.poshi.runner.util.JSONCurlUtil.post("${curl}");
+				com.liferay.poshi.runner.util.JSONCurlUtil.post(${curl});
 			}
 			else {
 				var uatBuildsForAccountExists = "false";
@@ -1020,16 +1020,16 @@ definition {
 	macro tearDownAllUATBuildsForAccount {
 		var uatBuildsForAccountExists = "true";
 
-		while (("${uatBuildsForAccountExists}" == "true")) {
-			var buildId = PatcherBuild.getFirstUATBuildId(accountCode = "${accountCode}");
+		while ((${uatBuildsForAccountExists} == "true")) {
+			var buildId = PatcherBuild.getFirstUATBuildId(accountCode = ${accountCode});
 
-			if (isSet(buildId) && ("${buildId}" != "")) {
+			if (isSet(buildId) && (${buildId} != "")) {
 				var curl = '''
 					${portalURL}/group/guest/patching/-/osb_patcher/builds/${buildId}/delete.json
-					-u ${patcherAdminEmailAddress}:${patcherAdminPassword}
-					''';
+						-u ${patcherAdminEmailAddress}:${patcherAdminPassword}
+				''';
 
-				com.liferay.poshi.runner.util.JSONCurlUtil.post("${curl}");
+				com.liferay.poshi.runner.util.JSONCurlUtil.post(${curl});
 			}
 			else {
 				var uatBuildsForAccountExists = "false";
@@ -1041,19 +1041,19 @@ definition {
 	macro tearDownAllUATConflictBuildsForAccount {
 		var uatConflictBuildsForAccountExists = "true";
 
-		while (("${uatConflictBuildsForAccountExists}" == "true")) {
-			var buildProjectVersion = PatcherBuild.getFirstUATConflictBuildProjectVersion(accountCode = "${accountCode}");
+		while ((${uatConflictBuildsForAccountExists} == "true")) {
+			var buildProjectVersion = PatcherBuild.getFirstUATConflictBuildProjectVersion(accountCode = ${accountCode});
 
-			if (isSet(buildProjectVersion) && ("${buildProjectVersion}" != "")) {
-				if ("${buildProjectVersion}" == "${projectVersion}") {
-					var buildId = PatcherBuild.getFirstUATConflictBuildId(accountCode = "${accountCode}");
+			if (isSet(buildProjectVersion) && (${buildProjectVersion} != "")) {
+				if (${buildProjectVersion} == ${projectVersion}) {
+					var buildId = PatcherBuild.getFirstUATConflictBuildId(accountCode = ${accountCode});
 
 					var curl = '''
 						${portalURL}/group/guest/patching/-/osb_patcher/builds/${buildId}/delete.json
-						-u ${patcherAdminEmailAddress}:${patcherAdminPassword}
-						''';
+							-u ${patcherAdminEmailAddress}:${patcherAdminPassword}
+					''';
 
-					com.liferay.poshi.runner.util.JSONCurlUtil.post("${curl}");
+					com.liferay.poshi.runner.util.JSONCurlUtil.post(${curl});
 				}
 				else {
 					var uatConflictBuildsForAccountExists = "false";
@@ -1067,139 +1067,139 @@ definition {
 
 	@prose = "I tear down the Patcher build for the ticket ${supportTicket} on the account ${accountCode}"
 	macro tearDownBuild {
-		if (!(contains("${supportTicket}", "{")) && !(contains("${supportTicket}", "}")) && ("${supportTicket}" != "") && !(contains("${accountCode}", "{")) && !(contains("${accountCode}", "}")) && ("${accountCode}" != "")) {
+		if (!(contains(${supportTicket}, "{")) && !(contains(${supportTicket}, "}")) && (${supportTicket} != "") && !(contains(${accountCode}, "{")) && !(contains(${accountCode}, "}")) && (${accountCode} != "")) {
 			var buildId = PatcherBuild.getBuildId(
-				accountCode = "${accountCode}",
-				supportTicket = "${supportTicket}");
+				accountCode = ${accountCode},
+				supportTicket = ${supportTicket});
 
-			if (isSet(buildId) && ("${buildId}" != "")) {
+			if (isSet(buildId) && (${buildId} != "")) {
 				var curl = '''
 					${portalURL}/group/guest/patching/-/osb_patcher/builds/${buildId}/delete.json
-					-u ${patcherAdminEmailAddress}:${patcherAdminPassword}
-					''';
+						-u ${patcherAdminEmailAddress}:${patcherAdminPassword}
+				''';
 
-				com.liferay.poshi.runner.util.JSONCurlUtil.post("${curl}");
+				com.liferay.poshi.runner.util.JSONCurlUtil.post(${curl});
 			}
 		}
 	}
 
 	@prose = "the security hotfix counter value for a build for the ticket ${supportTicket} on the account ${accountCode} that is built on the version ${projectVersion} on the root ${rootProjectVersion} should be ${hotfixCounterValue}"
 	macro verifySecurityHotfixCounterValue {
-		PatcherAccount.gotoAccount(accountCode = "${accountCode}");
+		PatcherAccount.gotoAccount(accountCode = ${accountCode});
 
 		PatcherSearch.searchAdvanced(
-			accountCodeKeyword = "${accountCode}",
-			supportTicketKeyword = "${supportTicket}");
+			accountCodeKeyword = ${accountCode},
+			supportTicketKeyword = ${supportTicket});
 
-		var key_supportTicket = "${supportTicket}";
+		var key_supportTicket = ${supportTicket};
 		var hotfixValue = selenium.getText("Patcher#BUILD_HOTFIX");
 
-		var hotfixValue = StringUtil.replace("${hotfixValue}", "liferay-security-${projectVersion}-${supportTicket}-", "");
+		var hotfixValue = StringUtil.replace(${hotfixValue}, "liferay-security-${projectVersion}-${supportTicket}-", "");
 
-		var hotfixCounterValueFromBuild = StringUtil.replace("${hotfixValue}", "-${rootProjectVersion}.zip", "");
+		var hotfixCounterValueFromBuild = StringUtil.replace(${hotfixValue}, "-${rootProjectVersion}.zip", "");
 
 		echo("Expected Hotfix Counter Value: ${hotfixCounterValue}");
 
 		echo("Actual Hotfix Counter Value: ${hotfixCounterValueFromBuild}");
 
-		if ("${hotfixCounterValue}" != "${hotfixCounterValueFromBuild}") {
+		if (${hotfixCounterValue} != ${hotfixCounterValueFromBuild}) {
 			fail("Actual hotfix counter value ${hotfixCounterValueFromBuild} obtained from the web site and the expected hotfix counter value ${hotfixCounterValue} do not match");
 		}
 	}
 
 	@prose = "I should be able to view a Patcher build for the ticket ${supportTicket} on the account ${accountCode} with the following values ${table}"
 	macro view {
-		PatcherAccount.gotoAccount(accountCode = "${accountCode}");
+		PatcherAccount.gotoAccount(accountCode = ${accountCode});
 
 		PatcherSearch.searchAdvanced(
-			accountCodeKeyword = "${accountCode}",
-			supportTicketKeyword = "${supportTicket}");
+			accountCodeKeyword = ${accountCode},
+			supportTicketKeyword = ${supportTicket});
 
-		var key_supportTicket = "${supportTicket}";
+		var key_supportTicket = ${supportTicket};
 
 		while (IsElementNotPresent(locator1 = "Patcher#BUILD_ID")) {
 			Refresh();
 
 			PatcherSearch.searchAdvanced(
-				accountCodeKeyword = "${accountCode}",
-				supportTicketKeyword = "${supportTicket}");
+				accountCodeKeyword = ${accountCode},
+				supportTicketKeyword = ${supportTicket});
 		}
 
-		var  rawTable = TableUtil.newTable(${table});
+		var rawTable = TableUtil.newTable(${table});
 
-		for (var row : table "${rawTable}") {
+		for (var row : table ${rawTable}) {
 			var field = "${row[0]}";
 			var value = "${row[1]}";
 
-			if ("${field}" == "Obsolete") {
-				if ("${value}" == "true") {
+			if (${field} == "Obsolete") {
+				if (${value} == "true") {
 					AssertElementPresent(locator1 = "Patcher#BUILD_OBSOLETE_ICON");
 				}
 				else {
 					AssertElementNotPresent(locator1 = "Patcher#BUILD_OBSOLETE_ICON");
 				}
 			}
-			else if ("${field}" == "Build ID") {
+			else if (${field} == "Build ID") {
 				AssertTextEquals(
 					locator1 = "Patcher#BUILD_ID",
-					value1 = "${value}");
+					value1 = ${value});
 			}
-			else if ("${field}" == "Type") {
+			else if (${field} == "Type") {
 				AssertTextEquals(
 					locator1 = "Patcher#BUILD_TYPE",
-					value1 = "${value}");
+					value1 = ${value});
 			}
-			else if ("${field}" == "Support Ticket") {
+			else if (${field} == "Support Ticket") {
 				AssertTextEquals(
 					locator1 = "Patcher#BUILD_SUPPORT_TICKET",
-					value1 = "${value}");
+					value1 = ${value});
 			}
-			else if ("${field}" == "Version") {
+			else if (${field} == "Version") {
 				AssertTextEquals(
 					locator1 = "Patcher#BUILD_VERSION",
-					value1 = "${value}");
+					value1 = ${value});
 			}
-			else if ("${field}" == "Project Version") {
+			else if (${field} == "Project Version") {
 				AssertTextEquals(
 					locator1 = "Patcher#BUILD_PROJECT_VERSION",
-					value1 = "${value}");
+					value1 = ${value});
 			}
-			else if ("${field}" == "Content") {
+			else if (${field} == "Content") {
 				AssertTextEquals(
 					locator1 = "Patcher#BUILD_CONTENT",
-					value1 = "${value}");
+					value1 = ${value});
 			}
-			else if ("${field}" == "Patcher Status") {
+			else if (${field} == "Patcher Status") {
 				AssertTextEquals(
 					locator1 = "Patcher#BUILD_PATCHER_STATUS",
-					value1 = "${value}");
+					value1 = ${value});
 			}
-			else if ("${field}" == "Jenkins") {
-				var key_jenkinsValue = "${value}";
+			else if (${field} == "Jenkins") {
+				var key_jenkinsValue = ${value};
 
 				AssertTextEquals.assertPartialText(
 					locator1 = "Patcher#BUILD_JENKINS_SPECIFIC",
-					value1 = "${value}");
+					value1 = ${value});
 			}
-			else if ("${field}" == "Engineer Comments") {
+			else if (${field} == "Engineer Comments") {
 				AssertTextEquals(
 					locator1 = "Patcher#BUILD_ENGINEER_COMMENTS",
-					value1 = "${value}");
+					value1 = ${value});
 			}
-			else if ("${field}" == "QA Status") {
+			else if (${field} == "QA Status") {
 				AssertTextEquals(
 					locator1 = "Patcher#BUILD_QA_STATUS",
-					value1 = "${value}");
+					value1 = ${value});
 			}
-			else if ("${field}" == "QA Comments") {
+			else if (${field} == "QA Comments") {
 				AssertTextEquals(
 					locator1 = "Patcher#BUILD_QA_COMMENTS",
-					value1 = "${value}");
+					value1 = ${value});
 			}
-			else if ("${field}" == "Hotfix") {
+			else if (${field} == "Hotfix") {
 				AssertTextEquals.assertPartialText(
 					locator1 = "Patcher#BUILD_HOTFIX",
-					value1 = "${value}");
+					value1 = ${value});
 			}
 			else {
 				fail("No such Patcher build field ${field}");
@@ -1209,11 +1209,11 @@ definition {
 
 	@prose = "I should be able to view a Patcher build fix with the name ${fixName} for the ticket ${supportTicket} on the account ${accountCode} with the following values ${table}"
 	macro viewBuildFix {
-		PatcherAccount.gotoAccount(accountCode = "${accountCode}");
+		PatcherAccount.gotoAccount(accountCode = ${accountCode});
 
 		PatcherBuild.clickActions(
-			accountCode = "${accountCode}",
-			supportTicket = "${supportTicket}");
+			accountCode = ${accountCode},
+			supportTicket = ${supportTicket});
 
 		AssertClick(
 			locator1 = "Patcher#MENULIST_VIEW_FIXES",
@@ -1221,47 +1221,47 @@ definition {
 
 		SelectFrame(locator1 = "PatcherBuildViewFixes#VIEW_FIXES_IFRAME");
 
-		var key_fixName = "${fixName}";
-		var  rawTable = TableUtil.newTable(${table});
+		var key_fixName = ${fixName};
+		var rawTable = TableUtil.newTable(${table});
 
-		for (var row : table "${rawTable}") {
+		for (var row : table ${rawTable}) {
 			var field = "${row[0]}";
 			var value = "${row[1]}";
 
-			if ("${field}" == "Fix ID") {
+			if (${field} == "Fix ID") {
 				AssertTextEquals(
 					locator1 = "PatcherBuildViewFixes#VIEW_FIXES_FIX_ID",
-					value1 = "${value}");
+					value1 = ${value});
 			}
-			else if ("${field}" == "Name") {
+			else if (${field} == "Name") {
 				AssertTextEquals(
 					locator1 = "PatcherBuildViewFixes#VIEW_FIXES_FIX_NAME",
-					value1 = "${value}");
+					value1 = ${value});
 			}
-			else if ("${field}" == "Version") {
+			else if (${field} == "Version") {
 				AssertTextEquals(
 					locator1 = "PatcherBuildViewFixes#VIEW_FIXES_FIX_VERSION",
-					value1 = "${value}");
+					value1 = ${value});
 			}
-			else if ("${field}" == "Git Hash") {
+			else if (${field} == "Git Hash") {
 				AssertTextEquals(
 					locator1 = "PatcherBuildViewFixes#VIEW_FIXES_FIX_GIT_HASH",
-					value1 = "${value}");
+					value1 = ${value});
 			}
-			else if ("${field}" == "Status") {
+			else if (${field} == "Status") {
 				AssertTextEquals(
 					locator1 = "PatcherBuildViewFixes#VIEW_FIXES_FIX_STATUS",
-					value1 = "${value}");
+					value1 = ${value});
 			}
-			else if ("${field}" == "Engineer Comments") {
+			else if (${field} == "Engineer Comments") {
 				AssertTextEquals(
 					locator1 = "PatcherBuildViewFixes#VIEW_FIXES_FIX_ENGINEER_COMMENTS",
-					value1 = "${value}");
+					value1 = ${value});
 			}
-			else if ("${field}" == "Type") {
+			else if (${field} == "Type") {
 				AssertTextEquals(
 					locator1 = "PatcherBuildViewFixes#VIEW_FIXES_FIX_TYPE",
-					value1 = "${value}");
+					value1 = ${value});
 			}
 			else {
 				fail("No such Patcher build fix field ${field}");
@@ -1275,11 +1275,11 @@ definition {
 
 	@prose = "I should be able to view a Patcher child build with the name ${childBuildName} for the ticket ${supportTicket} on the account ${accountCode} with the following values ${table}"
 	macro viewChildBuild {
-		PatcherAccount.gotoAccount(accountCode = "${accountCode}");
+		PatcherAccount.gotoAccount(accountCode = ${accountCode});
 
 		PatcherBuild.clickActions(
-			accountCode = "${accountCode}",
-			supportTicket = "${supportTicket}");
+			accountCode = ${accountCode},
+			supportTicket = ${supportTicket});
 
 		AssertClick(
 			locator1 = "Patcher#MENULIST_VIEW_CHILD_BUILDS",
@@ -1287,44 +1287,44 @@ definition {
 
 		SelectFrame(locator1 = "PatcherBuildViewChildBuilds#VIEW_CHILD_BUILDS_IFRAME");
 
-		var key_childBuildName = "${childBuildName}";
-		var  rawTable = TableUtil.newTable(${table});
+		var key_childBuildName = ${childBuildName};
+		var rawTable = TableUtil.newTable(${table});
 
-		for (var row : table "${rawTable}") {
+		for (var row : table ${rawTable}) {
 			var field = "${row[0]}";
 			var value = "${row[1]}";
 
-			if ("${field}" == "Build ID") {
+			if (${field} == "Build ID") {
 				AssertTextEquals(
 					locator1 = "PatcherBuildViewChildBuilds#VIEW_CHILD_BUILDS_BUILD_ID",
-					value1 = "${value}");
+					value1 = ${value});
 			}
-			else if ("${field}" == "Version") {
+			else if (${field} == "Version") {
 				AssertTextEquals(
 					locator1 = "PatcherBuildViewChildBuilds#VIEW_CHILD_BUILDS_VERSION_NUMBER",
-					value1 = "${value}");
+					value1 = ${value});
 			}
-			else if ("${field}" == "Name") {
+			else if (${field} == "Name") {
 				AssertTextEquals(
 					locator1 = "PatcherBuildViewChildBuilds#VIEW_CHILD_BUILDS_NAME",
-					value1 = "${value}");
+					value1 = ${value});
 			}
-			else if ("${field}" == "Project Version") {
+			else if (${field} == "Project Version") {
 				AssertTextEquals(
 					locator1 = "PatcherBuildViewChildBuilds#VIEW_CHILD_BUILDS_PROJECT_VERSION",
-					value1 = "${value}");
+					value1 = ${value});
 			}
-			else if ("${field}" == "Patcher Status") {
+			else if (${field} == "Patcher Status") {
 				AssertTextEquals(
 					locator1 = "PatcherBuildViewChildBuilds#VIEW_CHILD_BUILDS_PATCHER_STATUS",
-					value1 = "${value}");
+					value1 = ${value});
 			}
-			else if ("${field}" == "Jenkins") {
-				var key_jenkinsValue = "${value}";
+			else if (${field} == "Jenkins") {
+				var key_jenkinsValue = ${value};
 
 				AssertTextEquals.assertPartialText(
 					locator1 = "PatcherBuildViewChildBuilds#VIEW_CHILD_BUILDS_JENKINS_SPECIFIC",
-					value1 = "${value}");
+					value1 = ${value});
 			}
 			else {
 				fail("No such Patcher child build field ${field}");
@@ -1338,11 +1338,11 @@ definition {
 
 	@prose = "I should be able to view a Patcher child build fix with the name ${fixName} for the child build with the name ${childBuildName} for the ticket ${supportTicket} on the account ${accountCode} with the following values ${table}"
 	macro viewChildBuildFix {
-		PatcherAccount.gotoAccount(accountCode = "${accountCode}");
+		PatcherAccount.gotoAccount(accountCode = ${accountCode});
 
 		PatcherBuild.clickActions(
-			accountCode = "${accountCode}",
-			supportTicket = "${supportTicket}");
+			accountCode = ${accountCode},
+			supportTicket = ${supportTicket});
 
 		AssertClick(
 			locator1 = "Patcher#MENULIST_VIEW_CHILD_BUILDS",
@@ -1350,53 +1350,53 @@ definition {
 
 		SelectFrame(locator1 = "PatcherBuildViewChildBuilds#VIEW_CHILD_BUILDS_IFRAME");
 
-		var key_childBuildName = "${childBuildName}";
+		var key_childBuildName = ${childBuildName};
 
 		AssertClick(
 			locator1 = "PatcherBuildViewChildBuilds#VIEW_CHILD_BUILDS_VIEW_FIXES_LINK",
 			value1 = "View Fixes");
 
-		var key_fixName = "${fixName}";
-		var  rawTable = TableUtil.newTable(${table});
+		var key_fixName = ${fixName};
+		var rawTable = TableUtil.newTable(${table});
 
-		for (var row : table "${rawTable}") {
+		for (var row : table ${rawTable}) {
 			var field = "${row[0]}";
 			var value = "${row[1]}";
 
-			if ("${field}" == "Fix ID") {
+			if (${field} == "Fix ID") {
 				AssertTextEquals(
 					locator1 = "PatcherBuildViewFixes#VIEW_FIXES_FIX_ID",
-					value1 = "${value}");
+					value1 = ${value});
 			}
-			else if ("${field}" == "Name") {
+			else if (${field} == "Name") {
 				AssertTextEquals(
 					locator1 = "PatcherBuildViewFixes#VIEW_FIXES_FIX_NAME",
-					value1 = "${value}");
+					value1 = ${value});
 			}
-			else if ("${field}" == "Version") {
+			else if (${field} == "Version") {
 				AssertTextEquals(
 					locator1 = "PatcherBuildViewFixes#VIEW_FIXES_FIX_VERSION",
-					value1 = "${value}");
+					value1 = ${value});
 			}
-			else if ("${field}" == "Git Hash") {
+			else if (${field} == "Git Hash") {
 				AssertTextEquals(
 					locator1 = "PatcherBuildViewFixes#VIEW_FIXES_FIX_GIT_HASH",
-					value1 = "${value}");
+					value1 = ${value});
 			}
-			else if ("${field}" == "Status") {
+			else if (${field} == "Status") {
 				AssertTextEquals(
 					locator1 = "PatcherBuildViewFixes#VIEW_FIXES_FIX_STATUS",
-					value1 = "${value}");
+					value1 = ${value});
 			}
-			else if ("${field}" == "Engineer Comments") {
+			else if (${field} == "Engineer Comments") {
 				AssertTextEquals(
 					locator1 = "PatcherBuildViewFixes#VIEW_FIXES_FIX_ENGINEER_COMMENTS",
-					value1 = "${value}");
+					value1 = ${value});
 			}
-			else if ("${field}" == "Type") {
+			else if (${field} == "Type") {
 				AssertTextEquals(
 					locator1 = "PatcherBuildViewFixes#VIEW_FIXES_FIX_TYPE",
-					value1 = "${value}");
+					value1 = ${value});
 			}
 			else {
 				fail("No such Patcher child build field ${field}");
