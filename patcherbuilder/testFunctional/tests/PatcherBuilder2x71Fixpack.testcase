@@ -1,0 +1,33 @@
+definition {
+
+	property testray.main.component.name = "Patcher Builder";
+
+	setUp {
+		LocalFile.Jenkins.openJenkinsURL();
+	}
+
+	@priority = 3
+	test Runfixpackbuilderfixpack7xjob {
+		LocalFile.Jenkins.startFixpackBuilderFixpack7xJob(table = '''| fix.pack.fixed.issues   | LPE-16341,LPE-16386,LPE-16459,LPE-16460,LPE-16461,LPE-16466,LPE-16469 |
+      | fix.pack.id             | 25                                                                    |
+      | git.revision            | acdd74a9994482610f7b5933cc1961b5808833fe                              |
+      | checkStaleArtifactsSkip | true                                                                  |''');
+
+		LocalFile.Jenkins.pause(timeInSeconds = 5);
+
+		LocalFile.Jenkins.openJenkinsURL();
+
+		LocalFile.Jenkins.getCurrentJobBuildNumber(jobName = "fixpack-builder-fixpack-7x-uat");
+
+		LocalFile.Jenkins.checkForJobCompletion(
+			jobBuildNumber = ${staticJobBuildNumber},
+			jobName = "fixpack-builder-fixpack-7x-uat");
+
+		LocalFile.Jenkins.openJenkinsURL();
+
+		LocalFile.Jenkins.viewJobStatusSuccess(
+			jobBuildNumber = ${staticJobBuildNumber},
+			jobName = "fixpack-builder-fixpack-7x-uat");
+	}
+
+}

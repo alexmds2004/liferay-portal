@@ -1,0 +1,47 @@
+definition {
+
+	property testray.main.component.name = "Patcher Builder";
+
+	setUp {
+		LocalFile.Jenkins.openJenkinsURL();
+	}
+
+	@priority = 5
+	test Runfixpackbuilderhotfix7xjob {
+		LocalFile.Jenkins.startFixPackBuilderHotfix7xJob(table = '''| fix.pack.baseCommittish          | 7.4.13-u56                               |
+      | fix.pack.built.for               | HITACHIGP                                |
+      | fix.pack.customer.ticket         | 12345                                    |
+      | fix.pack.fixed.issues            | LRPU-4334                                |
+      | fix.pack.hotfixed.issues         | LRPU-4334                                |
+      | fix.pack.id                      | 1984                                     |
+      | git.revision                     | f9bf81719444d40ea55bdf5d7a5b2b274971a56e |
+      | patcher.build.id                 | 237617698                                |
+      | patcher.combined.branch          | true                                     |
+      | patcher.fix.delivery.method      | Fix Pack 3.0                             |
+      | patcher.request.key              | ca88bd54bb334ce0ebef2ae3d6cba9c578f2013d |
+      | patcher.security.patch           | false                                    |
+      | patcher.user.id                  | 10196                                    |''');
+
+		LocalFile.Jenkins.pause(timeInSeconds = 5);
+
+		LocalFile.Jenkins.openJenkinsURL();
+
+		LocalFile.Jenkins.getCurrentJobBuildNumber(jobName = "fixpack-builder-hotfix-7x(2x-uat)");
+
+		LocalFile.Jenkins.checkForJobCompletion(
+			jobBuildNumber = ${staticJobBuildNumber},
+			jobName = "fixpack-builder-hotfix-7x(2x-uat)");
+
+		LocalFile.Jenkins.openJenkinsURL();
+
+		LocalFile.Jenkins.viewJobStatusSuccess(
+			jobBuildNumber = ${staticJobBuildNumber},
+			jobName = "fixpack-builder-hotfix-7x(2x-uat)");
+
+		LocalFile.Jenkins.patchingToolInstallAndRevert(table = '''| bundle                   | /mnt/mfs-hdd1-172.16.168/ee/portal/7.4.13-u56/liferay-dxp-tomcat-7.4.13.u56-20221222145959924.tar.gz |
+      | hotfix                   | /mnt/mfs-hdd1-172.16.168/ee/hotfix/liferay-hotfix-1984-7413.zip                                      |
+      | patchingTool             | /mnt/mfs-hdd1-172.16.168/ee/fix-packs/patching-tool/patching-tool-3.0.37-internal.zip                |
+      | patchingToolMajorVersion | 3                                                                                                    |''');
+	}
+
+}

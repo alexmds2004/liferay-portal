@@ -1,0 +1,48 @@
+definition {
+
+	property testray.main.component.name = "Patcher Builder";
+
+	setUp {
+		LocalFile.Jenkins.openJenkinsURL();
+	}
+
+	@priority = 5
+	test Runfixpackbuilderhotfix7xjob {
+		LocalFile.Jenkins.startFixPackBuilderHotfix7xJob(table = '''| fix.pack.baseCommittish          | fix-pack-dxp-1-7310                                                                             |
+      | fix.pack.built.for               | STVINTRA                                                                                        |
+      | fix.pack.customer.ticket         | 12345                                                                                           |
+      | fix.pack.fixed.issues            | LPS-113225,LPS-113506,LPS-124970,LPS-128852,LPS-133602,LPS-135040,LPS-135887,LPS-94011,LRP-1615 |
+      | fix.pack.hotfixed.issues         | LPS-113225,LPS-113506,LPS-124970,LPS-128852,LPS-133602,LPS-135040,LPS-135887,LPS-94011,LRP-1615 |
+      | fix.pack.id                      | 3002                                                                                            |
+      | git.revision                     | 5d97c9d12ee660d8505af5ca235296f17210f1ba                                                        |
+      | patcher.build.id                 | 224254236                                                                                       |
+      | patcher.combined.branch          | true                                                                                            |
+      | patcher.fix.delivery.method      | Fix Pack 3.0                                                                                    |
+      | patcher.request.key              | 915d468fa560f34d4f6181fb95382f3ad33cac3d                                                        |
+      | patcher.security.patch           | false                                                                                           |
+      | patcher.user.id                  | 10196                                                                                           |''');
+
+		LocalFile.Jenkins.pause(timeInSeconds = 5);
+
+		LocalFile.Jenkins.openJenkinsURL();
+
+		LocalFile.Jenkins.getCurrentJobBuildNumber(jobName = "fixpack-builder-hotfix-7x(2x-uat)");
+
+		LocalFile.Jenkins.checkForJobCompletion(
+			jobBuildNumber = ${staticJobBuildNumber},
+			jobName = "fixpack-builder-hotfix-7x(2x-uat)");
+
+		LocalFile.Jenkins.openJenkinsURL();
+
+		LocalFile.Jenkins.viewJobStatusSuccess(
+			jobBuildNumber = ${staticJobBuildNumber},
+			jobName = "fixpack-builder-hotfix-7x(2x-uat)");
+
+		LocalFile.Jenkins.patchingToolInstallAndRevert(table = '''| bundle                   | /mnt/mfs-hdd1-172.16.168/ee/portal/7.3.10/liferay-dxp-tomcat-7.3.10-ga1-20200930160533946.tar.gz |
+      | fixPack                  | /mnt/mfs-hdd1-172.16.168/ee/fix-packs/7.3.10/dxp/liferay-fix-pack-dxp-1-7310.zip                 |
+      | hotfix                   | /mnt/mfs-hdd1-172.16.168/ee/hotfix/liferay-hotfix-3002-7310.zip                                  |
+      | patchingTool             | /mnt/mfs-hdd1-172.16.168/ee/fix-packs/patching-tool/patching-tool-LATEST-internal.zip            |
+      | patchingToolMajorVersion | 3                                                                                                |''');
+	}
+
+}

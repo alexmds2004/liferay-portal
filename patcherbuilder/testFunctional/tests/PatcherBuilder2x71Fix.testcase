@@ -1,0 +1,41 @@
+definition {
+
+	property testray.main.component.name = "Patcher Builder";
+
+	setUp {
+		LocalFile.Jenkins.openJenkinsURL();
+	}
+
+	@priority = 3
+	test Runfixpackbuilderagentjob {
+		LocalFile.Jenkins.startFixPackBuilderAgentJob(table = '''| osb.patcher.baseCommittish  | fix-pack-base-7110                                |
+      | osb.patcher.committish      | LPS-89343_GA1                                     |
+      | osb.patcher.fixIds          | 118757428                                         |
+      | osb.patcher.gitRemoteURL    | git@github.com:CsabaTurcsan/liferay-portal-ee.git |
+      | osb.patcher.patcherFixId    | 118757428                                         |
+      | osb.patcher.productVersion  | DXP 7.1                                           |
+      | osb.patcher.rebase          | false                                             |
+      | osb.patcher.repository      | liferay-portal-ee                                 |
+      | osb.patcher.type            | fix                                               |
+      | patcher.fix.delivery.method | Fix Pack 3.0                                      |
+      | patcher.request.key         | ff40197637bbd98565730e72f0ba6827091f7a77          |
+      | patcher.user.id             | 72559402                                          |''');
+
+		LocalFile.Jenkins.pause(timeInSeconds = 5);
+
+		LocalFile.Jenkins.openJenkinsURL();
+
+		LocalFile.Jenkins.getCurrentJobBuildNumber(jobName = "fixpack-builder-agent(2x-uat)");
+
+		LocalFile.Jenkins.checkForJobCompletion(
+			jobBuildNumber = ${staticJobBuildNumber},
+			jobName = "fixpack-builder-agent(2x-uat)");
+
+		LocalFile.Jenkins.openJenkinsURL();
+
+		LocalFile.Jenkins.viewJobStatusSuccess(
+			jobBuildNumber = ${staticJobBuildNumber},
+			jobName = "fixpack-builder-agent(2x-uat)");
+	}
+
+}

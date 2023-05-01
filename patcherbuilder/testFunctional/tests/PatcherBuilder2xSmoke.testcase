@@ -1,0 +1,31 @@
+definition {
+
+	property testray.main.component.name = "Patcher Builder";
+
+	setUp {
+		LocalFile.Jenkins.openJenkinsURL();
+	}
+
+	@priority = 5
+	test Runtestsmoketest {
+		LocalFile.Jenkins.startTestFixPackBuilderMainSmokeJob(table = '''| git.branch      | 2.x     |
+      | github.username | liferay |''');
+
+		LocalFile.Jenkins.pause(timeInSeconds = 5);
+
+		LocalFile.Jenkins.openJenkinsURL();
+
+		LocalFile.Jenkins.getCurrentJobBuildNumberForShortJob(jobName = "test-fixpack-builder-main-smoke(2x-uat)");
+
+		LocalFile.Jenkins.checkForJobCompletion(
+			jobBuildNumber = ${staticJobBuildNumber},
+			jobName = "test-fixpack-builder-main-smoke(2x-uat)");
+
+		LocalFile.Jenkins.openJenkinsURL();
+
+		LocalFile.Jenkins.viewJobStatusSuccess(
+			jobBuildNumber = ${staticJobBuildNumber},
+			jobName = "test-fixpack-builder-main-smoke(2x-uat)");
+	}
+
+}
