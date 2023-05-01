@@ -1,0 +1,129 @@
+definition {
+
+	property testray.main.component.name = "Support QA";
+	property type = "koroneiki";
+
+	tearDown {
+		LocalFile.KoroneikiContactAPI._tearDownContactExternalLinks(
+			contactEmailAddress = "koroneiki.deletion1@lrcustomer.com.broken",
+			table = '''| deletionexternallink |''');
+
+		LocalFile.KoroneikiContactAPI._tearDownContactEntitlementDefinitions(table = '''| Deletion Entitlement |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._tearDownProductPurchases(
+			accountName = "Koroneiki Deletion",
+			table = '''| Deletion Digital Experience Platform |''');
+
+		LocalFile.KoroneikiProductAPI._tearDownProducts(table = '''| Deletion Digital Experience Platform |''');
+
+		LocalFile.KoroneikiAccountAPI._tearDownAccounts(table = '''| Koroneiki Deletion |''');
+
+		LocalFile.KoroneikiContactAPI._tearDownContacts(table = '''| koroneiki.deletion1@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiContactRoleAPI._tearDownContactRoles(table = '''| Deletion Account Worker Role |''');
+	}
+
+	test Deleteworkercontactwithentitlementandteamandexternallinks {
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code         | KORDEL                             | |
+	| Description  | Test deletion account on koroneiki | |
+	| Fax Number   | 555-555-1234                       | |
+	| Name         | Koroneiki Deletion                 | |
+	| Phone Number | 555-555-5678                       | |
+	| Region       | United States                      | |
+	| Status       | Active                             | |
+	| Tier         | T4                                 | |
+	| Website      | www.koroneikideletion.com          | |''');
+
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.deletion1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                 |
+	| Language      | English                                   |
+	| Last Name     | Deletion1                                 |
+	| Middle Name   | User                                      |''');
+
+		LocalFile.KoroneikiContactAPI._createContactExternalLinkViaUuid(
+			contactEmailAddress = "koroneiki.deletion1@lrcustomer.com.broken",
+			table = '''| Domain      | koroneiki            |
+	| Entity Id   | deletionexternallink |
+	| Entity Name | DeletionExternalLink |''');
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRole(table = '''| Description | This is the Deletion worker role for accounts |
+	| Name        | Deletion Account Worker Role                  |
+	| Type        | Account Worker                                |''');
+
+		LocalFile.KoroneikiAccountAPI._assignWorkerContacts(
+			accountName = "Koroneiki Deletion",
+			table = '''| koroneiki.deletion1@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiTeamAPI._assignContacts(
+			table = '''| koroneiki.deletion1@lrcustomer.com.broken |''',
+			teamName = "Koroneiki Deletion");
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Koroneiki Deletion",
+			contactEmailAddress = "koroneiki.deletion1@lrcustomer.com.broken",
+			table = '''| Deletion Account Worker Role |''');
+
+		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | Deletion Digital Experience Platform | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Koroneiki Deletion",
+			productName = "Deletion Digital Experience Platform",
+			table = '''| End Date                | ${staticEndDate}   |                |
+	| Perpetual               | true               |                |
+	| Product Field and Value | additionalProp1    | propertyValue1 |
+	| Product Field and Value | additionalProp2    | propertyValue2 |
+	| Product Field and Value | additionalProp3    | propertyValue3 |
+	| Quantity                | 1                  |                |
+	| Start Date              | ${staticStartDate} |                |''');
+
+		LocalFile.KoroneikiContactAPI._createContactEntitlementDefinition(
+			contactRoleName = "Deletion Account Worker Role",
+			contactRoleType = "Account Worker",
+			productName = "Deletion Digital Experience Platform",
+			table = '''| Description | Deletion Entitlement Description |
+	| Name        | Deletion Entitlement             |
+	| Status      | Approved                         |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementDefinition(
+			entitlementDefinitionName = "Deletion Entitlement",
+			table = '''| Description | Deletion Entitlement Description |
+	| Name        | Deletion Entitlement             |
+	| Status      | Approved                         |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementDefinitionViaEntitlementDefinitionKey(
+			entitlementDefinitionName = "Deletion Entitlement",
+			table = '''| Description | Deletion Entitlement Description |
+	| Name        | Deletion Entitlement             |
+	| Status      | Approved                         |''');
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Deletion Entitlement");
+
+		LocalFile.KoroneikiContactAPI._createContactEntitlementNestedField(entitlementDefinitionName = "Deletion Entitlement");
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementViaNestedField(
+			contactEmailAddress = "koroneiki.deletion1@lrcustomer.com.broken",
+			entitlementDefinitionName = "Deletion Entitlement");
+
+		LocalFile.KoroneikiContactAPI._viewContactExternalLinkViaUuid(
+			contactEmailAddress = "koroneiki.deletion1@lrcustomer.com.broken",
+			entityId = "deletionexternallink",
+			table = '''| Domain      | koroneiki            |
+	| Entity Id   | deletionexternallink |
+	| Entity Name | DeletionExternalLink |''');
+
+		LocalFile.KoroneikiContactAPI._deleteContactViaEmailAddress(contactEmailAddress = "koroneiki.deletion1@lrcustomer.com.broken");
+
+		LocalFile.KoroneikiContactAPI._viewNoContact(contactEmailAddress = "koroneiki.deletion1@lrcustomer.com.broken");
+
+		LocalFile.KoroneikiAccountAPI._viewNoWorkerContact(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken");
+
+		LocalFile.KoroneikiTeamAPI._viewNoContact(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			teamName = "Koroneiki Automotive");
+	}
+
+}

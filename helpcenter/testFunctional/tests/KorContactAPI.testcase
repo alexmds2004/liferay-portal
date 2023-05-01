@@ -1,0 +1,634 @@
+definition {
+
+	property testray.main.component.name = "Support QA";
+	property type = "koroneiki";
+
+	tearDown {
+		LocalFile.KoroneikiContactAPI._tearDownContacts(table = '''| koroneiki.contact1@lrcustomer.com.broken |
+	| koroneiki.contact2@lrcustomer.com.broken |''');
+	}
+
+	test Createandviewcontact {
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address          | koroneiki.contact1@lrcustomer.com.broken |
+	| Email Address Verified | false                                    |
+	| First Name             | Koroneiki                                |
+	| Language               | English                                  |
+	| Last Name              | Contact1                                 |
+	| Middle Name            | User                                     |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactViaEmailAddress(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Email Address          | koroneiki.contact1@lrcustomer.com.broken |
+	| Email Address Verified | false                                    |
+	| First Name             | Koroneiki                                |
+	| Language               | English                                  |
+	| Last Name              | Contact1                                 |
+	| Middle Name            | User                                     |''');
+	}
+
+	test Createandviewcontactexternallink {
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiContactAPI._createContactExternalLinkViaUuid(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Domain      | koroneikicontact |
+	| Entity Id   | 1234             |
+	| Entity Name | KoroneikiContact |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactViaEmailAddress(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Email Address              | koroneiki.contact1@lrcustomer.com.broken |
+	| External Link Nested Field | koroneikicontact                         |
+	| First Name                 | Koroneiki                                |
+	| Language                   | English                                  |
+	| Last Name                  | Contact1                                 |
+	| Middle Name                | User                                     |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactExternalLinkViaUuid(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			entityId = 1234,
+			table = '''| Domain      | koroneikicontact |
+	| Entity Id   | 1234             |
+	| Entity Name | KoroneikiContact |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactExternalLinkViaExternalLinkKey(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			entityId = 1234,
+			table = '''| Domain      | koroneikicontact |
+	| Entity Id   | 1234             |
+	| Entity Name | KoroneikiContact |''');
+	}
+
+	test Createandviewcontactviauuid {
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactViaUuid(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+	}
+
+	test Createandviewcontactwithverifiedemailaddress {
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address          | koroneiki.contact1@lrcustomer.com.broken |
+	| Email Address Verified | true                                     |
+	| First Name             | Koroneiki                                |
+	| Language               | English                                  |
+	| Last Name              | Contact1                                 |
+	| Middle Name            | User                                     |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactViaEmailAddress(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Email Address          | koroneiki.contact1@lrcustomer.com.broken |
+	| Email Address Verified | true                                     |
+	| First Name             | Koroneiki                                |
+	| Language               | English                                  |
+	| Last Name              | Contact1                                 |
+	| Middle Name            | User                                     |''');
+	}
+
+	test Deletecontactandview {
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiContactAPI._deleteContactViaEmailAddress(contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken");
+
+		LocalFile.KoroneikiContactAPI._viewNoContact(contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken");
+	}
+
+	test Deletecontactviauuidandview {
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiContactAPI._deleteContactViaUuid(contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken");
+
+		LocalFile.KoroneikiContactAPI._viewNoContact(contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken");
+	}
+
+	test Deleteverifiedcontactandview {
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address          | koroneiki.contact1@lrcustomer.com.broken |
+	| Email Address Verified | true                                     |
+	| First Name             | Koroneiki                                |
+	| Language               | English                                  |
+	| Last Name              | Contact1                                 |
+	| Middle Name            | User                                     |''');
+
+		LocalFile.KoroneikiContactAPI._deleteContactViaEmailAddress(contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken");
+
+		LocalFile.KoroneikiContactAPI._viewNoContact(contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken");
+	}
+
+	test Removecontactexternallinkandview {
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiContactAPI._createContactExternalLinkViaUuid(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Domain      | koroneikicontact |
+	| Entity Id   | 1234             |
+	| Entity Name | KoroneikiContact |''');
+
+		LocalFile.KoroneikiContactAPI._deleteContactExternalLink(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			entityId = 1234);
+
+		LocalFile.KoroneikiContactAPI._viewNoContactExternalLink(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			entityId = 1234);
+	}
+
+	test Updatecontactandview {
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiContactAPI._updateContactViaEmailAddress(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Email Address          | koroneiki.contact2@lrcustomer.com.broken |
+	| Email Address Verified | true                                     |
+	| First Name             | Koroneiki                                |
+	| Last Name              | Contact2                                 |
+	| Middle Name            | User                                     |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactViaEmailAddress(
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			table = '''| Email Address          | koroneiki.contact2@lrcustomer.com.broken |
+	| Email Address Verified | true                                     |
+	| First Name             | Koroneiki                                |
+	| Last Name              | Contact2                                 |
+	| Middle Name            | User                                     |''');
+
+		LocalFile.KoroneikiContactAPI._viewNoContact(contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken");
+	}
+
+	test Updatecontactviauuidandview {
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiContactAPI._updateContactViaUuid(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Email Address          | koroneiki.contact2@lrcustomer.com.broken |
+	| Email Address Verified | true                                     |
+	| First Name             | Koroneiki                                |
+	| Last Name              | Contact2                                 |
+	| Middle Name            | User                                     |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactViaEmailAddress(
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			table = '''| Email Address          | koroneiki.contact2@lrcustomer.com.broken |
+	| Email Address Verified | true                                     |
+	| First Name             | Koroneiki                                |
+	| Language               | English                                  |
+	| Last Name              | Contact2                                 |
+	| Middle Name            | User                                     |''');
+
+		LocalFile.KoroneikiContactAPI._viewNoContact(contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken");
+	}
+
+	test Viewcontactauditentries {
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiContactAPI._updateContactViaEmailAddress(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Email Address | koroneiki.contact2@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Last Name     | Contact2                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryViaUuid(
+			action = "Add",
+			agentName = "Koroneiki QA Service Producer",
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			field = "Email Address",
+			newValue = "koroneiki.contact1@lrcustomer.com.broken",
+			oldValue = "");
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryViaUuid(
+			action = "Update",
+			agentName = "Koroneiki QA Service Producer",
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			field = "Email Address",
+			newValue = "koroneiki.contact2@lrcustomer.com.broken",
+			oldValue = "koroneiki.contact1@lrcustomer.com.broken");
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryViaUuid(
+			action = "Add",
+			agentName = "Koroneiki QA Service Producer",
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			field = "Email Address",
+			newValue = "koroneiki.contact1@lrcustomer.com.broken",
+			oldValue = "");
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryViaUuid(
+			action = "Update",
+			agentName = "Koroneiki QA Service Producer",
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			field = "Email Address",
+			newValue = "koroneiki.contact2@lrcustomer.com.broken",
+			oldValue = "koroneiki.contact1@lrcustomer.com.broken");
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryViaAuditEntryKey(
+			action = "Add",
+			agentName = "Koroneiki QA Service Producer",
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			field = "Email Address",
+			newValue = "koroneiki.contact1@lrcustomer.com.broken",
+			oldValue = "");
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryViaAuditEntryKey(
+			action = "Update",
+			agentName = "Koroneiki QA Service Producer",
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			field = "Email Address",
+			newValue = "koroneiki.contact2@lrcustomer.com.broken",
+			oldValue = "koroneiki.contact1@lrcustomer.com.broken");
+	}
+
+	test Viewcontactauditentriesbyadminandagent {
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiContactAPI._updateContactViaEmailAddress(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Agent Name    | Koroneiki User                           |
+	| Email Address | koroneiki.contact2@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Last Name     | Contact2                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryViaUuid(
+			action = "Add",
+			agentName = "Koroneiki QA Service Producer",
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			field = "Email Address",
+			newValue = "koroneiki.contact1@lrcustomer.com.broken",
+			oldValue = "");
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryViaUuid(
+			action = "Update",
+			agentName = "Koroneiki User",
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			field = "Email Address",
+			newValue = "koroneiki.contact2@lrcustomer.com.broken",
+			oldValue = "koroneiki.contact1@lrcustomer.com.broken");
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryViaUuid(
+			action = "Add",
+			agentName = "Koroneiki QA Service Producer",
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			field = "Email Address",
+			newValue = "koroneiki.contact1@lrcustomer.com.broken",
+			oldValue = "");
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryViaUuid(
+			action = "Update",
+			agentName = "Koroneiki User",
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			field = "Email Address",
+			newValue = "koroneiki.contact2@lrcustomer.com.broken",
+			oldValue = "koroneiki.contact1@lrcustomer.com.broken");
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryViaAuditEntryKey(
+			action = "Add",
+			agentName = "Koroneiki QA Service Producer",
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			field = "Email Address",
+			newValue = "koroneiki.contact1@lrcustomer.com.broken",
+			oldValue = "");
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryViaAuditEntryKey(
+			action = "Update",
+			agentName = "Koroneiki User",
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			field = "Email Address",
+			newValue = "koroneiki.contact2@lrcustomer.com.broken",
+			oldValue = "koroneiki.contact1@lrcustomer.com.broken");
+	}
+
+	test Viewcontactauditentriesbyagent {
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Agent Name    | Koroneiki User                           |
+	| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiContactAPI._updateContactViaEmailAddress(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Agent Name    | Koroneiki User                           |
+	| Email Address | koroneiki.contact2@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Last Name     | Contact2                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryViaUuid(
+			action = "Add",
+			agentName = "Koroneiki User",
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			field = "Email Address",
+			newValue = "koroneiki.contact1@lrcustomer.com.broken",
+			oldValue = "");
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryViaUuid(
+			action = "Update",
+			agentName = "Koroneiki User",
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			field = "Email Address",
+			newValue = "koroneiki.contact2@lrcustomer.com.broken",
+			oldValue = "koroneiki.contact1@lrcustomer.com.broken");
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryViaUuid(
+			action = "Add",
+			agentName = "Koroneiki User",
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			field = "Email Address",
+			newValue = "koroneiki.contact1@lrcustomer.com.broken",
+			oldValue = "");
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryViaUuid(
+			action = "Update",
+			agentName = "Koroneiki User",
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			field = "Email Address",
+			newValue = "koroneiki.contact2@lrcustomer.com.broken",
+			oldValue = "koroneiki.contact1@lrcustomer.com.broken");
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryViaAuditEntryKey(
+			action = "Add",
+			agentName = "Koroneiki User",
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			field = "Email Address",
+			newValue = "koroneiki.contact1@lrcustomer.com.broken",
+			oldValue = "");
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryViaAuditEntryKey(
+			action = "Update",
+			agentName = "Koroneiki User",
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			field = "Email Address",
+			newValue = "koroneiki.contact2@lrcustomer.com.broken",
+			oldValue = "koroneiki.contact1@lrcustomer.com.broken");
+	}
+
+	test Viewcontactexternallinkauditentries {
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiContactAPI._createContactExternalLinkViaUuid(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Domain      | koroneikicontact |
+	| Entity Id   | 1234             |
+	| Entity Name | KoroneikiContact |''');
+
+		LocalFile.KoroneikiContactAPI._deleteContactExternalLink(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			entityId = 1234);
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryViaUuid(
+			action = "Add",
+			agentName = "Koroneiki QA Service Producer",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			field = "Domain",
+			newValue = "koroneikicontact",
+			oldValue = "");
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryViaUuid(
+			action = "Add",
+			agentName = "Koroneiki QA Service Producer",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			field = "Entity Id",
+			newValue = 1234,
+			oldValue = "");
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryViaUuid(
+			action = "Add",
+			agentName = "Koroneiki QA Service Producer",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			field = "Entity Name",
+			newValue = "KoroneikiContact",
+			oldValue = "");
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryViaUuid(
+			action = "Delete",
+			agentName = "Koroneiki QA Service Producer",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			field = "Domain",
+			newValue = "",
+			oldValue = "koroneikicontact");
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryViaUuid(
+			action = "Delete",
+			agentName = "Koroneiki QA Service Producer",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			field = "Entity Id",
+			newValue = "",
+			oldValue = 1234);
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryViaUuid(
+			action = "Delete",
+			agentName = "Koroneiki QA Service Producer",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			field = "Entity Name",
+			newValue = "",
+			oldValue = "KoroneikiContact");
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryViaAuditEntryKey(
+			action = "Add",
+			agentName = "Koroneiki QA Service Producer",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			field = "Domain",
+			newValue = "koroneikicontact",
+			oldValue = "");
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryViaAuditEntryKey(
+			action = "Add",
+			agentName = "Koroneiki QA Service Producer",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			field = "Entity Id",
+			newValue = 1234,
+			oldValue = "");
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryViaAuditEntryKey(
+			action = "Add",
+			agentName = "Koroneiki QA Service Producer",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			field = "Entity Name",
+			newValue = "KoroneikiContact",
+			oldValue = "");
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryViaAuditEntryKey(
+			action = "Delete",
+			agentName = "Koroneiki QA Service Producer",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			field = "Domain",
+			newValue = "",
+			oldValue = "koroneikicontact");
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryViaAuditEntryKey(
+			action = "Delete",
+			agentName = "Koroneiki QA Service Producer",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			field = "Entity Id",
+			newValue = "",
+			oldValue = 1234);
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryViaAuditEntryKey(
+			action = "Delete",
+			agentName = "Koroneiki QA Service Producer",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			field = "Entity Name",
+			newValue = "",
+			oldValue = "KoroneikiContact");
+	}
+
+	test Viewcontactexternallinkauditentriesbyagent {
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiContactAPI._createContactExternalLinkViaUuid(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Agent Name  | Koroneiki User   |
+	| Domain      | koroneikicontact |
+	| Entity Id   | 1234             |
+	| Entity Name | KoroneikiContact |''');
+
+		LocalFile.KoroneikiContactAPI._deleteContactExternalLinkExecutedByAgent(
+			agentName = "Koroneiki User",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			entityId = 1234);
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryViaUuid(
+			action = "Add",
+			agentName = "Koroneiki User",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			field = "Domain",
+			newValue = "koroneikicontact",
+			oldValue = "");
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryViaUuid(
+			action = "Add",
+			agentName = "Koroneiki User",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			field = "Entity Id",
+			newValue = 1234,
+			oldValue = "");
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryViaUuid(
+			action = "Add",
+			agentName = "Koroneiki User",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			field = "Entity Name",
+			newValue = "KoroneikiContact",
+			oldValue = "");
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryViaUuid(
+			action = "Delete",
+			agentName = "Koroneiki User",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			field = "Domain",
+			newValue = "",
+			oldValue = "koroneikicontact");
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryViaUuid(
+			action = "Delete",
+			agentName = "Koroneiki User",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			field = "Entity Id",
+			newValue = "",
+			oldValue = 1234);
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryViaUuid(
+			action = "Delete",
+			agentName = "Koroneiki User",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			field = "Entity Name",
+			newValue = "",
+			oldValue = "KoroneikiContact");
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryViaAuditEntryKey(
+			action = "Add",
+			agentName = "Koroneiki User",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			field = "Domain",
+			newValue = "koroneikicontact",
+			oldValue = "");
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryViaAuditEntryKey(
+			action = "Add",
+			agentName = "Koroneiki User",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			field = "Entity Id",
+			newValue = 1234,
+			oldValue = "");
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryViaAuditEntryKey(
+			action = "Add",
+			agentName = "Koroneiki User",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			field = "Entity Name",
+			newValue = "KoroneikiContact",
+			oldValue = "");
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryViaAuditEntryKey(
+			action = "Delete",
+			agentName = "Koroneiki User",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			field = "Domain",
+			newValue = "",
+			oldValue = "koroneikicontact");
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryViaAuditEntryKey(
+			action = "Delete",
+			agentName = "Koroneiki User",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			field = "Entity Id",
+			newValue = "",
+			oldValue = 1234);
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryViaAuditEntryKey(
+			action = "Delete",
+			agentName = "Koroneiki User",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			field = "Entity Name",
+			newValue = "",
+			oldValue = "KoroneikiContact");
+	}
+
+}

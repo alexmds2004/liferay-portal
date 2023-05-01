@@ -1,0 +1,170 @@
+definition {
+
+	property testray.main.component.name = "Support QA";
+	property type = "koroneiki";
+
+	tearDown {
+		LocalFile.KoroneikiAccountAPI._tearDownAccounts(table = '''| Koroneiki Automotive |''');
+	}
+
+	test Createpostaladdressattemptbynonpermissioneduser {
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | KORAUTO                                  | |
+	| Contact Email Address | koroneiki.contact1@lrcustomer.com.broken | |
+	| Description           | Test automotive account on koroneiki     | |
+	| Fax Number            | 555-555-1234                             | |
+	| Name                  | Koroneiki Automotive                     | |
+	| Phone Number          | 555-555-5678                             | |
+	| Profile Email Address | koroneiki.contact1@lrcustomer.com.broken | |
+	| Region                | United States                            | |
+	| Status                | Active                                   | |
+	| Tier                  | T4                                       | |
+	| Website               | www.koroneikiautomotive.com              | |''');
+
+		LocalFile.KoroneikiAccountAPIPermissionCheck._createAccountPostalAddressAttempt(
+			accountName = "Koroneiki Automotive",
+			table = '''| Country               | United States   |
+	| Locality              | Diamond Bar     |
+	| Region                | California      |
+	| Type                  | Business        |
+	| Mailing               | True            |
+	| Postal Code           | 91761           |
+	| Primary               | True            |
+	| Street Address Line 1 | 123 Fake Street |''');
+
+		LocalFile.KoroneikiPostalAddressAPI._viewNoPostalAddress(
+			accountName = "Koroneiki Automotive",
+			streetAddressLine1 = "123 Fake Street");
+	}
+
+	test Removepostaladdressandviewattemptbynonpermissioneduser {
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | KORAUTO                                  | |
+	| Contact Email Address | koroneiki.contact1@lrcustomer.com.broken | |
+	| Description           | Test automotive account on koroneiki     | |
+	| Fax Number            | 555-555-1234                             | |
+	| Name                  | Koroneiki Automotive                     | |
+	| Phone Number          | 555-555-5678                             | |
+	| Profile Email Address | koroneiki.contact1@lrcustomer.com.broken | |
+	| Region                | United States                            | |
+	| Status                | Active                                   | |
+	| Tier                  | T4                                       | |
+	| Website               | www.koroneikiautomotive.com              | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountPostalAddress(
+			accountName = "Koroneiki Automotive",
+			table = '''| Country               | United States   |
+	| Locality              | Diamond Bar     |
+	| Region                | California      |
+	| Type                  | Business        |
+	| Mailing               | True            |
+	| Postal Code           | 91761           |
+	| Primary               | True            |
+	| Street Address Line 1 | 123 Fake Street |''');
+
+		LocalFile.KoroneikiPostalAddressAPIPermissionCheck._deletePostalAddressAttempt(
+			accountName = "Koroneiki Automotive",
+			streetAddressLine1 = "123 Fake Street");
+
+		LocalFile.KoroneikiPostalAddressAPI._viewPostalAddress(
+			accountName = "Koroneiki Automotive",
+			streetAddressLine1 = "123 Fake Street",
+			table = '''| Country               | United States   |
+	| Locality              | Diamond Bar     |
+	| Region                | California      |
+	| Type                  | Business        |
+	| Mailing               | True            |
+	| Postal Code           | 91761           |
+	| Primary               | True            |
+	| Street Address Line 1 | 123 Fake Street |''');
+
+		LocalFile.KoroneikiPostalAddressAPIPermissionCheck._viewNoPostalAddress(
+			accountName = "Koroneiki Automotive",
+			streetAddressLine1 = "123 Fake Street");
+	}
+
+	test Updatepostaladdressattemptbynonpermissioneduser {
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | KORAUTO                                  | |
+	| Contact Email Address | koroneiki.contact1@lrcustomer.com.broken | |
+	| Description           | Test automotive account on koroneiki     | |
+	| Fax Number            | 555-555-1234                             | |
+	| Name                  | Koroneiki Automotive                     | |
+	| Phone Number          | 555-555-5678                             | |
+	| Profile Email Address | koroneiki.contact1@lrcustomer.com.broken | |
+	| Region                | United States                            | |
+	| Status                | Active                                   | |
+	| Tier                  | T4                                       | |
+	| Website               | www.koroneikiautomotive.com              | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountPostalAddress(
+			accountName = "Koroneiki Automotive",
+			table = '''| Country               | United States   |
+	| Locality              | Diamond Bar     |
+	| Region                | California      |
+	| Type                  | Business        |
+	| Mailing               | True            |
+	| Postal Code           | 91761           |
+	| Primary               | True            |
+	| Street Address Line 1 | 123 Fake Street |''');
+
+		LocalFile.KoroneikiPostalAddressAPIPermissionCheck._updatePostalAddressAttempt(
+			accountName = "Koroneiki Automotive",
+			streetAddressLine1 = "123 Fake Street",
+			table = '''| Country               | Canada           |
+	| Locality              | Vancouver        |
+	| Region                | British Columbia |
+	| Type                  | Other            |
+	| Mailing               | False            |
+	| Postal Code           | V5Y 0C9          |
+	| Primary               | False            |
+	| Street Address Line 1 | 456 Main Street  |''');
+
+		LocalFile.KoroneikiPostalAddressAPI._viewPostalAddress(
+			accountName = "Koroneiki Automotive",
+			streetAddressLine1 = "123 Fake Street",
+			table = '''| Country               | United States   |
+	| Locality              | Diamond Bar     |
+	| Region                | California      |
+	| Type                  | Business        |
+	| Mailing               | True            |
+	| Postal Code           | 91761           |
+	| Primary               | True            |
+	| Street Address Line 1 | 123 Fake Street |''');
+
+		LocalFile.KoroneikiPostalAddressAPI._viewNoPostalAddress(
+			accountName = "Koroneiki Automotive",
+			streetAddressLine1 = "456 Main Street");
+
+		LocalFile.KoroneikiPostalAddressAPIPermissionCheck._viewNoPostalAddress(
+			accountName = "Koroneiki Automotive",
+			streetAddressLine1 = "123 Fake Street");
+	}
+
+	test Viewpostaladdressattemptbynonpermissioneduser {
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | KORAUTO                                  | |
+	| Contact Email Address | koroneiki.contact1@lrcustomer.com.broken | |
+	| Description           | Test automotive account on koroneiki     | |
+	| Fax Number            | 555-555-1234                             | |
+	| Name                  | Koroneiki Automotive                     | |
+	| Phone Number          | 555-555-5678                             | |
+	| Profile Email Address | koroneiki.contact1@lrcustomer.com.broken | |
+	| Region                | United States                            | |
+	| Status                | Active                                   | |
+	| Tier                  | T4                                       | |
+	| Website               | www.koroneikiautomotive.com              | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountPostalAddress(
+			accountName = "Koroneiki Automotive",
+			table = '''| Country               | United States   |
+	| Locality              | Diamond Bar     |
+	| Region                | California      |
+	| Type                  | Business        |
+	| Mailing               | True            |
+	| Postal Code           | 91761           |
+	| Primary               | True            |
+	| Street Address Line 1 | 123 Fake Street |''');
+
+		LocalFile.KoroneikiPostalAddressAPIPermissionCheck._viewNoPostalAddress(
+			accountName = "Koroneiki Automotive",
+			streetAddressLine1 = "123 Fake Street");
+	}
+
+}

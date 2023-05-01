@@ -1,0 +1,2619 @@
+definition {
+
+	property testray.main.component.name = "Support QA";
+	property type = "zendesk.frontend";
+
+	setUp {
+		LocalFile.Passwords.getPasswords();
+
+		LocalFile.ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved                   |
+	| Name             | Frontend Org Name 1        |
+	| Tags             | liferay_dxp,liferay_portal |
+	| Shared Tickets   | true                       |
+	| Shared Comments  | true                       |
+	| SLA              | Gold                       |
+	| Tier             | T4                         |
+	| Support Region   | US                         |
+	| Support Language | English                    |
+	| External ID      | 12341234                   |''');
+
+		LocalFile.ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved                   |
+	| Name             | Frontend Org Name 2        |
+	| Tags             | liferay_dxp,liferay_portal |
+	| Shared Tickets   | true                       |
+	| Shared Comments  | true                       |
+	| SLA              | Gold                       |
+	| Tier             | T4                         |
+	| Support Region   | Japan                      |
+	| Support Language | Japanese                   |
+	| External ID      | 56785678                   |''');
+
+		LocalFile.ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved                   |
+	| Name             | Frontend Org Name 3        |
+	| Tags             | liferay_dxp,liferay_portal |
+	| Shared Tickets   | true                       |
+	| Shared Comments  | true                       |
+	| SLA              | Gold                       |
+	| Tier             | T4                         |
+	| Support Region   | Spain                      |
+	| Support Language | Spanish                    |
+	| External ID      | 91239123                   |''');
+	}
+
+	tearDown {
+		LocalFile.ZendeskUserAPI._tearDownUsersRequestedTicketsByExternalIdTable(table = '''| Enduser1  |
+	| Enduser2  |
+	| Endagent1 |''');
+
+		LocalFile.ZendeskUserAPI._tearDownUsersByExternalIdTable(table = '''| Enduser1  |
+	| Enduser2  |
+	| Endagent1 |''');
+
+		LocalFile.ZendeskOrganizationAPI._tearDownOrganizationsByExternalIdTable(table = '''| 12341234 |  
+	| 56785678 | 
+	| 91239123 |''');
+	}
+
+	test CreateFollowUp {
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk Enduser1                    |
+	| Tags             | osb_customer,osb_kb                 |
+	| Password         | ${staticZendeskAdminPassword}       |
+	| Role             | End-user                            |
+	| Access           | Organization                        |
+	| Email            | zendesk.enduser1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                   |
+	| Organization     | Frontend Org Name 1                 |
+	| Language         | English                             |
+	| Time Zone        | Pacific Time (US & Canada)          |
+	| External ID      | Enduser1                            |''');
+
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk Endagent1                    |
+	| Password         | ${staticZendeskAdminPassword}        |
+	| Role             | Agent                                |
+	| Email            | zendesk.endagent1@liferay.com.broken |
+	| Phone Number     | +1 (555) 555-5555                    |
+	| Language         | English                              |
+	| Time Zone        | Pacific Time (US & Canada)           |
+	| External ID      | Endagent1                            |''');
+
+		LocalFile.ZendeskUserAPI._assignUserToGroup(
+			groupName = "Provisioning - US",
+			userEmailAddress = "zendesk.endagent1@liferay.com.broken");
+
+		LocalFile.ZendeskRequestAPI._createRequest(
+			requesterEmail = "zendesk.enduser1@zendesk.com.broken",
+			table = '''| Product                  | prd_liferay_dxp_7_4                              |
+	| Component                | activation_key_project_administration            |
+	| System Status            | production_functioning_with_limited_capabilities |
+	| Subject                  | Request Subject                                  |
+	| Description              | Request Description                              |
+	| Organization External ID | 12341234                                         |''');
+
+		LocalFile.ZendeskTicketAPI._assignTicket(
+			ticketId = ${staticRequestIdList},
+			userEmailAddress = "zendesk.endagent1@liferay.com.broken");
+
+		LocalFile.ZendeskTicketAPI._changeTicketStatusAndSubStatusAndLongTermResolution(
+			ticketId = ${staticRequestIdList},
+			ticketLongTermResolution = "bug_fix",
+			ticketStatus = "solved",
+			ticketSubStatus = "completed");
+
+		LocalFile.ZendeskTicketAPI._assignTagsToTicket(
+			table = '''| auto_closed |''',
+			ticketId = ${staticRequestIdList});
+
+		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+
+		LocalFile.ZendeskHomepage.login(
+			userEmailAddress = "zendesk.enduser1@zendesk.com.broken",
+			userPassword = ${staticZendeskAdminPassword});
+
+		LocalFile.ZendeskHomepage.gotoMyActivities();
+
+		LocalFile.ZendeskRequest.gotoViaIndex(requestSubject = "Request Subject");
+
+		LocalFile.ZendeskRequest.createFollowUpRequest();
+
+		LocalFile.ZendeskRequest.view(table = '''| Subject       | Re: Request Subject                                |
+	| Status        | OPEN                                               |
+	| Requester     | Zendesk Enduser1                                   |
+	| Priority      | Normal                                             |
+	| Product       | Liferay DXP > 7.4                                  |
+	| Sub-Status    | Completed                                          |
+	| Component     | Activation Key & Project Administration            |
+	| System Status | Production > Functioning with limited capabilities |''');
+
+		LocalFile.ZendeskRequest.viewCommentField();
+
+		LocalFile.ZendeskRequest.viewNoClosedCommentMessage();
+
+		LocalFile.ZendeskRequest.viewComment(
+			commentContent = "This is a follow-up to your previous request",
+			table = '''| Author          | Zendesk Enduser1                             |
+	| Partial Comment | This is a follow-up to your previous request |
+	| Partial Comment | "Request Subject"                            |''');
+	}
+
+	test DeveloperPermissions {
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk Enduser1                    |
+	| Tags             | osb_customer,osb_kb                 |
+	| Password         | ${staticZendeskAdminPassword}       |
+	| Role             | End-user                            |
+	| Access           | Organization                        |
+	| Email            | zendesk.enduser1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                   |
+	| Organization     | Frontend Org Name 1                 |
+	| Language         | English                             |
+	| Time Zone        | Pacific Time (US & Canada)          |
+	| External ID      | Enduser1                            |''');
+
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk Enduser2                    |
+	| Tags             | osb_customer,osb_kb                 |
+	| Password         | ${staticZendeskAdminPassword}       |
+	| Role             | End-user                            |
+	| Access           | Organization                        |
+	| Email            | zendesk.enduser2@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                   |
+	| Organization     | Frontend Org Name 1                 |
+	| Language         | English                             |
+	| Time Zone        | Pacific Time (US & Canada)          |
+	| External ID      | Enduser2                            |''');
+
+		LocalFile.ZendeskRequestAPI._createRequest(
+			requesterEmail = "zendesk.enduser1@zendesk.com.broken",
+			table = '''| Product                  | prd_liferay_dxp_7_4                              |
+	| Component                | activation_key_project_administration            |
+	| System Status            | production_functioning_with_limited_capabilities |
+	| Subject                  | Request Subject                                  |
+	| Description              | Request Description                              |
+	| Organization External ID | 12341234                                         |''');
+
+		LocalFile.ZendeskHomepage.login(
+			userEmailAddress = "zendesk.enduser2@zendesk.com.broken",
+			userPassword = ${staticZendeskAdminPassword});
+
+		LocalFile.ZendeskHomepage.gotoMyActivities();
+
+		LocalFile.ZendeskRequestIndex.gotoOrganizationRequestsTab();
+
+		LocalFile.ZendeskRequest.viewViaIndex(
+			requestSubject = "Request Subject",
+			table = '''| Subject       | Request Subject |
+	| Status        | OPEN            |''');
+
+		LocalFile.ZendeskRequest.gotoViaIndex(requestSubject = "Request Subject");
+
+		LocalFile.ZendeskRequest.submitComment(table = '''| Comment     | Request Comment |
+	| Attachments | Document_1.txt  |''');
+
+		LocalFile.ZendeskRequest.viewComment(
+			commentContent = "Request Comment",
+			table = '''| Author      | Zendesk Enduser2 |
+	| Comment     | Request Comment  |
+	| Attachments | Document_1.txt   |''');
+
+		LocalFile.ZendeskRequest.view(table = '''| Subject       | Request Subject                                    |
+	| Status        | OPEN                                               |
+	| Requester     | Zendesk Enduser1                                   |
+	| Priority      | Normal                                             |
+	| Product       | Liferay DXP > 7.4                                  |
+	| Sub-Status    | —                                                  |
+	| Component     | Activation Key & Project Administration            |
+	| System Status | Production > Functioning with limited capabilities |
+	| Attachments   | Document_1.txt                                     |''');
+	}
+
+	test MarkRequestasSolved {
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk Enduser1                    |
+	| Tags             | osb_customer,osb_kb                 |
+	| Password         | ${staticZendeskAdminPassword}       |
+	| Role             | End-user                            |
+	| Access           | Organization                        |
+	| Email            | zendesk.enduser1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                   |
+	| Organization     | Frontend Org Name 1                 |
+	| Language         | English                             |
+	| Time Zone        | Pacific Time (US & Canada)          |
+	| External ID      | Enduser1                            |''');
+
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk Endagent1                    |
+	| Password         | ${staticZendeskAdminPassword}        |
+	| Role             | Agent                                |
+	| Email            | zendesk.endagent1@liferay.com.broken |
+	| Phone Number     | +1 (555) 555-5555                    |
+	| Language         | English                              |
+	| Time Zone        | Pacific Time (US & Canada)           |
+	| External ID      | Endagent1                            |''');
+
+		LocalFile.ZendeskUserAPI._assignUserToGroup(
+			groupName = "Provisioning - US",
+			userEmailAddress = "zendesk.endagent1@liferay.com.broken");
+
+		LocalFile.ZendeskRequestAPI._createRequest(
+			requesterEmail = "zendesk.enduser1@zendesk.com.broken",
+			table = '''| Product                  | prd_liferay_dxp_7_4                              |
+	| Component                | activation_key_project_administration            |
+	| System Status            | production_functioning_with_limited_capabilities |
+	| Subject                  | Request Subject                                  |
+	| Description              | Request Description                              |
+	| Organization External ID | 12341234                                         |''');
+
+		LocalFile.ZendeskTicketAPI._assignTicket(
+			ticketId = ${staticRequestIdList},
+			userEmailAddress = "zendesk.endagent1@liferay.com.broken");
+
+		LocalFile.ZendeskHomepage.login(
+			userEmailAddress = "zendesk.enduser1@zendesk.com.broken",
+			userPassword = ${staticZendeskAdminPassword});
+
+		LocalFile.ZendeskHomepage.gotoMyActivities();
+
+		LocalFile.ZendeskRequest.gotoViaIndex(requestSubject = "Request Subject");
+
+		LocalFile.ZendeskRequest.markAsSolved();
+
+		LocalFile.ZendeskRequest.view(table = '''| Subject       | Request Subject                                    |
+	| Status        | SOLVED                                             |
+	| Requester     | Zendesk Enduser1                                   |
+	| Assigned to   | Zendesk Endagent1                                  |
+	| Priority      | Normal                                             |
+	| Product       | Liferay DXP > 7.4                                  |
+	| Sub-Status    | —                                                  |
+	| Component     | Activation Key & Project Administration            |
+	| System Status | Production > Functioning with limited capabilities |''');
+	}
+
+	test MarkRequestasSolvedwithComment {
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk Enduser1                    |
+	| Tags             | osb_customer,osb_kb                 |
+	| Password         | ${staticZendeskAdminPassword}       |
+	| Role             | End-user                            |
+	| Access           | Organization                        |
+	| Email            | zendesk.enduser1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                   |
+	| Organization     | Frontend Org Name 1                 |
+	| Language         | English                             |
+	| Time Zone        | Pacific Time (US & Canada)          |
+	| External ID      | Enduser1                            |''');
+
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk Endagent1                    |
+	| Password         | ${staticZendeskAdminPassword}        |
+	| Role             | Agent                                |
+	| Email            | zendesk.endagent1@liferay.com.broken |
+	| Phone Number     | +1 (555) 555-5555                    |
+	| Language         | English                              |
+	| Time Zone        | Pacific Time (US & Canada)           |
+	| External ID      | Endagent1                            |''');
+
+		LocalFile.ZendeskUserAPI._assignUserToGroup(
+			groupName = "Provisioning - US",
+			userEmailAddress = "zendesk.endagent1@liferay.com.broken");
+
+		LocalFile.ZendeskRequestAPI._createRequest(
+			requesterEmail = "zendesk.enduser1@zendesk.com.broken",
+			table = '''| Product                  | prd_liferay_dxp_7_4                              |
+	| Component                | activation_key_project_administration            |
+	| System Status            | production_functioning_with_limited_capabilities |
+	| Subject                  | Request Subject                                  |
+	| Description              | Request Description                              |
+	| Organization External ID | 12341234                                         |''');
+
+		LocalFile.ZendeskTicketAPI._assignTicket(
+			ticketId = ${staticRequestIdList},
+			userEmailAddress = "zendesk.endagent1@liferay.com.broken");
+
+		LocalFile.ZendeskHomepage.login(
+			userEmailAddress = "zendesk.enduser1@zendesk.com.broken",
+			userPassword = ${staticZendeskAdminPassword});
+
+		LocalFile.ZendeskHomepage.gotoMyActivities();
+
+		LocalFile.ZendeskRequest.gotoViaIndex(requestSubject = "Request Subject");
+
+		LocalFile.ZendeskRequest.markAsSolvedWithComment(table = '''| Comment     | Request Comment |
+	| Attachments | Document_1.txt  |''');
+
+		LocalFile.ZendeskRequest.view(table = '''| Subject       | Request Subject                                    |
+	| Status        | SOLVED                                             |
+	| Requester     | Zendesk Enduser1                                   |
+	| Assigned to   | Zendesk Endagent1                                  |
+	| Priority      | Normal                                             |
+	| Product       | Liferay DXP > 7.4                                  |
+	| Sub-Status    | —                                                  |
+	| Component     | Activation Key & Project Administration            |
+	| System Status | Production > Functioning with limited capabilities |
+	| Attachments   | Document_1.txt                                     |''');
+
+		LocalFile.ZendeskRequest.viewComment(
+			commentContent = "Request Comment",
+			table = '''| Author      | Zendesk Enduser1 |
+	| Comment     | Request Comment  |
+	| Attachments | Document_1.txt   |''');
+	}
+
+	test NonOrganizationPermissions {
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk Enduser1                    |
+	| Tags             | osb_customer,osb_kb                 |
+	| Password         | ${staticZendeskAdminPassword}       |
+	| Role             | End-user                            |
+	| Access           | Organization                        |
+	| Email            | zendesk.enduser1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                   |
+	| Language         | English                             |
+	| Time Zone        | Pacific Time (US & Canada)          |
+	| External ID      | Enduser1                            |''');
+
+		LocalFile.ZendeskHomepage.login(
+			userEmailAddress = "zendesk.enduser1@zendesk.com.broken",
+			userPassword = ${staticZendeskAdminPassword});
+
+		LocalFile.ZendeskHomepage.gotoSubmitATicket();
+
+		LocalFile.ZendeskRequest.viewNoRequestForm();
+	}
+
+	test OrganizationalPermissions {
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk Enduser1                    |
+	| Tags             | osb_customer,osb_kb                 |
+	| Password         | ${staticZendeskAdminPassword}       |
+	| Role             | End-user                            |
+	| Access           | Organization                        |
+	| Email            | zendesk.enduser1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                   |
+	| Organization     | Frontend Org Name 1                 |
+	| Language         | English                             |
+	| Time Zone        | Pacific Time (US & Canada)          |
+	| External ID      | Enduser1                            |''');
+
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk Enduser2                    |
+	| Tags             | osb_customer,osb_kb                 |
+	| Password         | ${staticZendeskAdminPassword}       |
+	| Role             | End-user                            |
+	| Access           | Organization                        |
+	| Email            | zendesk.enduser2@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                   |
+	| Organization     | Frontend Org Name 2                 |
+	| Language         | English                             |
+	| Time Zone        | Pacific Time (US & Canada)          |
+	| External ID      | Enduser2                            |''');
+
+		LocalFile.ZendeskUserAPI._assignUserToOrganization(
+			organizationExternalId = 56785678,
+			userEmailAddress = "zendesk.enduser1@zendesk.com.broken");
+
+		LocalFile.ZendeskUserAPI._assignWatcherRole(
+			organizationExternalId = 56785678,
+			userEmailAddress = "zendesk.enduser1@zendesk.com.broken");
+
+		LocalFile.ZendeskUserAPI._assignUserToOrganization(
+			organizationExternalId = 12341234,
+			userEmailAddress = "zendesk.enduser2@zendesk.com.broken");
+
+		LocalFile.ZendeskUserAPI._assignWatcherRole(
+			organizationExternalId = 12341234,
+			userEmailAddress = "zendesk.enduser2@zendesk.com.broken");
+
+		LocalFile.ZendeskHomepage.login(
+			userEmailAddress = "zendesk.enduser1@zendesk.com.broken",
+			userPassword = ${staticZendeskAdminPassword});
+
+		LocalFile.ZendeskHomepage.gotoSubmitATicket();
+
+		LocalFile.ZendeskRequest.clickRequestDropdown(dropdownLabel = "Organization");
+
+		LocalFile.ZendeskRequest.viewNoOption(value = "Frontend Org Name 2");
+
+		LocalFile.ZendeskHomepage.gotoHomePage();
+
+		LocalFile.ZendeskRequest.create(table = '''| Product       | Liferay DXP                             | 7.4                                   |
+	| Component     | Activation Key & Project Administration |                                       |
+	| System Status | Production                              | Functioning with limited capabilities |
+	| Subject       | Request1 Subject                        |                                       |
+	| Description   | Request1 Description                    |                                       |
+	| Attachments   | Document_1.txt                          |                                       |''');
+
+		LocalFile.ZendeskRequest.view(table = '''| Subject       | Request1 Subject                                   |
+	| Status        | OPEN                                               |
+	| Requester     | Zendesk Enduser1                                   |
+	| Priority      | Normal                                             |
+	| Organization  | Frontend Org Name 1                                |
+	| Product       | Liferay DXP > 7.4                                  |
+	| Sub-Status    | —                                                  |
+	| Component     | Activation Key & Project Administration            |
+	| System Status | Production > Functioning with limited capabilities |
+	| Attachments   | Document_1.txt                                     |''');
+
+		LocalFile.ZendeskRequest.viewComment(
+			commentContent = "Request1 Description",
+			table = '''| Author      | Zendesk Enduser1     |
+	| Comment     | Request1 Description |
+	| Attachments | Document_1.txt       |''');
+
+		LocalFile.ZendeskHomepage.logoutAndLogin(
+			userEmailAddress = "zendesk.enduser2@zendesk.com.broken",
+			userPassword = ${staticZendeskAdminPassword});
+
+		LocalFile.ZendeskHomepage.gotoSubmitATicket();
+
+		LocalFile.ZendeskRequest.clickRequestDropdown(dropdownLabel = "Organization");
+
+		LocalFile.ZendeskRequest.viewNoOption(value = "Frontend Org Name 1");
+
+		LocalFile.ZendeskHomepage.gotoHomePage();
+
+		LocalFile.ZendeskRequest.create(table = '''| Product       | Liferay DXP                             | 7.4                                   |
+	| Component     | Activation Key & Project Administration |                                       |
+	| System Status | Production                              | Functioning with limited capabilities |
+	| Subject       | Request2 Subject                        |                                       |
+	| Description   | Request2 Description                    |                                       |
+	| Attachments   | Document_2.txt                          |                                       |''');
+
+		LocalFile.ZendeskRequest.view(table = '''| Subject       | Request2 Subject                                   |
+	| Status        | OPEN                                               |
+	| Requester     | Zendesk Enduser2                                   |
+	| Priority      | Normal                                             |
+	| Organization  | Frontend Org Name 2                                |
+	| Product       | Liferay DXP > 7.4                                  |
+	| Sub-Status    | —                                                  |
+	| Component     | Activation Key & Project Administration            |
+	| System Status | Production > Functioning with limited capabilities |
+	| Attachments   | Document_2.txt                                     |''');
+
+		LocalFile.ZendeskRequest.viewComment(
+			commentContent = "Request2 Description",
+			table = '''| Author      | Zendesk Enduser2     |
+	| Comment     | Request2 Description |
+	| Attachments | Document_2.txt       |''');
+
+		LocalFile.ZendeskHomepage.logoutAndLogin(
+			userEmailAddress = "zendesk.enduser1@zendesk.com.broken",
+			userPassword = ${staticZendeskAdminPassword});
+
+		LocalFile.ZendeskHomepage.gotoMyActivities();
+
+		LocalFile.ZendeskRequestIndex.gotoOrganizationRequestsTab();
+
+		LocalFile.ZendeskRequest.selectOrganizationFromSearchDropdown(organization = "Frontend Org Name 2");
+
+		LocalFile.ZendeskRequest.viewViaIndex(
+			requestSubject = "Request2 Subject",
+			table = '''| Subject       | Request2 Subject |
+	| Status        | OPEN             |''');
+
+		LocalFile.ZendeskRequest.gotoViaIndex(requestSubject = "Request2 Subject");
+
+		LocalFile.ZendeskRequest.viewNoCommentField();
+
+		LocalFile.ZendeskHomepage.logoutAndLogin(
+			userEmailAddress = "zendesk.enduser2@zendesk.com.broken",
+			userPassword = ${staticZendeskAdminPassword});
+
+		LocalFile.ZendeskHomepage.gotoMyActivities();
+
+		LocalFile.ZendeskRequestIndex.gotoOrganizationRequestsTab();
+
+		LocalFile.ZendeskRequest.selectOrganizationFromSearchDropdown(organization = "Frontend Org Name 1");
+
+		LocalFile.ZendeskRequest.viewViaIndex(
+			requestSubject = "Request1 Subject",
+			table = '''| Subject       | Request1 Subject |
+	| Status        | OPEN             |''');
+
+		LocalFile.ZendeskRequest.gotoViaIndex(requestSubject = "Request1 Subject");
+
+		LocalFile.ZendeskRequest.viewNoCommentField();
+	}
+
+	test PartnerPermissions {
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk Enduser1                    |
+	| Tags             | osb_customer,osb_kb                 |
+	| Password         | ${staticZendeskAdminPassword}       |
+	| Role             | End-user                            |
+	| Access           | Organization                        |
+	| Email            | zendesk.enduser1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                   |
+	| Organization     | Frontend Org Name 1                 |
+	| Language         | English                             |
+	| Time Zone        | Pacific Time (US & Canada)          |
+	| External ID      | Enduser1                            |''');
+
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk Enduser2                    |
+	| Tags             | osb_partner,osb_kb                  |
+	| Password         | ${staticZendeskAdminPassword}       |
+	| Role             | End-user                            |
+	| Access           | Organization                        |
+	| Email            | zendesk.enduser2@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                   |
+	| Organization     | Frontend Org Name 1                 |
+	| Language         | English                             |
+	| Time Zone        | Pacific Time (US & Canada)          |
+	| External ID      | Enduser2                            |''');
+
+		LocalFile.ZendeskRequestAPI._createRequest(
+			requesterEmail = "zendesk.enduser1@zendesk.com.broken",
+			table = '''| Product                  | prd_liferay_dxp_7_4                               |
+	| Component                | activation_key_project_administration             |
+	| System Status            | production_functioning_with_limited_capabilities  |
+	| Subject                  | Request Subject                                   |
+	| Description              | Request Description                               |
+	| Organization External ID | 12341234                                          |''');
+
+		LocalFile.ZendeskHomepage.login(
+			userEmailAddress = "zendesk.enduser2@zendesk.com.broken",
+			userPassword = ${staticZendeskAdminPassword});
+
+		LocalFile.ZendeskHomepage.gotoMyActivities();
+
+		LocalFile.ZendeskRequestIndex.gotoOrganizationRequestsTab();
+
+		LocalFile.ZendeskRequest.viewViaIndex(
+			requestSubject = "Request Subject",
+			table = '''| Subject       | Request Subject |
+	| Status        | OPEN            |''');
+
+		LocalFile.ZendeskRequest.gotoViaIndex(requestSubject = "Request Subject");
+
+		LocalFile.ZendeskRequest.submitComment(table = '''| Comment     | Request Comment |
+	| Attachments | Document_1.txt  |''');
+
+		LocalFile.ZendeskRequest.viewComment(
+			commentContent = "Request Comment",
+			table = '''| Author      | Zendesk Enduser2 |
+	| Comment     | Request Comment  |
+	| Attachments | Document_1.txt   |''');
+
+		LocalFile.ZendeskRequest.view(table = '''| Subject       | Request Subject                                    |
+	| Status        | OPEN                                               |
+	| Requester     | Zendesk Enduser1                                   |
+	| Priority      | Normal                                             |
+	| Product       | Liferay DXP > 7.4                                  |
+	| Sub-Status    | —                                                  |
+	| Component     | Activation Key & Project Administration            |
+	| System Status | Production > Functioning with limited capabilities |
+	| Attachments   | Document_1.txt                                     |''');
+	}
+
+	test RequestAssignee {
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk Enduser1                    |
+	| Tags             | osb_customer,osb_kb                 |
+	| Password         | ${staticZendeskAdminPassword}       |
+	| Role             | End-user                            |
+	| Access           | Organization                        |
+	| Email            | zendesk.enduser1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                   |
+	| Organization     | Frontend Org Name 1                 |
+	| Language         | English                             |
+	| Time Zone        | Pacific Time (US & Canada)          |
+	| External ID      | Enduser1                            |''');
+
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk Endagent1                    |
+	| Password         | ${staticZendeskAdminPassword}        |
+	| Role             | Agent                                |
+	| Email            | zendesk.endagent1@liferay.com.broken |
+	| Phone Number     | +1 (555) 555-5555                    |
+	| Language         | English                              |
+	| Time Zone        | Pacific Time (US & Canada)           |
+	| External ID      | Endagent1                            |''');
+
+		LocalFile.ZendeskUserAPI._assignUserToGroup(
+			groupName = "Provisioning - US",
+			userEmailAddress = "zendesk.endagent1@liferay.com.broken");
+
+		LocalFile.ZendeskRequestAPI._createRequest(
+			requesterEmail = "zendesk.enduser1@zendesk.com.broken",
+			table = '''| Product                  | prd_liferay_dxp_7_4                              |
+	| Component                | activation_key_project_administration            |
+	| System Status            | production_functioning_with_limited_capabilities |
+	| Subject                  | Request Subject                                  |
+	| Description              | Request Description                              |
+	| Organization External ID | 12341234                                         |''');
+
+		LocalFile.ZendeskTicketAPI._assignTicket(
+			ticketId = ${staticRequestIdList},
+			userEmailAddress = "zendesk.endagent1@liferay.com.broken");
+
+		LocalFile.ZendeskHomepage.login(
+			userEmailAddress = "zendesk.enduser1@zendesk.com.broken",
+			userPassword = ${staticZendeskAdminPassword});
+
+		LocalFile.ZendeskHomepage.gotoMyActivities();
+
+		LocalFile.ZendeskRequest.gotoViaIndex(requestSubject = "Request Subject");
+
+		LocalFile.ZendeskRequest.view(table = '''| Subject       | Request Subject                                    |
+	| Status        | OPEN                                               |
+	| Requester     | Zendesk Enduser1                                   |
+	| Assigned to   | Zendesk Endagent1                                  |
+	| Priority      | Normal                                             |
+	| Product       | Liferay DXP > 7.4                                  |
+	| Sub-Status    | —                                                  |
+	| Component     | Activation Key & Project Administration            |
+	| System Status | Production > Functioning with limited capabilities |''');
+	}
+
+	@help.center.acceptance = "true"
+	test RequestComment {
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk Enduser1                    |
+	| Tags             | osb_customer,osb_kb                 |
+	| Password         | ${staticZendeskAdminPassword}       |
+	| Role             | End-user                            |
+	| Access           | Organization                        |
+	| Email            | zendesk.enduser1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                   |
+	| Organization     | Frontend Org Name 1                 |
+	| Language         | English                             |
+	| Time Zone        | Pacific Time (US & Canada)          |
+	| External ID      | Enduser1                            |''');
+
+		LocalFile.ZendeskRequestAPI._createRequest(
+			requesterEmail = "zendesk.enduser1@zendesk.com.broken",
+			table = '''| Product                  | prd_liferay_dxp_7_4                              |
+	| Component                | activation_key_project_administration            |
+	| System Status            | production_functioning_with_limited_capabilities |
+	| Subject                  | Request Subject                                  |
+	| Description              | Request Description                              |
+	| Organization External ID | 12341234                                         |''');
+
+		LocalFile.ZendeskHomepage.login(
+			userEmailAddress = "zendesk.enduser1@zendesk.com.broken",
+			userPassword = ${staticZendeskAdminPassword});
+
+		LocalFile.ZendeskHomepage.gotoMyActivities();
+
+		LocalFile.ZendeskRequest.viewViaIndex(
+			requestSubject = "Request Subject",
+			table = '''| Subject       | Request Subject |
+	| Status        | OPEN            |''');
+
+		LocalFile.ZendeskRequest.gotoViaIndex(requestSubject = "Request Subject");
+
+		LocalFile.ZendeskRequest.submitComment(table = '''| Comment     | Request Comment |
+	| Attachments | Document_1.txt  |''');
+
+		LocalFile.ZendeskRequest.viewComment(
+			commentContent = "Request Comment",
+			table = '''| Author      | Zendesk Enduser1 |
+	| Comment     | Request Comment  |
+	| Attachments | Document_1.txt   |''');
+
+		LocalFile.ZendeskRequest.view(table = '''| Subject       | Request Subject                                    |
+	| Status        | OPEN                                               |
+	| Requester     | Zendesk Enduser1                                   |
+	| Priority      | Normal                                             |
+	| Product       | Liferay DXP > 7.4                                  |
+	| Sub-Status    | —                                                  |
+	| Component     | Activation Key & Project Administration            |
+	| System Status | Production > Functioning with limited capabilities |
+	| Attachments   | Document_1.txt                                     |''');
+	}
+
+	test RequestCommentPositioning {
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk Enduser1                    |
+	| Tags             | osb_customer,osb_kb                 |
+	| Password         | ${staticZendeskAdminPassword}       |
+	| Role             | End-user                            |
+	| Access           | Organization                        |
+	| Email            | zendesk.enduser1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                   |
+	| Organization     | Frontend Org Name 1                 |
+	| Language         | English                             |
+	| Time Zone        | Pacific Time (US & Canada)          |
+	| External ID      | Enduser1                            |''');
+
+		LocalFile.ZendeskRequestAPI._createRequest(
+			requesterEmail = "zendesk.enduser1@zendesk.com.broken",
+			table = '''| Product                  | prd_liferay_dxp_7_4                              |
+	| Component                | activation_key_project_administration            |
+	| System Status            | production_functioning_with_limited_capabilities |
+	| Subject                  | Request Subject                                  |
+	| Description              | Request Description                              |
+	| Organization External ID | 12341234                                         |''');
+
+		LocalFile.ZendeskHomepage.login(
+			userEmailAddress = "zendesk.enduser1@zendesk.com.broken",
+			userPassword = ${staticZendeskAdminPassword});
+
+		LocalFile.ZendeskHomepage.gotoMyActivities();
+
+		LocalFile.ZendeskRequest.viewViaIndex(
+			requestSubject = "Request Subject",
+			table = '''| Subject       | Request Subject |
+	| Status        | OPEN            |''');
+
+		LocalFile.ZendeskRequest.gotoViaIndex(requestSubject = "Request Subject");
+
+		LocalFile.ZendeskRequest.submitComment(table = '''| Comment     | Request Comment 1 |
+	| Attachments | Document_1.txt    |''');
+
+		LocalFile.ZendeskRequest.submitComment(table = '''| Comment     | Request Comment 2 |
+	| Attachments | Document_2.txt    |''');
+
+		LocalFile.ZendeskRequest.submitComment(table = '''| Comment     | Request Comment 3 |
+	| Attachments | Document_3.txt    |''');
+
+		LocalFile.ZendeskRequest.viewCommentPosition(
+			positionValue = 1,
+			table = '''| Author      | Zendesk Enduser1  |
+	| Comment     | Request Comment 3 |
+	| Attachments | Document_3.txt    |''');
+
+		LocalFile.ZendeskRequest.viewCommentPosition(
+			positionValue = 2,
+			table = '''| Author      | Zendesk Enduser1  |
+	| Comment     | Request Comment 2 |
+	| Attachments | Document_2.txt    |''');
+
+		LocalFile.ZendeskRequest.viewCommentPosition(
+			positionValue = 3,
+			table = '''| Author      | Zendesk Enduser1  |
+	| Comment     | Request Comment 1 |
+	| Attachments | Document_1.txt    |''');
+
+		LocalFile.ZendeskRequest.view(table = '''| Subject       | Request Subject                                    |
+	| Status        | OPEN                                               |
+	| Requester     | Zendesk Enduser1                                   |
+	| Priority      | Normal                                             |
+	| Product       | Liferay DXP > 7.4                                  |
+	| Sub-Status    | —                                                  |
+	| Component     | Activation Key & Project Administration            |
+	| System Status | Production > Functioning with limited capabilities |
+	| Attachments   | Document_1.txt                                     |''');
+	}
+
+	@help.center.acceptance = "true"
+	test RequestCreation {
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk Enduser1                    |
+	| Tags             | osb_customer,osb_kb                 |
+	| Password         | ${staticZendeskAdminPassword}       |
+	| Role             | End-user                            |
+	| Access           | Organization                        |
+	| Email            | zendesk.enduser1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                   |
+	| Organization     | Frontend Org Name 1                 |
+	| Language         | English                             |
+	| Time Zone        | Pacific Time (US & Canada)          |
+	| External ID      | Enduser1                            |''');
+
+		LocalFile.ZendeskHomepage.login(
+			userEmailAddress = "zendesk.enduser1@zendesk.com.broken",
+			userPassword = ${staticZendeskAdminPassword});
+
+		LocalFile.ZendeskRequest.create(table = '''| Product       | Liferay DXP                             | 7.4                                   |
+	| Component     | Activation Key & Project Administration |                                       |
+	| System Status | Production                              | Functioning with limited capabilities |
+	| Subject       | Request Subject                         |                                       |
+	| Description   | Request Description                     |                                       |
+	| Attachments   | Document_1.txt                          |                                       |''');
+
+		LocalFile.ZendeskRequest.view(table = '''| Subject                      | Request Subject                                    |
+	| Status                       | OPEN                                               |
+	| Requester                    | Zendesk Enduser1                                   |
+	| Priority                     | Normal                                             |
+	| Product                      | Liferay DXP > 7.4                                  |
+	| Sub-Status                   | —                                                  |
+	| Component                    | Activation Key & Project Administration            |
+	| System Status                | Production > Functioning with limited capabilities |
+	| Attachments                  | Document_1.txt                                     |''');
+
+		LocalFile.ZendeskRequest.viewComment(
+			commentContent = "Request Description",
+			table = '''| Author      | Zendesk Enduser1    |
+	| Comment     | Request Description |
+	| Attachments | Document_1.txt      |''');
+	}
+
+	test RequestCreationasUserwithMultipleRolesinMultipleOrganizations {
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk Enduser1                    |
+	| Tags             | osb_customer,osb_kb                 |
+	| Password         | ${staticZendeskAdminPassword}       |
+	| Role             | End-user                            |
+	| Access           | Organization                        |
+	| Email            | zendesk.enduser1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                   |
+	| Organization     | Frontend Org Name 1                 |
+	| Language         | English                             |
+	| Time Zone        | Pacific Time (US & Canada)          |
+	| External ID      | Enduser1                            |''');
+
+		LocalFile.ZendeskUserAPI._assignUserToOrganization(
+			organizationExternalId = 56785678,
+			userEmailAddress = "zendesk.enduser1@zendesk.com.broken");
+
+		LocalFile.ZendeskUserAPI._assignUserToOrganization(
+			organizationExternalId = 91239123,
+			userEmailAddress = "zendesk.enduser1@zendesk.com.broken");
+
+		LocalFile.ZendeskUserAPI._assignWatcherRole(
+			organizationExternalId = 12341234,
+			userEmailAddress = "zendesk.enduser1@zendesk.com.broken");
+
+		LocalFile.ZendeskUserAPI._assignWatcherRole(
+			organizationExternalId = 56785678,
+			userEmailAddress = "zendesk.enduser1@zendesk.com.broken");
+
+		LocalFile.ZendeskHomepage.login(
+			userEmailAddress = "zendesk.enduser1@zendesk.com.broken",
+			userPassword = ${staticZendeskAdminPassword});
+
+		LocalFile.ZendeskHomepage.gotoSubmitATicket();
+
+		LocalFile.ZendeskRequest.clickRequestDropdown(dropdownLabel = "Organization");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Frontend Org Name 3 |''');
+
+		LocalFile.ZendeskRequest.viewNoOptionList(table = '''| Frontend Org Name 1 |
+	| Frontend Org Name 2 |''');
+
+		LocalFile.ZendeskHomepage.gotoHomePage();
+
+		LocalFile.ZendeskRequest.create(table = '''| Product       | Liferay DXP                             | 7.4                                   |
+	| Component     | Activation Key & Project Administration |                                       |
+	| System Status | Production                              | Functioning with limited capabilities |
+	| Subject       | Request Subject                         |                                       |
+	| Description   | Request Description                     |                                       |
+	| Attachments   | Document_1.txt                          |                                       |''');
+
+		LocalFile.ZendeskRequest.view(table = '''| Subject       | Request Subject                                    |
+	| Status        | OPEN                                               |
+	| Requester     | Zendesk Enduser1                                   |
+	| Priority      | Normal                                             |
+	| Organization  | Frontend Org Name 3                                |
+	| Product       | Liferay DXP > 7.4                                  |
+	| Sub-Status    | —                                                  |
+	| Component     | Activation Key & Project Administration            |
+	| System Status | Production > Functioning with limited capabilities |
+	| Attachments   | Document_1.txt                                     |''');
+
+		LocalFile.ZendeskRequest.viewComment(
+			commentContent = "Request Description",
+			table = '''| Author      | Zendesk Enduser1    |
+	| Comment     | Request Description |
+	| Attachments | Document_1.txt      |''');
+	}
+
+	test TicketFormValidationforDeveloperTools {
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk Enduser1                    |
+	| Tags             | osb_customer,osb_kb                 |
+	| Password         | ${staticZendeskAdminPassword}       |
+	| Role             | End-user                            |
+	| Access           | Organization                        |
+	| Email            | zendesk.enduser1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                   |
+	| Organization     | Frontend Org Name 1                 |
+	| Language         | English                             |
+	| Time Zone        | Pacific Time (US & Canada)          |
+	| External ID      | Enduser1                            |''');
+
+		LocalFile.ZendeskOrganizationAPI._assignTagsToOrganizationViaOrganizationExternalID(
+			organizationExternalId = 12341234,
+			table = '''| developer_tools |''');
+
+		LocalFile.ZendeskHomepage.login(
+			userEmailAddress = "zendesk.enduser1@zendesk.com.broken",
+			userPassword = ${staticZendeskAdminPassword});
+
+		LocalFile.ZendeskHomepage.gotoSubmitATicket();
+
+		LocalFile.ZendeskRequest.clickRequestDropdown(dropdownLabel = "Product");
+
+		LocalFile.ZendeskRequest.clickOption(option = "Developer Tools");
+
+		LocalFile.ZendeskRequest.viewDropdownMenuNotVisible(dropdownLabel = "Component");
+
+		LocalFile.ZendeskRequest.clickRequestDropdown(dropdownLabel = "System Status");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Production                         |
+	| Non-Production                     |
+	| General question about the product |''');
+
+		LocalFile.ZendeskRequest.clickOption(option = "Production");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Completely shutdown                   |
+	| Severely impacted or inoperable       |
+	| Unstable with periodic interruptions  |
+	| Functioning with limited capabilities |
+	| Fully functional with observed errors |''');
+
+		LocalFile.ZendeskRequest.clickOption(option = "Back");
+
+		LocalFile.ZendeskRequest.clickOption(option = "Non-Production");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Completely shutdown                   |
+	| Severely impacted or inoperable       |
+	| Unstable with periodic interruptions  |
+	| Functioning with limited capabilities |
+	| Fully functional with observed errors |''');
+
+		LocalFile.ZendeskRequest.viewSubjectTextField();
+
+		LocalFile.ZendeskRequest.viewDescriptionTextField();
+	}
+
+	test TicketFormValidationforEnterpriseSearch {
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk Enduser1                    |
+	| Tags             | osb_customer,osb_kb                 |
+	| Password         | ${staticZendeskAdminPassword}       |
+	| Role             | End-user                            |
+	| Access           | Organization                        |
+	| Email            | zendesk.enduser1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                   |
+	| Organization     | Frontend Org Name 1                 |
+	| Language         | English                             |
+	| Time Zone        | Pacific Time (US & Canada)          |
+	| External ID      | Enduser1                            |''');
+
+		LocalFile.ZendeskOrganizationAPI._assignTagsToOrganizationViaOrganizationExternalID(
+			organizationExternalId = 12341234,
+			table = '''| enterprise_search |''');
+
+		LocalFile.ZendeskHomepage.login(
+			userEmailAddress = "zendesk.enduser1@zendesk.com.broken",
+			userPassword = ${staticZendeskAdminPassword});
+
+		LocalFile.ZendeskHomepage.gotoSubmitATicket();
+
+		LocalFile.ZendeskRequest.clickRequestDropdown(dropdownLabel = "Product");
+
+		LocalFile.ZendeskRequest.clickOption(option = "Liferay Enterprise Search");
+
+		LocalFile.ZendeskRequest.clickRequestDropdown(dropdownLabel = "Component");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Cross-Cluster Replication |
+	| Elasticsearch             |
+	| Learning to Rank          |
+	| Monitoring                |
+	| Search Experiences        |
+	| Security                  |''');
+
+		LocalFile.ZendeskRequest.clickOption(option = "-");
+
+		LocalFile.ZendeskRequest.clickRequestDropdown(dropdownLabel = "System Status");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Production                         |
+	| Non-Production                     |
+	| General question about the product |''');
+
+		LocalFile.ZendeskRequest.clickOption(option = "Production");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Completely shutdown                   |
+	| Severely impacted or inoperable       |
+	| Unstable with periodic interruptions  |
+	| Functioning with limited capabilities |
+	| Fully functional with observed errors |''');
+
+		LocalFile.ZendeskRequest.clickOption(option = "Back");
+
+		LocalFile.ZendeskRequest.clickOption(option = "Non-Production");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Completely shutdown                   |
+	| Severely impacted or inoperable       |
+	| Unstable with periodic interruptions  |
+	| Functioning with limited capabilities |
+	| Fully functional with observed errors |''');
+
+		LocalFile.ZendeskRequest.clickOption(option = "Back");
+
+		LocalFile.ZendeskRequest.clickOption(option = "-");
+
+		LocalFile.ZendeskRequest.viewSubjectTextField();
+
+		LocalFile.ZendeskRequest.viewDescriptionTextField();
+	}
+
+	test TicketFormValidationforLiferayAnalyticsCloud {
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk Enduser1                    |
+	| Tags             | osb_customer,osb_kb                 |
+	| Password         | ${staticZendeskAdminPassword}       |
+	| Role             | End-user                            |
+	| Access           | Organization                        |
+	| Email            | zendesk.enduser1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                   |
+	| Organization     | Frontend Org Name 1                 |
+	| Language         | English                             |
+	| Time Zone        | Pacific Time (US & Canada)          |
+	| External ID      | Enduser1                            |''');
+
+		LocalFile.ZendeskOrganizationAPI._assignTagsToOrganizationViaOrganizationExternalID(
+			organizationExternalId = 12341234,
+			table = '''| liferay_analytics_cloud |''');
+
+		LocalFile.ZendeskHomepage.login(
+			userEmailAddress = "zendesk.enduser1@zendesk.com.broken",
+			userPassword = ${staticZendeskAdminPassword});
+
+		LocalFile.ZendeskHomepage.gotoSubmitATicket();
+
+		LocalFile.ZendeskRequest.clickRequestDropdown(dropdownLabel = "Product");
+
+		LocalFile.ZendeskRequest.clickOption(option = "Liferay Analytics Cloud");
+
+		LocalFile.ZendeskRequest.viewDropdownMenuNotVisible(dropdownLabel = "Component");
+
+		LocalFile.ZendeskRequest.viewDropdownMenuNotVisible(dropdownLabel = "System Status");
+
+		LocalFile.ZendeskRequest.clickRequestDropdown(dropdownLabel = "Liferay Version");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| 7.0 |
+	| 7.1 |
+	| 7.2 |
+	| 7.3 |
+	| 7.4 |
+	| -   |''');
+
+		LocalFile.ZendeskRequest.viewSubjectTextField();
+
+		LocalFile.ZendeskRequest.viewDescriptionTextField();
+	}
+
+	test TicketFormValidationforLiferayCommerce {
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk Enduser1                    |
+	| Tags             | osb_customer,osb_kb                 |
+	| Password         | ${staticZendeskAdminPassword}       |
+	| Role             | End-user                            |
+	| Access           | Organization                        |
+	| Email            | zendesk.enduser1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                   |
+	| Organization     | Frontend Org Name 1                 |
+	| Language         | English                             |
+	| Time Zone        | Pacific Time (US & Canada)          |
+	| External ID      | Enduser1                            |''');
+
+		LocalFile.ZendeskOrganizationAPI._assignTagsToOrganizationViaOrganizationExternalID(
+			organizationExternalId = 12341234,
+			table = '''| liferay_commerce |''');
+
+		LocalFile.ZendeskHomepage.login(
+			userEmailAddress = "zendesk.enduser1@zendesk.com.broken",
+			userPassword = ${staticZendeskAdminPassword});
+
+		LocalFile.ZendeskHomepage.gotoSubmitATicket();
+
+		LocalFile.ZendeskRequest.clickRequestDropdown(dropdownLabel = "Product");
+
+		LocalFile.ZendeskRequest.clickOption(option = "Liferay Commerce");
+
+		LocalFile.ZendeskRequest.clickOption(option = "4.0");
+
+		LocalFile.ZendeskRequest.clickRequestDropdown(dropdownLabel = "Component");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Activation Key & Project Administration |
+	| APIs, Integrations and Extension Points |
+	| Commerce Insights                       |
+	| Configuration and Settings              |
+	| Connectors                              |
+	| Digital Merchandise Management          |
+	| Digital Store Management                |
+	| Shopping Experience                     |''');
+
+		LocalFile.ZendeskRequest.clickOption(option = "-");
+
+		LocalFile.ZendeskRequest.clickRequestDropdown(dropdownLabel = "Liferay Version");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| 7.0 |
+	| 7.1 |
+	| 7.2 |
+	| 7.3 |
+	| 7.4 |
+	| -   |''');
+
+		LocalFile.ZendeskRequest.clickOption(option = "-");
+
+		LocalFile.ZendeskRequest.clickRequestDropdown(dropdownLabel = "System Status");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Production                         |
+	| Non-Production                     |
+	| General question about the product |''');
+
+		LocalFile.ZendeskRequest.clickOption(option = "Production");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Completely shutdown                   |
+	| Severely impacted or inoperable       |
+	| Unstable with periodic interruptions  |
+	| Functioning with limited capabilities |
+	| Fully functional with observed errors |''');
+
+		LocalFile.ZendeskRequest.clickOption(option = "Back");
+
+		LocalFile.ZendeskRequest.clickOption(option = "Non-Production");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Completely shutdown                   |
+	| Severely impacted or inoperable       |
+	| Unstable with periodic interruptions  |
+	| Functioning with limited capabilities |
+	| Fully functional with observed errors |''');
+
+		LocalFile.ZendeskRequest.viewSubjectTextField();
+
+		LocalFile.ZendeskRequest.viewDescriptionTextField();
+
+		LocalFile.ZendeskRequest.clickOption(option = "Back");
+
+		LocalFile.ZendeskRequest.clickOption(option = "-");
+
+		LocalFile.ZendeskRequest.clickRequestDropdown(dropdownLabel = "Product");
+
+		LocalFile.ZendeskRequest.clickOption(option = "Back");
+
+		LocalFile.ZendeskRequest.clickOption(option = "Liferay Commerce");
+
+		LocalFile.ZendeskRequest.clickOption(option = "3.0");
+
+		LocalFile.ZendeskRequest.clickRequestDropdown(dropdownLabel = "Component");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Activation Key & Project Administration |
+	| APIs, Integrations and Extension Points |
+	| Commerce Insights                       |
+	| Configuration and Settings              |
+	| Connectors                              |
+	| Digital Merchandise Management          |
+	| Digital Store Management                |
+	| Shopping Experience                     |''');
+
+		LocalFile.ZendeskRequest.clickOption(option = "-");
+
+		LocalFile.ZendeskRequest.clickRequestDropdown(dropdownLabel = "Liferay Version");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| 7.0 |
+	| 7.1 |
+	| 7.2 |
+	| 7.3 |
+	| 7.4 |
+	| -   |''');
+
+		LocalFile.ZendeskRequest.clickOption(option = "-");
+
+		LocalFile.ZendeskRequest.clickRequestDropdown(dropdownLabel = "System Status");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Production                         |
+	| Non-Production                     |
+	| General question about the product |''');
+
+		LocalFile.ZendeskRequest.clickOption(option = "Production");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Completely shutdown                   |
+	| Severely impacted or inoperable       |
+	| Unstable with periodic interruptions  |
+	| Functioning with limited capabilities |
+	| Fully functional with observed errors |''');
+
+		LocalFile.ZendeskRequest.clickOption(option = "Back");
+
+		LocalFile.ZendeskRequest.clickOption(option = "Non-Production");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Completely shutdown                   |
+	| Severely impacted or inoperable       |
+	| Unstable with periodic interruptions  |
+	| Functioning with limited capabilities |
+	| Fully functional with observed errors |''');
+
+		LocalFile.ZendeskRequest.viewSubjectTextField();
+
+		LocalFile.ZendeskRequest.viewDescriptionTextField();
+
+		LocalFile.ZendeskRequest.clickOption(option = "Back");
+
+		LocalFile.ZendeskRequest.clickOption(option = "-");
+
+		LocalFile.ZendeskRequest.clickRequestDropdown(dropdownLabel = "Product");
+
+		LocalFile.ZendeskRequest.clickOption(option = "Back");
+
+		LocalFile.ZendeskRequest.clickOption(option = "Liferay Commerce");
+
+		LocalFile.ZendeskRequest.clickOption(option = "2.1");
+
+		LocalFile.ZendeskRequest.clickRequestDropdown(dropdownLabel = "Component");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Activation Key & Project Administration |
+	| APIs, Integrations and Extension Points |
+	| Commerce Insights                       |
+	| Configuration and Settings              |
+	| Connectors                              |
+	| Digital Merchandise Management          |
+	| Digital Store Management                |
+	| Shopping Experience                     |''');
+
+		LocalFile.ZendeskRequest.clickOption(option = "-");
+
+		LocalFile.ZendeskRequest.clickRequestDropdown(dropdownLabel = "Liferay Version");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| 7.0 |
+	| 7.1 |
+	| 7.2 |
+	| 7.3 |
+	| 7.4 |
+	| -   |''');
+
+		LocalFile.ZendeskRequest.clickOption(option = "-");
+
+		LocalFile.ZendeskRequest.clickRequestDropdown(dropdownLabel = "System Status");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Production                         |
+	| Non-Production                     |
+	| General question about the product |''');
+
+		LocalFile.ZendeskRequest.clickOption(option = "Production");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Completely shutdown                   |
+	| Severely impacted or inoperable       |
+	| Unstable with periodic interruptions  |
+	| Functioning with limited capabilities |
+	| Fully functional with observed errors |''');
+
+		LocalFile.ZendeskRequest.clickOption(option = "Back");
+
+		LocalFile.ZendeskRequest.clickOption(option = "Non-Production");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Completely shutdown                   |
+	| Severely impacted or inoperable       |
+	| Unstable with periodic interruptions  |
+	| Functioning with limited capabilities |
+	| Fully functional with observed errors |''');
+
+		LocalFile.ZendeskRequest.viewSubjectTextField();
+
+		LocalFile.ZendeskRequest.viewDescriptionTextField();
+
+		LocalFile.ZendeskRequest.clickOption(option = "Back");
+
+		LocalFile.ZendeskRequest.clickOption(option = "-");
+
+		LocalFile.ZendeskRequest.clickRequestDropdown(dropdownLabel = "Product");
+
+		LocalFile.ZendeskRequest.clickOption(option = "Back");
+
+		LocalFile.ZendeskRequest.clickOption(option = "Liferay Commerce");
+
+		LocalFile.ZendeskRequest.clickOption(option = "2.0");
+
+		LocalFile.ZendeskRequest.clickRequestDropdown(dropdownLabel = "Component");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Activation Key & Project Administration |
+	| APIs, Integrations and Extension Points |
+	| Commerce Insights                       |
+	| Configuration and Settings              |
+	| Connectors                              |
+	| Digital Merchandise Management          |
+	| Digital Store Management                |
+	| Shopping Experience                     |''');
+
+		LocalFile.ZendeskRequest.clickOption(option = "-");
+
+		LocalFile.ZendeskRequest.clickRequestDropdown(dropdownLabel = "System Status");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Production                         |
+	| Non-Production                     |
+	| General question about the product |''');
+
+		LocalFile.ZendeskRequest.clickOption(option = "Production");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Completely shutdown                   |
+	| Severely impacted or inoperable       |
+	| Unstable with periodic interruptions  |
+	| Functioning with limited capabilities |
+	| Fully functional with observed errors |''');
+
+		LocalFile.ZendeskRequest.clickOption(option = "Back");
+
+		LocalFile.ZendeskRequest.clickOption(option = "Non-Production");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Completely shutdown                   |
+	| Severely impacted or inoperable       |
+	| Unstable with periodic interruptions  |
+	| Functioning with limited capabilities |
+	| Fully functional with observed errors |''');
+
+		LocalFile.ZendeskRequest.viewSubjectTextField();
+
+		LocalFile.ZendeskRequest.viewDescriptionTextField();
+
+		LocalFile.ZendeskRequest.clickOption(option = "Back");
+
+		LocalFile.ZendeskRequest.clickOption(option = "-");
+
+		LocalFile.ZendeskRequest.clickRequestDropdown(dropdownLabel = "Product");
+
+		LocalFile.ZendeskRequest.clickOption(option = "Back");
+
+		LocalFile.ZendeskRequest.clickOption(option = "Liferay Commerce");
+
+		LocalFile.ZendeskRequest.clickOption(option = "1.1");
+
+		LocalFile.ZendeskRequest.clickRequestDropdown(dropdownLabel = "Component");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Activation Key & Project Administration |
+	| APIs, Integrations and Extension Points |
+	| Commerce Insights                       |
+	| Configuration and Settings              |
+	| Connectors                              |
+	| Digital Merchandise Management          |
+	| Digital Store Management                |
+	| Shopping Experience                     |''');
+
+		LocalFile.ZendeskRequest.clickOption(option = "-");
+
+		LocalFile.ZendeskRequest.clickRequestDropdown(dropdownLabel = "System Status");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Production                         |
+	| Non-Production                     |
+	| General question about the product |''');
+
+		LocalFile.ZendeskRequest.clickOption(option = "Production");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Completely shutdown                   |
+	| Severely impacted or inoperable       |
+	| Unstable with periodic interruptions  |
+	| Functioning with limited capabilities |
+	| Fully functional with observed errors |''');
+
+		LocalFile.ZendeskRequest.clickOption(option = "Back");
+
+		LocalFile.ZendeskRequest.clickOption(option = "Non-Production");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Completely shutdown                   |
+	| Severely impacted or inoperable       |
+	| Unstable with periodic interruptions  |
+	| Functioning with limited capabilities |
+	| Fully functional with observed errors |''');
+
+		LocalFile.ZendeskRequest.viewSubjectTextField();
+
+		LocalFile.ZendeskRequest.viewDescriptionTextField();
+	}
+
+	test TicketFormValidationforLiferayDXP {
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk Enduser1                    |
+	| Tags             | osb_customer,osb_kb                 |
+	| Password         | ${staticZendeskAdminPassword}       |
+	| Role             | End-user                            |
+	| Access           | Organization                        |
+	| Email            | zendesk.enduser1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                   |
+	| Organization     | Frontend Org Name 1                 |
+	| Language         | English                             |
+	| Time Zone        | Pacific Time (US & Canada)          |
+	| External ID      | Enduser1                            |''');
+
+		LocalFile.ZendeskHomepage.login(
+			userEmailAddress = "zendesk.enduser1@zendesk.com.broken",
+			userPassword = ${staticZendeskAdminPassword});
+
+		LocalFile.ZendeskHomepage.gotoSubmitATicket();
+
+		LocalFile.ZendeskRequest.clickRequestDropdown(dropdownLabel = "Product");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Liferay DXP               |
+	| Liferay Commerce          |
+	| Liferay Enterprise Search |''');
+
+		LocalFile.ZendeskRequest.viewNoVisibleOptionList(table = '''| Developer Tools                         |
+	| Liferay Analytics Cloud                 |
+	| Liferay Experience Cloud - Self-Managed |
+	| Management Tools (LCS)                  |
+	| Mobile Experience                       |
+	| Productivity Tools (Sync)               |''');
+
+		LocalFile.ZendeskHomepage.gotoHomePage();
+
+		LocalFile.ZendeskHomepage.gotoSubmitATicket();
+
+		LocalFile.ZendeskRequest.clickRequestDropdown(dropdownLabel = "Product");
+
+		LocalFile.ZendeskRequest.clickOption(option = "Liferay DXP");
+
+		LocalFile.ZendeskRequest.clickOption(option = "7.4");
+
+		LocalFile.ZendeskRequest.clickRequestDropdown(dropdownLabel = "Component");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Activation Key & Project Administration |
+	| Authentication                          |
+	| Caching & Clustering                    |
+	| Calendar                                |
+	| Collaboration                           |
+	| Content Management                      |
+	| Deployment, Environments                |
+	| Document Management                     |
+	| Data Frameworks                         |
+	| Forms                                   |
+	| Liferay API                             |
+	| Liferay Objects                         |
+	| Localization                            |
+	| Performance                             |
+	| Publication and Staging                 |
+	| Search & Indexing                       |
+	| Search Engine Optimization (SEO)        |
+	| Security Management                     |
+	| Segmentation                            |
+	| Site and Page Management                |
+	| System Management                       |
+	| UI Infrastructure, Accessibility        |
+	| Upgrade                                 |
+	| User, Membership, Role Management       |
+	| Workflow                                |''');
+
+		LocalFile.ZendeskRequest.clickOption(option = "-");
+
+		LocalFile.ZendeskRequest.clickRequestDropdown(dropdownLabel = "System Status");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Production                         |
+	| Non-Production                     |
+	| General question about the product |''');
+
+		LocalFile.ZendeskRequest.clickOption(option = "Production");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Completely shutdown                   |
+	| Severely impacted or inoperable       |
+	| Unstable with periodic interruptions  |
+	| Functioning with limited capabilities |
+	| Fully functional with observed errors |''');
+
+		LocalFile.ZendeskRequest.clickOption(option = "Back");
+
+		LocalFile.ZendeskRequest.clickOption(option = "Non-Production");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Completely shutdown                   |
+	| Severely impacted or inoperable       |
+	| Unstable with periodic interruptions  |
+	| Functioning with limited capabilities |
+	| Fully functional with observed errors |''');
+
+		LocalFile.ZendeskRequest.viewSubjectTextField();
+
+		LocalFile.ZendeskRequest.viewDescriptionTextField();
+
+		LocalFile.ZendeskRequest.clickOption(option = "Back");
+
+		LocalFile.ZendeskRequest.clickOption(option = "-");
+
+		LocalFile.ZendeskRequest.clickRequestDropdown(dropdownLabel = "Product");
+
+		LocalFile.ZendeskRequest.clickOption(option = "7.3");
+
+		LocalFile.ZendeskRequest.clickRequestDropdown(dropdownLabel = "Component");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Activation Key & Project Administration |
+	| Authentication                          |
+	| Caching & Clustering                    |
+	| Calendar                                |
+	| Collaboration                           |
+	| Content Management                      |
+	| Deployment, Environments                |
+	| Document Management                     |
+	| Data Frameworks                         |
+	| Forms                                   |
+	| Liferay API                             |
+	| Liferay Objects                         |
+	| Localization                            |
+	| Performance                             |
+	| Publication and Staging                 |
+	| Search & Indexing                       |
+	| Search Engine Optimization (SEO)        |
+	| Security Management                     |
+	| Segmentation                            |
+	| Site and Page Management                |
+	| System Management                       |
+	| UI Infrastructure, Accessibility        |
+	| Upgrade                                 |
+	| User, Membership, Role Management       |
+	| Workflow                                |''');
+
+		LocalFile.ZendeskRequest.clickOption(option = "-");
+
+		LocalFile.ZendeskRequest.clickRequestDropdown(dropdownLabel = "System Status");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Production                         |
+	| Non-Production                     |
+	| General question about the product |''');
+
+		LocalFile.ZendeskRequest.clickOption(option = "Production");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Completely shutdown                   |
+	| Severely impacted or inoperable       |
+	| Unstable with periodic interruptions  |
+	| Functioning with limited capabilities |
+	| Fully functional with observed errors |''');
+
+		LocalFile.ZendeskRequest.clickOption(option = "Back");
+
+		LocalFile.ZendeskRequest.clickOption(option = "Non-Production");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Completely shutdown                   |
+	| Severely impacted or inoperable       |
+	| Unstable with periodic interruptions  |
+	| Functioning with limited capabilities |
+	| Fully functional with observed errors |''');
+
+		LocalFile.ZendeskRequest.viewSubjectTextField();
+
+		LocalFile.ZendeskRequest.viewDescriptionTextField();
+
+		LocalFile.ZendeskRequest.clickOption(option = "Back");
+
+		LocalFile.ZendeskRequest.clickOption(option = "-");
+
+		LocalFile.ZendeskRequest.clickRequestDropdown(dropdownLabel = "Product");
+
+		LocalFile.ZendeskRequest.clickOption(option = "7.2");
+
+		LocalFile.ZendeskRequest.clickRequestDropdown(dropdownLabel = "Component");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Activation Key & Project Administration |
+	| Authentication                          |
+	| Caching & Clustering                    |
+	| Calendar                                |
+	| Collaboration                           |
+	| Content Management                      |
+	| Deployment, Environments                |
+	| Document Management                     |
+	| Data Frameworks                         |
+	| Forms                                   |
+	| Liferay API                             |
+	| Liferay Objects                         |
+	| Localization                            |
+	| Performance                             |
+	| Publication and Staging                 |
+	| Search & Indexing                       |
+	| Search Engine Optimization (SEO)        |
+	| Security Management                     |
+	| Segmentation                            |
+	| Site and Page Management                |
+	| System Management                       |
+	| UI Infrastructure, Accessibility        |
+	| Upgrade                                 |
+	| User, Membership, Role Management       |
+	| Workflow                                |''');
+
+		LocalFile.ZendeskRequest.clickOption(option = "-");
+
+		LocalFile.ZendeskRequest.clickRequestDropdown(dropdownLabel = "System Status");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Production                         |
+	| Non-Production                     |
+	| General question about the product |''');
+
+		LocalFile.ZendeskRequest.clickOption(option = "Production");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Completely shutdown                   |
+	| Severely impacted or inoperable       |
+	| Unstable with periodic interruptions  |
+	| Functioning with limited capabilities |
+	| Fully functional with observed errors |''');
+
+		LocalFile.ZendeskRequest.clickOption(option = "Back");
+
+		LocalFile.ZendeskRequest.clickOption(option = "Non-Production");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Completely shutdown                   |
+	| Severely impacted or inoperable       |
+	| Unstable with periodic interruptions  |
+	| Functioning with limited capabilities |
+	| Fully functional with observed errors |''');
+
+		LocalFile.ZendeskRequest.viewSubjectTextField();
+
+		LocalFile.ZendeskRequest.viewDescriptionTextField();
+
+		LocalFile.ZendeskRequest.clickOption(option = "Back");
+
+		LocalFile.ZendeskRequest.clickOption(option = "-");
+
+		LocalFile.ZendeskRequest.clickRequestDropdown(dropdownLabel = "Product");
+
+		LocalFile.ZendeskRequest.clickOption(option = "7.1");
+
+		LocalFile.ZendeskRequest.clickRequestDropdown(dropdownLabel = "Component");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Activation Key & Project Administration |
+	| Authentication                          |
+	| Caching & Clustering                    |
+	| Calendar                                |
+	| Collaboration                           |
+	| Content Management                      |
+	| Deployment, Environments                |
+	| Document Management                     |
+	| Data Frameworks                         |
+	| Forms                                   |
+	| Liferay API                             |
+	| Liferay Objects                         |
+	| Localization                            |
+	| Performance                             |
+	| Publication and Staging                 |
+	| Search & Indexing                       |
+	| Search Engine Optimization (SEO)        |
+	| Security Management                     |
+	| Segmentation                            |
+	| Site and Page Management                |
+	| System Management                       |
+	| UI Infrastructure, Accessibility        |
+	| Upgrade                                 |
+	| User, Membership, Role Management       |
+	| Workflow                                |''');
+
+		LocalFile.ZendeskRequest.clickOption(option = "-");
+
+		LocalFile.ZendeskRequest.clickRequestDropdown(dropdownLabel = "System Status");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Production                         |
+	| Non-Production                     |
+	| General question about the product |''');
+
+		LocalFile.ZendeskRequest.clickOption(option = "Production");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Completely shutdown                   |
+	| Severely impacted or inoperable       |
+	| Unstable with periodic interruptions  |
+	| Functioning with limited capabilities |
+	| Fully functional with observed errors |''');
+
+		LocalFile.ZendeskRequest.clickOption(option = "Back");
+
+		LocalFile.ZendeskRequest.clickOption(option = "Non-Production");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Completely shutdown                   |
+	| Severely impacted or inoperable       |
+	| Unstable with periodic interruptions  |
+	| Functioning with limited capabilities |
+	| Fully functional with observed errors |''');
+
+		LocalFile.ZendeskRequest.viewSubjectTextField();
+
+		LocalFile.ZendeskRequest.viewDescriptionTextField();
+
+		LocalFile.ZendeskRequest.clickOption(option = "Back");
+
+		LocalFile.ZendeskRequest.clickOption(option = "-");
+
+		LocalFile.ZendeskRequest.clickRequestDropdown(dropdownLabel = "Product");
+
+		LocalFile.ZendeskRequest.clickOption(option = "7.0");
+
+		LocalFile.ZendeskRequest.clickRequestDropdown(dropdownLabel = "Component");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Activation Key & Project Administration |
+	| Authentication                          |
+	| Caching & Clustering                    |
+	| Calendar                                |
+	| Collaboration                           |
+	| Content Management                      |
+	| Deployment, Environments                |
+	| Document Management                     |
+	| Data Frameworks                         |
+	| Forms                                   |
+	| Liferay API                             |
+	| Liferay Objects                         |
+	| Localization                            |
+	| Performance                             |
+	| Publication and Staging                 |
+	| Search & Indexing                       |
+	| Search Engine Optimization (SEO)        |
+	| Security Management                     |
+	| Segmentation                            |
+	| Site and Page Management                |
+	| System Management                       |
+	| UI Infrastructure, Accessibility        |
+	| Upgrade                                 |
+	| User, Membership, Role Management       |
+	| Workflow                                |''');
+
+		LocalFile.ZendeskRequest.clickOption(option = "-");
+
+		LocalFile.ZendeskRequest.clickRequestDropdown(dropdownLabel = "System Status");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Production                         |
+	| Non-Production                     |
+	| General question about the product |''');
+
+		LocalFile.ZendeskRequest.clickOption(option = "Production");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Completely shutdown                   |
+	| Severely impacted or inoperable       |
+	| Unstable with periodic interruptions  |
+	| Functioning with limited capabilities |
+	| Fully functional with observed errors |''');
+
+		LocalFile.ZendeskRequest.clickOption(option = "Back");
+
+		LocalFile.ZendeskRequest.clickOption(option = "Non-Production");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Completely shutdown                   |
+	| Severely impacted or inoperable       |
+	| Unstable with periodic interruptions  |
+	| Functioning with limited capabilities |
+	| Fully functional with observed errors |''');
+
+		LocalFile.ZendeskRequest.viewSubjectTextField();
+
+		LocalFile.ZendeskRequest.viewDescriptionTextField();
+	}
+
+	test TicketFormValidationforLiferayPortal {
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk Enduser1                    |
+	| Tags             | osb_customer,osb_kb                 |
+	| Password         | ${staticZendeskAdminPassword}       |
+	| Role             | End-user                            |
+	| Access           | Organization                        |
+	| Email            | zendesk.enduser1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                   |
+	| Organization     | Frontend Org Name 1                 |
+	| Language         | English                             |
+	| Time Zone        | Pacific Time (US & Canada)          |
+	| External ID      | Enduser1                            |''');
+
+		LocalFile.ZendeskHomepage.login(
+			userEmailAddress = "zendesk.enduser1@zendesk.com.broken",
+			userPassword = ${staticZendeskAdminPassword});
+
+		LocalFile.ZendeskHomepage.gotoSubmitATicket();
+
+		LocalFile.ZendeskRequest.clickRequestDropdown(dropdownLabel = "Product");
+
+		LocalFile.ZendeskRequest.clickOption(option = "Liferay Portal");
+
+		LocalFile.ZendeskRequest.clickOption(option = "6.2");
+
+		LocalFile.ZendeskRequest.clickRequestDropdown(dropdownLabel = "Component");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Activation Key & Project Administration |
+	| Authentication                          |
+	| Caching & Clustering                    |
+	| Calendar                                |
+	| Collaboration Suite                     |
+	| Deployment, Environments                |
+	| Document Management                     |
+	| Liferay API                             |
+	| Liferay Sync                            |
+	| Localization                            |
+	| Patch Management                        |
+	| Portal Developer Tools                  |
+	| Search & Indexing                       |
+	| Security                                |
+	| Staging, Export/Import                  |
+	| UI Infrastructure, Accessibility        |
+	| Upgrade                                 |
+	| User, Membership, Role Management       |
+	| Web Content                             |
+	| Workflow, Workflow Forms                |''');
+
+		LocalFile.ZendeskRequest.clickOption(option = "-");
+
+		LocalFile.ZendeskRequest.clickRequestDropdown(dropdownLabel = "System Status");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Production                         |
+	| Non-Production                     |
+	| General question about the product |''');
+
+		LocalFile.ZendeskRequest.clickOption(option = "Production");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Completely shutdown                   |
+	| Severely impacted or inoperable       |
+	| Unstable with periodic interruptions  |
+	| Functioning with limited capabilities |
+	| Fully functional with observed errors |''');
+
+		LocalFile.ZendeskRequest.clickOption(option = "Back");
+
+		LocalFile.ZendeskRequest.clickOption(option = "Non-Production");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Completely shutdown                   |
+	| Severely impacted or inoperable       |
+	| Unstable with periodic interruptions  |
+	| Functioning with limited capabilities |
+	| Fully functional with observed errors |''');
+
+		LocalFile.ZendeskRequest.viewSubjectTextField();
+
+		LocalFile.ZendeskRequest.viewDescriptionTextField();
+
+		LocalFile.ZendeskRequest.clickOption(option = "Back");
+
+		LocalFile.ZendeskRequest.clickOption(option = "-");
+
+		LocalFile.ZendeskRequest.clickRequestDropdown(dropdownLabel = "Product");
+
+		LocalFile.ZendeskRequest.clickOption(option = "6.1");
+
+		LocalFile.ZendeskRequest.clickRequestDropdown(dropdownLabel = "Component");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Activation Key & Project Administration |
+	| Authentication                          |
+	| Caching & Clustering                    |
+	| Calendar                                |
+	| Collaboration Suite                     |
+	| Deployment, Environments                |
+	| Document Management                     |
+	| Liferay API                             |
+	| Liferay Sync                            |
+	| Localization                            |
+	| Patch Management                        |
+	| Portal Developer Tools                  |
+	| Search & Indexing                       |
+	| Security                                |
+	| Staging, Export/Import                  |
+	| UI Infrastructure, Accessibility        |
+	| Upgrade                                 |
+	| User, Membership, Role Management       |
+	| Web Content                             |
+	| Workflow, Workflow Forms                |''');
+
+		LocalFile.ZendeskRequest.clickOption(option = "-");
+
+		LocalFile.ZendeskRequest.clickRequestDropdown(dropdownLabel = "System Status");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Production                         |
+	| Non-Production                     |
+	| General question about the product |''');
+
+		LocalFile.ZendeskRequest.clickOption(option = "Production");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Completely shutdown                   |
+	| Severely impacted or inoperable       |
+	| Unstable with periodic interruptions  |
+	| Functioning with limited capabilities |
+	| Fully functional with observed errors |''');
+
+		LocalFile.ZendeskRequest.clickOption(option = "Back");
+
+		LocalFile.ZendeskRequest.clickOption(option = "Non-Production");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Completely shutdown                   |
+	| Severely impacted or inoperable       |
+	| Unstable with periodic interruptions  |
+	| Functioning with limited capabilities |
+	| Fully functional with observed errors |''');
+
+		LocalFile.ZendeskRequest.viewSubjectTextField();
+
+		LocalFile.ZendeskRequest.viewDescriptionTextField();
+
+		LocalFile.ZendeskRequest.clickOption(option = "Back");
+
+		LocalFile.ZendeskRequest.clickOption(option = "-");
+
+		LocalFile.ZendeskRequest.clickRequestDropdown(dropdownLabel = "Product");
+
+		LocalFile.ZendeskRequest.clickOption(option = "6.0");
+
+		LocalFile.ZendeskRequest.clickRequestDropdown(dropdownLabel = "Component");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Activation Key & Project Administration |
+	| Authentication                          |
+	| Caching & Clustering                    |
+	| Calendar                                |
+	| Collaboration Suite                     |
+	| Deployment, Environments                |
+	| Document Management                     |
+	| Liferay API                             |
+	| Liferay Sync                            |
+	| Localization                            |
+	| Patch Management                        |
+	| Portal Developer Tools                  |
+	| Search & Indexing                       |
+	| Security                                |
+	| Staging, Export/Import                  |
+	| UI Infrastructure, Accessibility        |
+	| Upgrade                                 |
+	| User, Membership, Role Management       |
+	| Web Content                             |
+	| Workflow, Workflow Forms                |''');
+
+		LocalFile.ZendeskRequest.clickOption(option = "-");
+
+		LocalFile.ZendeskRequest.clickRequestDropdown(dropdownLabel = "System Status");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Production                         |
+	| Non-Production                     |
+	| General question about the product |''');
+
+		LocalFile.ZendeskRequest.clickOption(option = "Production");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Completely shutdown                   |
+	| Severely impacted or inoperable       |
+	| Unstable with periodic interruptions  |
+	| Functioning with limited capabilities |
+	| Fully functional with observed errors |''');
+
+		LocalFile.ZendeskRequest.clickOption(option = "Back");
+
+		LocalFile.ZendeskRequest.clickOption(option = "Non-Production");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Completely shutdown                   |
+	| Severely impacted or inoperable       |
+	| Unstable with periodic interruptions  |
+	| Functioning with limited capabilities |
+	| Fully functional with observed errors |''');
+
+		LocalFile.ZendeskRequest.viewSubjectTextField();
+
+		LocalFile.ZendeskRequest.viewDescriptionTextField();
+
+		LocalFile.ZendeskRequest.clickOption(option = "Back");
+
+		LocalFile.ZendeskRequest.clickOption(option = "-");
+
+		LocalFile.ZendeskRequest.clickRequestDropdown(dropdownLabel = "Product");
+
+		LocalFile.ZendeskRequest.clickOption(option = "5.2");
+
+		LocalFile.ZendeskRequest.clickRequestDropdown(dropdownLabel = "Component");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Activation Key & Project Administration |
+	| Authentication                          |
+	| Caching & Clustering                    |
+	| Calendar                                |
+	| Collaboration Suite                     |
+	| Deployment, Environments                |
+	| Document Management                     |
+	| Liferay API                             |
+	| Liferay Sync                            |
+	| Localization                            |
+	| Patch Management                        |
+	| Portal Developer Tools                  |
+	| Search & Indexing                       |
+	| Security                                |
+	| Staging, Export/Import                  |
+	| UI Infrastructure, Accessibility        |
+	| Upgrade                                 |
+	| User, Membership, Role Management       |
+	| Web Content                             |
+	| Workflow, Workflow Forms                |''');
+
+		LocalFile.ZendeskRequest.clickOption(option = "-");
+
+		LocalFile.ZendeskRequest.clickRequestDropdown(dropdownLabel = "System Status");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Production                         |
+	| Non-Production                     |
+	| General question about the product |''');
+
+		LocalFile.ZendeskRequest.clickOption(option = "Production");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Completely shutdown                   |
+	| Severely impacted or inoperable       |
+	| Unstable with periodic interruptions  |
+	| Functioning with limited capabilities |
+	| Fully functional with observed errors |''');
+
+		LocalFile.ZendeskRequest.clickOption(option = "Back");
+
+		LocalFile.ZendeskRequest.clickOption(option = "Non-Production");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Completely shutdown                   |
+	| Severely impacted or inoperable       |
+	| Unstable with periodic interruptions  |
+	| Functioning with limited capabilities |
+	| Fully functional with observed errors |''');
+
+		LocalFile.ZendeskRequest.viewSubjectTextField();
+
+		LocalFile.ZendeskRequest.viewDescriptionTextField();
+	}
+
+	test TicketFormValidationforLXC {
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk Enduser1                    |
+	| Tags             | osb_customer,osb_kb                 |
+	| Password         | ${staticZendeskAdminPassword}       |
+	| Role             | End-user                            |
+	| Access           | Organization                        |
+	| Email            | zendesk.enduser1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                   |
+	| Organization     | Frontend Org Name 1                 |
+	| Language         | English                             |
+	| Time Zone        | Pacific Time (US & Canada)          |
+	| External ID      | Enduser1                            |''');
+
+		LocalFile.ZendeskOrganizationAPI._assignTagsToOrganizationViaOrganizationExternalID(
+			organizationExternalId = 12341234,
+			table = '''| lxc_engage   |
+	| lxc_support  |
+	| lxc_transact |''');
+
+		LocalFile.ZendeskHomepage.login(
+			userEmailAddress = "zendesk.enduser1@zendesk.com.broken",
+			userPassword = ${staticZendeskAdminPassword});
+
+		LocalFile.ZendeskHomepage.gotoSubmitATicket();
+
+		LocalFile.ZendeskRequest.clickRequestDropdown(dropdownLabel = "Product");
+
+		LocalFile.ZendeskRequest.clickOption(option = "Liferay Experience Cloud - Engage");
+
+		LocalFile.ZendeskRequest.viewDropdownMenuNotVisible(dropdownLabel = "Component");
+
+		LocalFile.ZendeskRequest.clickRequestDropdown(dropdownLabel = "System Status");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Production                         |
+	| Non-Production                     |
+	| General question about the product |''');
+
+		LocalFile.ZendeskRequest.clickOption(option = "Production");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Completely shutdown                   |
+	| Severely impacted or inoperable       |
+	| Unstable with periodic interruptions  |
+	| Functioning with limited capabilities |
+	| Fully functional with observed errors |''');
+
+		LocalFile.ZendeskRequest.clickOption(option = "Back");
+
+		LocalFile.ZendeskRequest.clickOption(option = "Non-Production");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Completely shutdown                   |
+	| Severely impacted or inoperable       |
+	| Unstable with periodic interruptions  |
+	| Functioning with limited capabilities |
+	| Fully functional with observed errors |''');
+
+		LocalFile.ZendeskRequest.viewSubjectTextField();
+
+		LocalFile.ZendeskRequest.viewDescriptionTextField();
+
+		LocalFile.ZendeskRequest.clickOption(option = "Back");
+
+		LocalFile.ZendeskRequest.clickOption(option = "-");
+
+		LocalFile.ZendeskRequest.clickRequestDropdown(dropdownLabel = "Product");
+
+		LocalFile.ZendeskRequest.clickOption(option = "Liferay Experience Cloud - Support");
+
+		LocalFile.ZendeskRequest.viewDropdownMenuNotVisible(dropdownLabel = "Component");
+
+		LocalFile.ZendeskRequest.clickRequestDropdown(dropdownLabel = "System Status");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Production                         |
+	| Non-Production                     |
+	| General question about the product |''');
+
+		LocalFile.ZendeskRequest.clickOption(option = "Production");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Completely shutdown                   |
+	| Severely impacted or inoperable       |
+	| Unstable with periodic interruptions  |
+	| Functioning with limited capabilities |
+	| Fully functional with observed errors |''');
+
+		LocalFile.ZendeskRequest.clickOption(option = "Back");
+
+		LocalFile.ZendeskRequest.clickOption(option = "Non-Production");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Completely shutdown                   |
+	| Severely impacted or inoperable       |
+	| Unstable with periodic interruptions  |
+	| Functioning with limited capabilities |
+	| Fully functional with observed errors |''');
+
+		LocalFile.ZendeskRequest.viewSubjectTextField();
+
+		LocalFile.ZendeskRequest.viewDescriptionTextField();
+
+		LocalFile.ZendeskRequest.clickOption(option = "Back");
+
+		LocalFile.ZendeskRequest.clickOption(option = "-");
+
+		LocalFile.ZendeskRequest.clickRequestDropdown(dropdownLabel = "Product");
+
+		LocalFile.ZendeskRequest.clickOption(option = "Liferay Experience Cloud - Transact");
+
+		LocalFile.ZendeskRequest.viewDropdownMenuNotVisible(dropdownLabel = "Component");
+
+		LocalFile.ZendeskRequest.clickRequestDropdown(dropdownLabel = "System Status");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Production                         |
+	| Non-Production                     |
+	| General question about the product |''');
+
+		LocalFile.ZendeskRequest.clickOption(option = "Production");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Completely shutdown                   |
+	| Severely impacted or inoperable       |
+	| Unstable with periodic interruptions  |
+	| Functioning with limited capabilities |
+	| Fully functional with observed errors |''');
+
+		LocalFile.ZendeskRequest.clickOption(option = "Back");
+
+		LocalFile.ZendeskRequest.clickOption(option = "Non-Production");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Completely shutdown                   |
+	| Severely impacted or inoperable       |
+	| Unstable with periodic interruptions  |
+	| Functioning with limited capabilities |
+	| Fully functional with observed errors |''');
+
+		LocalFile.ZendeskRequest.viewSubjectTextField();
+
+		LocalFile.ZendeskRequest.viewDescriptionTextField();
+	}
+
+	test TicketFormValidationforLXCSM {
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk Enduser1                    |
+	| Tags             | osb_customer,osb_kb                 |
+	| Password         | ${staticZendeskAdminPassword}       |
+	| Role             | End-user                            |
+	| Access           | Organization                        |
+	| Email            | zendesk.enduser1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                   |
+	| Organization     | Frontend Org Name 1                 |
+	| Language         | English                             |
+	| Time Zone        | Pacific Time (US & Canada)          |
+	| External ID      | Enduser1                            |''');
+
+		LocalFile.ZendeskOrganizationAPI._assignTagsToOrganizationViaOrganizationExternalID(
+			organizationExternalId = 12341234,
+			table = '''| lxc_sm |''');
+
+		LocalFile.ZendeskHomepage.login(
+			userEmailAddress = "zendesk.enduser1@zendesk.com.broken",
+			userPassword = ${staticZendeskAdminPassword});
+
+		LocalFile.ZendeskHomepage.gotoSubmitATicket();
+
+		LocalFile.ZendeskRequest.clickRequestDropdown(dropdownLabel = "Product");
+
+		LocalFile.ZendeskRequest.clickOption(option = "Liferay Experience Cloud - Self-Managed");
+
+		LocalFile.ZendeskRequest.viewDropdownMenuNotVisible(dropdownLabel = "Component");
+
+		LocalFile.ZendeskRequest.clickRequestDropdown(dropdownLabel = "Liferay Version");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| 7.0 |
+	| 7.1 |
+	| 7.2 |
+	| 7.3 |
+	| 7.4 |
+	| -   |''');
+
+		LocalFile.ZendeskRequest.clickOption(option = "-");
+
+		LocalFile.ZendeskRequest.clickRequestDropdown(dropdownLabel = "System Status");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Production                         |
+	| Non-Production                     |
+	| General question about the product |''');
+
+		LocalFile.ZendeskRequest.clickOption(option = "Production");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Completely shutdown                   |
+	| Severely impacted or inoperable       |
+	| Unstable with periodic interruptions  |
+	| Functioning with limited capabilities |
+	| Fully functional with observed errors |''');
+
+		LocalFile.ZendeskRequest.clickOption(option = "Back");
+
+		LocalFile.ZendeskRequest.clickOption(option = "Non-Production");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Completely shutdown                   |
+	| Severely impacted or inoperable       |
+	| Unstable with periodic interruptions  |
+	| Functioning with limited capabilities |
+	| Fully functional with observed errors |''');
+
+		LocalFile.ZendeskRequest.viewSubjectTextField();
+
+		LocalFile.ZendeskRequest.viewDescriptionTextField();
+	}
+
+	test TicketFormValidationforManagementTools {
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk Enduser1                    |
+	| Tags             | osb_customer,osb_kb                 |
+	| Password         | ${staticZendeskAdminPassword}       |
+	| Role             | End-user                            |
+	| Access           | Organization                        |
+	| Email            | zendesk.enduser1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                   |
+	| Organization     | Frontend Org Name 1                 |
+	| Language         | English                             |
+	| Time Zone        | Pacific Time (US & Canada)          |
+	| External ID      | Enduser1                            |''');
+
+		LocalFile.ZendeskOrganizationAPI._assignTagsToOrganizationViaOrganizationExternalID(
+			organizationExternalId = 12341234,
+			table = '''| management_tools_lcs |''');
+
+		LocalFile.ZendeskHomepage.login(
+			userEmailAddress = "zendesk.enduser1@zendesk.com.broken",
+			userPassword = ${staticZendeskAdminPassword});
+
+		LocalFile.ZendeskHomepage.gotoSubmitATicket();
+
+		LocalFile.ZendeskRequest.clickRequestDropdown(dropdownLabel = "Product");
+
+		LocalFile.ZendeskRequest.clickOption(option = "Management Tools (LCS)");
+
+		LocalFile.ZendeskRequest.viewDropdownMenuNotVisible(dropdownLabel = "Component");
+
+		LocalFile.ZendeskRequest.clickRequestDropdown(dropdownLabel = "System Status");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Production                         |
+	| Non-Production                     |
+	| General question about the product |''');
+
+		LocalFile.ZendeskRequest.clickOption(option = "Production");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Completely shutdown                   |
+	| Severely impacted or inoperable       |
+	| Unstable with periodic interruptions  |
+	| Functioning with limited capabilities |
+	| Fully functional with observed errors |''');
+
+		LocalFile.ZendeskRequest.clickOption(option = "Back");
+
+		LocalFile.ZendeskRequest.clickOption(option = "Non-Production");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Completely shutdown                   |
+	| Severely impacted or inoperable       |
+	| Unstable with periodic interruptions  |
+	| Functioning with limited capabilities |
+	| Fully functional with observed errors |''');
+
+		LocalFile.ZendeskRequest.viewSubjectTextField();
+
+		LocalFile.ZendeskRequest.viewDescriptionTextField();
+	}
+
+	test TicketFormValidationforMobileExperience {
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk Enduser1                    |
+	| Tags             | osb_customer,osb_kb                 |
+	| Password         | ${staticZendeskAdminPassword}       |
+	| Role             | End-user                            |
+	| Access           | Organization                        |
+	| Email            | zendesk.enduser1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                   |
+	| Organization     | Frontend Org Name 1                 |
+	| Language         | English                             |
+	| Time Zone        | Pacific Time (US & Canada)          |
+	| External ID      | Enduser1                            |''');
+
+		LocalFile.ZendeskOrganizationAPI._assignTagsToOrganizationViaOrganizationExternalID(
+			organizationExternalId = 12341234,
+			table = '''| mobile_experience |''');
+
+		LocalFile.ZendeskHomepage.login(
+			userEmailAddress = "zendesk.enduser1@zendesk.com.broken",
+			userPassword = ${staticZendeskAdminPassword});
+
+		LocalFile.ZendeskHomepage.gotoSubmitATicket();
+
+		LocalFile.ZendeskRequest.clickRequestDropdown(dropdownLabel = "Product");
+
+		LocalFile.ZendeskRequest.clickOption(option = "Mobile Experience");
+
+		LocalFile.ZendeskRequest.viewDropdownMenuNotVisible(dropdownLabel = "Component");
+
+		LocalFile.ZendeskRequest.clickRequestDropdown(dropdownLabel = "System Status");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Production                         |
+	| Non-Production                     |
+	| General question about the product |''');
+
+		LocalFile.ZendeskRequest.clickOption(option = "Production");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Completely shutdown                   |
+	| Severely impacted or inoperable       |
+	| Unstable with periodic interruptions  |
+	| Functioning with limited capabilities |
+	| Fully functional with observed errors |''');
+
+		LocalFile.ZendeskRequest.clickOption(option = "Back");
+
+		LocalFile.ZendeskRequest.clickOption(option = "Non-Production");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Completely shutdown                   |
+	| Severely impacted or inoperable       |
+	| Unstable with periodic interruptions  |
+	| Functioning with limited capabilities |
+	| Fully functional with observed errors |''');
+
+		LocalFile.ZendeskRequest.viewSubjectTextField();
+
+		LocalFile.ZendeskRequest.viewDescriptionTextField();
+	}
+
+	test TicketFormValidationforMultipleOrganizations {
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk Enduser1                    |
+	| Tags             | osb_customer,osb_kb                 |
+	| Password         | ${staticZendeskAdminPassword}       |
+	| Role             | End-user                            |
+	| Access           | Organization                        |
+	| Email            | zendesk.enduser1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                   |
+	| Organization     | Frontend Org Name 1                 |
+	| Language         | English                             |
+	| Time Zone        | Pacific Time (US & Canada)          |
+	| External ID      | Enduser1                            |''');
+
+		LocalFile.ZendeskUserAPI._assignUserToOrganization(
+			organizationExternalId = 56785678,
+			userEmailAddress = "zendesk.enduser1@zendesk.com.broken");
+
+		LocalFile.ZendeskOrganizationAPI._assignTagsToOrganizationViaOrganizationExternalID(
+			organizationExternalId = 12341234,
+			table = '''| developer_tools         |
+	| mobile_experience       |
+	| productivity_tools_sync |
+	| lxc_sm                  |''');
+
+		LocalFile.ZendeskOrganizationAPI._assignTagsToOrganizationViaOrganizationExternalID(
+			organizationExternalId = 56785678,
+			table = '''| management_tools_lcs    |
+	| liferay_analytics_cloud |
+	| liferay_commerce        |''');
+
+		LocalFile.ZendeskHomepage.login(
+			userEmailAddress = "zendesk.enduser1@zendesk.com.broken",
+			userPassword = ${staticZendeskAdminPassword});
+
+		LocalFile.ZendeskHomepage.gotoSubmitATicket();
+
+		LocalFile.ZendeskRequest.clickRequestDropdown(dropdownLabel = "Organization");
+
+		LocalFile.ZendeskRequest.clickOption(option = "Frontend Org Name 1");
+
+		LocalFile.ZendeskRequest.clickRequestDropdown(dropdownLabel = "Product");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Developer Tools                         |
+	| Liferay Commerce                        |
+	| Liferay DXP                             |
+	| Liferay Experience Cloud - Self-Managed |
+	| Liferay Portal                          |
+	| Mobile Experience                       |
+	| Productivity Tools (Sync)               |
+	| Liferay Enterprise Search               |''');
+
+		LocalFile.ZendeskRequest.viewNoVisibleOptionList(table = '''| Liferay Analytics Cloud |
+	| Management Tools (LCS)  |''');
+
+		LocalFile.ZendeskRequest.clickOption(option = "-");
+
+		LocalFile.ZendeskRequest.clickRequestDropdown(dropdownLabel = "Organization");
+
+		LocalFile.ZendeskRequest.clickOption(option = "Frontend Org Name 2");
+
+		LocalFile.ZendeskRequest.clickRequestDropdown(dropdownLabel = "Product");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Liferay Analytics Cloud   |
+	| Liferay Commerce          |
+	| Liferay DXP               |
+	| Liferay Portal            |
+	| Management Tools (LCS)    |
+	| Liferay Enterprise Search |''');
+
+		LocalFile.ZendeskRequest.viewNoVisibleOptionList(table = '''| Developer Tools                         |
+	| Liferay Experience Cloud - Self-Managed |
+	| Mobile Experience                       |
+	| Productivity Tools (Sync)               |''');
+	}
+
+	test TicketFormValidationforProductivityTools {
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk Enduser1                    |
+	| Tags             | osb_customer,osb_kb                 |
+	| Password         | ${staticZendeskAdminPassword}       |
+	| Role             | End-user                            |
+	| Access           | Organization                        |
+	| Email            | zendesk.enduser1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                   |
+	| Organization     | Frontend Org Name 1                 |
+	| Language         | English                             |
+	| Time Zone        | Pacific Time (US & Canada)          |
+	| External ID      | Enduser1                            |''');
+
+		LocalFile.ZendeskOrganizationAPI._assignTagsToOrganizationViaOrganizationExternalID(
+			organizationExternalId = 12341234,
+			table = '''| productivity_tools_sync |''');
+
+		LocalFile.ZendeskHomepage.login(
+			userEmailAddress = "zendesk.enduser1@zendesk.com.broken",
+			userPassword = ${staticZendeskAdminPassword});
+
+		LocalFile.ZendeskHomepage.gotoSubmitATicket();
+
+		LocalFile.ZendeskRequest.clickRequestDropdown(dropdownLabel = "Product");
+
+		LocalFile.ZendeskRequest.clickOption(option = "Productivity Tools (Sync)");
+
+		LocalFile.ZendeskRequest.viewDropdownMenuNotVisible(dropdownLabel = "Component");
+
+		LocalFile.ZendeskRequest.clickRequestDropdown(dropdownLabel = "System Status");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Production                         |
+	| Non-Production                     |
+	| General question about the product |''');
+
+		LocalFile.ZendeskRequest.clickOption(option = "Production");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Completely shutdown                   |
+	| Severely impacted or inoperable       |
+	| Unstable with periodic interruptions  |
+	| Functioning with limited capabilities |
+	| Fully functional with observed errors |''');
+
+		LocalFile.ZendeskRequest.clickOption(option = "Back");
+
+		LocalFile.ZendeskRequest.clickOption(option = "Non-Production");
+
+		LocalFile.ZendeskRequest.viewOptionList(table = '''| Completely shutdown                   |
+	| Severely impacted or inoperable       |
+	| Unstable with periodic interruptions  |
+	| Functioning with limited capabilities |
+	| Fully functional with observed errors |''');
+
+		LocalFile.ZendeskRequest.viewSubjectTextField();
+
+		LocalFile.ZendeskRequest.viewDescriptionTextField();
+	}
+
+	test ViewClosedRequest {
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk Enduser1                    |
+	| Tags             | osb_customer,osb_kb                 |
+	| Password         | ${staticZendeskAdminPassword}       |
+	| Role             | End-user                            |
+	| Access           | Organization                        |
+	| Email            | zendesk.enduser1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                   |
+	| Organization     | Frontend Org Name 1                 |
+	| Language         | English                             |
+	| Time Zone        | Pacific Time (US & Canada)          |
+	| External ID      | Enduser1                            |''');
+
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk Endagent1                    |
+	| Password         | ${staticZendeskAdminPassword}        |
+	| Role             | Agent                                |
+	| Email            | zendesk.endagent1@liferay.com.broken |
+	| Phone Number     | +1 (555) 555-5555                    |
+	| Language         | English                              |
+	| Time Zone        | Pacific Time (US & Canada)           |
+	| External ID      | Endagent1                            |''');
+
+		LocalFile.ZendeskUserAPI._assignUserToGroup(
+			groupName = "Provisioning - US",
+			userEmailAddress = "zendesk.endagent1@liferay.com.broken");
+
+		LocalFile.ZendeskRequestAPI._createRequest(
+			requesterEmail = "zendesk.enduser1@zendesk.com.broken",
+			table = '''| Product                  | prd_liferay_dxp_7_4                              |
+	| Component                | activation_key_project_administration            |
+	| System Status            | production_functioning_with_limited_capabilities |
+	| Subject                  | Request Subject                                  |
+	| Description              | Request Description                              |
+	| Organization External ID | 12341234                                         |''');
+
+		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+
+		LocalFile.ZendeskTicketAPI._assignTicket(
+			ticketId = ${staticRequestIdList},
+			userEmailAddress = "zendesk.endagent1@liferay.com.broken");
+
+		LocalFile.ZendeskTicketAPI._changeTicketStatusAndSubStatusAndLongTermResolution(
+			ticketId = ${staticRequestIdList},
+			ticketLongTermResolution = "bug_fix",
+			ticketStatus = "solved",
+			ticketSubStatus = "completed");
+
+		LocalFile.ZendeskTicketAPI._assignTagsToTicket(
+			table = '''| auto_closed |''',
+			ticketId = ${staticRequestIdList});
+
+		LocalFile.ZendeskHomepage.login(
+			userEmailAddress = "zendesk.enduser1@zendesk.com.broken",
+			userPassword = ${staticZendeskAdminPassword});
+
+		LocalFile.ZendeskHomepage.gotoMyActivities();
+
+		LocalFile.ZendeskRequest.gotoViaIndex(requestSubject = "Request Subject");
+
+		LocalFile.ZendeskRequest.view(table = '''| Subject       | Request Subject                                    |
+	| Status        | SOLVED                                             |
+	| Requester     | Zendesk Enduser1                                   |
+	| Assigned to   | Zendesk Endagent1                                  |
+	| Priority      | Normal                                             |
+	| Product       | Liferay DXP > 7.4                                  |
+	| Sub-Status    | Completed                                          |
+	| Component     | Activation Key & Project Administration            |
+	| System Status | Production > Functioning with limited capabilities |''');
+
+		LocalFile.ZendeskRequest.viewNoCommentField();
+
+		LocalFile.ZendeskRequest.viewClosedCommentMessage();
+
+		LocalFile.ZendeskRequest.viewNoLargeAttachmentLink();
+	}
+
+	test Viewlargefilewarnings {
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk Enduser1                    |
+	| Tags             | osb_customer,osb_kb                 |
+	| Password         | ${staticZendeskAdminPassword}       |
+	| Role             | End-user                            |
+	| Access           | Organization                        |
+	| Email            | zendesk.enduser1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                   |
+	| Organization     | Frontend Org Name 1                 |
+	| Language         | English                             |
+	| Time Zone        | Pacific Time (US & Canada)          |
+	| External ID      | Enduser1                            |''');
+
+		LocalFile.ZendeskHomepage.login(
+			userEmailAddress = "zendesk.enduser1@zendesk.com.broken",
+			userPassword = ${staticZendeskAdminPassword});
+
+		LocalFile.ZendeskHomepage.gotoSubmitATicket();
+
+		LocalFile.ZendeskRequest.viewLargeFileWarningViaAddPage();
+
+		LocalFile.ZendeskRequestAPI._createRequest(
+			requesterEmail = "zendesk.enduser1@zendesk.com.broken",
+			table = '''| Product                  | prd_liferay_dxp_7_3                              |
+	| Component                | activation_key_project_administration            |
+	| System Status            | production_functioning_with_limited_capabilities |
+	| Subject                  | Request Subject                                  |
+	| Description              | Request Description                              |
+	| Organization External ID | 12341234                                         |''');
+
+		LocalFile.ZendeskHomepage.gotoMyActivities();
+
+		LocalFile.ZendeskRequest.gotoViaIndex(requestSubject = "Request Subject");
+
+		LocalFile.ZendeskRequest.viewLargeFileWarningViaCommentForm();
+	}
+
+	test WatcherPermissions {
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk Enduser1                    |
+	| Tags             | osb_customer,osb_kb                 |
+	| Password         | ${staticZendeskAdminPassword}       |
+	| Role             | End-user                            |
+	| Access           | Organization                        |
+	| Email            | zendesk.enduser1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                   |
+	| Organization     | Frontend Org Name 1                 |
+	| Language         | English                             |
+	| Time Zone        | Pacific Time (US & Canada)          |
+	| External ID      | Enduser1                            |''');
+
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk Enduser2                    |
+	| Tags             | osb_kb                              |
+	| Password         | ${staticZendeskAdminPassword}       |
+	| Role             | End-user                            |
+	| Access           | Organization                        |
+	| Email            | zendesk.enduser2@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                   |
+	| Organization     | Frontend Org Name 1                 |
+	| Language         | English                             |
+	| Time Zone        | Pacific Time (US & Canada)          |
+	| External ID      | Enduser2                            |''');
+
+		LocalFile.ZendeskRequestAPI._createRequest(
+			requesterEmail = "zendesk.enduser1@zendesk.com.broken",
+			table = '''| Product                  | prd_liferay_dxp_7_4                              |
+	| Component                | activation_key_project_administration            |
+	| System Status            | production_functioning_with_limited_capabilities |
+	| Subject                  | Request Subject                                  |
+	| Description              | Request Description                              |
+	| Organization External ID | 12341234                                         |''');
+
+		LocalFile.ZendeskUserAPI._assignWatcherRole(
+			organizationExternalId = 12341234,
+			userEmailAddress = "zendesk.enduser2@zendesk.com.broken");
+
+		LocalFile.ZendeskHomepage.login(
+			userEmailAddress = "zendesk.enduser2@zendesk.com.broken",
+			userPassword = ${staticZendeskAdminPassword});
+
+		LocalFile.ZendeskHomepage.gotoSubmitATicket();
+
+		LocalFile.ZendeskRequest.viewNoRequestForm();
+
+		LocalFile.ZendeskHomepage.gotoMyActivities();
+
+		LocalFile.ZendeskRequestIndex.gotoOrganizationRequestsTab();
+
+		LocalFile.ZendeskRequest.viewViaIndex(
+			requestSubject = "Request Subject",
+			table = '''| Subject       | Request Subject |
+	| Status        | OPEN            |''');
+
+		LocalFile.ZendeskRequest.gotoViaIndex(requestSubject = "Request Subject");
+
+		LocalFile.ZendeskRequest.viewNoCommentField();
+	}
+
+}

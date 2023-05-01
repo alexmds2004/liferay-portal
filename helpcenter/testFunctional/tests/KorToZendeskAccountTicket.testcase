@@ -1,0 +1,1046 @@
+definition {
+
+	property testray.main.component.name = "Support QA";
+	property type = "auto.provisioning";
+
+	setUp {
+		LocalFile.OSBAdminRabbitMQ.generateStaticVariables();
+
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningCompanyName();
+
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | zen.koroneiki1                       |
+	| Email Address | zen.koroneiki1@lrcustomer.com.broken |
+	| First Name    | ZEN                                  |
+	| Last Name     | Koroneiki1                           |''');
+
+		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | zen.koroneiki2                       |
+	| Email Address | zen.koroneiki2@lrcustomer.com.broken |
+	| First Name    | ZEN                                  |
+	| Last Name     | Koroneiki2                           |''');
+	}
+
+	tearDown {
+		LocalFile.ZendeskUserAPI._getDefaultUserId(organizationName = "Korzen - ${staticProjectName}");
+
+		LocalFile.ZendeskUserAPI._renameFirstDefaultUserIdVariable();
+
+		LocalFile.ZendeskUserAPI._getDefaultUserId(organizationName = "Zenkor - ${staticCompanyName}");
+
+		LocalFile.ZendeskUserAPI._renameSecondDefaultUserIdVariable();
+
+		LocalFile.ZendeskTicketAPI._tearDownTicketByIds(ticketIdList = ${staticRequestIdList});
+
+		LocalFile.OSBAdminProject.tearDownProjects(table = '''| ZENKORKORZEN  |
+	| ZENKORKORZEN1 |
+	| ZENKOR        |''');
+
+		LocalFile.KoroneikiAccountAPI._tearDownAccounts(table = '''| Korzen - ${staticProjectName} |
+	| Zenkor - ${staticCompanyName} |''');
+
+		LocalFile.KoroneikiAccountAPI._tearDownAccountsViaAccountFieldNameAndValue(
+			fieldName = "Code",
+			table = '''| ZENKORKORZEN  |
+	| ZENKORKORZEN1 |
+	| ZENKOR        |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Gold Subscription");
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Limited Subscription");
+
+		LocalFile.JSONUser.tearDownUsers(table = '''| zen.koroneiki1@lrcustomer.com.broken |
+	| zen.koroneiki2@lrcustomer.com.broken |''');
+
+		LocalFile.JSONUser.tearDownUsersViaSupport(table = '''| zen.koroneiki1@lrcustomer.com.broken |
+	| zen.koroneiki2@lrcustomer.com.broken |''');
+
+		LocalFile.JSONUser.tearDownUsersViaKoroneiki(table = '''| zen.koroneiki1@lrcustomer.com.broken |
+	| zen.koroneiki2@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiContactAPI._tearDownContacts(table = '''| zen.koroneiki1@lrcustomer.com.broken |
+	| zen.koroneiki2@lrcustomer.com.broken |''');
+
+		LocalFile.JSONOkta.tearDownUsers(table = '''| zen.koroneiki1@lrcustomer.com.broken |
+	| zen.koroneiki2@lrcustomer.com.broken |''');
+
+		LocalFile.ZendeskTicketAPI._tearDownTicketsByKeywords(table = '''| New Subscription(s) for Korzen - ${staticProjectName} |
+	| New Subscription(s) for Korzen - ${staticProjectName} |
+	| New Subscription(s) for Zenkor - ${staticCompanyName} |
+	| Korzen - ${staticProjectName}                         |
+	| Korzen - ${staticProjectName}                         |
+	| Korzen - ${staticProjectName}                         |''');
+
+		LocalFile.ZendeskUserAPI._getMultipleUserIdsByEmailAddress(table = '''| zen.koroneiki1@lrcustomer.com.broken |
+	| zen.koroneiki2@lrcustomer.com.broken |''');
+
+		LocalFile.ZendeskUserAPI._tearDownUsersByIdList(userIds = ${staticUserIdList});
+
+		LocalFile.ZendeskOrganizationAPI._getMultipleOrganizationExternalIdsByOrganizationNameIfStillPresent(table = '''| Korzen - ${staticProjectName} |
+	| Zenkor - ${staticCompanyName} |''');
+
+		LocalFile.ZendeskOrganizationAPI._tearDownOrganizationsByExternalIdList(organizationExternalIds = ${staticOrganizationExternalIdList});
+
+		LocalFile.ZendeskUserAPI._tearDownUserById(userId = ${staticDefaultUserId1});
+
+		LocalFile.ZendeskUserAPI._tearDownUserById(userId = ${staticDefaultUserId2});
+	}
+
+	test Removeaccountservicesolutiontag {
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Zenkor - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Contact Email Address                  | zen.koroneiki1@lrcustomer.com.broken       |
+	| Contact First Name                     | ZEN                                        |
+	| Contact Last Name                      | Koroneiki1                                 |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | zen.koroneiki2@lrcustomer.com.broken       |
+	| Owner First Name                       | ZEN                                        |
+	| Owner Last Name                        | Koroneiki2                                 |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Korzen - ${staticProjectName}              |
+	| Project Solution                       | Service Solution                           |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "ZENKORKORZEN");
+
+		LocalFile.ZendeskOrganizationAPI._viewOrganizationSyncFromOsb(organizationName = "Korzen - ${staticProjectName}");
+
+		LocalFile.ZendeskRequestAPI._createRequest(
+			requesterEmail = "zen.koroneiki1@lrcustomer.com.broken",
+			table = '''| Product           | prd_liferay_dxp_7_2                              |
+    | Component         | activation_key_project_administration	           |
+    | System Status	    | production_functioning_with_limited_capabilities |
+    | Subject           | Request Subject                                  |
+    | Description       | Request Description                              |
+    | Organization Name	| Korzen - ${staticProjectName}                    |''');
+
+		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+
+		LocalFile.ZendeskTicketAPI._viewSpecificTagForMultipleTickets(
+			tagName = "service_solution",
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewNoSpecificTagForMultipleTickets(
+			tagName = "commerce_solution",
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.OSBAdminRabbitMQ.publishUpdateMessage(
+			routingKey = "dossiera.provisioning.project.update",
+			table = '''| Project Solution                       |                                            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |''');
+
+		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+
+		LocalFile.ZendeskTicketAPI._viewNoSpecificTagForMultipleTickets(
+			tagName = "service_solution",
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewNoSpecificTagForMultipleTickets(
+			tagName = "commerce_solution",
+			ticketIdList = ${staticRequestIdList});
+	}
+
+	test Removeticketcommercesolutiontag {
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Zenkor - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Contact Email Address                  | zen.koroneiki1@lrcustomer.com.broken       |
+	| Contact First Name                     | ZEN                                        |
+	| Contact Last Name                      | Koroneiki1                                 |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | zen.koroneiki2@lrcustomer.com.broken       |
+	| Owner First Name                       | ZEN                                        |
+	| Owner Last Name                        | Koroneiki2                                 |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Korzen - ${staticProjectName}              |
+	| Project Solution                       | Commerce Solution                          |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "ZENKORKORZEN");
+
+		LocalFile.ZendeskOrganizationAPI._viewOrganizationSyncFromOsb(organizationName = "Korzen - ${staticProjectName}");
+
+		LocalFile.ZendeskRequestAPI._createRequest(
+			requesterEmail = "zen.koroneiki1@lrcustomer.com.broken",
+			table = '''| Product           | prd_liferay_dxp_7_2                              |
+    | Component         | activation_key_project_administration	           |
+    | System Status	    | production_functioning_with_limited_capabilities |
+    | Subject           | Request Subject                                  |
+    | Description       | Request Description                              |
+    | Organization Name	| Korzen - ${staticProjectName}                    |''');
+
+		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+
+		LocalFile.ZendeskTicketAPI._viewSpecificTagForMultipleTickets(
+			tagName = "commerce_solution",
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewNoSpecificTagForMultipleTickets(
+			tagName = "service_solution",
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.OSBAdminRabbitMQ.publishUpdateMessage(
+			routingKey = "dossiera.provisioning.project.update",
+			table = '''| Project Solution                       |                                            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |''');
+
+		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+
+		LocalFile.ZendeskTicketAPI._viewNoSpecificTagForMultipleTickets(
+			tagName = "commerce_solution",
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewNoSpecificTagForMultipleTickets(
+			tagName = "service_solution",
+			ticketIdList = ${staticRequestIdList});
+	}
+
+	test Updateticketcommercesolutiontagtoservicesolutiontag {
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Zenkor - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Contact Email Address                  | zen.koroneiki1@lrcustomer.com.broken       |
+	| Contact First Name                     | ZEN                                        |
+	| Contact Last Name                      | Koroneiki1                                 |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | zen.koroneiki2@lrcustomer.com.broken       |
+	| Owner First Name                       | ZEN                                        |
+	| Owner Last Name                        | Koroneiki2                                 |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Korzen - ${staticProjectName}              |
+	| Project Solution                       | Commerce Solution                          |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "ZENKORKORZEN");
+
+		LocalFile.ZendeskOrganizationAPI._viewOrganizationSyncFromOsb(organizationName = "Korzen - ${staticProjectName}");
+
+		LocalFile.ZendeskRequestAPI._createRequest(
+			requesterEmail = "zen.koroneiki1@lrcustomer.com.broken",
+			table = '''| Product           | prd_liferay_dxp_7_2                              |
+    | Component         | activation_key_project_administration	           |
+    | System Status	    | production_functioning_with_limited_capabilities |
+    | Subject           | Request Subject                                  |
+    | Description       | Request Description                              |
+    | Organization Name	| Korzen - ${staticProjectName}                    |''');
+
+		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+
+		LocalFile.ZendeskTicketAPI._viewSpecificTagForMultipleTickets(
+			tagName = "commerce_solution",
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewNoSpecificTagForMultipleTickets(
+			tagName = "service_solution",
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.OSBAdminRabbitMQ.publishUpdateMessage(
+			routingKey = "dossiera.provisioning.project.update",
+			table = '''| Project Solution                       | Service Solution                           |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |''');
+
+		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+
+		LocalFile.ZendeskTicketAPI._viewSpecificTagForMultipleTickets(
+			tagName = "service_solution",
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewNoSpecificTagForMultipleTickets(
+			tagName = "commerce_solution",
+			ticketIdList = ${staticRequestIdList});
+	}
+
+	test Updateticketcommercesolutiontagtoservicesolutiontagattemptonclosedticket {
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Zenkor - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Contact Email Address                  | zen.koroneiki1@lrcustomer.com.broken       |
+	| Contact First Name                     | ZEN                                        |
+	| Contact Last Name                      | Koroneiki1                                 |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | zen.koroneiki2@lrcustomer.com.broken       |
+	| Owner First Name                       | ZEN                                        |
+	| Owner Last Name                        | Koroneiki2                                 |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Korzen - ${staticProjectName}              |
+	| Project Solution                       | Commerce Solution                          |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.2                                        |''');
+
+		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "ZENKORKORZEN");
+
+		LocalFile.ZendeskOrganizationAPI._viewOrganizationSyncFromOsb(organizationName = "Korzen - ${staticProjectName}");
+
+		LocalFile.ZendeskRequestAPI._createRequest(
+			requesterEmail = "zen.koroneiki1@lrcustomer.com.broken",
+			table = '''| Product           | prd_liferay_dxp_7_2                              |
+    | Component         | activation_key_project_administration	           |
+    | System Status	    | production_functioning_with_limited_capabilities |
+    | Subject           | Request Subject                                  |
+    | Description       | Request Description                              |
+    | Organization Name	| Korzen - ${staticProjectName}                    |''');
+
+		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+
+		LocalFile.ZendeskTicketAPI._viewSpecificTagForMultipleTickets(
+			tagName = "commerce_solution",
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewNoSpecificTagForMultipleTickets(
+			tagName = "service_solution",
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._changeTicketStatus(
+			ticketId = ${staticRequestIdList},
+			ticketStatus = "closed");
+
+		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Zenkor - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Contact Email Address                  | zen.koroneiki1@lrcustomer.com.broken       |
+	| Contact First Name                     | ZEN                                        |
+	| Contact Last Name                      | Koroneiki1                                 |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | zen.koroneiki2@lrcustomer.com.broken       |
+	| Owner First Name                       | ZEN                                        |
+	| Owner Last Name                        | Koroneiki2                                 |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Korzen - ${staticProjectName}              |
+	| Project Solution                       | Service Solution                           |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.2                                        |''');
+
+		LocalFile.ZendeskTicketAPI._viewSpecificTagForMultipleTickets(
+			tagName = "commerce_solution",
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewNoSpecificTagForMultipleTickets(
+			tagName = "service_solution",
+			ticketIdList = ${staticRequestIdList});
+	}
+
+	test Updateticketservicesolutiontagtocommercesolutiontag {
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Zenkor - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Contact Email Address                  | zen.koroneiki1@lrcustomer.com.broken       |
+	| Contact First Name                     | ZEN                                        |
+	| Contact Last Name                      | Koroneiki1                                 |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | zen.koroneiki2@lrcustomer.com.broken       |
+	| Owner First Name                       | ZEN                                        |
+	| Owner Last Name                        | Koroneiki2                                 |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Korzen - ${staticProjectName}              |
+	| Project Solution                       | Service Solution                           |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "ZENKORKORZEN");
+
+		LocalFile.ZendeskOrganizationAPI._viewOrganizationSyncFromOsb(organizationName = "Korzen - ${staticProjectName}");
+
+		LocalFile.ZendeskRequestAPI._createRequest(
+			requesterEmail = "zen.koroneiki1@lrcustomer.com.broken",
+			table = '''| Product           | prd_liferay_dxp_7_2                              |
+    | Component         | activation_key_project_administration	           |
+    | System Status	    | production_functioning_with_limited_capabilities |
+    | Subject           | Request Subject                                  |
+    | Description       | Request Description                              |
+    | Organization Name	| Korzen - ${staticProjectName}                    |''');
+
+		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+
+		LocalFile.ZendeskTicketAPI._viewSpecificTagForMultipleTickets(
+			tagName = "service_solution",
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewNoSpecificTagForMultipleTickets(
+			tagName = "commerce_solution",
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.OSBAdminRabbitMQ.publishUpdateMessage(
+			routingKey = "dossiera.provisioning.project.update",
+			table = '''| Project Solution                       | Commerce Solution                          |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |''');
+
+		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+
+		LocalFile.ZendeskTicketAPI._viewSpecificTagForMultipleTickets(
+			tagName = "commerce_solution",
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewNoSpecificTagForMultipleTickets(
+			tagName = "service_solution",
+			ticketIdList = ${staticRequestIdList});
+	}
+
+	test Updateticketservicesolutiontagtocommercesolutiontagattemptonclosedticket {
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Zenkor - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Contact Email Address                  | zen.koroneiki1@lrcustomer.com.broken       |
+	| Contact First Name                     | ZEN                                        |
+	| Contact Last Name                      | Koroneiki1                                 |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | zen.koroneiki2@lrcustomer.com.broken       |
+	| Owner First Name                       | ZEN                                        |
+	| Owner Last Name                        | Koroneiki2                                 |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Korzen - ${staticProjectName}              |
+	| Project Solution                       | Service Solution                           |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "ZENKORKORZEN");
+
+		LocalFile.ZendeskOrganizationAPI._viewOrganizationSyncFromOsb(organizationName = "Korzen - ${staticProjectName}");
+
+		LocalFile.ZendeskRequestAPI._createRequest(
+			requesterEmail = "zen.koroneiki1@lrcustomer.com.broken",
+			table = '''| Product           | prd_liferay_dxp_7_2                              |
+    | Component         | activation_key_project_administration	           |
+    | System Status	    | production_functioning_with_limited_capabilities |
+    | Subject           | Request Subject                                  |
+    | Description       | Request Description                              |
+    | Organization Name	| Korzen - ${staticProjectName}                    |''');
+
+		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+
+		LocalFile.ZendeskTicketAPI._viewSpecificTagForMultipleTickets(
+			tagName = "service_solution",
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewNoSpecificTagForMultipleTickets(
+			tagName = "commerce_solution",
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._changeTicketStatus(
+			ticketId = ${staticRequestIdList},
+			ticketStatus = "closed");
+
+		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Zenkor - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Contact Email Address                  | zen.koroneiki1@lrcustomer.com.broken       |
+	| Contact First Name                     | ZEN                                        |
+	| Contact Last Name                      | Koroneiki1                                 |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | zen.koroneiki2@lrcustomer.com.broken       |
+	| Owner First Name                       | ZEN                                        |
+	| Owner Last Name                        | Koroneiki2                                 |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Korzen - ${staticProjectName}              |
+	| Project Solution                       | Commerce Solution                          |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.ZendeskTicketAPI._viewSpecificTagForMultipleTickets(
+			tagName = "service_solution",
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewNoSpecificTagForMultipleTickets(
+			tagName = "commerce_solution",
+			ticketIdList = ${staticRequestIdList});
+	}
+
+	test Updateticketwithnosolutiontagtocommercesolutiontag {
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Zenkor - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Contact Email Address                  | zen.koroneiki1@lrcustomer.com.broken       |
+	| Contact First Name                     | ZEN                                        |
+	| Contact Last Name                      | Koroneiki1                                 |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | zen.koroneiki2@lrcustomer.com.broken       |
+	| Owner First Name                       | ZEN                                        |
+	| Owner Last Name                        | Koroneiki2                                 |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Korzen - ${staticProjectName}              |
+	| Project Solution                       |                                            |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.2                                        |''');
+
+		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "ZENKORKORZEN");
+
+		LocalFile.ZendeskOrganizationAPI._viewOrganizationSyncFromOsb(organizationName = "Korzen - ${staticProjectName}");
+
+		LocalFile.ZendeskRequestAPI._createRequest(
+			requesterEmail = "zen.koroneiki1@lrcustomer.com.broken",
+			table = '''| Product           | prd_liferay_dxp_7_2                              |
+    | Component         | activation_key_project_administration	           |
+    | System Status	    | production_functioning_with_limited_capabilities |
+    | Subject           | Request Subject                                  |
+    | Description       | Request Description                              |
+    | Organization Name	| Korzen - ${staticProjectName}                    |''');
+
+		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+
+		LocalFile.ZendeskTicketAPI._viewNoSpecificTagForMultipleTickets(
+			tagName = "commerce_solution",
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewNoSpecificTagForMultipleTickets(
+			tagName = "service_solution",
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.OSBAdminRabbitMQ.publishUpdateMessage(
+			routingKey = "dossiera.provisioning.project.update",
+			table = '''| Project Solution                       | Commerce Solution                          |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |''');
+
+		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+
+		LocalFile.ZendeskTicketAPI._viewSpecificTagForMultipleTickets(
+			tagName = "commerce_solution",
+			ticketIdList = ${staticRequestIdList});
+	}
+
+	test Updateticketwithnosolutiontagtoservicesolutiontag {
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Zenkor - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Contact Email Address                  | zen.koroneiki1@lrcustomer.com.broken       |
+	| Contact First Name                     | ZEN                                        |
+	| Contact Last Name                      | Koroneiki1                                 |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | zen.koroneiki2@lrcustomer.com.broken       |
+	| Owner First Name                       | ZEN                                        |
+	| Owner Last Name                        | Koroneiki2                                 |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Korzen - ${staticProjectName}              |
+	| Project Solution                       |                                            |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.2                                        |''');
+
+		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "ZENKORKORZEN");
+
+		LocalFile.ZendeskOrganizationAPI._viewOrganizationSyncFromOsb(organizationName = "Korzen - ${staticProjectName}");
+
+		LocalFile.ZendeskRequestAPI._createRequest(
+			requesterEmail = "zen.koroneiki1@lrcustomer.com.broken",
+			table = '''| Product           | prd_liferay_dxp_7_2                              |
+    | Component         | activation_key_project_administration	           |
+    | System Status	    | production_functioning_with_limited_capabilities |
+    | Subject           | Request Subject                                  |
+    | Description       | Request Description                              |
+    | Organization Name	| Korzen - ${staticProjectName}                    |''');
+
+		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+
+		LocalFile.ZendeskTicketAPI._viewNoSpecificTagForMultipleTickets(
+			tagName = "commerce_solution",
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewNoSpecificTagForMultipleTickets(
+			tagName = "service_solution",
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.OSBAdminRabbitMQ.publishUpdateMessage(
+			routingKey = "dossiera.provisioning.project.update",
+			table = '''| Project Solution                       | Service Solution                           |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |''');
+
+		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+
+		LocalFile.ZendeskOrganizationAPI._viewOrganizationTagSync(
+			organizationName = "Korzen - ${staticProjectName}",
+			tag = "service_solution");
+
+		LocalFile.ZendeskOrganizationAPI._viewOrganizationNoTagSync(
+			organizationName = "Korzen - ${staticProjectName}",
+			tag = "commerce_solution");
+	}
+
+	test Viewticketcommercesolutiontag {
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Zenkor - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Contact Email Address                  | zen.koroneiki1@lrcustomer.com.broken       |
+	| Contact First Name                     | ZEN                                        |
+	| Contact Last Name                      | Koroneiki1                                 |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | zen.koroneiki2@lrcustomer.com.broken       |
+	| Owner First Name                       | ZEN                                        |
+	| Owner Last Name                        | Koroneiki2                                 |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Korzen - ${staticProjectName}              |
+	| Project Solution                       | Commerce Solution                          |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.2                                        |''');
+
+		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "ZENKORKORZEN");
+
+		LocalFile.ZendeskOrganizationAPI._viewOrganizationSyncFromOsb(organizationName = "Korzen - ${staticProjectName}");
+
+		LocalFile.ZendeskRequestAPI._createRequest(
+			requesterEmail = "zen.koroneiki1@lrcustomer.com.broken",
+			table = '''| Product           | prd_liferay_dxp_7_2                              |
+    | Component         | activation_key_project_administration	           |
+    | System Status	    | production_functioning_with_limited_capabilities |
+    | Subject           | Request Subject                                  |
+    | Description       | Request Description                              |
+    | Organization Name	| Korzen - ${staticProjectName}                    |''');
+
+		LocalFile.ZendeskTicketAPI._viewSpecificTagForMultipleTickets(
+			tagName = "commerce_solution",
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewNoSpecificTagForMultipleTickets(
+			tagName = "service_solution",
+			ticketIdList = ${staticRequestIdList});
+	}
+
+	test Viewticketservicesolutiontag {
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Zenkor - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Contact Email Address                  | zen.koroneiki1@lrcustomer.com.broken       |
+	| Contact First Name                     | ZEN                                        |
+	| Contact Last Name                      | Koroneiki1                                 |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | zen.koroneiki2@lrcustomer.com.broken       |
+	| Owner First Name                       | ZEN                                        |
+	| Owner Last Name                        | Koroneiki2                                 |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Korzen - ${staticProjectName}              |
+	| Project Solution                       | Service Solution                           |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.2                                        |''');
+
+		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "ZENKORKORZEN");
+
+		LocalFile.ZendeskOrganizationAPI._viewOrganizationSyncFromOsb(organizationName = "Korzen - ${staticProjectName}");
+
+		LocalFile.ZendeskRequestAPI._createRequest(
+			requesterEmail = "zen.koroneiki1@lrcustomer.com.broken",
+			table = '''| Product           | prd_liferay_dxp_7_2                              |
+    | Component         | activation_key_project_administration	           |
+    | System Status	    | production_functioning_with_limited_capabilities |
+    | Subject           | Request Subject                                  |
+    | Description       | Request Description                              |
+    | Organization Name	| Korzen - ${staticProjectName}                    |''');
+
+		LocalFile.ZendeskTicketAPI._viewSpecificTagForMultipleTickets(
+			tagName = "service_solution",
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewNoSpecificTagForMultipleTickets(
+			tagName = "commerce_solution",
+			ticketIdList = ${staticRequestIdList});
+	}
+
+	test Viewticketwithnosolutiontag {
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Zenkor - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Contact Email Address                  | zen.koroneiki1@lrcustomer.com.broken       |
+	| Contact First Name                     | ZEN                                        |
+	| Contact Last Name                      | Koroneiki1                                 |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | zen.koroneiki2@lrcustomer.com.broken       |
+	| Owner First Name                       | ZEN                                        |
+	| Owner Last Name                        | Koroneiki2                                 |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Korzen - ${staticProjectName}              |
+	| Project Solution                       |                                            |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.2                                        |''');
+
+		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "ZENKORKORZEN");
+
+		LocalFile.ZendeskOrganizationAPI._viewOrganizationSyncFromOsb(organizationName = "Korzen - ${staticProjectName}");
+
+		LocalFile.ZendeskRequestAPI._createRequest(
+			requesterEmail = "zen.koroneiki1@lrcustomer.com.broken",
+			table = '''| Product           | prd_liferay_dxp_7_2                              |
+    | Component         | activation_key_project_administration	           |
+    | System Status	    | production_functioning_with_limited_capabilities |
+    | Subject           | Request Subject                                  |
+    | Description       | Request Description                              |
+    | Organization Name	| Korzen - ${staticProjectName}                    |''');
+
+		LocalFile.ZendeskTicketAPI._viewNoSpecificTagForMultipleTickets(
+			tagName = "service_solution",
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewNoSpecificTagForMultipleTickets(
+			tagName = "commerce_solution",
+			ticketIdList = ${staticRequestIdList});
+	}
+
+}

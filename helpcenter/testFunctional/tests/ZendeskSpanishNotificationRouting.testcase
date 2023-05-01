@@ -1,0 +1,588 @@
+definition {
+
+	property testray.main.component.name = "Support QA";
+	property type = "zendesk.api";
+
+	setUp {
+		LocalFile.Passwords.getPasswords();
+	}
+
+	tearDown {
+		LocalFile.ZendeskTicketAPI._tearDownTicketByIds(ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskUserAPI._tearDownUsersByExternalIdTable(table = '''| User1  |
+	| Agent1 |''');
+
+		LocalFile.ZendeskOrganizationAPI._tearDownOrganizationsByExternalIdTable(table = '''| 12345678 |''');
+
+		LocalFile.ZendeskHomepage.pause(timeInSeconds = 3);
+	}
+
+	test Notifyassigneeofassignment {
+		LocalFile.ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved            |
+	| Name             | Organization Name 1 |
+	| Tags             | liferay_dxp         |
+	| Shared Tickets   | true                |
+	| Shared Comments  | true                |
+	| SLA              | Gold                |
+	| Tier             | T4                  |
+	| Support Region   | Spain               |
+	| Support Language | Spanish             |
+	| External ID      | 12345678            |''');
+
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
+	| Tags             | osb_customer,osb_kb              |
+	| Password         | ${staticZendeskAdminPassword}    |
+	| Role             | End-user                         |
+	| Access           | Organization                     |
+	| Email            | zendesk.user1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                |
+	| Organization     | Organization Name 1              |
+	| Language         | Spanish                          |
+	| Time Zone        | Madrid                           |
+	| External ID      | User1                            |''');
+
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk Agent1                    |
+	| Password         | ${staticZendeskAdminPassword}     |
+	| Role             | Agent                             |
+	| Email            | zendesk.agent1@liferay.com.broken |
+	| Phone Number     | +1 (555) 555-5555                 |
+	| Language         | Spanish                           |
+	| Time Zone        | Pacific Time (US & Canada)        |
+	| External ID      | Agent1                            |''');
+
+		LocalFile.ZendeskUserAPI._assignUserToGroup(
+			groupName = "CSE - US",
+			userEmailAddress = "zendesk.agent1@liferay.com.broken");
+
+		LocalFile.ZendeskRequestAPI._createRequest(
+			requesterEmail = "zendesk.user1@zendesk.com.broken",
+			table = '''| Product                  | prd_liferay_dxp_7_4                              |
+	| Component                | authentication                                   |
+	| System Status            | production_functioning_with_limited_capabilities |
+	| Subject                  | Request Subject                                  |
+	| Description              | Request Description                              |
+	| Organization External ID | 12345678                                         |''');
+
+		LocalFile.ZendeskTicketAPI._assignTicket(
+			ticketId = ${staticRequestIdList},
+			userEmailAddress = "zendesk.agent1@liferay.com.broken");
+
+		LocalFile.ZendeskTicketAPI._viewTicketAssignmentEmailToAssignee(
+			supportLanguage = "Spanish",
+			table = '''| Recipients | Zendesk Agent1                                                                    |
+	| Subject    | [{{ticket.organization.name}}] ({{ticket.priority}}) Asignación: {{ticket.title}} |
+	| Body       | Te hemos asignado el ticket                                                       |
+	| Body       | {{ticket.id}})                                                                    |
+	| Body       | {{ticket.comments_formatted}}                                                     |''',
+			ticketId = ${staticRequestIdList});
+	}
+
+	test Notifyassigneeofcommentupdate {
+		LocalFile.ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved            |
+	| Name             | Organization Name 1 |
+	| Tags             | liferay_dxp         |
+	| Shared Tickets   | true                |
+	| Shared Comments  | true                |
+	| SLA              | Gold                |
+	| Tier             | T4                  |
+	| Support Region   | Spain               |
+	| Support Language | Spanish             |
+	| External ID      | 12345678            |''');
+
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
+	| Tags             | osb_customer,osb_kb              |
+	| Password         | ${staticZendeskAdminPassword}    |
+	| Role             | End-user                         |
+	| Access           | Organization                     |
+	| Email            | zendesk.user1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                |
+	| Organization     | Organization Name 1              |
+	| Language         | Spanish                          |
+	| Time Zone        | Madrid                           |
+	| External ID      | User1                            |''');
+
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk Agent1                    |
+	| Password         | ${staticZendeskAdminPassword}     |
+	| Role             | Agent                             |
+	| Email            | zendesk.agent1@liferay.com.broken |
+	| Phone Number     | +1 (555) 555-5555                 |
+	| Language         | Spanish                           |
+	| Time Zone        | Pacific Time (US & Canada)        |
+	| External ID      | Agent1                            |''');
+
+		LocalFile.ZendeskUserAPI._assignUserToGroup(
+			groupName = "CSE - US",
+			userEmailAddress = "zendesk.agent1@liferay.com.broken");
+
+		LocalFile.ZendeskRequestAPI._createRequest(
+			requesterEmail = "zendesk.user1@zendesk.com.broken",
+			table = '''| Product                  | prd_liferay_dxp_7_4                              |
+	| Component                | authentication                                   |
+	| System Status            | production_functioning_with_limited_capabilities |
+	| Subject                  | Request Subject                                  |
+	| Description              | Request Description                              |
+	| Organization External ID | 12345678                                         |''');
+
+		LocalFile.ZendeskTicketAPI._assignTicket(
+			ticketId = ${staticRequestIdList},
+			userEmailAddress = "zendesk.agent1@liferay.com.broken");
+
+		LocalFile.ZendeskRequestAPI._createRequestComment(
+			commentAuthorEmail = "zendesk.user1@zendesk.com.broken",
+			commentBody = "Comment Body",
+			ticketId = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewTicketCommentEmailToAssignee(
+			commentBody = "Comment Body",
+			supportLanguage = "Spanish",
+			table = '''| Recipients | Zendesk Agent1                                                            |
+	| Subject    | [{{ticket.organization.name}}] ({{ticket.priority}}) Re: {{ticket.title}} |
+	| Body       | El ticket                                                                 |
+	| Body       | {{ticket.id}}) ha sido actualizado                                        |
+	| Body       | {{ticket.latest_comment_formatted}}                                       |''',
+			ticketId = ${staticRequestIdList});
+	}
+
+	test Notifyassigneeofreopenedticket {
+		LocalFile.ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved            |
+	| Name             | Organization Name 1 |
+	| Tags             | liferay_dxp         |
+	| Shared Tickets   | true                |
+	| Shared Comments  | true                |
+	| SLA              | Gold                |
+	| Tier             | T4                  |
+	| Support Region   | Spain               |
+	| Support Language | Spanish             |
+	| External ID      | 12345678            |''');
+
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
+	| Tags             | osb_customer,osb_kb              |
+	| Password         | ${staticZendeskAdminPassword}    |
+	| Role             | End-user                         |
+	| Access           | Organization                     |
+	| Email            | zendesk.user1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                |
+	| Organization     | Organization Name 1              |
+	| Language         | Spanish                          |
+	| Time Zone        | Madrid                           |
+	| External ID      | User1                            |''');
+
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk Agent1                    |
+	| Password         | ${staticZendeskAdminPassword}     |
+	| Role             | Agent                             |
+	| Email            | zendesk.agent1@liferay.com.broken |
+	| Phone Number     | +1 (555) 555-5555                 |
+	| Language         | Spanish                           |
+	| Time Zone        | Pacific Time (US & Canada)        |
+	| External ID      | Agent1                            |''');
+
+		LocalFile.ZendeskUserAPI._assignUserToGroup(
+			groupName = "CSE - US",
+			userEmailAddress = "zendesk.agent1@liferay.com.broken");
+
+		LocalFile.ZendeskRequestAPI._createRequest(
+			requesterEmail = "zendesk.user1@zendesk.com.broken",
+			table = '''| Product                  | prd_liferay_dxp_7_4                              |
+	| Component                | authentication                                   |
+	| System Status            | production_functioning_with_limited_capabilities |
+	| Subject                  | Request Subject                                  |
+	| Description              | Request Description                              |
+	| Organization External ID | 12345678                                         |''');
+
+		LocalFile.ZendeskTicketAPI._assignTicket(
+			ticketId = ${staticRequestIdList},
+			userEmailAddress = "zendesk.agent1@liferay.com.broken");
+
+		LocalFile.ZendeskTicketAPI._changeTicketStatusAndSubStatusAndLongTermResolution(
+			ticketId = ${staticRequestIdList},
+			ticketLongTermResolution = "bug_fix",
+			ticketStatus = "solved",
+			ticketSubStatus = "completed");
+
+		LocalFile.ZendeskTicketAPI._changeTicketStatus(
+			ticketId = ${staticRequestIdList},
+			ticketStatus = "open");
+
+		LocalFile.ZendeskTicketAPI._viewReopenedTicketEmailToAssignee(
+			supportLanguage = "Spanish",
+			table = '''| Recipients | Zendesk Agent1                                      |
+	| Subject    | [{{ticket.organization.name}}] Re: {{ticket.title}} |
+	| Body       | El ticket                                           |
+	| Body       | {{ticket.id}}) ha sido reabierto                    |
+	| Body       | {{ticket.comments_formatted}}                       |''',
+			ticketId = ${staticRequestIdList});
+	}
+
+	test Notifyrequesterofcommentupdate {
+		LocalFile.ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved            |
+	| Name             | Organization Name 1 |
+	| Tags             | liferay_dxp         |
+	| Shared Tickets   | true                |
+	| Shared Comments  | true                |
+	| SLA              | Gold                |
+	| Tier             | T4                  |
+	| Support Region   | Spain               |
+	| Support Language | Spanish             |
+	| External ID      | 12345678            |''');
+
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
+	| Tags             | osb_customer,osb_kb              |
+	| Password         | ${staticZendeskAdminPassword}    |
+	| Role             | End-user                         |
+	| Access           | Organization                     |
+	| Email            | zendesk.user1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                |
+	| Organization     | Organization Name 1              |
+	| Language         | Spanish                          |
+	| Time Zone        | Madrid                           |
+	| External ID      | User1                            |''');
+
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk Agent1                    |
+	| Password         | ${staticZendeskAdminPassword}     |
+	| Role             | Agent                             |
+	| Email            | zendesk.agent1@liferay.com.broken |
+	| Phone Number     | +1 (555) 555-5555                 |
+	| Language         | Spanish                           |
+	| Time Zone        | Pacific Time (US & Canada)        |
+	| External ID      | Agent1                            |''');
+
+		LocalFile.ZendeskUserAPI._assignUserToGroup(
+			groupName = "CSE - US",
+			userEmailAddress = "zendesk.agent1@liferay.com.broken");
+
+		LocalFile.ZendeskRequestAPI._createRequest(
+			requesterEmail = "zendesk.user1@zendesk.com.broken",
+			table = '''| Product                  | prd_liferay_dxp_7_4                              |
+	| Component                | authentication                                   |
+	| System Status            | production_functioning_with_limited_capabilities |
+	| Subject                  | Request Subject                                  |
+	| Description              | Request Description                              |
+	| Organization External ID | 12345678                                         |''');
+
+		LocalFile.ZendeskTicketAPI._assignTicket(
+			ticketId = ${staticRequestIdList},
+			userEmailAddress = "zendesk.agent1@liferay.com.broken");
+
+		LocalFile.ZendeskRequestAPI._createRequestComment(
+			commentAuthorEmail = "zendesk.agent1@liferay.com.broken",
+			commentBody = "Comment Body",
+			ticketId = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewTicketCommentEmailToRequester(
+			commentBody = "Comment Body",
+			supportLanguage = "Spanish",
+			table = '''| Recipients | Zendesk User1                                                                         |
+	| Subject    | Re: [Soporte de Liferay] {{ticket.organization.name}} {{ticket.id}}: {{ticket.title}} |
+	| Body       | Hola, {{ticket.requester.first_name}}                                                 |
+	| Body       | Tu ticket                                                                             |
+	| Body       | {{ticket.id}}) ha sido actualizado                                                    |
+	| Body       | {{ticket.latest_public_comment_formatted}}                                            |''',
+			ticketId = ${staticRequestIdList});
+	}
+
+	test Notifyrequesterofreceivedrequest {
+		LocalFile.ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved            |
+	| Name             | Organization Name 1 |
+	| Shared Tickets   | true                |
+	| Shared Comments  | true                |
+	| SLA              | Gold                |
+	| Tier             | T4                  |
+	| Support Region   | Spain               |
+	| Support Language | Spanish             |
+	| External ID      | 12345678            |''');
+
+		LocalFile.ZendeskOrganizationAPI._assignTagsToOrganizationViaOrganizationExternalID(
+			organizationExternalId = 12345678,
+			table = '''| developer_tools         |
+	| enterprise_search       |
+	| liferay_analytics_cloud |
+	| liferay_commerce        |
+	| liferay_dxp             |
+	| lxc_sm                  |
+	| management_tools_lcs    |
+	| mobile_device_detection |
+	| mobile_experience       |
+	| productivity_tools_sync |
+	| social_office           |''');
+
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
+	| Tags             | osb_customer,osb_kb              |
+	| Password         | ${staticZendeskAdminPassword}    |
+	| Role             | End-user                         |
+	| Access           | Organization                     |
+	| Email            | zendesk.user1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                |
+	| Organization     | Organization Name 1              |
+	| Language         | Spanish                          |
+	| Time Zone        | Madrid                           |
+	| External ID      | User1                            |''');
+
+		LocalFile.ZendeskRequestAPI._createMultipleRequestsWithProductAndComponentValues(
+			requesterEmail = "zendesk.user1@zendesk.com.broken",
+			table = '''| prd_developer_tools         |                                       |
+	| prd_enterprise_search       | monitoring                            |
+	| prd_liferay_analytics_cloud |                                       |
+	| prd_liferay_commerce_1_1    | activation_key_project_administration |
+	| prd_liferay_commerce_2_0    | commerce_insights                     |
+	| prd_liferay_commerce_2_1    | configuration_and_settings            |
+	| prd_liferay_commerce_3_0    | connectors                            |
+	| prd_liferay_commerce_4_0    | digital_merchandise_management        |
+	| prd_liferay_dxp_7_4         | authentication                        |
+	| prd_liferay_dxp_7_3         | caching_clustering                    |
+	| prd_liferay_dxp_7_2         | calendar                              |
+	| prd_liferay_dxp_7_1         | collaboration                         |
+	| prd_liferay_dxp_7_0         | content_management                    |
+	| prd_lxc_sm                  | backup_recovery                       |
+	| prd_management_tools_lcs    |                                       |
+	| prd_mobile_device_detection |                                       |
+	| prd_mobile_experience       |                                       |
+	| prd_productivity_tools_sync |                                       |
+	| prd_social_office           |                                       |''');
+
+		LocalFile.ZendeskHomepage.pause(timeInSeconds = 60);
+
+		LocalFile.ZendeskTicketAPI._viewMultipleTicketReceptionEmails(
+			supportLanguage = "Spanish",
+			table = '''| Recipients | Zendesk User1                                                                                                                           |
+	| Subject    | [Soporte de Liferay] {{ticket.organization.name}} {{ticket.id}}: {{ticket.title}}                                                       |
+	| Body       | Hola, {{ticket.requester.first_name}}:                                                                                                  |
+	| Body       | Gracias por contactar con el Equipo de Soporte de Liferay en relación a tu proyecto {{ticket.organization.name}}                        |
+	| Body       | En este momento, uno de nuestros Ingenieros de Soporte está revisando tu petición                                                       |
+	| Body       | {{ticket.id}})                                                                                                                          |
+	| Body       | y te contestará pronto                                                                                                                  |
+	| Body       | Por favor, asegúrate que has incluido toda la información o adjuntos y si procede los pasos para reproducir el comportamiento reportado |
+	| Body       | Saludos                                                                                                                                 |
+	| Body       | El Equipo de Soporte de Liferay                                                                                                         |''',
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewNoMultipleLegacyVersionTicketReceptionEmails(
+			portalLegacyVersion = "6.2",
+			supportLanguage = "Spanish",
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewNoMultipleLegacyVersionTicketReceptionEmails(
+			portalLegacyVersion = "6.1",
+			supportLanguage = "Spanish",
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewNoMultipleLegacyVersionTicketReceptionEmails(
+			portalLegacyVersion = "6.0",
+			supportLanguage = "Spanish",
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewNoMultipleLegacyVersionTicketReceptionEmails(
+			portalLegacyVersion = "5.2",
+			supportLanguage = "Spanish",
+			ticketIdList = ${staticRequestIdList});
+	}
+
+	test Notifyrequesterofreceivedrequestand52EOSLPolicy {
+		LocalFile.ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved            |
+	| Name             | Organization Name 1 |
+	| Tags             | liferay_portal      |
+	| Shared Tickets   | true                |
+	| Shared Comments  | true                |
+	| SLA              | Gold                |
+	| Tier             | T4                  |
+	| Support Region   | Spain               |
+	| Support Language | Spanish             |
+	| External ID      | 12345678            |''');
+
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
+	| Tags             | osb_customer,osb_kb              |
+	| Password         | ${staticZendeskAdminPassword}    |
+	| Role             | End-user                         |
+	| Access           | Organization                     |
+	| Email            | zendesk.user1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                |
+	| Organization     | Organization Name 1              |
+	| Language         | Spanish                          |
+	| Time Zone        | Madrid                           |
+	| External ID      | User1                            |''');
+
+		LocalFile.ZendeskRequestAPI._createMultipleRequestsWithProductAndComponentValues(
+			requesterEmail = "zendesk.user1@zendesk.com.broken",
+			table = '''| prd_liferay_portal_5_2 | activation_key_project_administration |
+	| prd_liferay_portal_5_2 | authentication                        |''');
+
+		LocalFile.ZendeskHomepage.pause(timeInSeconds = 60);
+
+		LocalFile.ZendeskTicketAPI._viewMultipleLegacyVersionTicketReceptionEmails(
+			portalLegacyVersion = "5.2",
+			supportLanguage = "Spanish",
+			table = '''| Recipients | Zendesk User1                                                                                                                           |
+	| Subject    | [Soporte de Liferay] {{ticket.organization.name}} {{ticket.id}}: {{ticket.title}}                                                       |
+	| Body       | Hola, {{ticket.requester.first_name}}:                                                                                                  |
+	| Body       | Gracias por contactar al Equipo de Soporte de Liferay en relación a tu proyecto {{ticket.organization.name}}                            |
+	| Body       | En este momento, uno de nuestros Ingenieros de Soporte está revisando tu petición                                                       |
+	| Body       | {{ticket.id}})                                                                                                                          |
+	| Body       | y te contestará pronto                                                                                                                  |
+	| Body       | Ten en cuenta que la fecha de Fin de Versión para Liferay Portal 5.2 EE ha finalizado y el servicio de soporte es limitado.             |
+	| Body       | Por favor, revisa la política de fin de ciclo de vida y contacta con tu representante de ventas para conocer otras opciones disponibles |
+	| Body       | Saludos                                                                                                                                 |
+	| Body       | El Equipo de Soporte de Liferay                                                                                                         |''',
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewNoMultipleTicketReceptionEmails(
+			supportLanguage = "Spanish",
+			ticketIdList = ${staticRequestIdList});
+	}
+
+	test Notifyrequesterofreceivedrequestand60EOSLPolicy {
+		LocalFile.ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved            |
+	| Name             | Organization Name 1 |
+	| Tags             | liferay_portal      |
+	| Shared Tickets   | true                |
+	| Shared Comments  | true                |
+	| SLA              | Gold                |
+	| Tier             | T4                  |
+	| Support Region   | Spain               |
+	| Support Language | Spanish             |
+	| External ID      | 12345678            |''');
+
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
+	| Tags             | osb_customer,osb_kb              |
+	| Password         | ${staticZendeskAdminPassword}    |
+	| Role             | End-user                         |
+	| Access           | Organization                     |
+	| Email            | zendesk.user1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                |
+	| Organization     | Organization Name 1              |
+	| Language         | Spanish                          |
+	| Time Zone        | Madrid                           |
+	| External ID      | User1                            |''');
+
+		LocalFile.ZendeskRequestAPI._createMultipleRequestsWithProductAndComponentValues(
+			requesterEmail = "zendesk.user1@zendesk.com.broken",
+			table = '''| prd_liferay_portal_6_0 | activation_key_project_administration |
+	| prd_liferay_portal_6_0 | authentication                        |''');
+
+		LocalFile.ZendeskHomepage.pause(timeInSeconds = 60);
+
+		LocalFile.ZendeskTicketAPI._viewMultipleLegacyVersionTicketReceptionEmails(
+			portalLegacyVersion = "6.0",
+			supportLanguage = "Spanish",
+			table = '''| Recipients | Zendesk User1                                                                                                                           |
+	| Subject    | [Soporte de Liferay] {{ticket.organization.name}} {{ticket.id}}: {{ticket.title}}                                                       |
+	| Body       | Hola, {{ticket.requester.first_name}}:                                                                                                  |
+	| Body       | Gracias por contactar al Equipo de Soporte de Liferay en relación a tu proyecto {{ticket.organization.name}}                            |
+	| Body       | En este momento, uno de nuestros Ingenieros de Soporte está revisando tu petición                                                       |
+	| Body       | {{ticket.id}})                                                                                                                          |
+	| Body       | y te contestará pronto                                                                                                                  |
+	| Body       | Ten en cuenta que la fecha de Fin de Versión para Liferay Portal 6.0 EE ha finalizado y el servicio de soporte es limitado.             |
+	| Body       | Por favor, revisa la política de fin de ciclo de vida y contacta con tu representante de ventas para conocer otras opciones disponibles |
+	| Body       | Saludos                                                                                                                                 |
+	| Body       | El Equipo de Soporte de Liferay                                                                                                         |''',
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewNoMultipleTicketReceptionEmails(
+			supportLanguage = "Spanish",
+			ticketIdList = ${staticRequestIdList});
+	}
+
+	test Notifyrequesterofreceivedrequestand61EOSLPolicy {
+		LocalFile.ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved            |
+	| Name             | Organization Name 1 |
+	| Tags             | liferay_portal      |
+	| Shared Tickets   | true                |
+	| Shared Comments  | true                |
+	| SLA              | Gold                |
+	| Tier             | T4                  |
+	| Support Region   | Spain               |
+	| Support Language | Spanish             |
+	| External ID      | 12345678            |''');
+
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
+	| Tags             | osb_customer,osb_kb              |
+	| Password         | ${staticZendeskAdminPassword}    |
+	| Role             | End-user                         |
+	| Access           | Organization                     |
+	| Email            | zendesk.user1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                |
+	| Organization     | Organization Name 1              |
+	| Language         | Spanish                          |
+	| Time Zone        | Madrid                           |
+	| External ID      | User1                            |''');
+
+		LocalFile.ZendeskRequestAPI._createMultipleRequestsWithProductAndComponentValues(
+			requesterEmail = "zendesk.user1@zendesk.com.broken",
+			table = '''| prd_liferay_portal_6_1 | activation_key_project_administration |
+	| prd_liferay_portal_6_1 | authentication                        |''');
+
+		LocalFile.ZendeskHomepage.pause(timeInSeconds = 60);
+
+		LocalFile.ZendeskTicketAPI._viewMultipleLegacyVersionTicketReceptionEmails(
+			portalLegacyVersion = "6.1",
+			supportLanguage = "Spanish",
+			table = '''| Recipients | Zendesk User1                                                                                                                           |
+	| Subject    | [Soporte de Liferay] {{ticket.organization.name}} {{ticket.id}}: {{ticket.title}}                                                       |
+	| Body       | Hola, {{ticket.requester.first_name}}:                                                                                                  |
+	| Body       | Gracias por contactar al Equipo de Soporte de Liferay en relación a tu proyecto {{ticket.organization.name}}                            |
+	| Body       | En este momento, uno de nuestros Ingenieros de Soporte está revisando tu petición                                                       |
+	| Body       | {{ticket.id}})                                                                                                                          |
+	| Body       | y te contestará pronto                                                                                                                  |
+	| Body       | Ten en cuenta que el período de Soporte Premium para Liferay Portal 6.1 EE ha finalizado y el servicio de soporte es limitado           |
+	| Body       | Por favor, revisa la política de fin de ciclo de vida y contacta con tu representante de ventas para conocer otras opciones disponibles |
+	| Body       | Saludos                                                                                                                                 |
+	| Body       | El Equipo de Soporte de Liferay                                                                                                         |''',
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewNoMultipleTicketReceptionEmails(
+			supportLanguage = "Spanish",
+			ticketIdList = ${staticRequestIdList});
+	}
+
+	test Notifyrequesterofreceivedrequestand62EOSLPolicy {
+		LocalFile.ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved            |
+	| Name             | Organization Name 1 |
+	| Tags             | liferay_portal      |
+	| Shared Tickets   | true                |
+	| Shared Comments  | true                |
+	| SLA              | Gold                |
+	| Tier             | T4                  |
+	| Support Region   | Spain               |
+	| Support Language | Spanish             |
+	| External ID      | 12345678            |''');
+
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
+	| Tags             | osb_customer,osb_kb              |
+	| Password         | ${staticZendeskAdminPassword}    |
+	| Role             | End-user                         |
+	| Access           | Organization                     |
+	| Email            | zendesk.user1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                |
+	| Organization     | Organization Name 1              |
+	| Language         | Spanish                          |
+	| Time Zone        | Madrid                           |
+	| External ID      | User1                            |''');
+
+		LocalFile.ZendeskRequestAPI._createMultipleRequestsWithProductAndComponentValues(
+			requesterEmail = "zendesk.user1@zendesk.com.broken",
+			table = '''| prd_liferay_portal_6_2 | activation_key_project_administration |
+	| prd_liferay_portal_6_2 | authentication                        |''');
+
+		LocalFile.ZendeskHomepage.pause(timeInSeconds = 60);
+
+		LocalFile.ZendeskTicketAPI._viewMultipleLegacyVersionTicketReceptionEmails(
+			portalLegacyVersion = "6.2",
+			supportLanguage = "Spanish",
+			table = '''| Recipients | Zendesk User1                                                                                                                           |
+	| Subject    | [Soporte de Liferay] {{ticket.organization.name}} {{ticket.id}}: {{ticket.title}}                                                                                    |
+	| Body       | Hola, {{ticket.requester.first_name}}:                                                                                                  |
+	| Body       | Gracias por contactar al Equipo de Soporte de Liferay en relación a tu proyecto {{ticket.organization.name}}                            |
+	| Body       | En este momento, uno de nuestros Ingenieros de Soporte está revisando tu petición                                                       |
+	| Body       | {{ticket.id}})                                                                                                                          |
+	| Body       | y te contestará pronto                                                                                                                  |
+	| Body       | Ten en cuenta que el período de Soporte Premium para Liferay Portal 6.2 EE ha finalizado y el servicio de soporte es limitado           |
+	| Body       | Por favor, revisa la política de fin de ciclo de vida y contacta con tu representante de ventas para conocer otras opciones disponibles |
+	| Body       | Saludos                                                                                                                                 |
+	| Body       | El Equipo de Soporte de Liferay                                                                                                         |''',
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewNoMultipleTicketReceptionEmails(
+			supportLanguage = "Spanish",
+			ticketIdList = ${staticRequestIdList});
+	}
+
+}

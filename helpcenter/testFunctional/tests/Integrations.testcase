@@ -1,0 +1,429 @@
+definition {
+
+	property testray.main.component.name = "Support QA";
+	property type = "integration";
+
+	setUp {
+		LocalFile.Data.generateSupportStaticVariables();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.Passwords.getPasswords();
+
+		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | ${staticScreamName}       |
+	| Email Address | ${staticEmail}            |
+	| First Name    | ${staticContactFirstName} |
+	| Last Name     | ${staticContactLastName}  |''');
+	}
+
+	tearDown {
+		LocalFile.ZendeskUserAPI._getDefaultUserId(organizationName = ${staticProjectName});
+
+		LocalFile.ZendeskUserAPI._renameFirstDefaultUserIdVariable();
+
+		LocalFile.OSBAdminProject.tearDownProjects(table = '''| ${staticProjectCode} |''');
+
+		LocalFile.KoroneikiAccountAPI._tearDownAccounts(table = '''| ${staticAccountCode} |
+	| ${staticProjectCode} |''');
+
+		LocalFile.JSONUser.tearDownUsers(table = '''| ${staticEmail} |''');
+
+		LocalFile.JSONUser.tearDownUsersViaSupport(table = '''| ${staticEmail} |''');
+
+		LocalFile.JSONUser.tearDownUsersViaKoroneiki(table = '''| ${staticEmail} |''');
+
+		LocalFile.KoroneikiContactAPI._tearDownContacts(table = '''| ${staticEmail} |''');
+
+		LocalFile.JSONOkta.tearDownUsers(table = '''| ${staticEmail} |''');
+
+		LocalFile.ZendeskTicketAPI._tearDownTicketsByKeywords(table = '''| New Subscription(s) for ${staticAccountName} |
+	| New Subscription(s) for ${staticProjectName} |''');
+
+		LocalFile.ZendeskUserAPI._getMultipleUserIdsByEmailAddress(table = '''| ${staticEmail} |''');
+
+		LocalFile.ZendeskUserAPI._tearDownUsersByIdList(userIds = ${staticUserIdList});
+
+		LocalFile.ZendeskOrganizationAPI._getMultipleOrganizationExternalIdsByOrganizationNameIfStillPresent(table = '''| ${staticAccountCode} |
+	| ${staticProjectCode} |''');
+
+		LocalFile.ZendeskOrganizationAPI._tearDownOrganizationsByExternalIdList(organizationExternalIds = ${staticOrganizationExternalIdList});
+
+		LocalFile.ZendeskUserAPI._tearDownUserById(userId = ${staticDefaultUserId1});
+	}
+
+	@help.center.smoke = "true"
+	test CustomertoZendesk {
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code   | ${staticProjectCode} | |
+	| Name   | ${staticProjectName} | |
+	| Region | United States        | |
+	| Status | Active               | |
+	| Tier   | T1                   | |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = ${staticProjectName},
+			contactEmailAddress = ${staticEmail},
+			table = '''| Support User |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = ${staticProjectName},
+			productName = "DXP Production",
+			table = '''| End Date                | ${staticEndDate}         |   |
+	| Original End Date       | ${staticOriginalEndDate} |   |
+	| Perpetual               | false                    |   |
+	| Product Field and Value | sizing                   | 1 |
+	| Product Field and Value | licenses                 | 1 |
+	| Product Field and Value | version                  | 7 |
+	| Quantity                | 1                        |   |
+	| Start Date              | ${staticStartDate}       |   |
+	| Status                  | Approved                 |   |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._generateProductPurchaseId(
+			accountName = ${staticProjectName},
+			productName = "DXP Production");
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = ${staticProjectName},
+			productName = "Platinum Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+
+		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = ${staticProjectCode});
+
+		LocalFile.ZendeskOrganizationAPI._viewOrganizationSyncFromOsb(organizationName = ${staticProjectName});
+
+		LocalFile.ZendeskUserAPI._viewUserSyncFromOsb(userEmailAddress = ${staticEmail});
+	}
+
+	@help.center.smoke = "true"
+	test DossieraandOktatoKoroneiki {
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | ${staticAccountName}                       |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Contact Email Address                  | ${staticEmail}                             |
+	| Contact First Name                     | ${staticContactFirstName}                  |
+	| Contact Last Name                      | ${staticContactLastName}                   |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | ${staticEmail}                             |
+	| Owner First Name                       | ${staticContactFirstName}                  |
+	| Owner Last Name                        | ${staticContactLastName}                   |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | ${staticProjectName}                       |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.4                                        |''');
+
+		LocalFile.KoroneikiAccountAPI._viewAccount(
+			accountName = ${staticProjectName},
+			table = '''| Account Field and Value    | liferayVersion       | DXP 7.4 | |
+	| Code                       | ${staticProjectCode} |         | |
+	| Parent Account Name        | ${staticAccountName} |         | |
+	| Contact Email Address      | ${staticEmail}       |         | |
+	| Name                       | ${staticProjectName} |         | |
+	| Region                     | United States        |         | |
+	| Language                   | English              |         | |
+	| Status                     | Active               |         | |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = ${staticProjectName},
+			contactEmailAddress = ${staticEmail},
+			table = '''| Support User |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer");
+
+		LocalFile.KoroneikiContactAPI._viewContactUuidAndUserUuidComparison(contactEmailAddress = ${staticEmail});
+
+		LocalFile.JSONOkta.viewOktaUserGroupMembership(
+			groupName = "Customers",
+			userEmailAddress = ${staticEmail});
+
+		LocalFile.KoroneikiContactAPI._viewContactViaEmailAddress(
+			contactEmailAddress = ${staticEmail},
+			table = '''| Email Address | ${staticEmail}            |
+	| First Name    | ${staticContactFirstName} |
+	| Last Name     | ${staticContactLastName}  |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchase(
+			accountName = ${staticProjectName},
+			productName = "DXP Production",
+			table = '''| Quantity | 1        | |
+	| Status   | Approved | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchase(
+			accountName = ${staticProjectName},
+			productName = "Platinum Subscription",
+			table = '''| Quantity | 1        | |
+	| Status   | Approved | |''');
+	}
+
+	@help.center.smoke = "true"
+	test DossieratoZendesk {
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | ${staticAccountName}                       |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Contact Email Address                  | ${staticEmail}                             |
+	| Contact First Name                     | ${staticContactFirstName}                  |
+	| Contact Last Name                      | ${staticContactLastName}                   |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | ${staticEmail}                             |
+	| Owner First Name                       | ${staticContactFirstName}                  |
+	| Owner Last Name                        | ${staticContactLastName}                   |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | ${staticProjectName}                       |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.4                                        |''');
+
+		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+
+		LocalFile.ZendeskTicketAPI._viewTicketSyncByKeywords(keywords = "New Subscription(s) for ${staticProjectName}");
+
+		LocalFile.ZendeskTicketAPI._viewTicketSubject(
+			keywords = "New Subscription(s) for ${staticProjectName}",
+			subject = "New Business: New Subscription(s) for ${staticProjectName}");
+
+		LocalFile.ZendeskTicketAPI._viewTicketDescription(
+			descriptionText = "Account Name: ${staticProjectName}",
+			keywords = "New Subscription(s) for ${staticProjectName}");
+
+		LocalFile.ZendeskTicketAPI._viewTicketDescription(
+			descriptionText = "Account Code: ${staticProjectCode}",
+			keywords = "New Subscription(s) for ${staticProjectName}");
+
+		LocalFile.ZendeskTicketAPI._viewTicketDescription(
+			descriptionText = "Opportunity Type: New Business",
+			keywords = "New Subscription(s) for ${staticProjectName}");
+
+		LocalFile.ZendeskTicketAPI._viewTicketDescription(
+			descriptionText = "New DXP Production (1)",
+			keywords = "New Subscription(s) for ${staticProjectName}");
+
+		LocalFile.ZendeskTicketAPI._viewTicketDescription(
+			descriptionText = "New Platinum Subscription",
+			keywords = "New Subscription(s) for ${staticProjectName}");
+
+		LocalFile.ZendeskTicketAPI._viewTicketDescription(
+			descriptionText = "Start Date - End Date: ${staticStartYear}",
+			keywords = "New Subscription(s) for ${staticProjectName}");
+
+		LocalFile.ZendeskTicketAPI._viewTicketDescription(
+			descriptionText = "US Provisioning - Working with 2019 H2 Pricing Promotions: Grow Link",
+			keywords = "New Subscription(s) for ${staticProjectName}");
+
+		LocalFile.ZendeskTicketAPI._viewTicketRequester(
+			keywords = "New Subscription(s) for ${staticProjectName}",
+			requesterEmailAddress = "provisioningrequest@liferay.com");
+
+		LocalFile.ZendeskTicketAPI._viewTicketOrganizationByKeywords(
+			keywords = "New Subscription(s) for ${staticProjectName}",
+			organizationName = "Provisioning");
+
+		LocalFile.ZendeskTicketAPI._viewTicketProduct(
+			keywords = "New Subscription(s) for ${staticProjectName}",
+			product = "prd_provisioning_request");
+
+		LocalFile.ZendeskTicketAPI._viewTicketProvisioningComponent(
+			keywords = "New Subscription(s) for ${staticProjectName}",
+			provisioningComponent = "opportunity_invoiced");
+
+		LocalFile.ZendeskTicketAPI._viewTicketSupportRegion(
+			keywords = "New Subscription(s) for ${staticProjectName}",
+			supportRegion = "provisioning_united_states");
+
+		LocalFile.ZendeskTicketAPI._viewTicketPrimaryAddressCountry(
+			keywords = "New Subscription(s) for ${staticProjectName}",
+			primaryAddressCountry = "United States");
+	}
+
+	@help.center.smoke = "true"
+	test KoroneikitoCustomer {
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code   | ${staticProjectCode} | |
+	| Name   | ${staticProjectName} | |
+	| Region | United States        | |
+	| Status | Active               | |
+	| Tier   | T1                   | |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = ${staticProjectName},
+			contactEmailAddress = ${staticEmail},
+			table = '''| Support User |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = ${staticProjectName},
+			productName = "DXP Production",
+			table = '''| End Date                | ${staticEndDate}         |   |
+	| Original End Date       | ${staticOriginalEndDate} |   |
+	| Perpetual               | false                    |   |
+	| Product Field and Value | sizing                   | 1 |
+	| Product Field and Value | licenses                 | 1 |
+	| Product Field and Value | version                  | 7 |
+	| Quantity                | 1                        |   |
+	| Start Date              | ${staticStartDate}       |   |
+	| Status                  | Approved                 |   |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._generateProductPurchaseId(
+			accountName = ${staticProjectName},
+			productName = "DXP Production");
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = ${staticProjectName},
+			productName = "Platinum Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+
+		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = ${staticProjectCode});
+
+		LocalFile.OSBAdmin.loginToSupport(
+			userEmailAddress = ${staticSupportAdminEmailAdress},
+			userPassword = ${staticSupportAdminPassword});
+
+		LocalFile.OSBAdmin.gotoOSBAdmin();
+
+		LocalFile.OSBAdminProject.view(
+			projectName = ${staticProjectName},
+			table = '''| Project Name          | ${staticProjectName} |
+	| Code                  | ${staticProjectCode} |
+	| Tier                  | T1                   |''');
+
+		LocalFile.ProjectDetails.gotoProjectDetailsPage();
+
+		LocalFile.ProjectDetails.searchKeyword(keyword = ${staticProjectName});
+
+		LocalFile.ProjectDetails.gotoProject(projectName = ${staticProjectName});
+
+		LocalFile.ProjectDetails.viewDetails(table = '''| Project Code    | ${staticProjectCode}  |
+	| State           | ACTIVE                |
+	| Level           | Platinum Subscription |
+	| Support Region  | United States         |
+	| Tier            | T1                    |''');
+	}
+
+	@help.center.smoke = "true"
+	test KoroneikitoProvisioning {
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code   | ${staticProjectCode} | |
+	| Name   | ${staticProjectName} | |
+	| Region | United States        | |
+	| Status | Active               | |
+	| Tier   | T1                   | |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = ${staticProjectName},
+			contactEmailAddress = ${staticEmail},
+			table = '''| Support User |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = ${staticProjectName},
+			productName = "DXP Production",
+			table = '''| End Date                | ${staticEndDate}         |   |
+	| Original End Date       | ${staticOriginalEndDate} |   |
+	| Perpetual               | false                    |   |
+	| Product Field and Value | sizing                   | 1 |
+	| Product Field and Value | licenses                 | 1 |
+	| Product Field and Value | version                  | 7 |
+	| Quantity                | 1                        |   |
+	| Start Date              | ${staticStartDate}       |   |
+	| Status                  | Approved                 |   |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._generateProductPurchaseId(
+			accountName = ${staticProjectName},
+			productName = "DXP Production");
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = ${staticProjectName},
+			productName = "Platinum Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = ${staticProjectName});
+
+		LocalFile.Provisioning.clickAccount(accountName = ${staticProjectName});
+
+		LocalFile.ProvisioningAccount._viewAccountDetails(table = '''| Name           | ${staticProjectName} |
+	| Code           | ${staticProjectCode} |
+	| State          | ACTIVE               |
+	| Support Region | United States        |
+	| SLA            | Platinum             |
+	| Support Seats  | 0 / 3 Filled         |
+	| Tier           | T1                   |''');
+	}
+
+}

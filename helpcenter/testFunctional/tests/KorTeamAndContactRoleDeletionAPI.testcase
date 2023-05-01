@@ -1,0 +1,67 @@
+definition {
+
+	property testray.main.component.name = "Support QA";
+	property type = "koroneiki";
+
+	tearDown {
+		LocalFile.KoroneikiAccountAPI._tearDownAccounts(table = '''| Koroneiki Deletion |''');
+
+		LocalFile.KoroneikiContactAPI._tearDownContacts(table = '''| koroneiki.deletion1@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiContactRoleAPI._tearDownContactRoles(table = '''| Default Team Deletion Role  |''');
+
+		LocalFile.KoroneikiTeamAPI._tearDownTeams(table = '''| Deletion Team |''');
+	}
+
+	test Deleteteamandteamcontactandteamcontactroleafterteamcontactandcontactroleassignment {
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.deletion1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                 |
+	| Language      | English                                   |
+	| Last Name     | Deletion1                                 |
+	| Middle Name   | User                                      |''');
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRole(table = '''| Description | This is the default deletion role for teams |
+	| Name        | Default Team Deletion Role                  |
+	| Type        | Team                                        |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code         | KORDEL                             | |
+	| Description  | Test deletion account on koroneiki | |
+	| Fax Number   | 555-555-1234                       | |
+	| Name         | Koroneiki Deletion                 | |
+	| Phone Number | 555-555-5678                       | |
+	| Region       | United States                      | |
+	| Status       | Active                             | |
+	| Tier         | T4                                 | |
+	| Website      | www.koroneikideletion.com          | |''');
+
+		LocalFile.KoroneikiAccountAPI._assignCustomerContacts(
+			accountName = "Koroneiki Deletion",
+			table = '''| koroneiki.deletion1@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountTeam(
+			accountName = "Koroneiki Deletion",
+			teamName = "Deletion Team");
+
+		LocalFile.KoroneikiTeamAPI._assignContacts(
+			table = '''| koroneiki.deletion1@lrcustomer.com.broken |''',
+			teamName = "Deletion Team");
+
+		LocalFile.KoroneikiTeamAPI._assignContactRolesToContact(
+			contactEmailAddress = "koroneiki.deletion1@lrcustomer.com.broken",
+			table = '''| Default Team Deletion Role |''',
+			teamName = "Deletion Team");
+
+		LocalFile.KoroneikiTeamAPI._deleteTeam(teamName = "Deletion Team");
+
+		LocalFile.KoroneikiContactRoleAPI._deleteContactRole(contactRoleName = "Default Team Deletion Role");
+
+		LocalFile.KoroneikiContactAPI._deleteContactViaEmailAddress(contactEmailAddress = "koroneiki.deletion1@lrcustomer.com.broken");
+
+		LocalFile.KoroneikiContactAPI._viewNoContact(contactEmailAddress = "koroneiki.deletion1@lrcustomer.com.broken");
+
+		LocalFile.KoroneikiTeamAPI._viewNoTeam(teamName = "Deletion Team");
+
+		LocalFile.KoroneikiContactRoleAPI._viewNoContactRole(contactRoleName = "Default Team Deletion Role");
+	}
+
+}

@@ -1,0 +1,1463 @@
+definition {
+
+	property testray.main.component.name = "Support QA";
+	property type = "customer.integration";
+
+	setUp {
+		LocalFile.Passwords.getPasswords();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticPastStartAndEndDate();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFutureStartAndEndDate();
+
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningCompanyName();
+
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | cstm.customer1                       |
+	| Email Address | cstm.customer1@lrcustomer.com.broken |
+	| First Name    | CSTM                                 |
+	| Last Name     | Customer1                            |''');
+
+		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | cstm.customer2                       |
+	| Email Address | cstm.customer2@lrcustomer.com.broken |
+	| First Name    | CSTM                                 |
+	| Last Name     | Customer2                            |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code   | KORCSTKORCST                  | |
+	| Name   | Korcst - ${staticProjectName} | |
+	| Region | United States                 | |
+	| Status | Active                        | |
+	| Tier   | T1                            | |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Korcst - ${staticProjectName}",
+			contactEmailAddress = "cstm.customer1@lrcustomer.com.broken",
+			table = '''| Support Requester |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Korcst - ${staticProjectName}",
+			contactEmailAddress = "cstm.customer2@lrcustomer.com.broken",
+			table = '''| Support User |''');
+	}
+
+	tearDown {
+		LocalFile.KoroneikiTeamAPI._tearDownTeams(table = '''| CSTM Customer |''');
+
+		LocalFile.OSBAdminProject.tearDownProjects(table = '''| KORCSTKORCST |
+	| KORCT2KORCT2 |''');
+
+		LocalFile.KoroneikiAccountAPI._tearDownAccounts(table = '''| Korcst - ${staticProjectName} |''');
+
+		LocalFile.KoroneikiAccountAPI._tearDownAccountsViaAccountFieldNameAndValue(
+			fieldName = "Code",
+			table = '''| KORCSTKORCST |
+	| KORCT2KORCT2 |''');
+
+		LocalFile.JSONUser.tearDownUsers(table = '''| cstm.customer1@lrcustomer.com.broken |
+	| cstm.customer2@lrcustomer.com.broken |''');
+
+		LocalFile.JSONUser.tearDownUsersViaSupport(table = '''| cstm.customer1@lrcustomer.com.broken |
+	| cstm.customer2@lrcustomer.com.broken |''');
+
+		LocalFile.JSONUser.tearDownUsersViaKoroneiki(table = '''| cstm.customer1@lrcustomer.com.broken |
+	| cstm.customer2@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiContactAPI._tearDownContacts(table = '''| cstm.customer1@lrcustomer.com.broken |
+	| cstm.customer2@lrcustomer.com.broken |''');
+
+		LocalFile.JSONOkta.tearDownUsers(table = '''| cstm.customer1@lrcustomer.com.broken |
+	| cstm.customer2@lrcustomer.com.broken |''');
+	}
+
+	test ViewActiveaccountonCustomeraccountpage {
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korcst - ${staticProjectName}",
+			productName = "DXP Production",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korcst - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korcst");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korcst - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.clickSyncToCustomerPortalButton();
+
+		LocalFile.CustomerLogin.loginToCustomer(
+			userEmailAddress = ${staticCustomerAdminEmailAddress},
+			userPassword = ${staticCustomerAdminPassword});
+
+		LocalFile.CustomerProjects.searchCustomerProject(keyword = "Korcst");
+
+		LocalFile.CustomerProjects.clickCustomerProject(projectName = "Korcst - ${staticProjectName}");
+
+		LocalFile.CustomerProjects._viewCustomerProjectDetails(
+			projectName = "Korcst - ${staticProjectName}",
+			table = '''| Name           | Korcst - ${staticProjectName} |
+	| Code           | KORCSTKORCST                  |
+	| State          | ACTIVE                        |
+	| Support Region | United States                 |
+	| SLA            | -                             |
+	| Support Seats  | 0 / 0 Filled                  |
+	| Tier           | T1                            |
+	| FLS Partner    | -                             |''');
+	}
+
+	test ViewAustraliaSupportRegionaccountonCustomeraccountpage {
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code   | KORCT2KORCT2                  | |
+	| Name   | Korcp3 - ${staticProjectName} | |
+	| Region | Australia                     | |
+	| Status | Active                        | |
+	| Tier   | T1                            | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korcp3 - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korcp3");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korcp3 - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.clickSyncToCustomerPortalButton();
+
+		LocalFile.CustomerLogin.loginToCustomer(
+			userEmailAddress = ${staticCustomerAdminEmailAddress},
+			userPassword = ${staticCustomerAdminPassword});
+
+		LocalFile.CustomerProjects.searchCustomerProject(keyword = "Korcp3");
+
+		LocalFile.CustomerProjects.clickCustomerProject(projectName = "Korcp3 - ${staticProjectName}");
+
+		LocalFile.CustomerProjects._viewCustomerProjectDetails(
+			projectName = "Korcp3 - ${staticProjectName}",
+			table = '''| Name           | Korcp3 - ${staticProjectName} |
+	| Code           | KORCT2KORCT2                  |
+	| State          | ACTIVE                        |
+	| Support Region | Australia                     |
+	| SLA            | -                             |
+	| Support Seats  | 0 / 0 Filled                  |
+	| Tier           | T1                            |
+	| FLS Partner    | -                             |''');
+	}
+
+	test ViewBrazilSupportRegionaccountonCustomeraccountpage {
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code   | KORCT2KORCT2                  | |
+	| Name   | Korcp3 - ${staticProjectName} | |
+	| Region | Brazil                        | |
+	| Status | Active                        | |
+	| Tier   | T1                            | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korcp3 - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korcp3");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korcp3 - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.clickSyncToCustomerPortalButton();
+
+		LocalFile.CustomerLogin.loginToCustomer(
+			userEmailAddress = ${staticCustomerAdminEmailAddress},
+			userPassword = ${staticCustomerAdminPassword});
+
+		LocalFile.CustomerProjects.searchCustomerProject(keyword = "Korcp3");
+
+		LocalFile.CustomerProjects.clickCustomerProject(projectName = "Korcp3 - ${staticProjectName}");
+
+		LocalFile.CustomerProjects._viewCustomerProjectDetails(
+			projectName = "Korcp3 - ${staticProjectName}",
+			table = '''| Name           | Korcp3 - ${staticProjectName} |
+	| Code           | KORCT2KORCT2                  |
+	| State          | ACTIVE                        |
+	| Support Region | Brazil                        |
+	| SLA            | -                             |
+	| Support Seats  | 0 / 0 Filled                  |
+	| Tier           | T1                            |
+	| FLS Partner    | -                             |''');
+	}
+
+	test ViewCanceledaccountonCustomeraccountpage {
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korcst - ${staticProjectName}",
+			productName = "DXP Production",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Cancelled                | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korcst - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korcst");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korcst - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.clickSyncToCustomerPortalButton();
+
+		LocalFile.CustomerLogin.loginToCustomer(
+			userEmailAddress = ${staticCustomerAdminEmailAddress},
+			userPassword = ${staticCustomerAdminPassword});
+
+		LocalFile.CustomerProjects.searchCustomerProject(keyword = "Korcst");
+
+		LocalFile.CustomerProjects.clickCustomerProject(projectName = "Korcst - ${staticProjectName}");
+
+		LocalFile.CustomerProjects._viewCustomerProjectDetails(
+			projectName = "Korcst - ${staticProjectName}",
+			table = '''| Name           | Korcst - ${staticProjectName} |
+	| Code           | KORCSTKORCST                  |
+	| State          | ACTIVE                        |
+	| Support Region | United States                 |
+	| SLA            | -                             |
+	| Support Seats  | 0 / 0 Filled                  |
+	| Tier           | T1                            |
+	| FLS Partner    | -                             |''');
+	}
+
+	test ViewChinaSupportRegionaccountonCustomeraccountpage {
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code   | KORCT2KORCT2                  | |
+	| Name   | Korcp3 - ${staticProjectName} | |
+	| Region | China                         | |
+	| Status | Active                        | |
+	| Tier   | T1                            | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korcp3 - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korcp3");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korcp3 - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.clickSyncToCustomerPortalButton();
+
+		LocalFile.CustomerLogin.loginToCustomer(
+			userEmailAddress = ${staticCustomerAdminEmailAddress},
+			userPassword = ${staticCustomerAdminPassword});
+
+		LocalFile.CustomerProjects.searchCustomerProject(keyword = "Korcp3");
+
+		LocalFile.CustomerProjects.clickCustomerProject(projectName = "Korcp3 - ${staticProjectName}");
+
+		LocalFile.CustomerProjects._viewCustomerProjectDetails(
+			projectName = "Korcp3 - ${staticProjectName}",
+			table = '''| Name           | Korcp3 - ${staticProjectName} |
+	| Code           | KORCT2KORCT2                  |
+	| State          | ACTIVE                        |
+	| Support Region | China                         |
+	| SLA            | -                             |
+	| Support Seats  | 0 / 0 Filled                  |
+	| Tier           | T1                            |
+	| FLS Partner    | -                             |''');
+	}
+
+	test ViewDXPProductionaccountonCustomeraccountpage {
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korcst - ${staticProjectName}",
+			productName = "DXP Production",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korcst");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korcst - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount._viewAccountProduct(
+			productName = "DXP Production",
+			table = '''| Name                | DXP Production |
+	| Current Provisioned | 0              |
+	| Current Purchased   | 1              |
+	| State               | ACTIVE         |''');
+
+		LocalFile.ProvisioningAccount.clickSyncToCustomerPortalButton();
+
+		LocalFile.CustomerLogin.loginToCustomer(
+			userEmailAddress = ${staticCustomerAdminEmailAddress},
+			userPassword = ${staticCustomerAdminPassword});
+
+		LocalFile.CustomerProjects.searchCustomerProject(keyword = "Korcst");
+
+		LocalFile.CustomerProjects.clickCustomerProject(projectName = "Korcst - ${staticProjectName}");
+
+		LocalFile.CustomerProjects._viewCustomerProjectDetails(
+			projectName = "Korcst - ${staticProjectName}",
+			table = '''| Name                   | Korcst - ${staticProjectName}                                  |
+	| Support Level          | Platinum                                                       |
+	| State                  | CURRENT                                                        |
+	| Support Level Duration | ${staticMmDdYyyyStartDate} - ${staticMmDdYyyyOriginalEndDate}  |''');
+
+		LocalFile.CustomerProjectOverview.viewCustomerSubscriptionPurchaseDetails(
+			subscriptionName = "DXP",
+			table = '''| Type                   | Production                                                     |
+	| Instance Size          | 0                                                              |
+	| Support Level Duration | ${staticMmDdYyyyStartDate} - ${staticMmDdYyyyOriginalEndDate}  |
+	| Status                 | Active                                                         |''');
+	}
+
+	test ViewDXPProductionaccountwithCommerceonCustomeraccountpage {
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korcst - ${staticProjectName}",
+			productName = "DXP Production",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korcst - ${staticProjectName}",
+			productName = "Commerce Subscription Production",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korcst - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korcst");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korcst - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.clickSyncToCustomerPortalButton();
+
+		LocalFile.CustomerLogin.loginToCustomer(
+			userEmailAddress = ${staticCustomerAdminEmailAddress},
+			userPassword = ${staticCustomerAdminPassword});
+
+		LocalFile.CustomerProjects.searchCustomerProject(keyword = "Korcst");
+
+		LocalFile.CustomerProjects.clickCustomerProject(projectName = "Korcst - ${staticProjectName}");
+
+		LocalFile.CustomerProjects._viewCustomerProjectDetails(
+			projectName = "Korcst - ${staticProjectName}",
+			table = '''| Name           | Korcst - ${staticProjectName} |
+	| Code           | KORCSTKORCST                  |
+	| State          | ACTIVE                        |
+	| Support Region | United States                 |
+	| SLA            | -                             |
+	| Support Seats  | 0 / 0 Filled                  |
+	| Tier           | T1                            |
+	| FLS Partner    | -                             |''');
+	}
+
+	test ViewDXPProductionaccountwithEnterpriseSearchonCustomeraccountpage {
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korcst - ${staticProjectName}",
+			productName = "DXP Production",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korcst - ${staticProjectName}",
+			productName = "Enterprise Search - Production",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korcst - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korcst");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korcst - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount._viewAccountProduct(
+			productName = "DXP Production",
+			table = '''| Name                | DXP Production        |
+	| Current Provisioned | 1                     |
+	| Current Purchased   | 1                     |
+	| State               | ACTIVE                |''');
+
+		LocalFile.ProvisioningAccount.clickSyncToCustomerPortalButton();
+
+		LocalFile.CustomerLogin.loginToCustomer(
+			userEmailAddress = ${staticCustomerAdminEmailAddress},
+			userPassword = ${staticCustomerAdminPassword});
+
+		LocalFile.CustomerProjects.searchCustomerProject(keyword = "Korcst");
+
+		LocalFile.CustomerProjects.clickCustomerProject(projectName = "Korcst - ${staticProjectName}");
+
+		LocalFile.CustomerProjects._viewCustomerProjectDetails(
+			projectName = "Korcst - ${staticProjectName}",
+			table = '''| Name           | Korcst - ${staticProjectName} |
+	| Code           | KORCSTKORCST                  |
+	| State          | ACTIVE                        |
+	| Support Region | United States                 |
+	| SLA            | -                             |
+	| Support Seats  | 0 / 0 Filled                  |
+	| Tier           | T1                            |
+	| FLS Partner    | -                             |''');
+	}
+
+	test ViewExpiredaccountonCustomeraccountpage {
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korcst - ${staticProjectName}",
+			productName = "DXP Production",
+			table = '''| End Date                | ${staticPastEndDate}         | |
+	| Original End Date       | ${staticPastOriginalEndDate} | |
+	| Perpetual               | false                        | |
+	| Quantity                | 1                            | |
+	| Start Date              | ${staticPastStartDate}       | |
+	| Status                  | Approved                     | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korcst - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korcst");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korcst - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.clickSyncToCustomerPortalButton();
+
+		LocalFile.CustomerLogin.loginToCustomer(
+			userEmailAddress = ${staticCustomerAdminEmailAddress},
+			userPassword = ${staticCustomerAdminPassword});
+
+		LocalFile.CustomerProjects.searchCustomerProject(keyword = "Korcst");
+
+		LocalFile.CustomerProjects.clickCustomerProject(projectName = "Korcst - ${staticProjectName}");
+
+		LocalFile.CustomerProjects._viewCustomerProjectDetails(
+			projectName = "Korcst - ${staticProjectName}",
+			table = '''| Name           | Korcst - ${staticProjectName} |
+	| Code           | KORCSTKORCST                  |
+	| State          | ACTIVE                        |
+	| Support Region | United States                 |
+	| SLA            | -                             |
+	| Support Seats  | 0 / 0 Filled                  |
+	| Tier           | T1                            |
+	| FLS Partner    | -                             |''');
+	}
+
+	test ViewFutureaccountonCustomeraccountpage {
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korcst - ${staticProjectName}",
+			productName = "DXP Production",
+			table = '''| End Date                | ${staticFutureEndDate}         | |
+	| Original End Date       | ${staticFutureOriginalEndDate} | |
+	| Perpetual               | false                          | |
+	| Quantity                | 1                              | |
+	| Start Date              | ${staticFutureStartDate}       | |
+	| Status                  | Approved                       | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korcst - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korcst");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korcst - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.clickProductTab(tabName = "Future");
+
+		LocalFile.ProvisioningAccount._viewAccountProduct(
+			productName = "DXP Production",
+			table = '''| Name                  | DXP Production                                                    |
+	| Support Life          | ${staticFullFutureStartDate} - ${staticFullFutureOriginalEndDate} |
+	| Grace Period End Date | ${staticFullFutureEndDate}                                        |
+	| Current Provisioned   | 1                                                                 |
+	| Latest Purchased      | 1                                                                 |
+	| State                 | FUTURE                                                            |''');
+
+		LocalFile.ProvisioningAccount.clickSyncToCustomerPortalButton();
+
+		LocalFile.CustomerLogin.loginToCustomer(
+			userEmailAddress = ${staticCustomerAdminEmailAddress},
+			userPassword = ${staticCustomerAdminPassword});
+
+		LocalFile.CustomerProjects.searchCustomerProject(keyword = "Korcst");
+
+		LocalFile.CustomerProjects.clickCustomerProject(projectName = "Korcst - ${staticProjectName}");
+
+		LocalFile.CustomerProjects._viewCustomerProjectDetails(
+			projectName = "Korcst - ${staticProjectName}",
+			table = '''| Name           | Korcst - ${staticProjectName} |
+	| Code           | KORCSTKORCST                  |
+	| State          | FUTURE                        |
+	| Support Region | United States                 |
+	| SLA            | -                             |
+	| Support Seats  | 0 / 0 Filled                  |
+	| Tier           | T1                            |
+	| FLS Partner    | -                             |''');
+	}
+
+	test ViewHungarySupportRegionaccountonCustomeraccountpage {
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code   | KORCT2KORCT2                  | |
+	| Name   | Korcp3 - ${staticProjectName} | |
+	| Region | Hungary                       | |
+	| Status | Active                        | |
+	| Tier   | T1                            | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korcp3 - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korcp3");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korcp3 - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.clickSyncToCustomerPortalButton();
+
+		LocalFile.CustomerLogin.loginToCustomer(
+			userEmailAddress = ${staticCustomerAdminEmailAddress},
+			userPassword = ${staticCustomerAdminPassword});
+
+		LocalFile.CustomerProjects.searchCustomerProject(keyword = "Korcp3");
+
+		LocalFile.CustomerProjects.clickCustomerProject(projectName = "Korcp3 - ${staticProjectName}");
+
+		LocalFile.CustomerProjects._viewCustomerProjectDetails(
+			projectName = "Korcp3 - ${staticProjectName}",
+			table = '''| Name           | Korcp3 - ${staticProjectName} |
+	| Code           | KORCT2KORCT2                  |
+	| State          | ACTIVE                        |
+	| Support Region | Hungary                       |
+	| SLA            | -                             |
+	| Support Seats  | 0 / 0 Filled                  |
+	| Tier           | T1                            |
+	| FLS Partner    | -                             |''');
+	}
+
+	test ViewIndiaSupportRegionaccountonCustomeraccountpage {
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code   | KORCT2KORCT2                  | |
+	| Name   | Korcp3 - ${staticProjectName} | |
+	| Region | India                         | |
+	| Status | Active                        | |
+	| Tier   | T1                            | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korcp3 - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korcp3");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korcp3 - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.clickSyncToCustomerPortalButton();
+
+		LocalFile.CustomerLogin.loginToCustomer(
+			userEmailAddress = ${staticCustomerAdminEmailAddress},
+			userPassword = ${staticCustomerAdminPassword});
+
+		LocalFile.CustomerProjects.searchCustomerProject(keyword = "Korcp3");
+
+		LocalFile.CustomerProjects.clickCustomerProject(projectName = "Korcp3 - ${staticProjectName}");
+
+		LocalFile.CustomerProjects._viewCustomerProjectDetails(
+			projectName = "Korcp3 - ${staticProjectName}",
+			table = '''| Name           | Korcp3 - ${staticProjectName} |
+	| Code           | KORCT2KORCT2                  |
+	| State          | ACTIVE                        |
+	| Support Region | India                         |
+	| SLA            | -                             |
+	| Support Seats  | 0 / 0 Filled                  |
+	| Tier           | T1                            |
+	| FLS Partner    | -                             |''');
+	}
+
+	test ViewLimitedaccountonCustomeraccountpage {
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korcst - ${staticProjectName}",
+			productName = "Limited Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "limited Subscription");
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korcst");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korcst - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.clickSyncToCustomerPortalButton();
+
+		LocalFile.CustomerLogin.loginToCustomer(
+			userEmailAddress = ${staticCustomerAdminEmailAddress},
+			userPassword = ${staticCustomerAdminPassword});
+
+		LocalFile.CustomerProjects.searchCustomerProject(keyword = "Korcst");
+
+		LocalFile.CustomerProjects.clickCustomerProject(projectName = "Korcst - ${staticProjectName}");
+
+		LocalFile.CustomerProjects._viewCustomerProjectDetails(
+			projectName = "Korcst - ${staticProjectName}",
+			table = '''| Name           | Korcst - ${staticProjectName} |
+	| Code           | KORCSTKORCST                  |
+	| State          | ACTIVE                        |
+	| Support Region | United States                 |
+	| SLA            | -                             |
+	| Support Seats  | 0 / 0 Filled                  |
+	| Tier           | T1                            |
+	| FLS Partner    | -                             |''');
+	}
+
+	test ViewPlatinumaccountonCustomeraccountpage {
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korcst - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korcst");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korcst - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.clickSyncToCustomerPortalButton();
+
+		LocalFile.CustomerLogin.loginToCustomer(
+			userEmailAddress = ${staticCustomerAdminEmailAddress},
+			userPassword = ${staticCustomerAdminPassword});
+
+		LocalFile.CustomerProjects.searchCustomerProject(keyword = "Korcst");
+
+		LocalFile.CustomerProjects.clickCustomerProject(projectName = "Korcst - ${staticProjectName}");
+
+		LocalFile.CustomerProjects._viewCustomerProjectDetails(
+			projectName = "Korcst - ${staticProjectName}",
+			table = '''| Name           | Korcst - ${staticProjectName} |
+	| Code           | KORCSTKORCST                  |
+	| State          | ACTIVE                        |
+	| Support Region | United States                 |
+	| SLA            | -                             |
+	| Support Seats  | 0 / 0 Filled                  |
+	| Tier           | T1                            |
+	| FLS Partner    | -                             |''');
+	}
+
+	test ViewPortalProductionaccountonCustomeraccountpage {
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korcst - ${staticProjectName}",
+			productName = "Portal Production",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korcst - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korcst");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korcst - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount._viewAccountProduct(
+			productName = "DXP Production",
+			table = '''| Name                | DXP Production        |
+	| Current Provisioned | 1                     |
+	| Current Purchased   | 1                     |
+	| State               | ACTIVE                |''');
+
+		LocalFile.ProvisioningAccount.clickSyncToCustomerPortalButton();
+
+		LocalFile.CustomerLogin.loginToCustomer(
+			userEmailAddress = ${staticCustomerAdminEmailAddress},
+			userPassword = ${staticCustomerAdminPassword});
+
+		LocalFile.CustomerProjects.searchCustomerProject(keyword = "Korcst");
+
+		LocalFile.CustomerProjects.clickCustomerProject(projectName = "Korcst - ${staticProjectName}");
+
+		LocalFile.CustomerProjects._viewCustomerProjectDetails(
+			projectName = "Korcst - ${staticProjectName}",
+			table = '''| Name                   | Korcst - ${staticProjectName}                                 |
+	| Support Level          | Platinum                                                      |
+	| State                  | CURRENT                                                       |
+	| Support Level Duration | ${staticMmDdYyyyStartDate} - ${staticMmDdYyyyOriginalEndDate} |''');
+	}
+
+	test ViewSpainSupportRegionaccountonCustomeraccountpage {
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code   | KORCT2KORCT2                  | |
+	| Name   | Korcp3 - ${staticProjectName} | |
+	| Region | Spain                         | |
+	| Status | Active                        | |
+	| Tier   | T1                            | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korcp3 - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korcp3");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korcp3 - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.clickSyncToCustomerPortalButton();
+
+		LocalFile.CustomerLogin.loginToCustomer(
+			userEmailAddress = ${staticCustomerAdminEmailAddress},
+			userPassword = ${staticCustomerAdminPassword});
+
+		LocalFile.CustomerProjects.searchCustomerProject(keyword = "Korcp3");
+
+		LocalFile.CustomerProjects.clickCustomerProject(projectName = "Korcp3 - ${staticProjectName}");
+
+		LocalFile.CustomerProjects.clickCustomerProject(projectName = "Korcp3 - ${staticProjectName}");
+
+		LocalFile.CustomerProjects._viewCustomerProjectDetails(
+			projectName = "Korcp3 - ${staticProjectName}",
+			table = '''| Name           | Korcp3 - ${staticProjectName} |
+	| Code           | KORCT2KORCT2                  |
+	| State          | ACTIVE                        |
+	| Support Region | Spain                         |
+	| SLA            | -                             |
+	| Support Seats  | 0 / 0 Filled                  |
+	| Tier           | T1                            |
+	| FLS Partner    | -                             |''');
+	}
+
+	test ViewSupportSeatscountonProjectwithAnalyticsCloudwithManagedServicespurchase {
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korcst - ${staticProjectName}",
+			productName = "Analytics Cloud Basic",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | true                     | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korcst - ${staticProjectName}",
+			productName = "Managed Services for Liferay Experience Cloud - Self Managed",
+			table = '''| End Date                | ${staticEndDate}         |   |
+	| Original End Date       | ${staticOriginalEndDate} |   |
+	| Perpetual               | false                    |   |
+	| Product Field and Value | sizing                   | 1 |
+	| Product Field and Value | licenses                 | 1 |
+	| Product Field and Value | version                  | 7 |
+	| Quantity                | 1                        |   |
+	| Start Date              | ${staticStartDate}       |   |
+	| Status                  | Approved                 |   |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korcst - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korcst");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korcst - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.clickSyncToCustomerPortalButton();
+
+		LocalFile.CustomerLogin.loginToCustomer(
+			userEmailAddress = ${staticCustomerAdminEmailAddress},
+			userPassword = ${staticCustomerAdminPassword});
+
+		LocalFile.CustomerProjects.searchCustomerProject(keyword = "Korcst");
+
+		LocalFile.CustomerProjects.clickCustomerProject(projectName = "Korcst - ${staticProjectName}");
+	}
+
+	test ViewSupportSeatsonProjectwithAnalyticsCloudandLimitedpurchase {
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korcst - ${staticProjectName}",
+			productName = "Analytics Cloud Basic",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | true                     | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korcst - ${staticProjectName}",
+			productName = "Limited Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Limited Subscription");
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korcst");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korcst - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.clickSyncToCustomerPortalButton();
+
+		LocalFile.CustomerLogin.loginToCustomer(
+			userEmailAddress = ${staticCustomerAdminEmailAddress},
+			userPassword = ${staticCustomerAdminPassword});
+
+		LocalFile.CustomerProjects.searchCustomerProject(keyword = "Korcst");
+
+		LocalFile.CustomerProjects.clickCustomerProject(projectName = "Korcst - ${staticProjectName}");
+
+		LocalFile.CustomerProjectNavigation.clickOnTab(tab = "Team Members");
+	}
+
+	test ViewSupportSeatsonProjectwithAnalyticsCloudandPlatinumandDXPProductionpurchase {
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korcst - ${staticProjectName}",
+			productName = "Analytics Cloud Basic",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | true                     | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korcst - ${staticProjectName}",
+			productName = "DXP Production",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korcst - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korcst");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korcst - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.clickSyncToCustomerPortalButton();
+
+		LocalFile.CustomerLogin.loginToCustomer(
+			userEmailAddress = ${staticCustomerAdminEmailAddress},
+			userPassword = ${staticCustomerAdminPassword});
+
+		LocalFile.CustomerProjects.searchCustomerProject(keyword = "Korcst");
+
+		LocalFile.CustomerProjects.clickCustomerProject(projectName = "Korcst - ${staticProjectName}");
+
+		LocalFile.CustomerProjectNavigation.clickOnTab(tab = "Team Members");
+	}
+
+	test ViewSupportSeatsonProjectwithAnalyticsCloudandPlatinumandLXCSMpurchase {
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korcst - ${staticProjectName}",
+			productName = "Analytics Cloud Basic",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | true                     | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korcst - ${staticProjectName}",
+			productName = "LXC SM Subscription HA Production",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korcst - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korcst");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korcst - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.clickSyncToCustomerPortalButton();
+
+		LocalFile.CustomerLogin.loginToCustomer(
+			userEmailAddress = ${staticCustomerAdminEmailAddress},
+			userPassword = ${staticCustomerAdminPassword});
+
+		LocalFile.CustomerProjects.searchCustomerProject(keyword = "Korcst");
+
+		LocalFile.CustomerProjects.clickCustomerProject(projectName = "Korcst - ${staticProjectName}");
+
+		LocalFile.CustomerProjectNavigation.clickOnTab(tab = "Team Members");
+	}
+
+	test ViewSupportSeatsonProjectwithAnalyticsCloudandPlatinumpurchase {
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korcst - ${staticProjectName}",
+			productName = "Analytics Cloud Basic",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | true                     | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korcst - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korcst");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korcst - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.clickSyncToCustomerPortalButton();
+
+		LocalFile.CustomerLogin.loginToCustomer(
+			userEmailAddress = ${staticCustomerAdminEmailAddress},
+			userPassword = ${staticCustomerAdminPassword});
+
+		LocalFile.CustomerProjects.searchCustomerProject(keyword = "Korcst");
+
+		LocalFile.CustomerProjects.clickCustomerProject(projectName = "Korcst - ${staticProjectName}");
+
+		LocalFile.CustomerProjectNavigation.clickOnTab(tab = "Team Members");
+	}
+
+	test ViewT1accountonCustomeraccountpage {
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code   | KORCT2KORCT2                  | |
+	| Name   | Korcp3 - ${staticProjectName} | |
+	| Region | United States                 | |
+	| Status | Active                        | |
+	| Tier   | T1                            | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korcp3 - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korcp3");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korcp3 - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.clickSyncToCustomerPortalButton();
+
+		LocalFile.CustomerLogin.loginToCustomer(
+			userEmailAddress = ${staticCustomerAdminEmailAddress},
+			userPassword = ${staticCustomerAdminPassword});
+
+		LocalFile.CustomerProjects.searchCustomerProject(keyword = "Korcp3");
+
+		LocalFile.CustomerProjects.clickCustomerProject(projectName = "Korcp3 - ${staticProjectName}");
+
+		LocalFile.CustomerProjects._viewCustomerProjectDetails(
+			projectName = "Korcst - ${staticProjectName}",
+			table = '''| Name           | Korcp3 - ${staticProjectName} |
+	| Code           | KORCT2KORCT2                  |
+	| State          | ACTIVE                        |
+	| Support Region | United States                 |
+	| SLA            | -                             |
+	| Support Seats  | 0 / 0 Filled                  |
+	| Tier           | T1                            |
+	| FLS Partner    | -                             |''');
+	}
+
+	test ViewT2accountonCustomeraccountpage {
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code   | KORCT2KORCT2                  | |
+	| Name   | Korcp3 - ${staticProjectName} | |
+	| Region | United States                 | |
+	| Status | Active                        | |
+	| Tier   | T2                            | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korcp3 - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korcp3");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korcp3 - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.clickSyncToCustomerPortalButton();
+
+		LocalFile.CustomerLogin.loginToCustomer(
+			userEmailAddress = ${staticCustomerAdminEmailAddress},
+			userPassword = ${staticCustomerAdminPassword});
+
+		LocalFile.CustomerProjects.searchCustomerProject(keyword = "Korcp3");
+
+		LocalFile.CustomerProjects.clickCustomerProject(projectName = "Korcp3 - ${staticProjectName}");
+
+		LocalFile.CustomerProjects._viewCustomerProjectDetails(
+			projectName = "Korcp3 - ${staticProjectName}",
+			table = '''| Name           | Korcp3 - ${staticProjectName} |
+	| Code           | KORCT2KORCT2                  |
+	| State          | ACTIVE                        |
+	| Support Region | United States                 |
+	| SLA            | -                             |
+	| Support Seats  | 0 / 0 Filled                  |
+	| Tier           | T2                            |
+	| FLS Partner    | -                             |''');
+	}
+
+	test ViewT3accountonCustomeraccountpage {
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code   | KORCT2KORCT2                  | |
+	| Name   | Korcp3 - ${staticProjectName} | |
+	| Region | United States                 | |
+	| Status | Active                        | |
+	| Tier   | T3                            | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korcp3 - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korcp3");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korcp3 - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.clickSyncToCustomerPortalButton();
+
+		LocalFile.CustomerLogin.loginToCustomer(
+			userEmailAddress = ${staticCustomerAdminEmailAddress},
+			userPassword = ${staticCustomerAdminPassword});
+
+		LocalFile.CustomerProjects.searchCustomerProject(keyword = "Korcp3");
+
+		LocalFile.CustomerProjects.clickCustomerProject(projectName = "Korcp3 - ${staticProjectName}");
+
+		LocalFile.CustomerProjects._viewCustomerProjectDetails(
+			projectName = "Korcp3 - ${staticProjectName}",
+			table = '''| Name           | Korcp3 - ${staticProjectName} |
+	| Code           | KORCT2KORCT2                  |
+	| State          | ACTIVE                        |
+	| Support Region | United States                 |
+	| SLA            | -                             |
+	| Support Seats  | 0 / 0 Filled                  |
+	| Tier           | T3                            |
+	| FLS Partner    | -                             |''');
+	}
+
+	test ViewT4accountonCustomeraccountpage {
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code   | KORCT2KORCT2                  | |
+	| Name   | Korcp3 - ${staticProjectName} | |
+	| Region | United States                 | |
+	| Status | Active                        | |
+	| Tier   | T4                            | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korcp3 - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korcp3");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korcp3 - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.clickSyncToCustomerPortalButton();
+
+		LocalFile.CustomerLogin.loginToCustomer(
+			userEmailAddress = ${staticCustomerAdminEmailAddress},
+			userPassword = ${staticCustomerAdminPassword});
+
+		LocalFile.CustomerProjects.searchCustomerProject(keyword = "Korcp3");
+
+		LocalFile.CustomerProjects.clickCustomerProject(projectName = "Korcp3 - ${staticProjectName}");
+
+		LocalFile.CustomerProjects._viewCustomerProjectDetails(
+			projectName = "Korcp3 - ${staticProjectName}",
+			table = '''| Name           | Korcp3 - ${staticProjectName} |
+	| Code           | KORCT2KORCT2                  |
+	| State          | ACTIVE                        |
+	| Support Region | United States                 |
+	| SLA            | -                             |
+	| Support Seats  | 0 / 0 Filled                  |
+	| Tier           | T4                            |
+	| FLS Partner    | -                             |''');
+	}
+
+	test ViewUSSupportRegionaccountonCustomeraccountpage {
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korcst - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korcst");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korcst - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.clickSyncToCustomerPortalButton();
+
+		LocalFile.CustomerLogin.loginToCustomer(
+			userEmailAddress = ${staticCustomerAdminEmailAddress},
+			userPassword = ${staticCustomerAdminPassword});
+
+		LocalFile.CustomerProjects.searchCustomerProject(keyword = "Korcst");
+
+		LocalFile.CustomerProjects.clickCustomerProject(projectName = "Korcst - ${staticProjectName}");
+
+		LocalFile.CustomerProjects._viewCustomerProjectDetails(
+			projectName = "Korcst - ${staticProjectName}",
+			table = '''| Name           | Korcst - ${staticProjectName} |
+	| Code           | KORCSTKORCST                  |
+	| State          | ACTIVE                        |
+	| Support Region | United States                 |
+	| SLA            | -                             |
+	| Support Seats  | 0 / 0 Filled                  |
+	| Tier           | T1                            |
+	| FLS Partner    | -                             |''');
+	}
+
+}

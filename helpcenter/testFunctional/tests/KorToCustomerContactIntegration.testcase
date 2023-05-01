@@ -1,0 +1,382 @@
+definition {
+
+	property testray.main.component.name = "Support QA";
+	property type = "customer.integration";
+
+	setUp {
+		LocalFile.Passwords.getPasswords();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticPastStartAndEndDate();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFutureStartAndEndDate();
+
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningCompanyName();
+
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | guicstm                       |
+	| Email Address | guicstm@lrcustomer.com.broken |
+	| First Name    | GUI                           |
+	| Last Name     | CSTM                          |''');
+
+		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | cstm.customer2                       |
+	| Email Address | cstm.customer2@lrcustomer.com.broken |
+	| First Name    | CSTM                                 |
+	| Last Name     | Customer2                            |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code   | GUIZENGUIZEN                  | |
+	| Name   | Guizen - ${staticProjectName} | |
+	| Region | United States                 | |
+	| Status | Active                        | |
+	| Tier   | T1                            | |''');
+	}
+
+	tearDown {
+		LocalFile.KoroneikiTeamAPI._tearDownTeams(table = '''| CSTM Customer |''');
+
+		LocalFile.KoroneikiProductConsumptionAPI._tearDownProductConsumptionList(
+			accountName = "Korcst - ${staticProjectName}",
+			table = '''| DXP Production      |
+	| Service Partnership |''');
+
+		LocalFile.KoroneikiProductConsumptionAPI._tearDownProductConsumptions(
+			accountName = "Korcst - ${staticProjectName}",
+			table = '''| DXP Production      |
+	| Service Partnership |''');
+
+		LocalFile.OSBAdminProject.tearDownProjects(table = '''| KORCSTKORCST |
+	| KORCT2KORCT2 |''');
+
+		LocalFile.KoroneikiAccountAPI._tearDownAccounts(table = '''| Korcst - ${staticProjectName} |''');
+
+		LocalFile.KoroneikiAccountAPI._tearDownAccountsViaAccountFieldNameAndValue(
+			fieldName = "Code",
+			table = '''| KORCSTKORCST |
+	| KORCT2KORCT2 |''');
+
+		LocalFile.JSONUser.tearDownUsers(table = '''| cstm.customer1@lrcustomer.com.broken |
+	| cstm.customer2@2rcustomer.com.broken |''');
+
+		LocalFile.JSONUser.tearDownUsersViaSupport(table = '''| cstm.customer1@lrcustomer.com.broken |
+	| cstm.customer2@2rcustomer.com.broken |''');
+
+		LocalFile.JSONUser.tearDownUsersViaKoroneiki(table = '''| cstm.customer1@lrcustomer.com.broken |
+	| cstm.customer2@2rcustomer.com.broken |''');
+
+		LocalFile.KoroneikiContactAPI._tearDownContacts(table = '''| cstm.customer1@lrcustomer.com.broken |
+	| cstm.customer2@2rcustomer.com.broken |''');
+
+		LocalFile.JSONOkta.tearDownUsers(table = '''| cstm.customer1@lrcustomer.com.broken |
+	| cstm.customer2@2rcustomer.com.broken |''');
+	}
+
+	test ViewPartnerManageroncustomer {
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korcst - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korcst - ${staticProjectName}",
+			productName = "Service Partnership",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Korcst - ${staticProjectName}",
+			contactEmailAddress = "cstm.customer2@lrcustomer.com.broken",
+			table = '''| Partner Manager |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Partner");
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korcst");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korcst - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.clickSyncToCustomerPortalButton();
+
+		LocalFile.CustomerLogin.loginToCustomer(
+			userEmailAddress = ${staticCustomerAdminEmailAddress},
+			userPassword = ${staticCustomerAdminPassword});
+
+		LocalFile.CustomerProjects.searchCustomerProject(keyword = "Korcst");
+
+		LocalFile.CustomerProjects.clickCustomerProject(projectName = "Korcst - ${staticProjectName}");
+
+		LocalFile.CustomerProjectOverview.viewSuportLevelCustomerSubscriptionPurchase(table = '''| Name                   | Platinum                                                      |
+	| State                  | CURRENT                                                       |
+	| Support Level Duration | ${staticMmDdYyyyStartDate} - ${staticMmDdYyyyOriginalEndDate} |''');
+
+		LocalFile.CustomerProjectOverview.viewCustomerSubscriptionPurchaseDetails(
+			subscriptionName = "Service Partnership",
+			table = '''| Type                   | Partnership                                                   |
+	| Name                   | Service Partnership                                           |
+	| Instance Size          | ${staticMmDdYyyyStartDate} - ${staticMmDdYyyyOriginalEndDate} |
+	| Status                 | Active                                                        |''');
+
+		LocalFile.CustomerProjectNavigation.clickOnTab(tab = "Team Members");
+
+		LocalFile.CustomerProjectTeamMembers._viewCustomerTeamMember(
+			member = "CSTM Customer1",
+			table = '''| Name          | CSTM Customer1                       |
+	| Email         | cstm.customer1@lrcustomer.com.broken |
+	| Role          | Partner Member                       |
+	| Status        | Invited                              |''');
+	}
+
+	test ViewPartnerMemberoncustomer {
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korcst - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korcst - ${staticProjectName}",
+			productName = "Service Partnership",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Korcst - ${staticProjectName}",
+			contactEmailAddress = "cstm.customer1@lrcustomer.com.broken",
+			table = '''| Partner Member |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Partner");
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korcst");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korcst - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.clickSyncToCustomerPortalButton();
+
+		LocalFile.CustomerLogin.loginToCustomer(
+			userEmailAddress = ${staticCustomerAdminEmailAddress},
+			userPassword = ${staticCustomerAdminPassword});
+
+		LocalFile.CustomerProjects.searchCustomerProject(keyword = "Korcst");
+
+		LocalFile.CustomerProjects.clickCustomerProject(projectName = "Korcst - ${staticProjectName}");
+
+		LocalFile.CustomerProjectOverview.viewSuportLevelCustomerSubscriptionPurchase(table = '''| Name                   | Platinum                                                      |
+	| Status                 | CURRENT                                                       |
+	| Support Level Duration | ${staticMmDdYyyyStartDate} - ${staticMmDdYyyyOriginalEndDate} |''');
+
+		LocalFile.CustomerProjectOverview.viewCustomerSubscriptionPurchaseDetails(
+			subscriptionName = "Service Partnership",
+			table = '''| Type                   | Partnership                                                   |
+	| Name                   | Service Partnership                                           |
+	| Date                   | ${staticMmDdYyyyStartDate} - ${staticMmDdYyyyOriginalEndDate} |
+	| Instance Size          | 0                                                             |
+	| State                  | Active                                                        |''');
+
+		LocalFile.CustomerProjectNavigation.clickOnTab(tab = "Team Members");
+
+		LocalFile.CustomerProjectTeamMembers._viewCustomerTeamMember(
+			member = "CSTM Customer1",
+			table = '''| Name          | CSTM Customer1                       |
+	| Email         | cstm.customer1@lrcustomer.com.broken |
+	| Support Seat  | false                                |
+	| Role          | Partner Member                       |
+	| Status        | Invited                              |''');
+	}
+
+	test ViewSupportAdministratoronCustomer {
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Guizen - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Guizen - ${staticProjectName}",
+			contactEmailAddress = "guicstm@lrcustomer.com.broken",
+			table = '''| Support Administrator |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Guizen");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Guizen - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.clickSyncToCustomerPortalButton();
+
+		LocalFile.CustomerLogin.loginToCustomer(
+			userEmailAddress = ${staticCustomerAdminEmailAddress},
+			userPassword = ${staticCustomerAdminPassword});
+
+		LocalFile.CustomerProjects.searchCustomerProject(keyword = "Korcst");
+
+		LocalFile.CustomerProjects.clickCustomerProject(projectName = "Korcst - ${staticProjectName}");
+
+		LocalFile.CustomerProjectOverview.viewSuportLevelCustomerSubscriptionPurchase(table = '''| Name                   | Platinum                                                      |
+	| State                  | CURRENT                                                       |
+	| Support Level Duration | ${staticMmDdYyyyStartDate} - ${staticMmDdYyyyOriginalEndDate} |''');
+
+		LocalFile.CustomerProjectNavigation.clickOnTab(tab = "Team Members");
+
+		LocalFile.CustomerProjectTeamMembers._viewCustomerTeamMember(
+			member = "CSTM Customer1",
+			table = '''| Name          | CSTM customer1                       |
+	| Email Address | cstm.customer1@lrcustomer.com.broken |
+	| Role          | Requester                            |
+	| Status        | Invited                              |''');
+
+		LocalFile.CustomerProjectTeamMembers._viewCustomerTeamMember(
+			member = "CSTM Customer2",
+			table = '''| Name          | CSTM customer2                       |
+	| Email Address | cstm.customer2@lrcustomer.com.broken |
+	| Role          | Requester                            |
+	| Status        | Invited                              |''');
+	}
+
+	test ViewSupportRequesteroncustomer {
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korcst - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Korcst - ${staticProjectName}",
+			contactEmailAddress = "cstm.customer1@lrcustomer.com.broken",
+			table = '''| Support Requester |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korcst");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korcst - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.clickSyncToCustomerPortalButton();
+
+		LocalFile.CustomerLogin.loginToCustomer(
+			userEmailAddress = ${staticCustomerAdminEmailAddress},
+			userPassword = ${staticCustomerAdminPassword});
+
+		LocalFile.CustomerProjects.searchCustomerProject(keyword = "Korcst");
+
+		LocalFile.CustomerProjects.clickCustomerProject(projectName = "Korcst - ${staticProjectName}");
+
+		LocalFile.CustomerProjectOverview.viewSuportLevelCustomerSubscriptionPurchase(table = '''| Name                   | Platinum                                                      |
+	| State                  | CURRENT                                                       |
+	| Support Level Duration | ${staticMmDdYyyyStartDate} - ${staticMmDdYyyyOriginalEndDate} |''');
+
+		LocalFile.CustomerProjectNavigation.clickOnTab(tab = "Team Members");
+
+		LocalFile.CustomerProjectTeamMembers._viewCustomerTeamMember(
+			member = "CSTM Customer1",
+			table = '''| Name          | CSTM customer1                       |
+	| Email Address | cstm.customer1@lrcustomer.com.broken |
+	| Role          | Support Requester                    |
+	| User Status   | VERIFIED                             |''');
+	}
+
+	test ViewSupportUseroncustomer {
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korcst - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Korcst - ${staticProjectName}",
+			contactEmailAddress = "cstm.customer1@lrcustomer.com.broken",
+			table = '''| Support Requester |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korcst");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korcst - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.clickSyncToCustomerPortalButton();
+
+		LocalFile.CustomerLogin.loginToCustomer(
+			userEmailAddress = ${staticCustomerAdminEmailAddress},
+			userPassword = ${staticCustomerAdminPassword});
+
+		LocalFile.CustomerProjects.searchCustomerProject(keyword = "Korcst");
+
+		LocalFile.CustomerProjects.clickCustomerProject(projectName = "Korcst - ${staticProjectName}");
+
+		LocalFile.CustomerProjectOverview.viewSuportLevelCustomerSubscriptionPurchase(table = '''| Name                   | Platinum                                                      |
+	| State                  | CURRENT                                                       |
+	| Support Level Duration | ${staticMmDdYyyyStartDate} - ${staticMmDdYyyyOriginalEndDate} |''');
+
+		LocalFile.CustomerProjectNavigation.clickOnTab(tab = "Team Members");
+
+		LocalFile.CustomerProjectTeamMembers._viewCustomerTeamMember(
+			member = "CSTM Customer1",
+			table = '''| Name          | CSTM customer1                       |
+	| Email Address | cstm.customer1@lrcustomer.com.broken |
+	| Role          | Support Requester                    |
+	| User Status   | VERIFIED                             |''');
+	}
+
+}

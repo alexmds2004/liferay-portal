@@ -1,0 +1,1278 @@
+definition {
+
+	property testray.main.component.name = "Support QA";
+	property type = "koroneiki";
+
+	tearDown {
+		LocalFile.KoroneikiAccountAPI._tearDownAccounts(table = '''| Koroneiki Auto Subsidiary |
+	| Koroneiki Engr Subsidiary |
+	| Koroneiki Automotive      |
+	| Koroneiki Engineering     |''');
+
+		LocalFile.KoroneikiContactAPI._tearDownContacts(table = '''| koroneiki.contact1@lrcustomer.com.broken |
+	| koroneiki.contact2@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiTeamAPI._tearDownTeams(table = '''| Development Team |
+	| Marketing Team   |
+	| Engineering Team |
+	| Sales Team       |''');
+	}
+
+	test Assigncontactstoteam {
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact2@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact2                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code         | KORAUTO                              | |
+	| Description  | Test automotive account on koroneiki | |
+	| Fax Number   | 555-555-1234                         | |
+	| Name         | Koroneiki Automotive                 | |
+	| Phone Number | 555-555-5678                         | |
+	| Region       | United States                        | |
+	| Status       | Active                               | |
+	| Tier         | T4                                   | |
+	| Website      | www.koroneikiautomotive.com          | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountTeam(
+			accountName = "Koroneiki Automotive",
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._assignContacts(
+			table = '''| koroneiki.contact1@lrcustomer.com.broken |
+	| koroneiki.contact2@lrcustomer.com.broken |''',
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._viewContact(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._viewContact(
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._viewContactViaNestedField(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._viewContactViaNestedField(
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			teamName = "Development Team");
+	}
+
+	test Assigncontactstoteamsonaccountandchildaccount {
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact2@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact2                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code         | KORAUTO                              | |
+	| Description  | Test automotive account on koroneiki | |
+	| Fax Number   | 555-555-1234                         | |
+	| Name         | Koroneiki Automotive                 | |
+	| Phone Number | 555-555-5678                         | |
+	| Region       | United States                        | |
+	| Status       | Active                               | |
+	| Tier         | T4                                   | |
+	| Website      | www.koroneikiautomotive.com          | |''');
+
+		LocalFile.KoroneikiAccountAPI._createChildAccount(
+			accountName = "Koroneiki Automotive",
+			table = '''| Code         | KORAUTOSUB                                 | |
+	| Description  | Test automotive child account on koroneiki | |
+	| Fax Number   | 555-555-9012                               | |
+	| Name         | Koroneiki Auto Subsidiary                  | |
+	| Phone Number | 555-555-3456                               | |
+	| Region       | United States                              | |
+	| Status       | Active                                     | |
+	| Tier         | T4                                         | |
+	| Website      | www.koroneikiautomotivesubsidiary.com      | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountTeam(
+			accountName = "Koroneiki Automotive",
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiAccountAPI._createAccountTeam(
+			accountName = "Koroneiki Auto Subsidiary",
+			teamName = "Marketing Team");
+
+		LocalFile.KoroneikiTeamAPI._assignContacts(
+			table = '''| koroneiki.contact1@lrcustomer.com.broken |''',
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._assignContacts(
+			table = '''| koroneiki.contact2@lrcustomer.com.broken |''',
+			teamName = "Marketing Team");
+
+		LocalFile.KoroneikiTeamAPI._viewContact(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._viewContact(
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			teamName = "Marketing Team");
+
+		LocalFile.KoroneikiTeamAPI._viewNoContact(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			teamName = "Marketing Team");
+
+		LocalFile.KoroneikiTeamAPI._viewNoContact(
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._viewContactViaNestedField(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._viewContactViaNestedField(
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			teamName = "Marketing Team");
+
+		LocalFile.KoroneikiTeamAPI._viewNoContactViaNestedField(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			teamName = "Marketing Team");
+
+		LocalFile.KoroneikiTeamAPI._viewNoContactViaNestedField(
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			teamName = "Development Team");
+	}
+
+	test Assigncontacttoteam {
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code         | KORAUTO                                  | |
+	| Description  | Test automotive account on koroneiki     | |
+	| Fax Number   | 555-555-1234                             | |
+	| Name         | Koroneiki Automotive                     | |
+	| Phone Number | 555-555-5678                             | |
+	| Region       | United States                            | |
+	| Status       | Active                                   | |
+	| Tier         | T4                                       | |
+	| Website      | www.koroneikiautomotive.com              | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountTeam(
+			accountName = "Koroneiki Automotive",
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._assignContacts(
+			table = '''| koroneiki.contact1@lrcustomer.com.broken |''',
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._viewContact(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._viewContactViaNestedField(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			teamName = "Development Team");
+	}
+
+	test Assigncontacttoteamonchildaccount {
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code         | KORAUTO                              | |
+	| Description  | Test automotive account on koroneiki | |
+	| Fax Number   | 555-555-1234                         | |
+	| Name         | Koroneiki Automotive                 | |
+	| Phone Number | 555-555-5678                         | |
+	| Region       | United States                        | |
+	| Status       | Active                               | |
+	| Tier         | T4                                   | |
+	| Website      | www.koroneikiautomotive.com          | |''');
+
+		LocalFile.KoroneikiAccountAPI._createChildAccount(
+			accountName = "Koroneiki Automotive",
+			table = '''| Code                  | KORAUTOSUB                                 | |
+	| Description           | Test automotive child account on koroneiki | |
+	| Fax Number            | 555-555-9012                               | |
+	| Name                  | Koroneiki Auto Subsidiary                  | |
+	| Phone Number          | 555-555-3456                               | |
+	| Region                | United States                              | |
+	| Status                | Active                                     | |
+	| Tier                  | T4                                         | |
+	| Website               | www.koroneikiautomotivesubsidiary.com      | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountTeam(
+			accountName = "Koroneiki Auto Subsidiary",
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._assignContacts(
+			table = '''| koroneiki.contact1@lrcustomer.com.broken |''',
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._viewContact(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._viewContactViaNestedField(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			teamName = "Development Team");
+	}
+
+	test Assigncontacttoteamviauuid {
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code         | KORAUTO                                  | |
+	| Description  | Test automotive account on koroneiki     | |
+	| Fax Number   | 555-555-1234                             | |
+	| Name         | Koroneiki Automotive                     | |
+	| Phone Number | 555-555-5678                             | |
+	| Region       | United States                            | |
+	| Status       | Active                                   | |
+	| Tier         | T4                                       | |
+	| Website      | www.koroneikiautomotive.com              | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountTeam(
+			accountName = "Koroneiki Automotive",
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._assignContactsViaUuid(
+			table = '''| koroneiki.contact1@lrcustomer.com.broken |''',
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._viewContact(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._viewContactViaNestedField(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			teamName = "Development Team");
+	}
+
+	test Assignseparatecontactstoseparateteams {
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact2@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact2                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code         | KORAUTO                              | |
+	| Description  | Test automotive account on koroneiki | |
+	| Fax Number   | 555-555-1234                         | |
+	| Name         | Koroneiki Automotive                 | |
+	| Phone Number | 555-555-5678                         | |
+	| Region       | United States                        | |
+	| Status       | Active                               | |
+	| Tier         | T4                                   | |
+	| Website      | www.koroneikiautomotive.com          | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountTeam(
+			accountName = "Koroneiki Automotive",
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiAccountAPI._createAccountTeam(
+			accountName = "Koroneiki Automotive",
+			teamName = "Marketing Team");
+
+		LocalFile.KoroneikiTeamAPI._assignContacts(
+			table = '''| koroneiki.contact1@lrcustomer.com.broken |''',
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._assignContacts(
+			table = '''| koroneiki.contact2@lrcustomer.com.broken |''',
+			teamName = "Marketing Team");
+
+		LocalFile.KoroneikiTeamAPI._viewContact(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._viewContact(
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			teamName = "Marketing Team");
+
+		LocalFile.KoroneikiTeamAPI._viewNoContact(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			teamName = "Marketing Team");
+
+		LocalFile.KoroneikiTeamAPI._viewNoContact(
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._viewContactViaNestedField(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._viewContactViaNestedField(
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			teamName = "Marketing Team");
+
+		LocalFile.KoroneikiTeamAPI._viewNoContactViaNestedField(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			teamName = "Marketing Team");
+
+		LocalFile.KoroneikiTeamAPI._viewNoContactViaNestedField(
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			teamName = "Development Team");
+	}
+
+	test Assignseparatecontactstoseparateteamsonseparateaccounts {
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact2@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact2                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code         | KORAUTO                              | |
+	| Description  | Test automotive account on koroneiki | |
+	| Fax Number   | 555-555-1234                         | |
+	| Name         | Koroneiki Automotive                 | |
+	| Phone Number | 555-555-5678                         | |
+	| Region       | United States                        | |
+	| Status       | Active                               | |
+	| Tier         | T4                                   | |
+	| Website      | www.koroneikiautomotive.com          | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code         | KORENGR                               | |
+	| Description  | Test engineering account on koroneiki | |
+	| Fax Number   | 555-555-4321                          | |
+	| Name         | Koroneiki Engineering                 | |
+	| Phone Number | 555-555-8765                          | |
+	| Region       | Japan                                 | |
+	| Status       | Active                                | |
+	| Tier         | T1                                    | |
+	| Website      | www.koroneikiengineering.com          | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountTeam(
+			accountName = "Koroneiki Automotive",
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiAccountAPI._createAccountTeam(
+			accountName = "Koroneiki Engineering",
+			teamName = "Marketing Team");
+
+		LocalFile.KoroneikiTeamAPI._assignContacts(
+			table = '''| koroneiki.contact1@lrcustomer.com.broken |''',
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._assignContacts(
+			table = '''| koroneiki.contact2@lrcustomer.com.broken |''',
+			teamName = "Marketing Team");
+
+		LocalFile.KoroneikiTeamAPI._viewContact(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._viewContact(
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			teamName = "Marketing Team");
+
+		LocalFile.KoroneikiTeamAPI._viewNoContact(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			teamName = "Marketing Team");
+
+		LocalFile.KoroneikiTeamAPI._viewNoContact(
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._viewContactViaNestedField(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._viewContactViaNestedField(
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			teamName = "Marketing Team");
+
+		LocalFile.KoroneikiTeamAPI._viewNoContactViaNestedField(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			teamName = "Marketing Team");
+
+		LocalFile.KoroneikiTeamAPI._viewNoContactViaNestedField(
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			teamName = "Development Team");
+	}
+
+	test Removecontactfromteam {
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code         | KORAUTO                              | |
+	| Description  | Test automotive account on koroneiki | |
+	| Fax Number   | 555-555-1234                         | |
+	| Name         | Koroneiki Automotive                 | |
+	| Phone Number | 555-555-5678                         | |
+	| Region       | United States                        | |
+	| Status       | Active                               | |
+	| Tier         | T4                                   | |
+	| Website      | www.koroneikiautomotive.com          | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountTeam(
+			accountName = "Koroneiki Automotive",
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._assignContacts(
+			table = '''| koroneiki.contact1@lrcustomer.com.broken |''',
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._removeContacts(
+			table = '''| koroneiki.contact1@lrcustomer.com.broken |''',
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._viewNoContact(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._viewNoContactViaNestedField(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			teamName = "Development Team");
+	}
+
+	test Removecontactfromteamviauuid {
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code         | KORAUTO                              | |
+	| Description  | Test automotive account on koroneiki | |
+	| Fax Number   | 555-555-1234                         | |
+	| Name         | Koroneiki Automotive                 | |
+	| Phone Number | 555-555-5678                         | |
+	| Region       | United States                        | |
+	| Status       | Active                               | |
+	| Tier         | T4                                   | |
+	| Website      | www.koroneikiautomotive.com          | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountTeam(
+			accountName = "Koroneiki Automotive",
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._assignContactsViaUuid(
+			table = '''| koroneiki.contact1@lrcustomer.com.broken |''',
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._removeContactsViaUuid(
+			table = '''| koroneiki.contact1@lrcustomer.com.broken |''',
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._viewNoContact(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._viewNoContactViaNestedField(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			teamName = "Development Team");
+	}
+
+	test Removecontactfromteamwithmultiplecontacts {
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact2@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact2                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code         | KORAUTO                              | |
+	| Description  | Test automotive account on koroneiki | |
+	| Fax Number   | 555-555-1234                         | |
+	| Name         | Koroneiki Automotive                 | |
+	| Phone Number | 555-555-5678                         | |
+	| Region       | United States                        | |
+	| Status       | Active                               | |
+	| Tier         | T4                                   | |
+	| Website      | www.koroneikiautomotive.com          | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountTeam(
+			accountName = "Koroneiki Automotive",
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._assignContacts(
+			table = '''| koroneiki.contact1@lrcustomer.com.broken |
+	| koroneiki.contact2@lrcustomer.com.broken |''',
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._removeContacts(
+			table = '''| koroneiki.contact1@lrcustomer.com.broken |''',
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._viewNoContact(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._viewContact(
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._removeContacts(
+			table = '''| koroneiki.contact2@lrcustomer.com.broken |''',
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._viewNoContact(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._viewNoContact(
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._viewNoContactViaNestedField(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._viewNoContactViaNestedField(
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			teamName = "Development Team");
+	}
+
+	test Removecontactsfromteamsonaccountandchildaccount {
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact2@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact2                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code         | KORAUTO                              | |
+	| Description  | Test automotive account on koroneiki | |
+	| Fax Number   | 555-555-1234                         | |
+	| Name         | Koroneiki Automotive                 | |
+	| Phone Number | 555-555-5678                         | |
+	| Region       | United States                        | |
+	| Status       | Active                               | |
+	| Tier         | T4                                   | |
+	| Website      | www.koroneikiautomotive.com          | |''');
+
+		LocalFile.KoroneikiAccountAPI._createChildAccount(
+			accountName = "Koroneiki Automotive",
+			table = '''| Code         | KORAUTOSUB                                 | |
+	| Description  | Test automotive child account on koroneiki | |
+	| Fax Number   | 555-555-9012                               | |
+	| Name         | Koroneiki Auto Subsidiary                  | |
+	| Phone Number | 555-555-3456                               | |
+	| Region       | United States                              | |
+	| Status       | Active                                     | |
+	| Tier         | T4                                         | |
+	| Website      | www.koroneikiautomotivesubsidiary.com      | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountTeam(
+			accountName = "Koroneiki Automotive",
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiAccountAPI._createAccountTeam(
+			accountName = "Koroneiki Auto Subsidiary",
+			teamName = "Marketing Team");
+
+		LocalFile.KoroneikiTeamAPI._assignContacts(
+			table = '''| koroneiki.contact1@lrcustomer.com.broken |''',
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._assignContacts(
+			table = '''| koroneiki.contact2@lrcustomer.com.broken |''',
+			teamName = "Marketing Team");
+
+		LocalFile.KoroneikiTeamAPI._removeContacts(
+			table = '''| koroneiki.contact1@lrcustomer.com.broken |''',
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._removeContacts(
+			table = '''| koroneiki.contact2@lrcustomer.com.broken |''',
+			teamName = "Marketing Team");
+
+		LocalFile.KoroneikiTeamAPI._viewNoContact(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._viewNoContact(
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			teamName = "Marketing Team");
+
+		LocalFile.KoroneikiTeamAPI._viewNoContact(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			teamName = "Marketing Team");
+
+		LocalFile.KoroneikiTeamAPI._viewNoContact(
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._viewNoContactViaNestedField(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._viewNoContactViaNestedField(
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			teamName = "Marketing Team");
+
+		LocalFile.KoroneikiTeamAPI._viewNoContactViaNestedField(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			teamName = "Marketing Team");
+
+		LocalFile.KoroneikiTeamAPI._viewNoContactViaNestedField(
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			teamName = "Development Team");
+	}
+
+	test Updatecontactandandaccountandteam {
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code         | KORAUTO                                  | |
+	| Description  | Test automotive account on koroneiki     | |
+	| Fax Number   | 555-555-1234                             | |
+	| Name         | Koroneiki Automotive                     | |
+	| Phone Number | 555-555-5678                             | |
+	| Region       | United States                            | |
+	| Status       | Active                                   | |
+	| Tier         | T4                                       | |
+	| Website      | www.koroneikiautomotive.com              | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountTeam(
+			accountName = "Koroneiki Automotive",
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._assignContacts(
+			table = '''| koroneiki.contact1@lrcustomer.com.broken |''',
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiContactAPI._updateContactViaEmailAddress(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Email Address | koroneiki.contact2@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Last Name     | Contact2                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiAccountAPI._updateAccount(
+			accountName = "Koroneiki Automotive",
+			table = '''| Code         | KORENGR                               | |
+	| Description  | Test engineering account on koroneiki | |
+	| Fax Number   | 555-555-4321                          | |
+	| Name         | Koroneiki Engineering                 | |
+	| Phone Number | 555-555-8765                          | |
+	| Region       | Japan                                 | |
+	| Status       | Active                                | |
+	| Tier         | T1                                    | |
+	| Website      | www.koroneikiengineering.com          | |''');
+
+		LocalFile.KoroneikiTeamAPI.updateTeam(
+			teamName = "Development Team",
+			teamNameEdit = "Engineering Team");
+
+		LocalFile.KoroneikiContactAPI._viewContactViaEmailAddress(
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			table = '''| Email Address | koroneiki.contact2@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact2                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiAccountAPI._viewAccount(
+			accountName = "Koroneiki Engineering",
+			table = '''| Code         | KORENGR                               | |
+	| Description  | Test engineering account on koroneiki | |
+	| Fax Number   | 555-555-4321                          | |
+	| Name         | Koroneiki Engineering                 | |
+	| Phone Number | 555-555-8765                          | |
+	| Region       | Japan                                 | |
+	| Status       | Active                                | |
+	| Tier         | T1                                    | |
+	| Website      | www.koroneikiengineering.com          | |''');
+
+		LocalFile.KoroneikiTeamAPI._viewNoTeam(teamName = "Development Team");
+
+		LocalFile.KoroneikiAccountAPI._viewNoAccount(accountName = "Koroneiki Automotive");
+
+		LocalFile.KoroneikiContactAPI._viewNoContact(contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken");
+
+		LocalFile.KoroneikiTeamAPI._viewContact(
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			teamName = "Engineering Team");
+
+		LocalFile.KoroneikiTeamAPI._viewNoContact(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			teamName = "Engineering Team");
+
+		LocalFile.KoroneikiTeamAPI._viewContactViaNestedField(
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			teamName = "Engineering Team");
+
+		LocalFile.KoroneikiTeamAPI._viewNoContactViaNestedField(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			teamName = "Engineering Team");
+	}
+
+	test Updatecontactandteam {
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code         | KORAUTO                                  | |
+	| Description  | Test automotive account on koroneiki     | |
+	| Fax Number   | 555-555-1234                             | |
+	| Name         | Koroneiki Automotive                     | |
+	| Phone Number | 555-555-5678                             | |
+	| Region       | United States                            | |
+	| Status       | Active                                   | |
+	| Tier         | T4                                       | |
+	| Website      | www.koroneikiautomotive.com              | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountTeam(
+			accountName = "Koroneiki Automotive",
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._assignContacts(
+			table = '''| koroneiki.contact1@lrcustomer.com.broken |''',
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiContactAPI._updateContactViaEmailAddress(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Email Address | koroneiki.contact2@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Last Name     | Contact2                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiTeamAPI.updateTeam(
+			teamName = "Development Team",
+			teamNameEdit = "Engineering Team");
+
+		LocalFile.KoroneikiContactAPI._viewContactViaEmailAddress(
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			table = '''| Email Address | koroneiki.contact2@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact2                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiTeamAPI._viewNoTeam(teamName = "Development Team");
+
+		LocalFile.KoroneikiContactAPI._viewNoContact(contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken");
+
+		LocalFile.KoroneikiTeamAPI._viewContact(
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			teamName = "Engineering Team");
+
+		LocalFile.KoroneikiTeamAPI._viewNoContact(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			teamName = "Engineering Team");
+
+		LocalFile.KoroneikiTeamAPI._viewContactViaNestedField(
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			teamName = "Engineering Team");
+
+		LocalFile.KoroneikiTeamAPI._viewNoContactViaNestedField(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			teamName = "Engineering Team");
+	}
+
+	test Updatecontactonteam {
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code         | KORAUTO                                  | |
+	| Description  | Test automotive account on koroneiki     | |
+	| Fax Number   | 555-555-1234                             | |
+	| Name         | Koroneiki Automotive                     | |
+	| Phone Number | 555-555-5678                             | |
+	| Region       | United States                            | |
+	| Status       | Active                                   | |
+	| Tier         | T4                                       | |
+	| Website      | www.koroneikiautomotive.com              | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountTeam(
+			accountName = "Koroneiki Automotive",
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._assignContacts(
+			table = '''| koroneiki.contact1@lrcustomer.com.broken |''',
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiContactAPI._updateContactViaEmailAddress(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Email Address | koroneiki.contact2@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Last Name     | Contact2                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactViaEmailAddress(
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			table = '''| Email Address | koroneiki.contact2@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact2                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiContactAPI._viewNoContact(contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken");
+
+		LocalFile.KoroneikiTeamAPI._viewContact(
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._viewNoContact(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._viewContactViaNestedField(
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._viewNoContactViaNestedField(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			teamName = "Development Team");
+	}
+
+	test Updatecontactviauuidonteam {
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code         | KORAUTO                                  | |
+	| Description  | Test automotive account on koroneiki     | |
+	| Fax Number   | 555-555-1234                             | |
+	| Name         | Koroneiki Automotive                     | |
+	| Phone Number | 555-555-5678                             | |
+	| Region       | United States                            | |
+	| Status       | Active                                   | |
+	| Tier         | T4                                       | |
+	| Website      | www.koroneikiautomotive.com              | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountTeam(
+			accountName = "Koroneiki Automotive",
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._assignContacts(
+			table = '''| koroneiki.contact1@lrcustomer.com.broken |''',
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiContactAPI._updateContactViaUuid(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Email Address | koroneiki.contact2@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Last Name     | Contact2                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactViaEmailAddress(
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			table = '''| Email Address | koroneiki.contact2@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact2                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiContactAPI._viewNoContact(contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken");
+
+		LocalFile.KoroneikiTeamAPI._viewContact(
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._viewNoContact(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._viewContactViaNestedField(
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._viewNoContactViaNestedField(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			teamName = "Development Team");
+	}
+
+	test Updateteamwithcontacts {
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code         | KORAUTO                                  | |
+	| Description  | Test automotive account on koroneiki     | |
+	| Fax Number   | 555-555-1234                             | |
+	| Name         | Koroneiki Automotive                     | |
+	| Phone Number | 555-555-5678                             | |
+	| Region       | United States                            | |
+	| Status       | Active                                   | |
+	| Tier         | T4                                       | |
+	| Website      | www.koroneikiautomotive.com              | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountTeam(
+			accountName = "Koroneiki Automotive",
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._assignContacts(
+			table = '''| koroneiki.contact1@lrcustomer.com.broken |''',
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI.updateTeam(
+			teamName = "Development Team",
+			teamNameEdit = "Engineering Team");
+
+		LocalFile.KoroneikiTeamAPI._viewNoTeam(teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._viewContact(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			teamName = "Engineering Team");
+
+		LocalFile.KoroneikiTeamAPI._viewContactViaNestedField(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			teamName = "Engineering Team");
+	}
+
+	test Viewteamandcontactauditentriesforcontactassignment {
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code         | KORAUTO                                  | |
+	| Description  | Test automotive account on koroneiki     | |
+	| Fax Number   | 555-555-1234                             | |
+	| Name         | Koroneiki Automotive                     | |
+	| Phone Number | 555-555-5678                             | |
+	| Region       | United States                            | |
+	| Status       | Active                                   | |
+	| Tier         | T4                                       | |
+	| Website      | www.koroneikiautomotive.com              | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountTeam(
+			accountName = "Koroneiki Automotive",
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._assignContacts(
+			table = '''| koroneiki.contact1@lrcustomer.com.broken |''',
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._removeContacts(
+			table = '''| koroneiki.contact1@lrcustomer.com.broken |''',
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._viewTeamAuditEntryRegardingAdditionalEntities(
+			agentName = "Koroneiki QA Service Producer",
+			description = "Koroneiki User Contact1",
+			field = "Contact Role",
+			newValue = "Member",
+			oldValue = "",
+			summary = "Assigned Contact",
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._viewTeamAuditEntryRegardingAdditionalEntities(
+			agentName = "Koroneiki QA Service Producer",
+			description = "Koroneiki User Contact1",
+			field = "Contact Role",
+			newValue = "",
+			oldValue = "Member",
+			summary = "Unassigned Contact",
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryRegardingAdditionalEntities(
+			action = "Assign",
+			agentName = "Koroneiki QA Service Producer",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			description = "Member",
+			field = "Team",
+			newValue = "Development Team",
+			oldValue = "");
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryRegardingAdditionalEntities(
+			action = "Unassign",
+			agentName = "Koroneiki QA Service Producer",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			description = "Member",
+			field = "Team",
+			newValue = "",
+			oldValue = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._viewTeamAuditEntryRegardingAdditionalEntitiesViaAuditEntryKey(
+			agentName = "Koroneiki QA Service Producer",
+			description = "Koroneiki User Contact1",
+			field = "Contact Role",
+			newValue = "Member",
+			oldValue = "",
+			summary = "Assigned Contact",
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._viewTeamAuditEntryRegardingAdditionalEntitiesViaAuditEntryKey(
+			agentName = "Koroneiki QA Service Producer",
+			description = "Koroneiki User Contact1",
+			field = "Contact Role",
+			newValue = "",
+			oldValue = "Member",
+			summary = "Unassigned Contact",
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryRegardingAdditionalEntitiesViaAuditEntryKey(
+			action = "Assign",
+			agentName = "Koroneiki QA Service Producer",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			description = "Member",
+			field = "Team",
+			newValue = "Development Team",
+			oldValue = "");
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryRegardingAdditionalEntitiesViaAuditEntryKey(
+			action = "Unassign",
+			agentName = "Koroneiki QA Service Producer",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			description = "Member",
+			field = "Team",
+			newValue = "",
+			oldValue = "Development Team");
+	}
+
+	test Viewteamandcontactauditentriesforcontactassignmentbyagent {
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code         | KORAUTO                                  | |
+	| Description  | Test automotive account on koroneiki     | |
+	| Fax Number   | 555-555-1234                             | |
+	| Name         | Koroneiki Automotive                     | |
+	| Phone Number | 555-555-5678                             | |
+	| Region       | United States                            | |
+	| Status       | Active                                   | |
+	| Tier         | T4                                       | |
+	| Website      | www.koroneikiautomotive.com              | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountTeam(
+			accountName = "Koroneiki Automotive",
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._assignContactsExecutedByAgent(
+			agentName = "Koroneiki User",
+			table = '''| koroneiki.contact1@lrcustomer.com.broken |''',
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._removeContactsExecutedByAgent(
+			agentName = "Koroneiki User",
+			table = '''| koroneiki.contact1@lrcustomer.com.broken |''',
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._viewTeamAuditEntryRegardingAdditionalEntities(
+			agentName = "Koroneiki User",
+			description = "Koroneiki User Contact1",
+			field = "Contact Role",
+			newValue = "Member",
+			oldValue = "",
+			summary = "Assigned Contact",
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._viewTeamAuditEntryRegardingAdditionalEntities(
+			agentName = "Koroneiki User",
+			description = "Koroneiki User Contact1",
+			field = "Contact Role",
+			newValue = "",
+			oldValue = "Member",
+			summary = "Unassigned Contact",
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryRegardingAdditionalEntities(
+			action = "Assign",
+			agentName = "Koroneiki User",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			description = "Member",
+			field = "Team",
+			newValue = "Development Team",
+			oldValue = "");
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryRegardingAdditionalEntities(
+			action = "Unassign",
+			agentName = "Koroneiki User",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			description = "Member",
+			field = "Team",
+			newValue = "",
+			oldValue = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._viewTeamAuditEntryRegardingAdditionalEntitiesViaAuditEntryKey(
+			agentName = "Koroneiki User",
+			description = "Koroneiki User Contact1",
+			field = "Contact Role",
+			newValue = "Member",
+			oldValue = "",
+			summary = "Assigned Contact",
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._viewTeamAuditEntryRegardingAdditionalEntitiesViaAuditEntryKey(
+			agentName = "Koroneiki User",
+			description = "Koroneiki User Contact1",
+			field = "Contact Role",
+			newValue = "",
+			oldValue = "Member",
+			summary = "Unassigned Contact",
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryRegardingAdditionalEntitiesViaAuditEntryKey(
+			action = "Assign",
+			agentName = "Koroneiki User",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			description = "Member",
+			field = "Team",
+			newValue = "Development Team",
+			oldValue = "");
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryRegardingAdditionalEntitiesViaAuditEntryKey(
+			action = "Unassign",
+			agentName = "Koroneiki User",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			description = "Member",
+			field = "Team",
+			newValue = "",
+			oldValue = "Development Team");
+	}
+
+	test Viewteamandcontactauditentriesforcontactassignmentbyagentandadmin {
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code         | KORAUTO                                  | |
+	| Description  | Test automotive account on koroneiki     | |
+	| Fax Number   | 555-555-1234                             | |
+	| Name         | Koroneiki Automotive                     | |
+	| Phone Number | 555-555-5678                             | |
+	| Region       | United States                            | |
+	| Status       | Active                                   | |
+	| Tier         | T4                                       | |
+	| Website      | www.koroneikiautomotive.com              | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountTeam(
+			accountName = "Koroneiki Automotive",
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._assignContacts(
+			table = '''| koroneiki.contact1@lrcustomer.com.broken |''',
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._removeContactsExecutedByAgent(
+			agentName = "Koroneiki User",
+			table = '''| koroneiki.contact1@lrcustomer.com.broken |''',
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._viewTeamAuditEntryRegardingAdditionalEntities(
+			agentName = "Koroneiki QA Service Producer",
+			description = "Koroneiki User Contact1",
+			field = "Contact Role",
+			newValue = "Member",
+			oldValue = "",
+			summary = "Assigned Contact",
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._viewTeamAuditEntryRegardingAdditionalEntities(
+			agentName = "Koroneiki User",
+			description = "Koroneiki User Contact1",
+			field = "Contact Role",
+			newValue = "",
+			oldValue = "Member",
+			summary = "Unassigned Contact",
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryRegardingAdditionalEntities(
+			action = "Assign",
+			agentName = "Koroneiki QA Service Producer",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			description = "Member",
+			field = "Team",
+			newValue = "Development Team",
+			oldValue = "");
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryRegardingAdditionalEntities(
+			action = "Unassign",
+			agentName = "Koroneiki User",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			description = "Member",
+			field = "Team",
+			newValue = "",
+			oldValue = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._viewTeamAuditEntryRegardingAdditionalEntitiesViaAuditEntryKey(
+			agentName = "Koroneiki QA Service Producer",
+			description = "Koroneiki User Contact1",
+			field = "Contact Role",
+			newValue = "Member",
+			oldValue = "",
+			summary = "Assigned Contact",
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._viewTeamAuditEntryRegardingAdditionalEntitiesViaAuditEntryKey(
+			agentName = "Koroneiki User",
+			description = "Koroneiki User Contact1",
+			field = "Contact Role",
+			newValue = "",
+			oldValue = "Member",
+			summary = "Unassigned Contact",
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryRegardingAdditionalEntitiesViaAuditEntryKey(
+			action = "Assign",
+			agentName = "Koroneiki QA Service Producer",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			description = "Member",
+			field = "Team",
+			newValue = "Development Team",
+			oldValue = "");
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryRegardingAdditionalEntitiesViaAuditEntryKey(
+			action = "Unassign",
+			agentName = "Koroneiki User",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			description = "Member",
+			field = "Team",
+			newValue = "",
+			oldValue = "Development Team");
+	}
+
+}

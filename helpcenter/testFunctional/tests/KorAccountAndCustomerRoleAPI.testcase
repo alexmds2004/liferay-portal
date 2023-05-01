@@ -1,0 +1,2432 @@
+definition {
+
+	property testray.main.component.name = "Support QA";
+	property type = "koroneiki";
+
+	tearDown {
+		LocalFile.KoroneikiAccountAPI._tearDownAccounts(table = '''| Koroneiki Auto Subsidiary |
+	| Koroneiki Engr Subsidiary |
+	| Koroneiki Automotive      |
+	| Koroneiki Engineering     |''');
+
+		LocalFile.KoroneikiContactAPI._tearDownContacts(table = '''| koroneiki.contact1@lrcustomer.com.broken |
+	| koroneiki.contact2@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiContactRoleAPI._tearDownContactRoles(table = '''| Default Account Customer Role  |
+	| Optional Account Customer Role |''');
+	}
+
+	test Assignaccountcustomercontactrolestocontact {
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code         | KORAUTO                              | |
+	| Description  | Test automotive account on koroneiki | |
+	| Fax Number   | 555-555-1234                         | |
+	| Name         | Koroneiki Automotive                 | |
+	| Phone Number | 555-555-5678                         | |
+	| Region       | United States                        | |
+	| Status       | Active                               | |
+	| Tier         | T4                                   | |
+	| Website      | www.koroneikiautomotive.com          | |''');
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRole(table = '''| Description | This is the default customer role for accounts |
+	| Name        | Default Account Customer Role                  |
+	| Type        | Account Customer                               |''');
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRole(table = '''| Description | This is the optional customer role for accounts |
+	| Name        | Optional Account Customer Role                  |
+	| Type        | Account Customer                                |''');
+
+		LocalFile.KoroneikiAccountAPI._assignCustomerContacts(
+			accountName = "Koroneiki Automotive",
+			table = '''| koroneiki.contact1@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Default Account Customer Role  |
+	| Optional Account Customer Role |''');
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Default Account Customer Role");
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Optional Account Customer Role");
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Member");
+
+		LocalFile.KoroneikiContactAPI._viewAccountCustomerContactRoleViaUuid(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Default Account Customer Role");
+
+		LocalFile.KoroneikiContactAPI._viewAccountCustomerContactRoleViaUuid(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Optional Account Customer Role");
+
+		LocalFile.KoroneikiContactAPI._viewAccountCustomerContactRoleViaUuid(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Member");
+
+		LocalFile.KoroneikiTeamAPI._viewContactRole(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Member",
+			teamName = "Koroneiki Automotive");
+	}
+
+	test Assignaccountcustomercontactrolestocontactsonaccountandchildaccounts {
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact2@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact2                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code         | KORAUTO                              | |
+	| Description  | Test automotive account on koroneiki | |
+	| Fax Number   | 555-555-1234                         | |
+	| Name         | Koroneiki Automotive                 | |
+	| Phone Number | 555-555-5678                         | |
+	| Region       | United States                        | |
+	| Status       | Active                               | |
+	| Tier         | T4                                   | |
+	| Website      | www.koroneikiautomotive.com          | |''');
+
+		LocalFile.KoroneikiAccountAPI._createChildAccount(
+			accountName = "Koroneiki Automotive",
+			table = '''| Code         | KORAUTOSUB                                 | |
+	| Description  | Test automotive child account on koroneiki | |
+	| Fax Number   | 555-555-9012                               | |
+	| Name         | Koroneiki Auto Subsidiary                  | |
+	| Phone Number | 555-555-3456                               | |
+	| Region       | United States                              | |
+	| Status       | Active                                     | |
+	| Tier         | T4                                         | |
+	| Website      | www.koroneikiautomotivesubsidiary.com      | |''');
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRole(table = '''| Description | This is the default customer role for accounts |
+	| Name        | Default Account Customer Role                  |
+	| Type        | Account Customer                               |''');
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRole(table = '''| Description | This is the optional customer role for accounts |
+	| Name        | Optional Account Customer Role                  |
+	| Type        | Account Customer                                |''');
+
+		LocalFile.KoroneikiAccountAPI._assignCustomerContacts(
+			accountName = "Koroneiki Automotive",
+			table = '''| koroneiki.contact1@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiAccountAPI._assignCustomerContacts(
+			accountName = "Koroneiki Auto Subsidiary",
+			table = '''| koroneiki.contact2@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Default Account Customer Role |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Koroneiki Auto Subsidiary",
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			table = '''| Optional Account Customer Role |''');
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Default Account Customer Role");
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Koroneiki Auto Subsidiary",
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			contactRoleName = "Optional Account Customer Role");
+
+		LocalFile.KoroneikiAccountAPI._viewNoContactRole(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Optional Account Customer Role");
+
+		LocalFile.KoroneikiAccountAPI._viewNoContactRole(
+			accountName = "Koroneiki Auto Subsidiary",
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			contactRoleName = "Default Account Customer Role");
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Member");
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Koroneiki Auto Subsidiary",
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			contactRoleName = "Member");
+
+		LocalFile.KoroneikiContactAPI._viewAccountCustomerContactRoleViaUuid(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Default Account Customer Role");
+
+		LocalFile.KoroneikiContactAPI._viewAccountCustomerContactRoleViaUuid(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Member");
+
+		LocalFile.KoroneikiContactAPI._viewAccountCustomerContactRoleViaUuid(
+			accountName = "Koroneiki Auto Subsidiary",
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			contactRoleName = "Optional Account Customer Role");
+
+		LocalFile.KoroneikiContactAPI._viewAccountCustomerContactRoleViaUuid(
+			accountName = "Koroneiki Auto Subsidiary",
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			contactRoleName = "Member");
+
+		LocalFile.KoroneikiContactAPI._viewNoAccountCustomerContactRoleViaUuid(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Optional Account Customer Role");
+
+		LocalFile.KoroneikiContactAPI._viewNoAccountCustomerContactRoleViaUuid(
+			accountName = "Koroneiki Auto Subsidiary",
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			contactRoleName = "Default Account Customer Role");
+
+		LocalFile.KoroneikiTeamAPI._viewContactRole(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Member",
+			teamName = "Koroneiki Automotive");
+
+		LocalFile.KoroneikiTeamAPI._viewContactRole(
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			contactRoleName = "Member",
+			teamName = "Koroneiki Auto Subsidiary");
+	}
+
+	test Assignaccountcustomercontactroletocontact {
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRole(table = '''| Description | This is the default customer role for accounts |
+	| Name        | Default Account Customer Role                  |
+	| Type        | Account Customer                               |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code         | KORAUTO                              | |
+	| Description  | Test automotive account on koroneiki | |
+	| Fax Number   | 555-555-1234                         | |
+	| Name         | Koroneiki Automotive                 | |
+	| Phone Number | 555-555-5678                         | |
+	| Region       | United States                        | |
+	| Status       | Active                               | |
+	| Tier         | T4                                   | |
+	| Website      | www.koroneikiautomotive.com          | |''');
+
+		LocalFile.KoroneikiAccountAPI._assignCustomerContacts(
+			accountName = "Koroneiki Automotive",
+			table = '''| koroneiki.contact1@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Default Account Customer Role |''');
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Default Account Customer Role");
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Member");
+
+		LocalFile.KoroneikiContactAPI._viewAccountCustomerContactRoleViaUuid(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Default Account Customer Role");
+
+		LocalFile.KoroneikiContactAPI._viewAccountCustomerContactRoleViaUuid(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Member");
+
+		LocalFile.KoroneikiTeamAPI._viewContactRole(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Member",
+			teamName = "Koroneiki Automotive");
+	}
+
+	test Assignaccountcustomercontactroletocontactonchildaccount {
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code         | KORAUTO                              | |
+	| Description  | Test automotive account on koroneiki | |
+	| Fax Number   | 555-555-1234                         | |
+	| Name         | Koroneiki Automotive                 | |
+	| Phone Number | 555-555-5678                         | |
+	| Region       | United States                        | |
+	| Status       | Active                               | |
+	| Tier         | T4                                   | |
+	| Website      | www.koroneikiautomotive.com          | |''');
+
+		LocalFile.KoroneikiAccountAPI._createChildAccount(
+			accountName = "Koroneiki Automotive",
+			table = '''| Code                  | KORAUTOSUB                                 | |
+	| Description           | Test automotive child account on koroneiki | |
+	| Fax Number            | 555-555-9012                               | |
+	| Name                  | Koroneiki Auto Subsidiary                  | |
+	| Phone Number          | 555-555-3456                               | |
+	| Region                | United States                              | |
+	| Status                | Active                                     | |
+	| Tier                  | T4                                         | |
+	| Website               | www.koroneikiautomotivesubsidiary.com      | |''');
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRole(table = '''| Description | This is the default customer role for accounts |
+	| Name        | Default Account Customer Role                  |
+	| Type        | Account Customer                               |''');
+
+		LocalFile.KoroneikiAccountAPI._assignCustomerContacts(
+			accountName = "Koroneiki Auto Subsidiary",
+			table = '''| koroneiki.contact1@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Koroneiki Auto Subsidiary",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Default Account Customer Role |''');
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Koroneiki Auto Subsidiary",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Default Account Customer Role");
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Koroneiki Auto Subsidiary",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Member");
+
+		LocalFile.KoroneikiContactAPI._viewAccountCustomerContactRoleViaUuid(
+			accountName = "Koroneiki Auto Subsidiary",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Default Account Customer Role");
+
+		LocalFile.KoroneikiContactAPI._viewAccountCustomerContactRoleViaUuid(
+			accountName = "Koroneiki Auto Subsidiary",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Member");
+
+		LocalFile.KoroneikiTeamAPI._viewContactRole(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Member",
+			teamName = "Koroneiki Auto Subsidiary");
+	}
+
+	test Assignaccountcustomercontactroletocontactviauuid {
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRole(table = '''| Description | This is the default customer role for accounts |
+	| Name        | Default Account Customer Role                  |
+	| Type        | Account Customer                               |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code         | KORAUTO                                  | |
+	| Description  | Test automotive account on koroneiki     | |
+	| Fax Number   | 555-555-1234                             | |
+	| Name         | Koroneiki Automotive                     | |
+	| Phone Number | 555-555-5678                             | |
+	| Region       | United States                            | |
+	| Status       | Active                                   | |
+	| Tier         | T4                                       | |
+	| Website      | www.koroneikiautomotive.com              | |''');
+
+		LocalFile.KoroneikiAccountAPI._assignCustomerContacts(
+			accountName = "Koroneiki Automotive",
+			table = '''| koroneiki.contact1@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContactViaUuid(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Default Account Customer Role |''');
+
+		LocalFile.KoroneikiAccountAPI._viewContactRoleViaUuid(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Default Account Customer Role");
+
+		LocalFile.KoroneikiAccountAPI._viewContactRoleViaUuid(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Member");
+
+		LocalFile.KoroneikiContactAPI._viewAccountCustomerContactRoleViaUuid(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Default Account Customer Role");
+
+		LocalFile.KoroneikiContactAPI._viewAccountCustomerContactRoleViaUuid(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Member");
+
+		LocalFile.KoroneikiTeamAPI._viewContactRole(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Member",
+			teamName = "Koroneiki Automotive");
+	}
+
+	test Assignmultiplenonexistentaccountcustomercontactrolestocontact {
+		LocalFile.KoroneikiContactRoleAPI._createContactRoleNestedFieldForNonExistentContactRole(table = '''| Description | This is the default customer role for accounts |
+	| Name        | Default Account Customer Role                  |
+	| Type        | Account Customer                               |''');
+
+		LocalFile.KoroneikiContactRoleAPI._renameFirstContactRoleNestedFieldVariable();
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRoleNestedFieldForNonExistentContactRole(table = '''| Description | This is the optional customer role for accounts |
+	| Name        | Optional Account Customer Role                  |
+	| Type        | Account Customer                                |''');
+
+		LocalFile.KoroneikiContactRoleAPI._renameSecondContactRoleNestedFieldVariable();
+
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiContactAPI._createCustomerContactNestedFieldWithContactRoleNestedField(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRolesNestedField = "${staticContactRolesNestedField1},${staticContactRolesNestedField2}");
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                 | KORAUTO                              | |
+	| Contact Nested Field | ${staticContactsNestedField}         | |
+	| Description          | Test automotive account on koroneiki | |
+	| Fax Number           | 555-555-1234                         | |
+	| Name                 | Koroneiki Automotive                 | |
+	| Phone Number         | 555-555-5678                         | |
+	| Region               | United States                        | |
+	| Status               | Active                               | |
+	| Tier                 | T4                                   | |
+	| Website              | www.koroneikiautomotive.com          | |''');
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Default Account Customer Role");
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Optional Account Customer Role");
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Member");
+
+		LocalFile.KoroneikiContactRoleAPI._viewContactRole(
+			contactRoleName = "Default Account Customer Role",
+			table = '''| Description | This is the default customer role for accounts |
+	| Name        | Default Account Customer Role                  |
+	| Type        | Account Customer                               |''');
+
+		LocalFile.KoroneikiContactRoleAPI._viewContactRole(
+			contactRoleName = "Optional Account Customer Role",
+			table = '''| Description | This is the optional customer role for accounts |
+	| Name        | Optional Account Customer Role                  |
+	| Type        | Account Customer                                |''');
+
+		LocalFile.KoroneikiContactAPI._viewAccountCustomerContactRoleViaUuid(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Default Account Customer Role");
+
+		LocalFile.KoroneikiContactAPI._viewAccountCustomerContactRoleViaUuid(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Optional Account Customer Role");
+
+		LocalFile.KoroneikiContactAPI._viewAccountCustomerContactRoleViaUuid(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Member");
+
+		LocalFile.KoroneikiTeamAPI._viewContactRole(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Member",
+			teamName = "Koroneiki Automotive");
+	}
+
+	test Assignmultiplenonexistentaccountcustomercontactrolestononexistentcontact {
+		LocalFile.KoroneikiContactRoleAPI._createContactRoleNestedFieldForNonExistentContactRole(table = '''| Description | This is the default customer role for accounts |
+	| Name        | Default Account Customer Role                  |
+	| Type        | Account Customer                               |''');
+
+		LocalFile.KoroneikiContactRoleAPI._renameFirstContactRoleNestedFieldVariable();
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRoleNestedFieldForNonExistentContactRole(table = '''| Description | This is the optional customer role for accounts |
+	| Name        | Optional Account Customer Role                  |
+	| Type        | Account Customer                                |''');
+
+		LocalFile.KoroneikiContactRoleAPI._renameSecondContactRoleNestedFieldVariable();
+
+		LocalFile.KoroneikiContactAPI._createCustomerContactNestedFieldForNonexistentContactWithContactRoleNestedField(
+			contactRolesNestedField = "${staticContactRolesNestedField1},${staticContactRolesNestedField2}",
+			table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                 | KORAUTO                              | |
+	| Contact Nested Field | ${staticContactsNestedField}         | |
+	| Description          | Test automotive account on koroneiki | |
+	| Fax Number           | 555-555-1234                         | |
+	| Name                 | Koroneiki Automotive                 | |
+	| Phone Number         | 555-555-5678                         | |
+	| Region               | United States                        | |
+	| Status               | Active                               | |
+	| Tier                 | T4                                   | |
+	| Website              | www.koroneikiautomotive.com          | |''');
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Default Account Customer Role");
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Optional Account Customer Role");
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Member");
+
+		LocalFile.KoroneikiContactRoleAPI._viewContactRole(
+			contactRoleName = "Default Account Customer Role",
+			table = '''| Description | This is the default customer role for accounts |
+	| Name        | Default Account Customer Role                  |
+	| Type        | Account Customer                               |''');
+
+		LocalFile.KoroneikiContactRoleAPI._viewContactRole(
+			contactRoleName = "Optional Account Customer Role",
+			table = '''| Description | This is the optional customer role for accounts |
+	| Name        | Optional Account Customer Role                  |
+	| Type        | Account Customer                                |''');
+
+		LocalFile.KoroneikiContactAPI._viewAccountCustomerContactRoleViaUuid(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Default Account Customer Role");
+
+		LocalFile.KoroneikiContactAPI._viewAccountCustomerContactRoleViaUuid(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Optional Account Customer Role");
+
+		LocalFile.KoroneikiContactAPI._viewAccountCustomerContactRoleViaUuid(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Member");
+
+		LocalFile.KoroneikiTeamAPI._viewContactRole(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Member",
+			teamName = "Koroneiki Automotive");
+	}
+
+	test Assignnonexistentaccountcustomercontactroleandaccountcustomercontactroletocontact {
+		LocalFile.KoroneikiContactRoleAPI._createContactRoleNestedFieldForNonExistentContactRole(table = '''| Description | This is the default customer role for accounts |
+	| Name        | Default Account Customer Role                  |
+	| Type        | Account Customer                               |''');
+
+		LocalFile.KoroneikiContactRoleAPI._renameFirstContactRoleNestedFieldVariable();
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRole(table = '''| Description | This is the optional customer role for accounts |
+	| Name        | Optional Account Customer Role                  |
+	| Type        | Account Customer                                |''');
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRoleNestedField(contactRoleName = "Optional Account Customer Role");
+
+		LocalFile.KoroneikiContactRoleAPI._renameSecondContactRoleNestedFieldVariable();
+
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiContactAPI._createCustomerContactNestedFieldWithContactRoleNestedField(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRolesNestedField = "${staticContactRolesNestedField1},${staticContactRolesNestedField2}");
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                 | KORAUTO                              | |
+	| Contact Nested Field | ${staticContactsNestedField}         | |
+	| Description          | Test automotive account on koroneiki | |
+	| Fax Number           | 555-555-1234                         | |
+	| Name                 | Koroneiki Automotive                 | |
+	| Phone Number         | 555-555-5678                         | |
+	| Region               | United States                        | |
+	| Status               | Active                               | |
+	| Tier                 | T4                                   | |
+	| Website              | www.koroneikiautomotive.com          | |''');
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Default Account Customer Role");
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Optional Account Customer Role");
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Member");
+
+		LocalFile.KoroneikiContactRoleAPI._viewContactRole(
+			contactRoleName = "Default Account Customer Role",
+			table = '''| Description | This is the default customer role for accounts |
+	| Name        | Default Account Customer Role                  |
+	| Type        | Account Customer                               |''');
+
+		LocalFile.KoroneikiContactAPI._viewAccountCustomerContactRoleViaUuid(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Default Account Customer Role");
+
+		LocalFile.KoroneikiContactAPI._viewAccountCustomerContactRoleViaUuid(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Optional Account Customer Role");
+
+		LocalFile.KoroneikiContactAPI._viewAccountCustomerContactRoleViaUuid(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Member");
+
+		LocalFile.KoroneikiTeamAPI._viewContactRole(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Member",
+			teamName = "Koroneiki Automotive");
+	}
+
+	test Assignnonexistentaccountcustomercontactroleandaccountcustomercontactroletononexistentcontact {
+		LocalFile.KoroneikiContactRoleAPI._createContactRoleNestedFieldForNonExistentContactRole(table = '''| Description | This is the default customer role for accounts |
+	| Name        | Default Account Customer Role                  |
+	| Type        | Account Customer                               |''');
+
+		LocalFile.KoroneikiContactRoleAPI._renameFirstContactRoleNestedFieldVariable();
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRole(table = '''| Description | This is the optional customer role for accounts |
+	| Name        | Optional Account Customer Role                  |
+	| Type        | Account Customer                                |''');
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRoleNestedField(contactRoleName = "Optional Account Customer Role");
+
+		LocalFile.KoroneikiContactRoleAPI._renameSecondContactRoleNestedFieldVariable();
+
+		LocalFile.KoroneikiContactAPI._createCustomerContactNestedFieldForNonexistentContactWithContactRoleNestedField(
+			contactRolesNestedField = "${staticContactRolesNestedField1},${staticContactRolesNestedField2}",
+			table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                 | KORAUTO                              | |
+	| Contact Nested Field | ${staticContactsNestedField}         | |
+	| Description          | Test automotive account on koroneiki | |
+	| Fax Number           | 555-555-1234                         | |
+	| Name                 | Koroneiki Automotive                 | |
+	| Phone Number         | 555-555-5678                         | |
+	| Region               | United States                        | |
+	| Status               | Active                               | |
+	| Tier                 | T4                                   | |
+	| Website              | www.koroneikiautomotive.com          | |''');
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Default Account Customer Role");
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Optional Account Customer Role");
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Member");
+
+		LocalFile.KoroneikiContactRoleAPI._viewContactRole(
+			contactRoleName = "Default Account Customer Role",
+			table = '''| Description | This is the default customer role for accounts |
+	| Name        | Default Account Customer Role                  |
+	| Type        | Account Customer                               |''');
+
+		LocalFile.KoroneikiContactAPI._viewAccountCustomerContactRoleViaUuid(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Default Account Customer Role");
+
+		LocalFile.KoroneikiContactAPI._viewAccountCustomerContactRoleViaUuid(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Optional Account Customer Role");
+
+		LocalFile.KoroneikiContactAPI._viewAccountCustomerContactRoleViaUuid(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Member");
+
+		LocalFile.KoroneikiTeamAPI._viewContactRole(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Member",
+			teamName = "Koroneiki Automotive");
+	}
+
+	test Assignnonexistentaccountcustomercontactroletocontact {
+		LocalFile.KoroneikiContactRoleAPI._createContactRoleNestedFieldForNonExistentContactRole(table = '''| Description | This is the default customer role for accounts |
+	| Name        | Default Account Customer Role                  |
+	| Type        | Account Customer                               |''');
+
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiContactAPI._createCustomerContactNestedFieldWithContactRoleNestedField(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRolesNestedField = ${staticContactRolesNestedField});
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                 | KORAUTO                              | |
+	| Contact Nested Field | ${staticContactsNestedField}         | |
+	| Description          | Test automotive account on koroneiki | |
+	| Fax Number           | 555-555-1234                         | |
+	| Name                 | Koroneiki Automotive                 | |
+	| Phone Number         | 555-555-5678                         | |
+	| Region               | United States                        | |
+	| Status               | Active                               | |
+	| Tier                 | T4                                   | |
+	| Website              | www.koroneikiautomotive.com          | |''');
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Default Account Customer Role");
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Member");
+
+		LocalFile.KoroneikiContactRoleAPI._viewContactRole(
+			contactRoleName = "Default Account Customer Role",
+			table = '''| Description | This is the default customer role for accounts |
+	| Name        | Default Account Customer Role                  |
+	| Type        | Account Customer                               |''');
+
+		LocalFile.KoroneikiContactAPI._viewAccountCustomerContactRoleViaUuid(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Default Account Customer Role");
+
+		LocalFile.KoroneikiContactAPI._viewAccountCustomerContactRoleViaUuid(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Member");
+
+		LocalFile.KoroneikiTeamAPI._viewContactRole(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Member",
+			teamName = "Koroneiki Automotive");
+	}
+
+	test Assignnonexistentaccountcustomercontactroletononexistentcontact {
+		LocalFile.KoroneikiContactRoleAPI._createContactRoleNestedFieldForNonExistentContactRole(table = '''| Description | This is the default customer role for accounts |
+	| Name        | Default Account Customer Role                  |
+	| Type        | Account Customer                               |''');
+
+		LocalFile.KoroneikiContactAPI._createCustomerContactNestedFieldForNonexistentContactWithContactRoleNestedField(
+			contactRolesNestedField = ${staticContactRolesNestedField},
+			table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                 | KORAUTO                              | |
+	| Contact Nested Field | ${staticContactsNestedField}         | |
+	| Description          | Test automotive account on koroneiki | |
+	| Fax Number           | 555-555-1234                         | |
+	| Name                 | Koroneiki Automotive                 | |
+	| Phone Number         | 555-555-5678                         | |
+	| Region               | United States                        | |
+	| Status               | Active                               | |
+	| Tier                 | T4                                   | |
+	| Website              | www.koroneikiautomotive.com          | |''');
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Default Account Customer Role");
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Member");
+
+		LocalFile.KoroneikiContactAPI._viewContactViaEmailAddress(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiContactRoleAPI._viewContactRole(
+			contactRoleName = "Default Account Customer Role",
+			table = '''| Description | This is the default customer role for accounts |
+	| Name        | Default Account Customer Role                  |
+	| Type        | Account Customer                               |''');
+
+		LocalFile.KoroneikiContactAPI._viewAccountCustomerContactRoleViaUuid(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Default Account Customer Role");
+
+		LocalFile.KoroneikiContactAPI._viewAccountCustomerContactRoleViaUuid(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Member");
+
+		LocalFile.KoroneikiTeamAPI._viewContactRole(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Member",
+			teamName = "Koroneiki Automotive");
+	}
+
+	test Assignseparateaccountcustomercontactrolestocontacts {
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact2@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact2                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRole(table = '''| Description | This is the default customer role for accounts |
+	| Name        | Default Account Customer Role                  |
+	| Type        | Account Customer                               |''');
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRole(table = '''| Description | This is the optional customer role for accounts |
+	| Name        | Optional Account Customer Role                  |
+	| Type        | Account Customer                                |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code         | KORAUTO                              | |
+	| Description  | Test automotive account on koroneiki | |
+	| Fax Number   | 555-555-1234                         | |
+	| Name         | Koroneiki Automotive                 | |
+	| Phone Number | 555-555-5678                         | |
+	| Region       | United States                        | |
+	| Status       | Active                               | |
+	| Tier         | T4                                   | |
+	| Website      | www.koroneikiautomotive.com          | |''');
+
+		LocalFile.KoroneikiAccountAPI._assignCustomerContacts(
+			accountName = "Koroneiki Automotive",
+			table = '''| koroneiki.contact1@lrcustomer.com.broken |
+	| koroneiki.contact2@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Default Account Customer Role |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			table = '''| Optional Account Customer Role |''');
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Default Account Customer Role");
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Member");
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			contactRoleName = "Optional Account Customer Role");
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			contactRoleName = "Member");
+
+		LocalFile.KoroneikiAccountAPI._viewNoContactRole(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Optional Account Customer Role");
+
+		LocalFile.KoroneikiAccountAPI._viewNoContactRole(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			contactRoleName = "Default Account Customer Role");
+
+		LocalFile.KoroneikiContactAPI._viewAccountCustomerContactRoleViaUuid(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Default Account Customer Role");
+
+		LocalFile.KoroneikiContactAPI._viewAccountCustomerContactRoleViaUuid(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Member");
+
+		LocalFile.KoroneikiContactAPI._viewAccountCustomerContactRoleViaUuid(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			contactRoleName = "Optional Account Customer Role");
+
+		LocalFile.KoroneikiContactAPI._viewAccountCustomerContactRoleViaUuid(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			contactRoleName = "Member");
+
+		LocalFile.KoroneikiContactAPI._viewNoAccountCustomerContactRoleViaUuid(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Optional Account Customer Role");
+
+		LocalFile.KoroneikiContactAPI._viewNoAccountCustomerContactRoleViaUuid(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			contactRoleName = "Default Account Customer Role");
+
+		LocalFile.KoroneikiTeamAPI._viewContactRole(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Member",
+			teamName = "Koroneiki Automotive");
+
+		LocalFile.KoroneikiTeamAPI._viewContactRole(
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			contactRoleName = "Member",
+			teamName = "Koroneiki Automotive");
+	}
+
+	test Deleteassignedcustomercontactrole {
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRole(table = '''| Description | This is the default customer role for accounts |
+	| Name        | Default Account Customer Role                  |
+	| Type        | Account Customer                               |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code         | KORAUTO                              | |
+	| Description  | Test automotive account on koroneiki | |
+	| Fax Number   | 555-555-1234                         | |
+	| Name         | Koroneiki Automotive                 | |
+	| Phone Number | 555-555-5678                         | |
+	| Region       | United States                        | |
+	| Status       | Active                               | |
+	| Tier         | T4                                   | |
+	| Website      | www.koroneikiautomotive.com          | |''');
+
+		LocalFile.KoroneikiAccountAPI._assignCustomerContacts(
+			accountName = "Koroneiki Automotive",
+			table = '''| koroneiki.contact1@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Default Account Customer Role |''');
+
+		LocalFile.KoroneikiContactRoleAPI.viewAssignedContactRoleDeletionError(contactRoleName = "Default Account Customer Role");
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Default Account Customer Role");
+
+		LocalFile.KoroneikiContactAPI._viewAccountCustomerContactRoleViaUuid(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Default Account Customer Role");
+	}
+
+	test Removeaccountcustomercontactrolefromcontact {
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code         | KORAUTO                              | |
+	| Description  | Test automotive account on koroneiki | |
+	| Fax Number   | 555-555-1234                         | |
+	| Name         | Koroneiki Automotive                 | |
+	| Phone Number | 555-555-5678                         | |
+	| Region       | United States                        | |
+	| Status       | Active                               | |
+	| Tier         | T4                                   | |
+	| Website      | www.koroneikiautomotive.com          | |''');
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRole(table = '''| Description | This is the default customer role for accounts |
+	| Name        | Default Account Customer Role                  |
+	| Type        | Account Customer                               |''');
+
+		LocalFile.KoroneikiAccountAPI._assignCustomerContacts(
+			accountName = "Koroneiki Automotive",
+			table = '''| koroneiki.contact1@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Default Account Customer Role |''');
+
+		LocalFile.KoroneikiAccountAPI._removeContactRolesFromContact(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Default Account Customer Role |''');
+
+		LocalFile.KoroneikiAccountAPI._viewNoContactRole(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Default Account Customer Role");
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Member");
+
+		LocalFile.KoroneikiContactAPI._viewNoAccountCustomerContactRoleViaUuid(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Default Account Customer Role");
+
+		LocalFile.KoroneikiContactAPI._viewAccountCustomerContactRoleViaUuid(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Member");
+
+		LocalFile.KoroneikiTeamAPI._viewContactRole(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Member",
+			teamName = "Koroneiki Automotive");
+	}
+
+	test Removeaccountcustomercontactrolefromcontactviauuid {
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code         | KORAUTO                              | |
+	| Description  | Test automotive account on koroneiki | |
+	| Fax Number   | 555-555-1234                         | |
+	| Name         | Koroneiki Automotive                 | |
+	| Phone Number | 555-555-5678                         | |
+	| Region       | United States                        | |
+	| Status       | Active                               | |
+	| Tier         | T4                                   | |
+	| Website      | www.koroneikiautomotive.com          | |''');
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRole(table = '''| Description | This is the default customer role for accounts |
+	| Name        | Default Account Customer Role                  |
+	| Type        | Account Customer                               |''');
+
+		LocalFile.KoroneikiAccountAPI._assignCustomerContacts(
+			accountName = "Koroneiki Automotive",
+			table = '''| koroneiki.contact1@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContactViaUuid(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Default Account Customer Role |''');
+
+		LocalFile.KoroneikiAccountAPI._removeContactRolesFromContactViaUuid(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Default Account Customer Role |''');
+
+		LocalFile.KoroneikiAccountAPI._viewNoContactRoleViaUuid(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Default Account Customer Role");
+
+		LocalFile.KoroneikiAccountAPI._viewContactRoleViaUuid(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Member");
+
+		LocalFile.KoroneikiContactAPI._viewNoAccountCustomerContactRoleViaUuid(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Default Account Customer Role");
+
+		LocalFile.KoroneikiContactAPI._viewAccountCustomerContactRoleViaUuid(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Member");
+
+		LocalFile.KoroneikiTeamAPI._viewContactRole(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Member",
+			teamName = "Koroneiki Automotive");
+	}
+
+	test Removeaccountcustomercontactrolefromcontactwithmultipleroles {
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code         | KORAUTO                              | |
+	| Description  | Test automotive account on koroneiki | |
+	| Fax Number   | 555-555-1234                         | |
+	| Name         | Koroneiki Automotive                 | |
+	| Phone Number | 555-555-5678                         | |
+	| Region       | United States                        | |
+	| Status       | Active                               | |
+	| Tier         | T4                                   | |
+	| Website      | www.koroneikiautomotive.com          | |''');
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRole(table = '''| Description | This is the default customer role for accounts |
+	| Name        | Default Account Customer Role                  |
+	| Type        | Account Customer                               |''');
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRole(table = '''| Description | This is the optional customer role for accounts |
+	| Name        | Optional Account Customer Role                  |
+	| Type        | Account Customer                                |''');
+
+		LocalFile.KoroneikiAccountAPI._assignCustomerContacts(
+			accountName = "Koroneiki Automotive",
+			table = '''| koroneiki.contact1@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Default Account Customer Role  |
+	| Optional Account Customer Role |''');
+
+		LocalFile.KoroneikiAccountAPI._removeContactRolesFromContact(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Default Account Customer Role |''');
+
+		LocalFile.KoroneikiAccountAPI._viewNoContactRole(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Default Account Customer Role");
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Optional Account Customer Role");
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Member");
+
+		LocalFile.KoroneikiAccountAPI._removeContactRolesFromContact(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Optional Account Customer Role |''');
+
+		LocalFile.KoroneikiAccountAPI._viewNoContactRole(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Default Account Customer Role");
+
+		LocalFile.KoroneikiAccountAPI._viewNoContactRole(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Optional Account Customer Role");
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Member");
+
+		LocalFile.KoroneikiContactAPI._viewNoAccountCustomerContactRoleViaUuid(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Default Account Customer Role");
+
+		LocalFile.KoroneikiContactAPI._viewNoAccountCustomerContactRoleViaUuid(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Optional Account Customer Role");
+
+		LocalFile.KoroneikiContactAPI._viewAccountCustomerContactRoleViaUuid(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Member");
+
+		LocalFile.KoroneikiTeamAPI._viewContactRole(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Member",
+			teamName = "Koroneiki Automotive");
+	}
+
+	test Removeaccountcustomercontactrolesfromcontactsonaccountandchildaccounts {
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact2@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact2                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code         | KORAUTO                              | |
+	| Description  | Test automotive account on koroneiki | |
+	| Fax Number   | 555-555-1234                         | |
+	| Name         | Koroneiki Automotive                 | |
+	| Phone Number | 555-555-5678                         | |
+	| Region       | United States                        | |
+	| Status       | Active                               | |
+	| Tier         | T4                                   | |
+	| Website      | www.koroneikiautomotive.com          | |''');
+
+		LocalFile.KoroneikiAccountAPI._createChildAccount(
+			accountName = "Koroneiki Automotive",
+			table = '''| Code         | KORAUTOSUB                                 | |
+	| Description  | Test automotive child account on koroneiki | |
+	| Fax Number   | 555-555-9012                               | |
+	| Name         | Koroneiki Auto Subsidiary                  | |
+	| Phone Number | 555-555-3456                               | |
+	| Region       | United States                              | |
+	| Status       | Active                                     | |
+	| Tier         | T4                                         | |
+	| Website      | www.koroneikiautomotivesubsidiary.com      | |''');
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRole(table = '''| Description | This is the default customer role for accounts |
+	| Name        | Default Account Customer Role                  |
+	| Type        | Account Customer                               |''');
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRole(table = '''| Description | This is the optional customer role for accounts |
+	| Name        | Optional Account Customer Role                  |
+	| Type        | Account Customer                                |''');
+
+		LocalFile.KoroneikiAccountAPI._assignCustomerContacts(
+			accountName = "Koroneiki Automotive",
+			table = '''| koroneiki.contact1@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiAccountAPI._assignCustomerContacts(
+			accountName = "Koroneiki Auto Subsidiary",
+			table = '''| koroneiki.contact2@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Default Account Customer Role |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Koroneiki Auto Subsidiary",
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			table = '''| Optional Account Customer Role |''');
+
+		LocalFile.KoroneikiAccountAPI._removeContactRolesFromContact(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Default Account Customer Role |''');
+
+		LocalFile.KoroneikiAccountAPI._removeContactRolesFromContact(
+			accountName = "Koroneiki Auto Subsidiary",
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			table = '''| Optional Account Customer Role |''');
+
+		LocalFile.KoroneikiAccountAPI._viewNoContactRole(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Default Account Customer Role");
+
+		LocalFile.KoroneikiAccountAPI._viewNoContactRole(
+			accountName = "Koroneiki Auto Subsidiary",
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			contactRoleName = "Optional Account Customer Role");
+
+		LocalFile.KoroneikiAccountAPI._viewNoContactRole(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Optional Account Customer Role");
+
+		LocalFile.KoroneikiAccountAPI._viewNoContactRole(
+			accountName = "Koroneiki Auto Subsidiary",
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			contactRoleName = "Default Account Customer Role");
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Member");
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Koroneiki Auto Subsidiary",
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			contactRoleName = "Member");
+
+		LocalFile.KoroneikiContactAPI._viewNoAccountCustomerContactRoleViaUuid(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Default Account Customer Role");
+
+		LocalFile.KoroneikiContactAPI._viewAccountCustomerContactRoleViaUuid(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Member");
+
+		LocalFile.KoroneikiContactAPI._viewNoAccountCustomerContactRoleViaUuid(
+			accountName = "Koroneiki Auto Subsidiary",
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			contactRoleName = "Optional Account Customer Role");
+
+		LocalFile.KoroneikiContactAPI._viewAccountCustomerContactRoleViaUuid(
+			accountName = "Koroneiki Auto Subsidiary",
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			contactRoleName = "Member");
+
+		LocalFile.KoroneikiContactAPI._viewNoAccountCustomerContactRoleViaUuid(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Optional Account Customer Role");
+
+		LocalFile.KoroneikiContactAPI._viewNoAccountCustomerContactRoleViaUuid(
+			accountName = "Koroneiki Auto Subsidiary",
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			contactRoleName = "Default Account Customer Role");
+
+		LocalFile.KoroneikiTeamAPI._viewContactRole(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Member",
+			teamName = "Koroneiki Automotive");
+
+		LocalFile.KoroneikiTeamAPI._viewContactRole(
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			contactRoleName = "Member",
+			teamName = "Koroneiki Auto Subsidiary");
+	}
+
+	test Updateaccountandcontactandcontactrolewhencontactisassignedaccountcustomercontactrole {
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code         | KORAUTO                              | |
+	| Description  | Test automotive account on koroneiki | |
+	| Fax Number   | 555-555-1234                         | |
+	| Name         | Koroneiki Automotive                 | |
+	| Phone Number | 555-555-5678                         | |
+	| Region       | United States                        | |
+	| Status       | Active                               | |
+	| Tier         | T4                                   | |
+	| Website      | www.koroneikiautomotive.com          | |''');
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRole(table = '''| Description | This is the default customer role for accounts |
+	| Name        | Default Account Customer Role                  |
+	| Type        | Account Customer                               |''');
+
+		LocalFile.KoroneikiAccountAPI._assignCustomerContacts(
+			accountName = "Koroneiki Automotive",
+			table = '''| koroneiki.contact1@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Default Account Customer Role |''');
+
+		LocalFile.KoroneikiAccountAPI._updateAccount(
+			accountName = "Koroneiki Automotive",
+			table = '''| Code                  | KORENGR                                  | |
+	| Contact Email Address | koroneiki.contact2@lrcustomer.com.broken | |
+	| Description           | Test engineering account on koroneiki    | |
+	| Fax Number            | 555-555-4321                             | |
+	| Name                  | Koroneiki Engineering                    | |
+	| Phone Number          | 555-555-8765                             | |
+	| Profile Email Address | koroneiki.contact2@lrcustomer.com.broken | |
+	| Region                | Japan                                    | |
+	| Status                | Active                                   | |
+	| Tier                  | T1                                       | |
+	| Website               | www.koroneikiengineering.com             | |''');
+
+		LocalFile.KoroneikiContactAPI._updateContactViaEmailAddress(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Email Address | koroneiki.contact2@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Last Name     | Contact2                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiContactRoleAPI._updateContactRole(
+			contactRoleName = "Default Account Customer Role",
+			table = '''| Description | This is the optional customer role for accounts |
+	| Name        | Optional Account Customer Role                  |
+	| Type        | Account Customer                                |''');
+
+		LocalFile.KoroneikiAccountAPI._viewNoAccount(accountName = "Koroneiki Automotive");
+
+		LocalFile.KoroneikiContactAPI._viewNoContact(contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken");
+
+		LocalFile.KoroneikiContactRoleAPI._viewNoContactRole(contactRoleName = "Default Account Customer Role");
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Koroneiki Engineering",
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			contactRoleName = "Optional Account Customer Role");
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Koroneiki Engineering",
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			contactRoleName = "Member");
+
+		LocalFile.KoroneikiAccountAPI._viewNoContactRole(
+			accountName = "Koroneiki Engineering",
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			contactRoleName = "Default Account Customer Role");
+
+		LocalFile.KoroneikiContactAPI._viewAccountCustomerContactRoleViaUuid(
+			accountName = "Koroneiki Engineering",
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			contactRoleName = "Optional Account Customer Role");
+
+		LocalFile.KoroneikiContactAPI._viewAccountCustomerContactRoleViaUuid(
+			accountName = "Koroneiki Engineering",
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			contactRoleName = "Member");
+
+		LocalFile.KoroneikiContactAPI._viewNoAccountCustomerContactRoleViaUuid(
+			accountName = "Koroneiki Engineering",
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			contactRoleName = "Default Account Customer Role");
+
+		LocalFile.KoroneikiTeamAPI._viewContactRole(
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			contactRoleName = "Member",
+			teamName = "Koroneiki Engineering");
+	}
+
+	test Updateaccountandcontactwhencontactisassignedaccountcustomercontactrole {
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code         | KORAUTO                              | |
+	| Description  | Test automotive account on koroneiki | |
+	| Fax Number   | 555-555-1234                         | |
+	| Name         | Koroneiki Automotive                 | |
+	| Phone Number | 555-555-5678                         | |
+	| Region       | United States                        | |
+	| Status       | Active                               | |
+	| Tier         | T4                                   | |
+	| Website      | www.koroneikiautomotive.com          | |''');
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRole(table = '''| Description | This is the default customer role for accounts |
+	| Name        | Default Account Customer Role                  |
+	| Type        | Account Customer                               |''');
+
+		LocalFile.KoroneikiAccountAPI._assignCustomerContacts(
+			accountName = "Koroneiki Automotive",
+			table = '''| koroneiki.contact1@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Default Account Customer Role |''');
+
+		LocalFile.KoroneikiAccountAPI._updateAccount(
+			accountName = "Koroneiki Automotive",
+			table = '''| Code                  | KORENGR                                  | |
+	| Contact Email Address | koroneiki.contact2@lrcustomer.com.broken | |
+	| Description           | Test engineering account on koroneiki    | |
+	| Fax Number            | 555-555-4321                             | |
+	| Name                  | Koroneiki Engineering                    | |
+	| Phone Number          | 555-555-8765                             | |
+	| Profile Email Address | koroneiki.contact2@lrcustomer.com.broken | |
+	| Region                | Japan                                    | |
+	| Status                | Active                                   | |
+	| Tier                  | T1                                       | |
+	| Website               | www.koroneikiengineering.com             | |''');
+
+		LocalFile.KoroneikiContactAPI._updateContactViaEmailAddress(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Email Address | koroneiki.contact2@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Last Name     | Contact2                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiAccountAPI._viewNoAccount(accountName = "Koroneiki Automotive");
+
+		LocalFile.KoroneikiContactAPI._viewNoContact(contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken");
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Koroneiki Engineering",
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			contactRoleName = "Default Account Customer Role");
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Koroneiki Engineering",
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			contactRoleName = "Member");
+
+		LocalFile.KoroneikiContactAPI._viewAccountCustomerContactRoleViaUuid(
+			accountName = "Koroneiki Engineering",
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			contactRoleName = "Default Account Customer Role");
+
+		LocalFile.KoroneikiContactAPI._viewAccountCustomerContactRoleViaUuid(
+			accountName = "Koroneiki Engineering",
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			contactRoleName = "Member");
+
+		LocalFile.KoroneikiTeamAPI._viewContactRole(
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			contactRoleName = "Member",
+			teamName = "Koroneiki Engineering");
+	}
+
+	test Updateaccountcustomercontactroleoncontact {
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code         | KORAUTO                              | |
+	| Description  | Test automotive account on koroneiki | |
+	| Fax Number   | 555-555-1234                         | |
+	| Name         | Koroneiki Automotive                 | |
+	| Phone Number | 555-555-5678                         | |
+	| Region       | United States                        | |
+	| Status       | Active                               | |
+	| Tier         | T4                                   | |
+	| Website      | www.koroneikiautomotive.com          | |''');
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRole(table = '''| Description | This is the default customer role for accounts |
+	| Name        | Default Account Customer Role                  |
+	| Type        | Account Customer                               |''');
+
+		LocalFile.KoroneikiAccountAPI._assignCustomerContacts(
+			accountName = "Koroneiki Automotive",
+			table = '''| koroneiki.contact1@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Default Account Customer Role |''');
+
+		LocalFile.KoroneikiContactRoleAPI._updateContactRole(
+			contactRoleName = "Default Account Customer Role",
+			table = '''| Description | This is the optional customer role for accounts |
+	| Name        | Optional Account Customer Role                  |
+	| Type        | Account Customer                                |''');
+
+		LocalFile.KoroneikiContactRoleAPI._viewNoContactRole(contactRoleName = "Default Account Customer Role");
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Optional Account Customer Role");
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Member");
+
+		LocalFile.KoroneikiAccountAPI._viewNoContactRole(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Default Account Customer Role");
+
+		LocalFile.KoroneikiContactAPI._viewAccountCustomerContactRoleViaUuid(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Optional Account Customer Role");
+
+		LocalFile.KoroneikiContactAPI._viewAccountCustomerContactRoleViaUuid(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Member");
+
+		LocalFile.KoroneikiContactAPI._viewNoAccountCustomerContactRoleViaUuid(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Default Account Customer Role");
+
+		LocalFile.KoroneikiTeamAPI._viewContactRole(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Member",
+			teamName = "Koroneiki Automotive");
+	}
+
+	test Updateaccountwithcontactwithaccountcustomercontactrole {
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code         | KORAUTO                              | |
+	| Description  | Test automotive account on koroneiki | |
+	| Fax Number   | 555-555-1234                         | |
+	| Name         | Koroneiki Automotive                 | |
+	| Phone Number | 555-555-5678                         | |
+	| Region       | United States                        | |
+	| Status       | Active                               | |
+	| Tier         | T4                                   | |
+	| Website      | www.koroneikiautomotive.com          | |''');
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRole(table = '''| Description | This is the default customer role for accounts |
+	| Name        | Default Account Customer Role                  |
+	| Type        | Account Customer                               |''');
+
+		LocalFile.KoroneikiAccountAPI._assignCustomerContacts(
+			accountName = "Koroneiki Automotive",
+			table = '''| koroneiki.contact1@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Default Account Customer Role |''');
+
+		LocalFile.KoroneikiAccountAPI._updateAccount(
+			accountName = "Koroneiki Automotive",
+			table = '''| Code                  | KORENGR                                  | |
+	| Contact Email Address | koroneiki.contact2@lrcustomer.com.broken | |
+	| Description           | Test engineering account on koroneiki    | |
+	| Fax Number            | 555-555-4321                             | |
+	| Name                  | Koroneiki Engineering                    | |
+	| Phone Number          | 555-555-8765                             | |
+	| Profile Email Address | koroneiki.contact2@lrcustomer.com.broken | |
+	| Region                | Japan                                    | |
+	| Status                | Active                                   | |
+	| Tier                  | T1                                       | |
+	| Website               | www.koroneikiengineering.com             | |''');
+
+		LocalFile.KoroneikiAccountAPI._viewNoAccount(accountName = "Koroneiki Automotive");
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Koroneiki Engineering",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Default Account Customer Role");
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Koroneiki Engineering",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Member");
+
+		LocalFile.KoroneikiContactAPI._viewAccountCustomerContactRoleViaUuid(
+			accountName = "Koroneiki Engineering",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Default Account Customer Role");
+
+		LocalFile.KoroneikiContactAPI._viewAccountCustomerContactRoleViaUuid(
+			accountName = "Koroneiki Engineering",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Member");
+
+		LocalFile.KoroneikiTeamAPI._viewContactRole(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Member",
+			teamName = "Koroneiki Engineering");
+	}
+
+	test Updatecontactwithaccountcustomercontactrole {
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code         | KORAUTO                              | |
+	| Description  | Test automotive account on koroneiki | |
+	| Fax Number   | 555-555-1234                         | |
+	| Name         | Koroneiki Automotive                 | |
+	| Phone Number | 555-555-5678                         | |
+	| Region       | United States                        | |
+	| Status       | Active                               | |
+	| Tier         | T4                                   | |
+	| Website      | www.koroneikiautomotive.com          | |''');
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRole(table = '''| Description | This is the default customer role for accounts |
+	| Name        | Default Account Customer Role                  |
+	| Type        | Account Customer                               |''');
+
+		LocalFile.KoroneikiAccountAPI._assignCustomerContacts(
+			accountName = "Koroneiki Automotive",
+			table = '''| koroneiki.contact1@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Default Account Customer Role |''');
+
+		LocalFile.KoroneikiContactAPI._updateContactViaEmailAddress(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Email Address | koroneiki.contact2@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Last Name     | Contact2                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiContactAPI._viewNoContact(contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken");
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			contactRoleName = "Default Account Customer Role");
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			contactRoleName = "Member");
+
+		LocalFile.KoroneikiContactAPI._viewAccountCustomerContactRoleViaUuid(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			contactRoleName = "Default Account Customer Role");
+
+		LocalFile.KoroneikiContactAPI._viewAccountCustomerContactRoleViaUuid(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			contactRoleName = "Member");
+
+		LocalFile.KoroneikiTeamAPI._viewContactRole(
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			contactRoleName = "Member",
+			teamName = "Koroneiki Automotive");
+	}
+
+	test Viewaccountandcontactauditentriesforcontactroleassignment {
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code         | KORAUTO                              | |
+	| Description  | Test automotive account on koroneiki | |
+	| Fax Number   | 555-555-1234                         | |
+	| Name         | Koroneiki Automotive                 | |
+	| Phone Number | 555-555-5678                         | |
+	| Region       | United States                        | |
+	| Status       | Active                               | |
+	| Tier         | T4                                   | |
+	| Website      | www.koroneikiautomotive.com          | |''');
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRole(table = '''| Description | This is the default customer role for accounts |
+	| Name        | Default Account Customer Role                  |
+	| Type        | Account Customer                               |''');
+
+		LocalFile.KoroneikiAccountAPI._assignCustomerContacts(
+			accountName = "Koroneiki Automotive",
+			table = '''| koroneiki.contact1@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Default Account Customer Role |''');
+
+		LocalFile.KoroneikiAccountAPI._removeContactRolesFromContact(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Default Account Customer Role |''');
+
+		LocalFile.KoroneikiAccountAPI._viewAccountAuditEntryRegardingAdditionalEntities(
+			accountName = "Koroneiki Automotive",
+			agentName = "Koroneiki QA Service Producer",
+			description = "Koroneiki User Contact1",
+			field = "Contact Role",
+			newValue = "Member",
+			oldValue = "",
+			summary = "Assigned Contact");
+
+		LocalFile.KoroneikiAccountAPI._viewAccountAuditEntryRegardingAdditionalEntities(
+			accountName = "Koroneiki Automotive",
+			agentName = "Koroneiki QA Service Producer",
+			description = "Koroneiki User Contact1",
+			field = "Contact Role",
+			newValue = "Default Account Customer Role",
+			oldValue = "",
+			summary = "Assigned Contact");
+
+		LocalFile.KoroneikiAccountAPI._viewAccountAuditEntryRegardingAdditionalEntities(
+			accountName = "Koroneiki Automotive",
+			agentName = "Koroneiki QA Service Producer",
+			description = "Koroneiki User Contact1",
+			field = "Contact Role",
+			newValue = "",
+			oldValue = "Default Account Customer Role",
+			summary = "Unassigned Contact");
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryRegardingAdditionalEntities(
+			action = "Assign",
+			agentName = "Koroneiki QA Service Producer",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			description = "Member",
+			field = "Account",
+			newValue = "Koroneiki Automotive",
+			oldValue = "");
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryRegardingAdditionalEntities(
+			action = "Assign",
+			agentName = "Koroneiki QA Service Producer",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			description = "Default Account Customer Role",
+			field = "Account",
+			newValue = "Koroneiki Automotive",
+			oldValue = "");
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryRegardingAdditionalEntities(
+			action = "Unassign",
+			agentName = "Koroneiki QA Service Producer",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			description = "Default Account Customer Role",
+			field = "Account",
+			newValue = "",
+			oldValue = "Koroneiki Automotive");
+
+		LocalFile.KoroneikiAccountAPI._viewAccountAuditEntryRegardingAdditionalEntitiesViaAuditEntryKey(
+			accountName = "Koroneiki Automotive",
+			agentName = "Koroneiki QA Service Producer",
+			description = "Koroneiki User Contact1",
+			field = "Contact Role",
+			newValue = "Member",
+			oldValue = "",
+			summary = "Assigned Contact");
+
+		LocalFile.KoroneikiAccountAPI._viewAccountAuditEntryRegardingAdditionalEntitiesViaAuditEntryKey(
+			accountName = "Koroneiki Automotive",
+			agentName = "Koroneiki QA Service Producer",
+			description = "Koroneiki User Contact1",
+			field = "Contact Role",
+			newValue = "Default Account Customer Role",
+			oldValue = "",
+			summary = "Assigned Contact");
+
+		LocalFile.KoroneikiAccountAPI._viewAccountAuditEntryRegardingAdditionalEntitiesViaAuditEntryKey(
+			accountName = "Koroneiki Automotive",
+			agentName = "Koroneiki QA Service Producer",
+			description = "Koroneiki User Contact1",
+			field = "Contact Role",
+			newValue = "",
+			oldValue = "Default Account Customer Role",
+			summary = "Unassigned Contact");
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryRegardingAdditionalEntitiesViaAuditEntryKey(
+			action = "Assign",
+			agentName = "Koroneiki QA Service Producer",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			description = "Member",
+			field = "Account",
+			newValue = "Koroneiki Automotive",
+			oldValue = "");
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryRegardingAdditionalEntitiesViaAuditEntryKey(
+			action = "Assign",
+			agentName = "Koroneiki QA Service Producer",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			description = "Default Account Customer Role",
+			field = "Account",
+			newValue = "Koroneiki Automotive",
+			oldValue = "");
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryRegardingAdditionalEntitiesViaAuditEntryKey(
+			action = "Unassign",
+			agentName = "Koroneiki QA Service Producer",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			description = "Default Account Customer Role",
+			field = "Account",
+			newValue = "",
+			oldValue = "Koroneiki Automotive");
+	}
+
+	test Viewaccountandcontactauditentriesforcontactroleassignmentafterentityupdates {
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code         | KORAUTO                              | |
+	| Description  | Test automotive account on koroneiki | |
+	| Fax Number   | 555-555-1234                         | |
+	| Name         | Koroneiki Automotive                 | |
+	| Phone Number | 555-555-5678                         | |
+	| Region       | United States                        | |
+	| Status       | Active                               | |
+	| Tier         | T4                                   | |
+	| Website      | www.koroneikiautomotive.com          | |''');
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRole(table = '''| Description | This is the default customer role for accounts |
+	| Name        | Default Account Customer Role                  |
+	| Type        | Account Customer                               |''');
+
+		LocalFile.KoroneikiAccountAPI._assignCustomerContacts(
+			accountName = "Koroneiki Automotive",
+			table = '''| koroneiki.contact1@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Default Account Customer Role |''');
+
+		LocalFile.KoroneikiAccountAPI._updateAccount(
+			accountName = "Koroneiki Automotive",
+			table = '''| Code                  | KORENGR                                  | |
+	| Contact Email Address | koroneiki.contact2@lrcustomer.com.broken | |
+	| Description           | Test engineering account on koroneiki    | |
+	| Fax Number            | 555-555-4321                             | |
+	| Name                  | Koroneiki Engineering                    | |
+	| Phone Number          | 555-555-8765                             | |
+	| Profile Email Address | koroneiki.contact2@lrcustomer.com.broken | |
+	| Region                | Japan                                    | |
+	| Status                | Active                                   | |
+	| Tier                  | T1                                       | |
+	| Website               | www.koroneikiengineering.com             | |''');
+
+		LocalFile.KoroneikiContactAPI._updateContactViaEmailAddress(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Email Address | koroneiki.contact2@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Last Name     | Contact2                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiContactRoleAPI._updateContactRole(
+			contactRoleName = "Default Account Customer Role",
+			table = '''| Description | This is the optional customer role for accounts |
+	| Name        | Optional Account Customer Role                  |
+	| Type        | Account Customer                                |''');
+
+		LocalFile.KoroneikiAccountAPI._removeContactRolesFromContact(
+			accountName = "Koroneiki Engineering",
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			table = '''| Optional Account Customer Role |''');
+
+		LocalFile.KoroneikiAccountAPI._viewAccountAuditEntryRegardingAdditionalEntities(
+			accountName = "Koroneiki Engineering",
+			agentName = "Koroneiki QA Service Producer",
+			description = "Koroneiki User Contact1",
+			field = "Contact Role",
+			newValue = "Member",
+			oldValue = "",
+			summary = "Assigned Contact");
+
+		LocalFile.KoroneikiAccountAPI._viewAccountAuditEntryRegardingAdditionalEntities(
+			accountName = "Koroneiki Engineering",
+			agentName = "Koroneiki QA Service Producer",
+			description = "Koroneiki User Contact1",
+			field = "Contact Role",
+			newValue = "Default Account Customer Role",
+			oldValue = "",
+			summary = "Assigned Contact");
+
+		LocalFile.KoroneikiAccountAPI._viewAccountAuditEntryRegardingAdditionalEntities(
+			accountName = "Koroneiki Engineering",
+			agentName = "Koroneiki QA Service Producer",
+			description = "Koroneiki User Contact2",
+			field = "Contact Role",
+			newValue = "",
+			oldValue = "Optional Account Customer Role",
+			summary = "Unassigned Contact");
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryRegardingAdditionalEntities(
+			action = "Assign",
+			agentName = "Koroneiki QA Service Producer",
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			description = "Member",
+			field = "Account",
+			newValue = "Koroneiki Automotive",
+			oldValue = "");
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryRegardingAdditionalEntities(
+			action = "Assign",
+			agentName = "Koroneiki QA Service Producer",
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			description = "Default Account Customer Role",
+			field = "Account",
+			newValue = "Koroneiki Automotive",
+			oldValue = "");
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryRegardingAdditionalEntities(
+			action = "Unassign",
+			agentName = "Koroneiki QA Service Producer",
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			description = "Optional Account Customer Role",
+			field = "Account",
+			newValue = "",
+			oldValue = "Koroneiki Engineering");
+
+		LocalFile.KoroneikiAccountAPI._viewAccountAuditEntryRegardingAdditionalEntitiesViaAuditEntryKey(
+			accountName = "Koroneiki Engineering",
+			agentName = "Koroneiki QA Service Producer",
+			description = "Koroneiki User Contact1",
+			field = "Contact Role",
+			newValue = "Member",
+			oldValue = "",
+			summary = "Assigned Contact");
+
+		LocalFile.KoroneikiAccountAPI._viewAccountAuditEntryRegardingAdditionalEntitiesViaAuditEntryKey(
+			accountName = "Koroneiki Engineering",
+			agentName = "Koroneiki QA Service Producer",
+			description = "Koroneiki User Contact1",
+			field = "Contact Role",
+			newValue = "Default Account Customer Role",
+			oldValue = "",
+			summary = "Assigned Contact");
+
+		LocalFile.KoroneikiAccountAPI._viewAccountAuditEntryRegardingAdditionalEntitiesViaAuditEntryKey(
+			accountName = "Koroneiki Engineering",
+			agentName = "Koroneiki QA Service Producer",
+			description = "Koroneiki User Contact2",
+			field = "Contact Role",
+			newValue = "",
+			oldValue = "Optional Account Customer Role",
+			summary = "Unassigned Contact");
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryRegardingAdditionalEntitiesViaAuditEntryKey(
+			action = "Assign",
+			agentName = "Koroneiki QA Service Producer",
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			description = "Member",
+			field = "Account",
+			newValue = "Koroneiki Automotive",
+			oldValue = "");
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryRegardingAdditionalEntitiesViaAuditEntryKey(
+			action = "Assign",
+			agentName = "Koroneiki QA Service Producer",
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			description = "Default Account Customer Role",
+			field = "Account",
+			newValue = "Koroneiki Automotive",
+			oldValue = "");
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryRegardingAdditionalEntitiesViaAuditEntryKey(
+			action = "Unassign",
+			agentName = "Koroneiki QA Service Producer",
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			description = "Optional Account Customer Role",
+			field = "Account",
+			newValue = "",
+			oldValue = "Koroneiki Engineering");
+	}
+
+	test Viewaccountandcontactauditentriesforcontactroleassignmentbyagent {
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code         | KORAUTO                              | |
+	| Description  | Test automotive account on koroneiki | |
+	| Fax Number   | 555-555-1234                         | |
+	| Name         | Koroneiki Automotive                 | |
+	| Phone Number | 555-555-5678                         | |
+	| Region       | United States                        | |
+	| Status       | Active                               | |
+	| Tier         | T4                                   | |
+	| Website      | www.koroneikiautomotive.com          | |''');
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRole(table = '''| Description | This is the default customer role for accounts |
+	| Name        | Default Account Customer Role                  |
+	| Type        | Account Customer                               |''');
+
+		LocalFile.KoroneikiAccountAPI._assignCustomerContactsExecutedByAgent(
+			accountName = "Koroneiki Automotive",
+			agentName = "Koroneiki User",
+			table = '''| koroneiki.contact1@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContactExecutedByAgent(
+			accountName = "Koroneiki Automotive",
+			agentName = "Koroneiki User",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Default Account Customer Role |''');
+
+		LocalFile.KoroneikiAccountAPI._removeContactRolesFromContactExecutedByAgent(
+			accountName = "Koroneiki Automotive",
+			agentName = "Koroneiki User",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Default Account Customer Role |''');
+
+		LocalFile.KoroneikiAccountAPI._viewAccountAuditEntryRegardingAdditionalEntities(
+			accountName = "Koroneiki Automotive",
+			agentName = "Koroneiki User",
+			description = "Koroneiki User Contact1",
+			field = "Contact Role",
+			newValue = "Member",
+			oldValue = "",
+			summary = "Assigned Contact");
+
+		LocalFile.KoroneikiAccountAPI._viewAccountAuditEntryRegardingAdditionalEntities(
+			accountName = "Koroneiki Automotive",
+			agentName = "Koroneiki User",
+			description = "Koroneiki User Contact1",
+			field = "Contact Role",
+			newValue = "Default Account Customer Role",
+			oldValue = "",
+			summary = "Assigned Contact");
+
+		LocalFile.KoroneikiAccountAPI._viewAccountAuditEntryRegardingAdditionalEntities(
+			accountName = "Koroneiki Automotive",
+			agentName = "Koroneiki User",
+			description = "Koroneiki User Contact1",
+			field = "Contact Role",
+			newValue = "",
+			oldValue = "Default Account Customer Role",
+			summary = "Unassigned Contact");
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryRegardingAdditionalEntities(
+			action = "Assign",
+			agentName = "Koroneiki User",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			description = "Member",
+			field = "Account",
+			newValue = "Koroneiki Automotive",
+			oldValue = "");
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryRegardingAdditionalEntities(
+			action = "Assign",
+			agentName = "Koroneiki User",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			description = "Default Account Customer Role",
+			field = "Account",
+			newValue = "Koroneiki Automotive",
+			oldValue = "");
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryRegardingAdditionalEntities(
+			action = "Unassign",
+			agentName = "Koroneiki User",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			description = "Default Account Customer Role",
+			field = "Account",
+			newValue = "",
+			oldValue = "Koroneiki Automotive");
+
+		LocalFile.KoroneikiAccountAPI._viewAccountAuditEntryRegardingAdditionalEntitiesViaAuditEntryKey(
+			accountName = "Koroneiki Automotive",
+			agentName = "Koroneiki User",
+			description = "Koroneiki User Contact1",
+			field = "Contact Role",
+			newValue = "Member",
+			oldValue = "",
+			summary = "Assigned Contact");
+
+		LocalFile.KoroneikiAccountAPI._viewAccountAuditEntryRegardingAdditionalEntitiesViaAuditEntryKey(
+			accountName = "Koroneiki Automotive",
+			agentName = "Koroneiki User",
+			description = "Koroneiki User Contact1",
+			field = "Contact Role",
+			newValue = "Default Account Customer Role",
+			oldValue = "",
+			summary = "Assigned Contact");
+
+		LocalFile.KoroneikiAccountAPI._viewAccountAuditEntryRegardingAdditionalEntitiesViaAuditEntryKey(
+			accountName = "Koroneiki Automotive",
+			agentName = "Koroneiki User",
+			description = "Koroneiki User Contact1",
+			field = "Contact Role",
+			newValue = "",
+			oldValue = "Default Account Customer Role",
+			summary = "Unassigned Contact");
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryRegardingAdditionalEntitiesViaAuditEntryKey(
+			action = "Assign",
+			agentName = "Koroneiki User",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			description = "Member",
+			field = "Account",
+			newValue = "Koroneiki Automotive",
+			oldValue = "");
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryRegardingAdditionalEntitiesViaAuditEntryKey(
+			action = "Assign",
+			agentName = "Koroneiki User",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			description = "Default Account Customer Role",
+			field = "Account",
+			newValue = "Koroneiki Automotive",
+			oldValue = "");
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryRegardingAdditionalEntitiesViaAuditEntryKey(
+			action = "Unassign",
+			agentName = "Koroneiki User",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			description = "Default Account Customer Role",
+			field = "Account",
+			newValue = "",
+			oldValue = "Koroneiki Automotive");
+	}
+
+	test Viewaccountandcontactauditentriesforcontactroleassignmentbyagentandadmin {
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code         | KORAUTO                              | |
+	| Description  | Test automotive account on koroneiki | |
+	| Fax Number   | 555-555-1234                         | |
+	| Name         | Koroneiki Automotive                 | |
+	| Phone Number | 555-555-5678                         | |
+	| Region       | United States                        | |
+	| Status       | Active                               | |
+	| Tier         | T4                                   | |
+	| Website      | www.koroneikiautomotive.com          | |''');
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRole(table = '''| Description | This is the default customer role for accounts |
+	| Name        | Default Account Customer Role                  |
+	| Type        | Account Customer                               |''');
+
+		LocalFile.KoroneikiAccountAPI._assignCustomerContactsExecutedByAgent(
+			accountName = "Koroneiki Automotive",
+			agentName = "Koroneiki User",
+			table = '''| koroneiki.contact1@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Default Account Customer Role |''');
+
+		LocalFile.KoroneikiAccountAPI._removeContactRolesFromContactExecutedByAgent(
+			accountName = "Koroneiki Automotive",
+			agentName = "Koroneiki User",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Default Account Customer Role |''');
+
+		LocalFile.KoroneikiAccountAPI._viewAccountAuditEntryRegardingAdditionalEntities(
+			accountName = "Koroneiki Automotive",
+			agentName = "Koroneiki User",
+			description = "Koroneiki User Contact1",
+			field = "Contact Role",
+			newValue = "Member",
+			oldValue = "",
+			summary = "Assigned Contact");
+
+		LocalFile.KoroneikiAccountAPI._viewAccountAuditEntryRegardingAdditionalEntities(
+			accountName = "Koroneiki Automotive",
+			agentName = "Koroneiki QA Service Producer",
+			description = "Koroneiki User Contact1",
+			field = "Contact Role",
+			newValue = "Default Account Customer Role",
+			oldValue = "",
+			summary = "Assigned Contact");
+
+		LocalFile.KoroneikiAccountAPI._viewAccountAuditEntryRegardingAdditionalEntities(
+			accountName = "Koroneiki Automotive",
+			agentName = "Koroneiki User",
+			description = "Koroneiki User Contact1",
+			field = "Contact Role",
+			newValue = "",
+			oldValue = "Default Account Customer Role",
+			summary = "Unassigned Contact");
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryRegardingAdditionalEntities(
+			action = "Assign",
+			agentName = "Koroneiki User",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			description = "Member",
+			field = "Account",
+			newValue = "Koroneiki Automotive",
+			oldValue = "");
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryRegardingAdditionalEntities(
+			action = "Assign",
+			agentName = "Koroneiki QA Service Producer",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			description = "Default Account Customer Role",
+			field = "Account",
+			newValue = "Koroneiki Automotive",
+			oldValue = "");
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryRegardingAdditionalEntities(
+			action = "Unassign",
+			agentName = "Koroneiki User",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			description = "Default Account Customer Role",
+			field = "Account",
+			newValue = "",
+			oldValue = "Koroneiki Automotive");
+
+		LocalFile.KoroneikiAccountAPI._viewAccountAuditEntryRegardingAdditionalEntitiesViaAuditEntryKey(
+			accountName = "Koroneiki Automotive",
+			agentName = "Koroneiki User",
+			description = "Koroneiki User Contact1",
+			field = "Contact Role",
+			newValue = "Member",
+			oldValue = "",
+			summary = "Assigned Contact");
+
+		LocalFile.KoroneikiAccountAPI._viewAccountAuditEntryRegardingAdditionalEntitiesViaAuditEntryKey(
+			accountName = "Koroneiki Automotive",
+			agentName = "Koroneiki QA Service Producer",
+			description = "Koroneiki User Contact1",
+			field = "Contact Role",
+			newValue = "Default Account Customer Role",
+			oldValue = "",
+			summary = "Assigned Contact");
+
+		LocalFile.KoroneikiAccountAPI._viewAccountAuditEntryRegardingAdditionalEntitiesViaAuditEntryKey(
+			accountName = "Koroneiki Automotive",
+			agentName = "Koroneiki User",
+			description = "Koroneiki User Contact1",
+			field = "Contact Role",
+			newValue = "",
+			oldValue = "Default Account Customer Role",
+			summary = "Unassigned Contact");
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryRegardingAdditionalEntitiesViaAuditEntryKey(
+			action = "Assign",
+			agentName = "Koroneiki User",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			description = "Member",
+			field = "Account",
+			newValue = "Koroneiki Automotive",
+			oldValue = "");
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryRegardingAdditionalEntitiesViaAuditEntryKey(
+			action = "Assign",
+			agentName = "Koroneiki QA Service Producer",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			description = "Default Account Customer Role",
+			field = "Account",
+			newValue = "Koroneiki Automotive",
+			oldValue = "");
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryRegardingAdditionalEntitiesViaAuditEntryKey(
+			action = "Unassign",
+			agentName = "Koroneiki User",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			description = "Default Account Customer Role",
+			field = "Account",
+			newValue = "",
+			oldValue = "Koroneiki Automotive");
+	}
+
+	test Viewaccountmodifieddatevalueaftercontactupdates {
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code         | KORAUTO                              | |
+	| Description  | Test automotive account on koroneiki | |
+	| Fax Number   | 555-555-1234                         | |
+	| Name         | Koroneiki Automotive                 | |
+	| Phone Number | 555-555-5678                         | |
+	| Region       | United States                        | |
+	| Status       | Active                               | |
+	| Tier         | T4                                   | |
+	| Website      | www.koroneikiautomotive.com          | |''');
+
+		LocalFile.KoroneikiAccountAPI._getAccountDateModifiedValue(accountName = "Koroneiki Automotive");
+
+		LocalFile.KoroneikiAccountAPI._renameFirstAccountDateModifiedValue();
+
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiAccountAPI._assignCustomerContacts(
+			accountName = "Koroneiki Automotive",
+			table = '''| koroneiki.contact1@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Default Account Customer Role |''');
+
+		LocalFile.KoroneikiAccountAPI._getAccountDateModifiedValue(accountName = "Koroneiki Automotive");
+
+		LocalFile.KoroneikiAccountAPI._renameSecondAccountDateModifiedValue();
+
+		LocalFile.KoroneikiAccountAPI._assertDifferentAccountDateModifiedValuesFirst(
+			accountDateModifiedValue1 = ${staticAccountDateModified1Value1},
+			accountDateModifiedValue2 = ${staticAccountDateModified1Value2});
+
+		LocalFile.KoroneikiContactRoleAPI._updateContactRole(
+			contactRoleName = "Default Account Customer Role",
+			table = '''| Description | This is the optional customer role for accounts |
+	| Name        | Optional Account Customer Role                  |
+	| Type        | Account Customer                                |''');
+
+		LocalFile.KoroneikiContactRoleAPI._viewNoContactRole(contactRoleName = "Default Account Customer Role");
+
+		LocalFile.KoroneikiAccountAPI._getAccountDateModifiedValue(accountName = "Koroneiki Automotive");
+
+		LocalFile.KoroneikiAccountAPI._renameThirdAccountDateModifiedValue();
+
+		LocalFile.KoroneikiAccountAPI._assertDifferentAccountDateModifiedValuesFirst(
+			accountDateModifiedValue1 = ${staticAccountDateModifiedValue2},
+			accountDateModifiedValue2 = ${accountDateModifiedValue3});
+
+		LocalFile.KoroneikiAccountAPI._removeContactRolesFromContact(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Optional Account Customer Role |''');
+
+		LocalFile.KoroneikiAccountAPI._viewNoContactRole(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Optional Account Customer Role");
+
+		LocalFile.KoroneikiAccountAPI._getAccountDateModifiedValue(accountName = "Koroneiki Automotive");
+
+		LocalFile.KoroneikiAccountAPI._renameFourthAccountDateModifiedValue();
+
+		LocalFile.KoroneikiAccountAPI._assertDifferentAccountDateModifiedValuesFirst(
+			accountDateModifiedValue1 = ${accountDateModifiedValue3},
+			accountDateModifiedValue2 = ${accountDateModifiedValue4});
+	}
+
+}

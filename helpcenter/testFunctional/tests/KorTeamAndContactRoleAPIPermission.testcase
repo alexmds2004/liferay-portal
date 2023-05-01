@@ -1,0 +1,464 @@
+definition {
+
+	property testray.main.component.name = "Support QA";
+	property type = "koroneiki";
+
+	tearDown {
+		LocalFile.KoroneikiContactAPI._tearDownContactPermissions(contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken");
+
+		LocalFile.KoroneikiContactRoleAPI._tearDownContactRolePermissions(contactRoleName = "Default Team Role");
+
+		LocalFile.KoroneikiAccountAPI._tearDownAccountPermissions(accountName = "Koroneiki Automotive");
+
+		LocalFile.KoroneikiAccountAPI._tearDownAccounts(table = '''| Koroneiki Automotive |''');
+
+		LocalFile.KoroneikiContactAPI._tearDownContacts(table = '''| koroneiki.contact1@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiContactRoleAPI._tearDownContactRoles(table = '''| Default Team Role |''');
+
+		LocalFile.KoroneikiTeamAPI._tearDownTeams(table = '''| Development Team |''');
+	}
+
+	test Assigncontactroletocontactaspermissioneduser {
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRole(table = '''| Description | This is the default role for teams |
+	| Name        | Default Team Role                  |
+	| Type        | Team                               |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code         | KORAUTO                              | |
+	| Description  | Test automotive account on koroneiki | |
+	| Fax Number   | 555-555-1234                         | |
+	| Name         | Koroneiki Automotive                 | |
+	| Phone Number | 555-555-5678                         | |
+	| Region       | United States                        | |
+	| Status       | Active                               | |
+	| Tier         | T4                                   | |
+	| Website      | www.koroneikiautomotive.com          | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountTeam(
+			accountName = "Koroneiki Automotive",
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._assignContacts(
+			table = '''| koroneiki.contact1@lrcustomer.com.broken |''',
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._setTeamPermissions(
+			table = '''| Assign Contact | true |''',
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiContactAPI._setContactPermissionsViaUuid(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| View | true |''');
+
+		LocalFile.KoroneikiContactRoleAPI._setContactRolePermissions(
+			contactRoleName = "Default Team Role",
+			table = '''| Assign Contact | true |''');
+
+		LocalFile.KoroneikiTeamAPIPermissionCheck._assignContactRolesToContact(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Default Team Role |''',
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._viewContactRole(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Default Team Role",
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._viewContactRole(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Member",
+			teamName = "Development Team");
+	}
+
+	test Assigncontactroletocontactattempt {
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRole(table = '''| Description | This is the default role for teams |
+	| Name        | Default Team Role                  |
+	| Type        | Team                               |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code         | KORAUTO                              | |
+	| Description  | Test automotive account on koroneiki | |
+	| Fax Number   | 555-555-1234                         | |
+	| Name         | Koroneiki Automotive                 | |
+	| Phone Number | 555-555-5678                         | |
+	| Region       | United States                        | |
+	| Status       | Active                               | |
+	| Tier         | T4                                   | |
+	| Website      | www.koroneikiautomotive.com          | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountTeam(
+			accountName = "Koroneiki Automotive",
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._assignContacts(
+			table = '''| koroneiki.contact1@lrcustomer.com.broken |''',
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPIPermissionCheck._assignContactRolesToContactAttempt(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Default Team Role |''',
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._viewNoContactRole(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Default Team Role",
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._viewContactRole(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Member",
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPIPermissionCheck._viewNoContactRole(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Member",
+			teamName = "Development Team");
+	}
+
+	test Assigncontactroletocontactattemptbynewlynonpermissioneduser {
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRole(table = '''| Description | This is the default role for teams |
+	| Name        | Default Team Role                  |
+	| Type        | Team                               |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code         | KORAUTO                              | |
+	| Description  | Test automotive account on koroneiki | |
+	| Fax Number   | 555-555-1234                         | |
+	| Name         | Koroneiki Automotive                 | |
+	| Phone Number | 555-555-5678                         | |
+	| Region       | United States                        | |
+	| Status       | Active                               | |
+	| Tier         | T4                                   | |
+	| Website      | www.koroneikiautomotive.com          | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountTeam(
+			accountName = "Koroneiki Automotive",
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._assignContacts(
+			table = '''| koroneiki.contact1@lrcustomer.com.broken |''',
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._setTeamPermissions(
+			table = '''| Assign Contact | true |''',
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiContactAPI._setContactPermissionsViaUuid(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| View | true |''');
+
+		LocalFile.KoroneikiContactRoleAPI._setContactRolePermissions(
+			contactRoleName = "Default Team Role",
+			table = '''| Assign Contact | true |''');
+
+		LocalFile.KoroneikiTeamAPI._unsetTeamPermissions(
+			table = '''| Assign Contact | true |''',
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiContactAPI._unsetContactPermissionsViaUuid(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| View | true |''');
+
+		LocalFile.KoroneikiContactRoleAPI._unsetContactRolePermissions(
+			contactRoleName = "Default Team Role",
+			table = '''| Assign Contact | true |''');
+
+		LocalFile.KoroneikiTeamAPIPermissionCheck._assignContactRolesToContactAttempt(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Default Team Role |''',
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._viewNoContactRole(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Default Team Role",
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._viewContactRole(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Member",
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPIPermissionCheck._viewNoContactRole(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Member",
+			teamName = "Development Team");
+	}
+
+	test Removecontactrolefromcontactattempt {
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code         | KORAUTO                              | |
+	| Description  | Test automotive account on koroneiki | |
+	| Fax Number   | 555-555-1234                         | |
+	| Name         | Koroneiki Automotive                 | |
+	| Phone Number | 555-555-5678                         | |
+	| Region       | United States                        | |
+	| Status       | Active                               | |
+	| Tier         | T4                                   | |
+	| Website      | www.koroneikiautomotive.com          | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountTeam(
+			accountName = "Koroneiki Automotive",
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRole(table = '''| Description | This is the default role for teams |
+	| Name        | Default Team Role                  |
+	| Type        | Team                               |''');
+
+		LocalFile.KoroneikiTeamAPI._assignContacts(
+			table = '''| koroneiki.contact1@lrcustomer.com.broken |''',
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._assignContactRolesToContact(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Default Team Role |''',
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPIPermissionCheck._removeContactRolesFromContactAttempt(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Default Team Role |''',
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._viewContactRole(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Default Team Role",
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._viewContactRole(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Member",
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPIPermissionCheck._viewNoContactRole(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Default Team Role",
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPIPermissionCheck._viewNoContactRole(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Member",
+			teamName = "Development Team");
+	}
+
+	test Removecontactrolefromcontactattemptbynewlynonpermissioneduser {
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code         | KORAUTO                              | |
+	| Description  | Test automotive account on koroneiki | |
+	| Fax Number   | 555-555-1234                         | |
+	| Name         | Koroneiki Automotive                 | |
+	| Phone Number | 555-555-5678                         | |
+	| Region       | United States                        | |
+	| Status       | Active                               | |
+	| Tier         | T4                                   | |
+	| Website      | www.koroneikiautomotive.com          | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountTeam(
+			accountName = "Koroneiki Automotive",
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRole(table = '''| Description | This is the default role for teams |
+	| Name        | Default Team Role                  |
+	| Type        | Team                               |''');
+
+		LocalFile.KoroneikiTeamAPI._assignContacts(
+			table = '''| koroneiki.contact1@lrcustomer.com.broken |''',
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._assignContactRolesToContact(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Default Team Role |''',
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._setTeamPermissions(
+			table = '''| Assign Contact | true |''',
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiContactAPI._setContactPermissionsViaUuid(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| View | true |''');
+
+		LocalFile.KoroneikiContactRoleAPI._setContactRolePermissions(
+			contactRoleName = "Default Team Role",
+			table = '''| Assign Contact | true |''');
+
+		LocalFile.KoroneikiTeamAPI._unsetTeamPermissions(
+			table = '''| Assign Contact | true |''',
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiContactAPI._unsetContactPermissionsViaUuid(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| View | true |''');
+
+		LocalFile.KoroneikiContactRoleAPI._unsetContactRolePermissions(
+			contactRoleName = "Default Team Role",
+			table = '''| Assign Contact | true |''');
+
+		LocalFile.KoroneikiTeamAPIPermissionCheck._removeContactRolesFromContactAttempt(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Default Team Role |''',
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._viewContactRole(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Default Team Role",
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._viewContactRole(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Member",
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPIPermissionCheck._viewNoContactRole(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Default Team Role",
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPIPermissionCheck._viewNoContactRole(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Member",
+			teamName = "Development Team");
+	}
+
+	test Removecontactroletocontactaspermissioneduser {
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRole(table = '''| Description | This is the default role for teams |
+	| Name        | Default Team Role                  |
+	| Type        | Team                               |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code         | KORAUTO                              | |
+	| Description  | Test automotive account on koroneiki | |
+	| Fax Number   | 555-555-1234                         | |
+	| Name         | Koroneiki Automotive                 | |
+	| Phone Number | 555-555-5678                         | |
+	| Region       | United States                        | |
+	| Status       | Active                               | |
+	| Tier         | T4                                   | |
+	| Website      | www.koroneikiautomotive.com          | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountTeam(
+			accountName = "Koroneiki Automotive",
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._assignContacts(
+			table = '''| koroneiki.contact1@lrcustomer.com.broken |''',
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._setTeamPermissions(
+			table = '''| Assign Contact | true |''',
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiContactAPI._setContactPermissionsViaUuid(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| View | true |''');
+
+		LocalFile.KoroneikiContactRoleAPI._setContactRolePermissions(
+			contactRoleName = "Default Team Role",
+			table = '''| Assign Contact | true |''');
+
+		LocalFile.KoroneikiTeamAPIPermissionCheck._assignContactRolesToContact(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Default Team Role |''',
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPIPermissionCheck._removeContactRolesFromContact(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Default Team Role |''',
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._viewNoContactRole(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Default Team Role",
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._viewContactRole(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Member",
+			teamName = "Development Team");
+	}
+
+	test Viewcontactrolefromcontactattempt {
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code         | KORAUTO                              | |
+	| Description  | Test automotive account on koroneiki | |
+	| Fax Number   | 555-555-1234                         | |
+	| Name         | Koroneiki Automotive                 | |
+	| Phone Number | 555-555-5678                         | |
+	| Region       | United States                        | |
+	| Status       | Active                               | |
+	| Tier         | T4                                   | |
+	| Website      | www.koroneikiautomotive.com          | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountTeam(
+			accountName = "Koroneiki Automotive",
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRole(table = '''| Description | This is the default role for teams |
+	| Name        | Default Team Role                  |
+	| Type        | Team                               |''');
+
+		LocalFile.KoroneikiTeamAPI._assignContacts(
+			table = '''| koroneiki.contact1@lrcustomer.com.broken |''',
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._assignContactRolesToContact(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Default Team Role |''',
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._viewContactRole(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Default Team Role",
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPI._viewContactRole(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Member",
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPIPermissionCheck._viewNoContactRole(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Default Team Role",
+			teamName = "Development Team");
+
+		LocalFile.KoroneikiTeamAPIPermissionCheck._viewNoContactRole(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Member",
+			teamName = "Development Team");
+	}
+
+}

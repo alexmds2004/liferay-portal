@@ -1,0 +1,198 @@
+definition {
+
+	property testray.main.component.name = "Support QA";
+	property type = "osb.integration";
+
+	setUp {
+		LocalFile.Passwords.getPasswords();
+	}
+
+	tearDown {
+		LocalFile.KoroneikiProductAPI._tearDownProducts(table = '''| A Liferay OSB Product        |
+	| A Liferay Server Product     |
+	| A New Liferay OSB Product    |
+	| A New Liferay Server Product |''');
+	}
+
+	test Createandviewmultipleproducts {
+		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | A Liferay OSB Product | |''');
+
+		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | A Liferay Server Product | |''');
+
+		LocalFile.OSBAdmin.loginToSupport(
+			userEmailAddress = ${staticSupportAdminEmailAdress},
+			userPassword = ${staticSupportAdminPassword});
+
+		LocalFile.OSBAdmin.gotoOSBAdmin();
+
+		LocalFile.OSBAdminSales.viewProduct(
+			productName = "A Liferay OSB Product",
+			table = '''| Name                  | A Liferay OSB Product |
+	| Koroneiki Product Key | Verify from name      |''');
+
+		LocalFile.OSBAdminSales.viewProduct(
+			productName = "A Liferay Server Product",
+			table = '''| Name                  | A Liferay Server Product |
+	| Koroneiki Product Key | Verify from name         |''');
+	}
+
+	@help.center.acceptance = "true"
+	test Createandviewproduct {
+		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | A Liferay OSB Product | |''');
+
+		LocalFile.OSBAdmin.loginToSupport(
+			userEmailAddress = ${staticSupportAdminEmailAdress},
+			userPassword = ${staticSupportAdminPassword});
+
+		LocalFile.OSBAdmin.gotoOSBAdmin();
+
+		LocalFile.OSBAdminSales.viewProduct(
+			productName = "A Liferay OSB Product",
+			table = '''| Name                  | A Liferay OSB Product |
+	| Koroneiki Product Key | Verify from name      |''');
+	}
+
+	test Createandviewproductexternallink {
+		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | A Liferay OSB Product | |''');
+
+		LocalFile.KoroneikiProductAPI._createProductExternalLink(
+			productName = "A Liferay OSB Product",
+			table = '''| Domain      | liferayosb |
+	| Entity Id   | 1234       |
+	| Entity Name | LiferayOSB |''');
+
+		LocalFile.KoroneikiProductAPI._createProductExternalLinkNestedField(table = '''| Domain      | liferayosb |
+	| Entity Id   | 1234       |
+	| Entity Name | LiferayOSB |''');
+
+		LocalFile.OSBAdmin.loginToSupport(
+			userEmailAddress = ${staticSupportAdminEmailAdress},
+			userPassword = ${staticSupportAdminPassword});
+
+		LocalFile.OSBAdmin.gotoOSBAdmin();
+
+		LocalFile.OSBAdminSales.viewProduct(
+			productName = "A Liferay OSB Product",
+			table = '''| Name                      | A Liferay OSB Product |
+	| Koroneiki Product Key     | Verify from name      |
+	| External Link Domain      | liferayosb            |
+	| External Link Entity Id   | 1234                  |
+	| External Link Entity Name | LiferayOSB            |''');
+	}
+
+	test Removemultipleproductsandview {
+		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | A Liferay OSB Product | |''');
+
+		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | A Liferay Server Product | |''');
+
+		LocalFile.KoroneikiProductAPI._deleteProduct(productName = "A Liferay OSB Product");
+
+		LocalFile.KoroneikiProductAPI._deleteProduct(productName = "A Liferay Server Product");
+
+		LocalFile.OSBAdmin.loginToSupport(
+			userEmailAddress = ${staticSupportAdminEmailAdress},
+			userPassword = ${staticSupportAdminPassword});
+
+		LocalFile.OSBAdmin.gotoOSBAdmin();
+
+		LocalFile.OSBAdminSales.viewNoProduct(productName = "A Liferay OSB Product");
+
+		LocalFile.OSBAdminSales.viewNoProduct(productName = "A Liferay Server Product");
+	}
+
+	test Removeproductandview {
+		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | A Liferay OSB Product | |''');
+
+		LocalFile.KoroneikiProductAPI._deleteProduct(productName = "A Liferay OSB Product");
+
+		LocalFile.OSBAdmin.loginToSupport(
+			userEmailAddress = ${staticSupportAdminEmailAdress},
+			userPassword = ${staticSupportAdminPassword});
+
+		LocalFile.OSBAdmin.gotoOSBAdmin();
+
+		LocalFile.OSBAdminSales.viewNoProduct(productName = "A Liferay OSB Product");
+	}
+
+	test Removeproductexternallinkandview {
+		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | A Liferay OSB Product | |''');
+
+		LocalFile.KoroneikiProductAPI._createProductExternalLink(
+			productName = "A Liferay OSB Product",
+			table = '''| Domain      | liferayosb |
+	| Entity Id   | 1234       |
+	| Entity Name | LiferayOSB |''');
+
+		LocalFile.KoroneikiProductAPI._deleteProductExternalLink(
+			entityId = 1234,
+			productName = "A Liferay OSB Product");
+
+		LocalFile.OSBAdmin.loginToSupport(
+			userEmailAddress = ${staticSupportAdminEmailAdress},
+			userPassword = ${staticSupportAdminPassword});
+
+		LocalFile.OSBAdmin.gotoOSBAdmin();
+
+		LocalFile.OSBAdminSales.viewNoProductExternalLink(
+			domain = "liferayosb",
+			entityId = 1234,
+			entityName = "LiferayOSB",
+			productName = "A Liferay OSB Product");
+	}
+
+	test Updateandviewmultipleproducts {
+		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | A Liferay OSB Product | |''');
+
+		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | A Liferay Server Product | |''');
+
+		LocalFile.KoroneikiProductAPI.updateProduct(
+			productName = "A Liferay OSB Product",
+			table = '''| Name | A New Liferay OSB Product | |''');
+
+		LocalFile.KoroneikiProductAPI.updateProduct(
+			productName = "A Liferay Server Product",
+			table = '''| Name | A New Liferay Server Product | |''');
+
+		LocalFile.OSBAdmin.loginToSupport(
+			userEmailAddress = ${staticSupportAdminEmailAdress},
+			userPassword = ${staticSupportAdminPassword});
+
+		LocalFile.OSBAdmin.gotoOSBAdmin();
+
+		LocalFile.OSBAdminSales.viewProduct(
+			productName = "A New Liferay OSB Product",
+			table = '''| Name                  | A New Liferay OSB Product |
+	| Koroneiki Product Key | Verify from name          |''');
+
+		LocalFile.OSBAdminSales.viewProduct(
+			productName = "A New Liferay Server Product",
+			table = '''| Name                  | A New Liferay Server Product |
+	| Koroneiki Product Key | Verify from name             |''');
+
+		LocalFile.OSBAdminSales.viewNoProduct(productName = "A Liferay OSB Product");
+
+		LocalFile.OSBAdminSales.viewNoProduct(productName = "A Liferay Server Product");
+	}
+
+	test Updateandviewproduct {
+		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | A Liferay OSB Product | |''');
+
+		LocalFile.KoroneikiProductAPI.updateProduct(
+			productName = "A Liferay OSB Product",
+			table = '''| Name | A Liferay Server Product | |''');
+
+		LocalFile.OSBAdmin.loginToSupport(
+			userEmailAddress = ${staticSupportAdminEmailAdress},
+			userPassword = ${staticSupportAdminPassword});
+
+		LocalFile.OSBAdmin.gotoOSBAdmin();
+
+		LocalFile.OSBAdminSales.viewProduct(
+			productName = "A Liferay Server Product",
+			table = '''| Name                  | A Liferay Server Product |
+	| Koroneiki Product Key | Verify from name         |''');
+
+		LocalFile.OSBAdminSales.viewNoProduct(productName = "A Liferay OSB Product");
+	}
+
+}

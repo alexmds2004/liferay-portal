@@ -1,0 +1,430 @@
+definition {
+
+	property testray.main.component.name = "Support QA";
+	property type = "zendesk.api";
+
+	setUp {
+		LocalFile.Passwords.getPasswords();
+	}
+
+	tearDown {
+		LocalFile.ZendeskTicketAPI._tearDownTicketByIds(ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskUserAPI._tearDownUsersByExternalIdTable(table = '''| User1 |''');
+
+		LocalFile.ZendeskOrganizationAPI._tearDownOrganizationsByExternalIdTable(table = '''| 12345678 |''');
+
+		LocalFile.ZendeskHomepage.pause(timeInSeconds = 3);
+	}
+
+	test LXCSMAURouting {
+		LocalFile.ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved            |
+	| Name             | Organization Name 1 |
+	| Tags             | lxc_sm              |
+	| Shared Tickets   | true                |
+	| Shared Comments  | true                |
+	| SLA              | Gold                |
+	| Tier             | T4                  |
+	| Support Region   | Australia           |
+	| Support Language | English             |
+	| External ID      | 12345678            |''');
+
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
+	| Tags             | osb_customer,osb_kb              |
+	| Password         | ${staticZendeskAdminPassword}    |
+	| Role             | End-user                         |
+	| Access           | Organization                     |
+	| Email            | zendesk.user1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                |
+	| Organization     | Organization Name 1              |
+	| Language         | English                          |
+	| Time Zone        | Sydney                           |
+	| External ID      | User1                            |''');
+
+		LocalFile.ZendeskRequestAPI._createMultipleRequestsWithProductAndComponentValues(
+			requesterEmail = "zendesk.user1@zendesk.com.broken",
+			table = '''| prd_lxc_sm | backup_recovery     |
+	| prd_lxc_sm | connectivity        |
+	| prd_lxc_sm | networking          |
+	| prd_lxc_sm | system_availability |
+	| prd_lxc_sm | vpn                 |''');
+
+		LocalFile.ZendeskTicketAPI._viewMultipleTicketGroupAssigneesWithThreePossibleAssignees(
+			possibleGroupAssignee1 = "LXC - SM - AU/NZ",
+			possibleGroupAssignee2 = "LXC - SM - US",
+			possibleGroupAssignee3 = "LXC - SM - HU",
+			ticketIdList = ${staticRequestIdList});
+	}
+
+	test LXCSMBRRouting {
+		LocalFile.ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved            |
+	| Name             | Organization Name 1 |
+	| Tags             | lxc_sm              |
+	| Shared Tickets   | true                |
+	| Shared Comments  | true                |
+	| SLA              | Gold                |
+	| Tier             | T4                  |
+	| Support Region   | Brazil              |
+	| Support Language | Portuguese          |
+	| External ID      | 12345678            |''');
+
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
+	| Tags             | osb_customer,osb_kb              |
+	| Password         | ${staticZendeskAdminPassword}    |
+	| Role             | End-user                         |
+	| Access           | Organization                     |
+	| Email            | zendesk.user1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                |
+	| Organization     | Organization Name 1              |
+	| Language         | Portuguese                       |
+	| Time Zone        | Brasilia                         |
+	| External ID      | User1                            |''');
+
+		LocalFile.ZendeskRequestAPI._createMultipleRequestsWithProductAndComponentValues(
+			requesterEmail = "zendesk.user1@zendesk.com.broken",
+			table = '''| prd_lxc_sm | backup_recovery     |
+	| prd_lxc_sm | connectivity        |
+	| prd_lxc_sm | networking          |
+	| prd_lxc_sm | system_availability |
+	| prd_lxc_sm | vpn                 |''');
+
+		LocalFile.ZendeskTicketAPI._viewMultipleTicketGroupAssignees(
+			groupAssignee = "LXC - SM - BR",
+			ticketIdList = ${staticRequestIdList});
+	}
+
+	test LXCSMCNRouting {
+		LocalFile.ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved            |
+	| Name             | Organization Name 1 |
+	| Tags             | lxc_sm              |
+	| Shared Tickets   | true                |
+	| Shared Comments  | true                |
+	| SLA              | Gold                |
+	| Tier             | T4                  |
+	| Support Region   | China               |
+	| Support Language | Chinese             |
+	| External ID      | 12345678            |''');
+
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
+	| Tags             | osb_customer,osb_kb              |
+	| Password         | ${staticZendeskAdminPassword}    |
+	| Role             | End-user                         |
+	| Access           | Organization                     |
+	| Email            | zendesk.user1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                |
+	| Organization     | Organization Name 1              |
+	| Language         | Portuguese                       |
+	| Time Zone        | Brasilia                         |
+	| External ID      | User1                            |''');
+
+		LocalFile.ZendeskRequestAPI._createMultipleRequestsWithProductAndComponentValues(
+			requesterEmail = "zendesk.user1@zendesk.com.broken",
+			table = '''| prd_lxc_sm | backup_recovery     |
+	| prd_lxc_sm | connectivity        |
+	| prd_lxc_sm | networking          |
+	| prd_lxc_sm | system_availability |
+	| prd_lxc_sm | vpn                 |''');
+
+		LocalFile.ZendeskTicketAPI._viewMultipleTicketGroupAssignees(
+			groupAssignee = "LXC - SM - CN",
+			ticketIdList = ${staticRequestIdList});
+	}
+
+	test LXCSMESRouting {
+		LocalFile.ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved            |
+	| Name             | Organization Name 1 |
+	| Tags             | lxc_sm              |
+	| Shared Tickets   | true                |
+	| Shared Comments  | true                |
+	| SLA              | Gold                |
+	| Tier             | T4                  |
+	| Support Region   | Spain               |
+	| Support Language | Spanish             |
+	| External ID      | 12345678            |''');
+
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
+	| Tags             | osb_customer,osb_kb              |
+	| Password         | ${staticZendeskAdminPassword}    |
+	| Role             | End-user                         |
+	| Access           | Organization                     |
+	| Email            | zendesk.user1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                |
+	| Organization     | Organization Name 1              |
+	| Language         | Spanish                          |
+	| Time Zone        | Madrid                           |
+	| External ID      | User1                            |''');
+
+		LocalFile.ZendeskRequestAPI._createMultipleRequestsWithProductAndComponentValues(
+			requesterEmail = "zendesk.user1@zendesk.com.broken",
+			table = '''| prd_lxc_sm | backup_recovery     |
+	| prd_lxc_sm | connectivity        |
+	| prd_lxc_sm | networking          |
+	| prd_lxc_sm | system_availability |
+	| prd_lxc_sm | vpn                 |''');
+
+		LocalFile.ZendeskTicketAPI._viewMultipleTicketGroupAssignees(
+			groupAssignee = "LXC - SM - ES",
+			ticketIdList = ${staticRequestIdList});
+	}
+
+	test LXCSMHURouting {
+		LocalFile.ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved            |
+	| Name             | Organization Name 1 |
+	| Tags             | lxc_sm              |
+	| Shared Tickets   | true                |
+	| Shared Comments  | true                |
+	| SLA              | Gold                |
+	| Tier             | T4                  |
+	| Support Region   | Hungary             |
+	| Support Language | English             |
+	| External ID      | 12345678            |''');
+
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
+	| Tags             | osb_customer,osb_kb              |
+	| Password         | ${staticZendeskAdminPassword}    |
+	| Role             | End-user                         |
+	| Access           | Organization                     |
+	| Email            | zendesk.user1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                |
+	| Organization     | Organization Name 1              |
+	| Language         | English                          |
+	| Time Zone        | Budapest                         |
+	| External ID      | User1                            |''');
+
+		LocalFile.ZendeskRequestAPI._createMultipleRequestsWithProductAndComponentValues(
+			requesterEmail = "zendesk.user1@zendesk.com.broken",
+			table = '''| prd_lxc_sm | backup_recovery     |
+	| prd_lxc_sm | connectivity        |
+	| prd_lxc_sm | networking          |
+	| prd_lxc_sm | system_availability |
+	| prd_lxc_sm | vpn                 |''');
+
+		LocalFile.ZendeskTicketAPI._viewMultipleTicketGroupAssignees(
+			groupAssignee = "LXC - SM - HU",
+			ticketIdList = ${staticRequestIdList});
+	}
+
+	test LXCSMINRouting {
+		LocalFile.ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved            |
+	| Name             | Organization Name 1 |
+	| Tags             | lxc_sm              |
+	| Shared Tickets   | true                |
+	| Shared Comments  | true                |
+	| SLA              | Gold                |
+	| Tier             | T4                  |
+	| Support Region   | India               |
+	| Support Language | English             |
+	| External ID      | 12345678            |''');
+
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
+	| Tags             | osb_customer,osb_kb              |
+	| Password         | ${staticZendeskAdminPassword}    |
+	| Role             | End-user                         |
+	| Access           | Organization                     |
+	| Email            | zendesk.user1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                |
+	| Organization     | Organization Name 1              |
+	| Language         | English                          |
+	| Time Zone        | Mumbai                           |
+	| External ID      | User1                            |''');
+
+		LocalFile.ZendeskRequestAPI._createMultipleRequestsWithProductAndComponentValues(
+			requesterEmail = "zendesk.user1@zendesk.com.broken",
+			table = '''| prd_lxc_sm | backup_recovery     |
+	| prd_lxc_sm | connectivity        |
+	| prd_lxc_sm | networking          |
+	| prd_lxc_sm | system_availability |
+	| prd_lxc_sm | vpn                 |''');
+
+		LocalFile.ZendeskTicketAPI._viewMultipleTicketGroupAssignees(
+			groupAssignee = "LXC - SM - IN",
+			ticketIdList = ${staticRequestIdList});
+	}
+
+	test LXCSMJPRouting {
+		LocalFile.ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved            |
+	| Name             | Organization Name 1 |
+	| Tags             | lxc_sm              |
+	| Shared Tickets   | true                |
+	| Shared Comments  | true                |
+	| SLA              | Gold                |
+	| Tier             | T4                  |
+	| Support Region   | Japan               |
+	| Support Language | Japanese            |
+	| External ID      | 12345678            |''');
+
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
+	| Tags             | osb_customer,osb_kb              |
+	| Password         | ${staticZendeskAdminPassword}    |
+	| Role             | End-user                         |
+	| Access           | Organization                     |
+	| Email            | zendesk.user1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                |
+	| Organization     | Organization Name 1              |
+	| Language         | Japanese                         |
+	| Time Zone        | Tokyo                            |
+	| External ID      | User1                            |''');
+
+		LocalFile.ZendeskRequestAPI._createMultipleRequestsWithProductAndComponentValues(
+			requesterEmail = "zendesk.user1@zendesk.com.broken",
+			table = '''| prd_lxc_sm | backup_recovery     |
+	| prd_lxc_sm | connectivity        |
+	| prd_lxc_sm | networking          |
+	| prd_lxc_sm | system_availability |
+	| prd_lxc_sm | vpn                 |''');
+
+		LocalFile.ZendeskTicketAPI._viewMultipleTicketGroupAssigneesWithThreePossibleAssignees(
+			possibleGroupAssignee1 = "LXC - SM - JP",
+			possibleGroupAssignee2 = "LXC - SM - US",
+			possibleGroupAssignee3 = "LXC - SM - HU",
+			ticketIdList = ${staticRequestIdList});
+	}
+
+	test LXCSMNoRegionRouting {
+		LocalFile.ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved            |
+	| Name             | Organization Name 1 |
+	| Tags             | lxc_sm              |
+	| Shared Tickets   | true                |
+	| Shared Comments  | true                |
+	| SLA              | Gold                |
+	| Tier             | T4                  |
+	| External ID      | 12345678            |''');
+
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
+	| Tags             | osb_customer,osb_kb              |
+	| Password         | ${staticZendeskAdminPassword}    |
+	| Role             | End-user                         |
+	| Access           | Organization                     |
+	| Email            | zendesk.user1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                |
+	| Organization     | Organization Name 1              |
+	| Language         | English                          |
+	| Time Zone        | Pacific Time (US & Canada)       |
+	| External ID      | User1                            |''');
+
+		LocalFile.ZendeskRequestAPI._createMultipleRequestsWithProductAndComponentValues(
+			requesterEmail = "zendesk.user1@zendesk.com.broken",
+			table = '''| prd_lxc_sm | backup_recovery     |
+	| prd_lxc_sm | connectivity        |
+	| prd_lxc_sm | networking          |
+	| prd_lxc_sm | system_availability |
+	| prd_lxc_sm | vpn                 |''');
+
+		LocalFile.ZendeskTicketAPI._viewMultipleTicketGroupAssignees(
+			groupAssignee = "LXC - SM - Support",
+			ticketIdList = ${staticRequestIdList});
+	}
+
+	test LXCSMNoRegionRoutingforFLSOrganization {
+		LocalFile.ZendeskOrganizationAPI._createOrganization(table = '''| Status                     | Approved            |
+	| Name                       | Organization Name 1 |
+	| Tags                       | lxc_sm              |
+	| Shared Tickets             | true                |
+	| Shared Comments            | true                |
+	| SLA                        | Gold                |
+	| Tier                       | T4                  |
+	| Partner First Line Support | true                |
+	| External ID                | 12345678            |''');
+
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
+	| Tags             | osb_customer,osb_kb              |
+	| Password         | ${staticZendeskAdminPassword}    |
+	| Role             | End-user                         |
+	| Access           | Organization                     |
+	| Email            | zendesk.user1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                |
+	| Organization     | Organization Name 1              |
+	| Language         | English                          |
+	| Time Zone        | Pacific Time (US & Canada)       |
+	| External ID      | User1                            |''');
+
+		LocalFile.ZendeskRequestAPI._createMultipleRequestsWithProductAndComponentValues(
+			requesterEmail = "zendesk.user1@zendesk.com.broken",
+			table = '''| prd_lxc_sm | backup_recovery     |
+	| prd_lxc_sm | connectivity        |
+	| prd_lxc_sm | networking          |
+	| prd_lxc_sm | system_availability |
+	| prd_lxc_sm | vpn                 |''');
+
+		LocalFile.ZendeskTicketAPI._viewMultipleTicketGroupAssignees(
+			groupAssignee = "LXC - SM - Support",
+			ticketIdList = ${staticRequestIdList});
+	}
+
+	@help.center.acceptance = "true"
+	test LXCSMUSRouting {
+		LocalFile.ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved            |
+	| Name             | Organization Name 1 |
+	| Tags             | lxc_sm              |
+	| Shared Tickets   | true                |
+	| Shared Comments  | true                |
+	| SLA              | Gold                |
+	| Tier             | T4                  |
+	| Support Region   | US                  |
+	| Support Language | English             |
+	| External ID      | 12345678            |''');
+
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
+	| Tags             | osb_customer,osb_kb              |
+	| Password         | ${staticZendeskAdminPassword}    |
+	| Role             | End-user                         |
+	| Access           | Organization                     |
+	| Email            | zendesk.user1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                |
+	| Organization     | Organization Name 1              |
+	| Language         | English                          |
+	| Time Zone        | Pacific Time (US & Canada)       | 
+	| External ID      | User1                            |''');
+
+		LocalFile.ZendeskRequestAPI._createMultipleRequestsWithProductAndComponentValues(
+			requesterEmail = "zendesk.user1@zendesk.com.broken",
+			table = '''| prd_lxc_sm | backup_recovery     |
+	| prd_lxc_sm | connectivity        |
+	| prd_lxc_sm | networking          |
+	| prd_lxc_sm | system_availability |
+	| prd_lxc_sm | vpn                 |''');
+
+		LocalFile.ZendeskTicketAPI._viewMultipleTicketGroupAssignees(
+			groupAssignee = "LXC - SM - US",
+			ticketIdList = ${staticRequestIdList});
+	}
+
+	test LXCSMUSRoutingforFLSOrganization {
+		LocalFile.ZendeskOrganizationAPI._createOrganization(table = '''| Status                     | Approved            |
+	| Name                       | Organization Name 1 |
+	| Tags                       | lxc_sm              |
+	| Shared Tickets             | true                |
+	| Shared Comments            | true                |
+	| SLA                        | Gold                |
+	| Tier                       | T4                  |
+	| Support Region             | US                  |
+	| Support Language           | English             |
+	| Partner First Line Support | true                |
+	| External ID                | 12345678            |''');
+
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
+	| Tags             | osb_customer,osb_kb              |
+	| Password         | ${staticZendeskAdminPassword}    |
+	| Role             | End-user                         |
+	| Access           | Organization                     |
+	| Email            | zendesk.user1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                |
+	| Organization     | Organization Name 1              |
+	| Language         | English                          |
+	| Time Zone        | Pacific Time (US & Canada)       |
+	| External ID      | User1                            |''');
+
+		LocalFile.ZendeskRequestAPI._createMultipleRequestsWithProductAndComponentValues(
+			requesterEmail = "zendesk.user1@zendesk.com.broken",
+			table = '''| prd_lxc_sm | backup_recovery     |
+	| prd_lxc_sm | connectivity        |
+	| prd_lxc_sm | networking          |
+	| prd_lxc_sm | system_availability |
+	| prd_lxc_sm | vpn                 |''');
+
+		LocalFile.ZendeskTicketAPI._viewMultipleTicketGroupAssignees(
+			groupAssignee = "LXC - SM - US",
+			ticketIdList = ${staticRequestIdList});
+	}
+
+}

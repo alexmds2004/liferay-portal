@@ -1,0 +1,2231 @@
+definition {
+
+	property testray.main.component.name = "Support QA";
+	property type = "provisioning.integration";
+
+	setUp {
+		LocalFile.Passwords.getPasswords();
+
+		LocalFile.OSBAdminRabbitMQ.generateStaticVariables();
+
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningCompanyName();
+
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | pro.koroneiki1                       |
+	| Email Address | pro.koroneiki1@lrcustomer.com.broken |
+	| First Name    | PRO                                  |
+	| Last Name     | Koroneiki1                           |''');
+
+		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | pro.koroneiki2                       |
+	| Email Address | pro.koroneiki2@lrcustomer.com.broken |
+	| First Name    | PRO                                  |
+	| Last Name     | Koroneiki2                           |''');
+	}
+
+	tearDown {
+		LocalFile.ZendeskUserAPI._getDefaultUserId(organizationName = "Korpro - ${staticProjectName}");
+
+		LocalFile.ZendeskUserAPI._renameFirstDefaultUserIdVariable();
+
+		LocalFile.ZendeskUserAPI._getDefaultUserId(organizationName = "Vchild - ${staticProjectName}");
+
+		LocalFile.ZendeskUserAPI._renameSecondDefaultUserIdVariable();
+
+		LocalFile.ZendeskUserAPI._getDefaultUserId(organizationName = "Pchild - ${staticProjectName}");
+
+		LocalFile.ZendeskUserAPI._renameThirdDefaultUserIdVariable();
+
+		LocalFile.ZendeskUserAPI._getDefaultUserId(organizationName = "Onepro - ${staticProjectName}");
+
+		LocalFile.ZendeskUserAPI._renameFourthDefaultUserIdVariable();
+
+		LocalFile.ZendeskUserAPI._getDefaultUserId(organizationName = "Prokor - ${staticCompanyName}");
+
+		LocalFile.ZendeskUserAPI._renameFifthDefaultUserIdVariable();
+
+		LocalFile.ZendeskUserAPI._getDefaultUserId(organizationName = "Korpar - ${staticProjectName}");
+
+		LocalFile.ZendeskUserAPI._renameSixthDefaultUserIdVariable();
+
+		LocalFile.KoroneikiTeamAPI._tearDownTeams(table = '''| Koroneiki Partner |
+	| Updated Partner   |''');
+
+		LocalFile.KoroneikiAccountAPI._tearDownAccounts(table = '''| Korpar - ${staticProjectName} |''');
+
+		LocalFile.KoroneikiAccountAPI._tearDownAccountsViaAccountFieldNameAndValue(
+			fieldName = "Code",
+			table = '''| KORPARKORPAR |''');
+
+		LocalFile.OSBAdminProject.tearDownProjects(table = '''| KORPARKORPAR |
+	| VCHILDVCHILD |
+	| PCHILDPCHILD |
+	| PROKORKORPRO |
+	| ONEPROONEPRO |
+	| PROKOR       |''');
+
+		LocalFile.KoroneikiAccountAPI._tearDownAccounts(table = '''| Vchild - ${staticProjectName} |
+	| Pchild - ${staticProjectName} |
+	| Korpro - ${staticProjectName} |
+	| Onepro - ${staticProjectName} |
+	| Prokor - ${staticCompanyName} |''');
+
+		LocalFile.KoroneikiAccountAPI._tearDownAccountsViaAccountFieldNameAndValue(
+			fieldName = "Code",
+			table = '''| VCHILDVCHILD |
+	| PCHILDPCHILD |
+	| PROKORKORPRO |
+	| ONEPROONEPRO |
+	| PROKOR       |''');
+
+		LocalFile.JSONUser.tearDownUsers(table = '''| pro.koroneiki1@lrcustomer.com.broken |
+	| pro.koroneiki2@lrcustomer.com.broken |''');
+
+		LocalFile.JSONUser.tearDownUsersViaSupport(table = '''| pro.koroneiki1@lrcustomer.com.broken |
+	| pro.koroneiki2@lrcustomer.com.broken |''');
+
+		LocalFile.JSONUser.tearDownUsersViaKoroneiki(table = '''| pro.koroneiki1@lrcustomer.com.broken |
+	| pro.koroneiki2@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiContactAPI._tearDownContacts(table = '''| pro.koroneiki1@lrcustomer.com.broken |
+	| pro.koroneiki2@lrcustomer.com.broken |''');
+
+		LocalFile.JSONOkta.tearDownUsers(table = '''| pro.koroneiki1@lrcustomer.com.broken |
+	| pro.koroneiki2@lrcustomer.com.broken |''');
+
+		LocalFile.ZendeskTicketAPI._tearDownTicketsByKeywords(table = '''| New Subscription(s) for Korpro - ${staticProjectName} |
+	| New Subscription(s) for Prokor - ${staticCompanyName} |''');
+
+		LocalFile.ZendeskUserAPI._getMultipleUserIdsByEmailAddress(table = '''| pro.koroneiki1@lrcustomer.com.broken |
+	| pro.koroneiki2@lrcustomer.com.broken |''');
+
+		LocalFile.ZendeskUserAPI._tearDownUsersByIdList(userIds = ${staticUserIdList});
+
+		LocalFile.ZendeskOrganizationAPI._getMultipleOrganizationExternalIdsByOrganizationNameIfStillPresent(table = '''| Korpar - ${staticProjectName} |
+	| Korpro - ${staticProjectName} |
+	| Vchild - ${staticProjectName} |
+	| Pchild - ${staticProjectName} |
+	| Onepro - ${staticProjectName} |
+	| Prokor - ${staticCompanyName} |''');
+
+		LocalFile.ZendeskOrganizationAPI._tearDownOrganizationsByExternalIdList(organizationExternalIds = ${staticOrganizationExternalIdList});
+
+		LocalFile.ZendeskUserAPI._tearDownUserById(userId = ${staticDefaultUserId1});
+
+		LocalFile.ZendeskUserAPI._tearDownUserById(userId = ${staticDefaultUserId2});
+
+		LocalFile.ZendeskUserAPI._tearDownUserById(userId = ${staticDefaultUserId3});
+
+		LocalFile.ZendeskUserAPI._tearDownUserById(userId = ${staticDefaultUserId4});
+
+		LocalFile.ZendeskUserAPI._tearDownUserById(userId = ${staticDefaultUserId5});
+
+		LocalFile.ZendeskUserAPI._tearDownUserById(userId = ${staticDefaultUserId6});
+	}
+
+	@help.center.acceptance = "true"
+	test Addpartner {
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Prokor - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Contact Email Address                  | pro.koroneiki1@lrcustomer.com.broken       |
+	| Contact First Name                     | PRO                                        |
+	| Contact Last Name                      | Koroneiki1                                 |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | pro.koroneiki2@lrcustomer.com.broken       |
+	| Owner First Name                       | PRO                                        |
+	| Owner Last Name                        | Koroneiki2                                 |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Korpro - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | KORPARKORPAR                                   | |
+	| Contact Email Address | pro.koroneiki2@lrcustomer.com.broken           | |
+	| Description           | Test provisioning partner account on koroneiki | |
+	| Fax Number            | 555-555-9012                                   | |
+	| Name                  | Korpar - ${staticProjectName}                  | |
+	| Profile Email Address | pro.koroneiki2@lrcustomer.com.broken           | |
+	| Region                | United States                                  | |
+	| Status                | Active                                         | |
+	| Tier                  | T4                                             | |
+	| Website               | www.koroneikipartner.com                       | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korpar - ${staticProjectName}",
+			productName = "Service Partnership",
+			table = '''| Perpetual   | true     | |
+	| Quantity    | 1        | |
+	| Status      | Approved | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Partner");
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korpro");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korpro - ${staticProjectName}");
+
+		LocalFile.Provisioning.clickTab(tabName = "Details");
+
+		LocalFile.ProvisioningAccount.editAccountDetails(table = '''| Partner/Reseller/SI | Select Entity | Korpar - ${staticProjectName} | |
+	| First Line Support  | Select Entity | Korpar - ${staticProjectName} | |''');
+
+		LocalFile.ProvisioningAccount._viewAccountDetails(table = '''| Name           | Korpro - ${staticProjectName} |
+	| Code           | PROKORKORPRO                  |
+	| State          | ACTIVE                        |
+	| Support Region | United States                 |
+	| Country        | United States                 |
+	| SLA            | Platinum                      |
+	| Support Seats  | 1 / 3 Filled                  |
+	| Tier           | T4                            |
+	| FLS Partner    | Korpar - ${staticProjectName} |''');
+
+		LocalFile.ProvisioningAccount._viewAccountDetailsViaDetailsTab(table = '''| Account Name        | Korpro - ${staticProjectName} | |
+	| State               | ACTIVE                        | |
+	| Code                | PROKORKORPRO                  | |
+	| Tier                | T4                            | |
+	| Data Region         | United States                 | |
+	| Partner/Reseller/SI | Korpar - ${staticProjectName} |	|
+	| First Line Support  | Korpar - ${staticProjectName} |	|
+	| Street 1            | 456 Fake Street               | |
+	| Country             | United States                 | |
+	| City                | Diamond Bar                   | |
+	| State/Province      | California                    | |
+	| Postal Code         | 91765                         | |
+	| Primary             | true                          | |
+	| Dossiera Project    | ${staticDossieraProjectKey}   | |
+	| Salesforce Project  | ${staticSalesforceProjectKey} | |''');
+
+		LocalFile.KoroneikiAccountAPI._viewTeamRole(
+			accountName = "Korpro - ${staticProjectName}",
+			teamName = "Korpar - ${staticProjectName}",
+			teamRoleName = "Partner");
+
+		LocalFile.KoroneikiAccountAPI._viewTeamRole(
+			accountName = "Korpro - ${staticProjectName}",
+			teamName = "Korpar - ${staticProjectName}",
+			teamRoleName = "First Line Support");
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korpro");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korpro - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.clickPartnerLinkViaAccountHeader();
+
+		LocalFile.ProvisioningTeam._viewTeamDetails(table = '''| Name | Korpar - ${staticProjectName} |''');
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korpar");
+
+		LocalFile.Provisioning.removeAdvancedSearchFilters(table = '''| Subscription State: Active      |
+	| Subscription State: Cancelled   |
+	| Subscription State: Expired     |
+	| Subscription State: Unactivated |''');
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korpar - ${staticProjectName}");
+
+		LocalFile.Provisioning.clickTab(tabName = "Teams");
+
+		LocalFile.ProvisioningAccount._viewAccountTeam(
+			table = '''| Name                         | Korpar - ${staticProjectName} |
+	| Partner/Reseller/SI Accounts | 1                             |
+	| First Line Support Accounts  | 1                             |''',
+			teamName = "Korpar - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.clickTeamLink(teamName = "Korpar - ${staticProjectName}");
+
+		LocalFile.Provisioning.clickTab(tabName = "Partner/Reseller/SI Accounts");
+
+		LocalFile.ProvisioningTeam._viewTeamAccount(
+			accountName = "Korpro - ${staticProjectName}",
+			table = '''| Account Name  | Korpro - ${staticProjectName} |
+	| Code          | PROKORKORPRO                  |
+	| Region        | United States                 |
+	| SLA           | Platinum                      |
+	| Tier          | T4                            |
+	| Account State | ACTIVE                        |''');
+
+		LocalFile.Provisioning.clickTab(tabName = "First Line Support Accounts");
+
+		LocalFile.ProvisioningTeam._viewTeamAccount(
+			accountName = "Korpro - ${staticProjectName}",
+			table = '''| Account Name  | Korpro - ${staticProjectName} |
+	| Code          | PROKORKORPRO                  |
+	| Region        | United States                 |
+	| SLA           | Platinum                      |
+	| Tier          | T4                            |
+	| Account State | ACTIVE                        |''');
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korpro");
+
+		LocalFile.Provisioning._viewAccountViaIndex(
+			accountName = "Korpro - ${staticProjectName}",
+			table = '''| Name    | Korpro - ${staticProjectName} |
+	| Code    | PROKORKORPRO                  |
+	| Partner | Korpar - ${staticProjectName} |
+	| Region  | United States                 |
+	| SLA     | Platinum                      |
+	| Tier    | T4                            |
+	| State   | ACTIVE                        |''');
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korpro - ${staticProjectName}");
+
+		LocalFile.Provisioning.clickTab(tabName = "History");
+
+		LocalFile.KoroneikiAccountAPI._generateAccountId(accountName = "Korpro - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "contactEmailAddress",
+			keyword = "Auto > Added Account",
+			table = '''| Update Description          | Auto > Added Account                 |
+	| Update Field Name           | contactEmailAddress                  |
+	| Update Field Original Value | N/A                                  |
+	| Update Field New Value      | pro.koroneiki2@lrcustomer.com.broken |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "internal",
+			keyword = "Auto > Added Account",
+			table = '''| Update Description          | Auto > Added Account |
+	| Update Field Name           | internal             |
+	| Update Field Original Value | N/A                  |
+	| Update Field New Value      | false                |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "code",
+			keyword = "Auto > Added Account",
+			table = '''| Update Description          | Auto > Added Account |
+	| Update Field Name           | code                 |
+	| Update Field Original Value | N/A                  |
+	| Update Field New Value      | PROKORKORPRO         |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "region",
+			keyword = "Auto > Added Account",
+			table = '''| Update Description          | Auto > Added Account |
+	| Update Field Name           | region               |
+	| Update Field Original Value | N/A                  |
+	| Update Field New Value      | United States        |''');
+
+		LocalFile.KoroneikiAccountAPI._generateAccountId(accountName = "Prokor - ${staticCompanyName}");
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "parentAccountId",
+			keyword = "Auto > Added Account",
+			table = '''| Update Description          | Auto > Added Account |
+	| Update Field Name           | parentAccountId      |
+	| Update Field Original Value | N/A                  |
+	| Update Field New Value      | ${staticAccountId}   |''');
+
+		LocalFile.KoroneikiAccountAPI._generateAccountId(accountName = "Korpro - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "accountId",
+			keyword = "Auto > Added Account",
+			table = '''| Update Description          | Auto > Added Account |
+	| Update Field Name           | accountId            |
+	| Update Field Original Value | N/A                  |
+	| Update Field New Value      | ${staticAccountId}   |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "name",
+			keyword = "Auto > Added Account",
+			table = '''| Update Description          | Auto > Added Account          |
+	| Update Field Name           | name                          |
+	| Update Field Original Value | N/A                           |
+	| Update Field New Value      | Korpro - ${staticProjectName} |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "status",
+			keyword = "Auto > Added Account",
+			table = '''| Update Description          | Auto > Added Account |
+	| Update Field Name           | status               |
+	| Update Field Original Value | N/A                  |
+	| Update Field New Value      | Active               |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "tier",
+			keyword = "Auto > Added Account",
+			table = '''| Update Description          | Auto > Added Account |
+	| Update Field Name           | tier                 |
+	| Update Field Original Value | N/A                  |
+	| Update Field New Value      | T4                   |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeywordAndPosition(
+			fieldName = "Team Role",
+			keyword = "Test Test > Assigned Team",
+			positionValue = 1,
+			table = '''| Update Description          | Test Test > Assigned Team > Korpar - ${staticProjectName} |
+	| Update Field Name           | Team Role                                                 |
+	| Update Field Original Value | N/A                                                       |
+	| Update Field New Value      | Partner                                                   |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeywordAndPosition(
+			fieldName = "Team Role",
+			keyword = "Test Test > Assigned Team",
+			positionValue = 2,
+			table = '''| Update Description          | Test Test > Assigned Team > Korpar - ${staticProjectName} |
+	| Update Field Name           | Team Role                                                 |
+	| Update Field Original Value | N/A                                                       |
+	| Update Field New Value      | First Line Support                                        |''');
+	}
+
+	test AddpartnerwithBasicResellerPartnership {
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Prokor - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Contact Email Address                  | pro.koroneiki1@lrcustomer.com.broken       |
+	| Contact First Name                     | PRO                                        |
+	| Contact Last Name                      | Koroneiki1                                 |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | pro.koroneiki2@lrcustomer.com.broken       |
+	| Owner First Name                       | PRO                                        |
+	| Owner Last Name                        | Koroneiki2                                 |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Korpro - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | KORPARKORPAR                                   | |
+	| Contact Email Address | pro.koroneiki2@lrcustomer.com.broken           | |
+	| Description           | Test provisioning partner account on koroneiki | |
+	| Fax Number            | 555-555-9012                                   | |
+	| Name                  | Korpar - ${staticProjectName}                  | |
+	| Profile Email Address | pro.koroneiki2@lrcustomer.com.broken           | |
+	| Region                | United States                                  | |
+	| Status                | Active                                         | |
+	| Tier                  | T4                                             | |
+	| Website               | www.koroneikipartner.com                       | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korpar - ${staticProjectName}",
+			productName = "Basic Reseller Partnership",
+			table = '''| Perpetual   | true     | |
+	| Quantity    | 1        | |
+	| Status      | Approved | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Partner");
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korpro");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korpro - ${staticProjectName}");
+
+		LocalFile.Provisioning.clickTab(tabName = "Details");
+
+		LocalFile.ProvisioningAccount.editAccountDetails(table = '''| Partner/Reseller/SI | Select Entity | Korpar - ${staticProjectName} | |
+	| First Line Support  | Select Entity | Korpar - ${staticProjectName} | |''');
+
+		LocalFile.ProvisioningAccount._viewAccountDetails(table = '''| Name           | Korpro - ${staticProjectName} |
+	| Code           | PROKORKORPRO                  |
+	| State          | ACTIVE                        |
+	| Support Region | United States                 |
+	| Country        | United States                 |
+	| SLA            | Platinum                      |
+	| Support Seats  | 1 / 3 Filled                  |
+	| Tier           | T4                            |
+	| FLS Partner    | Korpar - ${staticProjectName} |''');
+
+		LocalFile.ProvisioningAccount._viewAccountDetailsViaDetailsTab(table = '''| Account Name        | Korpro - ${staticProjectName} | |
+	| State               | ACTIVE                        | |
+	| Code                | PROKORKORPRO                  | |
+	| Tier                | T4                            | |
+	| Data Region         | United States                 | |
+	| Partner/Reseller/SI | Korpar - ${staticProjectName} |	|
+	| First Line Support  | Korpar - ${staticProjectName} |	|
+	| Street 1            | 456 Fake Street               | |
+	| Country             | United States                 | |
+	| City                | Diamond Bar                   | |
+	| State/Province      | California                    | |
+	| Postal Code         | 91765                         | |
+	| Primary             | true                          | |
+	| Dossiera Project    | ${staticDossieraProjectKey}   | |
+	| Salesforce Project  | ${staticSalesforceProjectKey} | |''');
+
+		LocalFile.KoroneikiAccountAPI._viewTeamRole(
+			accountName = "Korpro - ${staticProjectName}",
+			teamName = "Korpar - ${staticProjectName}",
+			teamRoleName = "Partner");
+
+		LocalFile.KoroneikiAccountAPI._viewTeamRole(
+			accountName = "Korpro - ${staticProjectName}",
+			teamName = "Korpar - ${staticProjectName}",
+			teamRoleName = "First Line Support");
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korpro");
+
+		LocalFile.Provisioning._viewAccountViaIndex(
+			accountName = "Korpro - ${staticProjectName}",
+			table = '''| Name    | Korpro - ${staticProjectName} |
+	| Code    | PROKORKORPRO                  |
+	| Partner | Korpar - ${staticProjectName} |
+	| Region  | United States                 |
+	| SLA     | Platinum                      |
+	| Tier    | T4                            |
+	| State   | ACTIVE                        |''');
+	}
+
+	test AddpartnerwithDistributionPartnership {
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Prokor - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Contact Email Address                  | pro.koroneiki1@lrcustomer.com.broken       |
+	| Contact First Name                     | PRO                                        |
+	| Contact Last Name                      | Koroneiki1                                 |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | pro.koroneiki2@lrcustomer.com.broken       |
+	| Owner First Name                       | PRO                                        |
+	| Owner Last Name                        | Koroneiki2                                 |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Korpro - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | KORPARKORPAR                                   | |
+	| Contact Email Address | pro.koroneiki2@lrcustomer.com.broken           | |
+	| Description           | Test provisioning partner account on koroneiki | |
+	| Fax Number            | 555-555-9012                                   | |
+	| Name                  | Korpar - ${staticProjectName}                  | |
+	| Profile Email Address | pro.koroneiki2@lrcustomer.com.broken           | |
+	| Region                | United States                                  | |
+	| Status                | Active                                         | |
+	| Tier                  | T4                                             | |
+	| Website               | www.koroneikipartner.com                       | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korpar - ${staticProjectName}",
+			productName = "Distribution Partnership",
+			table = '''| Perpetual   | true     | |
+	| Quantity    | 1        | |
+	| Status      | Approved | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Partner");
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korpro");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korpro - ${staticProjectName}");
+
+		LocalFile.Provisioning.clickTab(tabName = "Details");
+
+		LocalFile.ProvisioningAccount.editAccountDetails(table = '''| Partner/Reseller/SI | Select Entity | Korpar - ${staticProjectName} | |
+	| First Line Support  | Select Entity | Korpar - ${staticProjectName} | |''');
+
+		LocalFile.ProvisioningAccount._viewAccountDetails(table = '''| Name           | Korpro - ${staticProjectName} |
+	| Code           | PROKORKORPRO                  |
+	| State          | ACTIVE                        |
+	| Support Region | United States                 |
+	| Country        | United States                 |
+	| SLA            | Platinum                      |
+	| Support Seats  | 1 / 3 Filled                  |
+	| Tier           | T4                            |
+	| FLS Partner    | Korpar - ${staticProjectName} |''');
+
+		LocalFile.ProvisioningAccount._viewAccountDetailsViaDetailsTab(table = '''| Account Name        | Korpro - ${staticProjectName} | |
+	| State               | ACTIVE                        | |
+	| Code                | PROKORKORPRO                  | |
+	| Tier                | T4                            | |
+	| Data Region         | United States                 | |
+	| Partner/Reseller/SI | Korpar - ${staticProjectName} |	|
+	| First Line Support  | Korpar - ${staticProjectName} |	|
+	| Street 1            | 456 Fake Street               | |
+	| Country             | United States                 | |
+	| City                | Diamond Bar                   | |
+	| State/Province      | California                    | |
+	| Postal Code         | 91765                         | |
+	| Primary             | true                          | |
+	| Dossiera Project    | ${staticDossieraProjectKey}   | |
+	| Salesforce Project  | ${staticSalesforceProjectKey} | |''');
+
+		LocalFile.KoroneikiAccountAPI._viewTeamRole(
+			accountName = "Korpro - ${staticProjectName}",
+			teamName = "Korpar - ${staticProjectName}",
+			teamRoleName = "Partner");
+
+		LocalFile.KoroneikiAccountAPI._viewTeamRole(
+			accountName = "Korpro - ${staticProjectName}",
+			teamName = "Korpar - ${staticProjectName}",
+			teamRoleName = "First Line Support");
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korpro");
+
+		LocalFile.Provisioning._viewAccountViaIndex(
+			accountName = "Korpro - ${staticProjectName}",
+			table = '''| Name    | Korpro - ${staticProjectName} |
+	| Code    | PROKORKORPRO                  |
+	| Partner | Korpar - ${staticProjectName} |
+	| Region  | United States                 |
+	| SLA     | Platinum                      |
+	| Tier    | T4                            |
+	| State   | ACTIVE                        |''');
+	}
+
+	test AddpartnerwithResellerPartnership {
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Prokor - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Contact Email Address                  | pro.koroneiki1@lrcustomer.com.broken       |
+	| Contact First Name                     | PRO                                        |
+	| Contact Last Name                      | Koroneiki1                                 |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | pro.koroneiki2@lrcustomer.com.broken       |
+	| Owner First Name                       | PRO                                        |
+	| Owner Last Name                        | Koroneiki2                                 |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Korpro - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | KORPARKORPAR                                   | |
+	| Contact Email Address | pro.koroneiki2@lrcustomer.com.broken           | |
+	| Description           | Test provisioning partner account on koroneiki | |
+	| Fax Number            | 555-555-9012                                   | |
+	| Name                  | Korpar - ${staticProjectName}                  | |
+	| Profile Email Address | pro.koroneiki2@lrcustomer.com.broken           | |
+	| Region                | United States                                  | |
+	| Status                | Active                                         | |
+	| Tier                  | T4                                             | |
+	| Website               | www.koroneikipartner.com                       | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korpar - ${staticProjectName}",
+			productName = "Reseller Partnership",
+			table = '''| Perpetual   | true     | |
+	| Quantity    | 1        | |
+	| Status      | Approved | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Partner");
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korpro");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korpro - ${staticProjectName}");
+
+		LocalFile.Provisioning.clickTab(tabName = "Details");
+
+		LocalFile.ProvisioningAccount.editAccountDetails(table = '''| Partner/Reseller/SI | Select Entity | Korpar - ${staticProjectName} | |
+	| First Line Support  | Select Entity | Korpar - ${staticProjectName} | |''');
+
+		LocalFile.ProvisioningAccount._viewAccountDetails(table = '''| Name           | Korpro - ${staticProjectName} |
+	| Code           | PROKORKORPRO                  |
+	| State          | ACTIVE                        |
+	| Support Region | United States                 |
+	| Country        | United States                 |
+	| SLA            | Platinum                      |
+	| Support Seats  | 1 / 3 Filled                  |
+	| Tier           | T4                            |
+	| FLS Partner    | Korpar - ${staticProjectName} |''');
+
+		LocalFile.ProvisioningAccount._viewAccountDetailsViaDetailsTab(table = '''| Account Name        | Korpro - ${staticProjectName} | |
+	| State               | ACTIVE                        | |
+	| Code                | PROKORKORPRO                  | |
+	| Tier                | T4                            | |
+	| Data Region         | United States                 | |
+	| Partner/Reseller/SI | Korpar - ${staticProjectName} |	|
+	| First Line Support  | Korpar - ${staticProjectName} |	|
+	| Street 1            | 456 Fake Street               | |
+	| Country             | United States                 | |
+	| City                | Diamond Bar                   | |
+	| State/Province      | California                    | |
+	| Postal Code         | 91765                         | |
+	| Primary             | true                          | |
+	| Dossiera Project    | ${staticDossieraProjectKey}   | |
+	| Salesforce Project  | ${staticSalesforceProjectKey} | |''');
+
+		LocalFile.KoroneikiAccountAPI._viewTeamRole(
+			accountName = "Korpro - ${staticProjectName}",
+			teamName = "Korpar - ${staticProjectName}",
+			teamRoleName = "Partner");
+
+		LocalFile.KoroneikiAccountAPI._viewTeamRole(
+			accountName = "Korpro - ${staticProjectName}",
+			teamName = "Korpar - ${staticProjectName}",
+			teamRoleName = "First Line Support");
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korpro");
+
+		LocalFile.Provisioning._viewAccountViaIndex(
+			accountName = "Korpro - ${staticProjectName}",
+			table = '''| Name    | Korpro - ${staticProjectName} |
+	| Code    | PROKORKORPRO                  |
+	| Partner | Korpar - ${staticProjectName} |
+	| Region  | United States                 |
+	| SLA     | Platinum                      |
+	| Tier    | T4                            |
+	| State   | ACTIVE                        |''');
+	}
+
+	test AddpartnerwithServicePartnershipReferralProgram {
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Prokor - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Contact Email Address                  | pro.koroneiki1@lrcustomer.com.broken       |
+	| Contact First Name                     | PRO                                        |
+	| Contact Last Name                      | Koroneiki1                                 |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | pro.koroneiki2@lrcustomer.com.broken       |
+	| Owner First Name                       | PRO                                        |
+	| Owner Last Name                        | Koroneiki2                                 |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Korpro - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | KORPARKORPAR                                   | |
+	| Contact Email Address | pro.koroneiki2@lrcustomer.com.broken           | |
+	| Description           | Test provisioning partner account on koroneiki | |
+	| Fax Number            | 555-555-9012                                   | |
+	| Name                  | Korpar - ${staticProjectName}                  | |
+	| Profile Email Address | pro.koroneiki2@lrcustomer.com.broken           | |
+	| Region                | United States                                  | |
+	| Status                | Active                                         | |
+	| Tier                  | T4                                             | |
+	| Website               | www.koroneikipartner.com                       | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korpar - ${staticProjectName}",
+			productName = "Service Partnership - Referral Program",
+			table = '''| Perpetual   | true     | |
+	| Quantity    | 1        | |
+	| Status      | Approved | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Partner");
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korpro");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korpro - ${staticProjectName}");
+
+		LocalFile.Provisioning.clickTab(tabName = "Details");
+
+		LocalFile.ProvisioningAccount.editAccountDetails(table = '''| Partner/Reseller/SI | Select Entity | Korpar - ${staticProjectName} | |
+	| First Line Support  | Select Entity | Korpar - ${staticProjectName} | |''');
+
+		LocalFile.ProvisioningAccount._viewAccountDetails(table = '''| Name           | Korpro - ${staticProjectName} |
+	| Code           | PROKORKORPRO                  |
+	| State          | ACTIVE                        |
+	| Support Region | United States                 |
+	| Country        | United States                 |
+	| SLA            | Platinum                      |
+	| Support Seats  | 1 / 3 Filled                  |
+	| Tier           | T4                            |
+	| FLS Partner    | Korpar - ${staticProjectName} |''');
+
+		LocalFile.ProvisioningAccount._viewAccountDetailsViaDetailsTab(table = '''| Account Name        | Korpro - ${staticProjectName} | |
+	| State               | ACTIVE                        | |
+	| Code                | PROKORKORPRO                  | |
+	| Tier                | T4                            | |
+	| Data Region         | United States                 | |
+	| Partner/Reseller/SI | Korpar - ${staticProjectName} |	|
+	| First Line Support  | Korpar - ${staticProjectName} |	|
+	| Street 1            | 456 Fake Street               | |
+	| Country             | United States                 | |
+	| City                | Diamond Bar                   | |
+	| State/Province      | California                    | |
+	| Postal Code         | 91765                         | |
+	| Primary             | true                          | |
+	| Dossiera Project    | ${staticDossieraProjectKey}   | |
+	| Salesforce Project  | ${staticSalesforceProjectKey} | |''');
+
+		LocalFile.KoroneikiAccountAPI._viewTeamRole(
+			accountName = "Korpro - ${staticProjectName}",
+			teamName = "Korpar - ${staticProjectName}",
+			teamRoleName = "Partner");
+
+		LocalFile.KoroneikiAccountAPI._viewTeamRole(
+			accountName = "Korpro - ${staticProjectName}",
+			teamName = "Korpar - ${staticProjectName}",
+			teamRoleName = "First Line Support");
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korpro");
+
+		LocalFile.Provisioning._viewAccountViaIndex(
+			accountName = "Korpro - ${staticProjectName}",
+			table = '''| Name    | Korpro - ${staticProjectName} |
+	| Code    | PROKORKORPRO                  |
+	| Partner | Korpar - ${staticProjectName} |
+	| Region  | United States                 |
+	| SLA     | Platinum                      |
+	| Tier    | T4                            |
+	| State   | ACTIVE                        |''');
+	}
+
+	test AddpartnerwithSolutionPartnershipResellerProgram {
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Prokor - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Contact Email Address                  | pro.koroneiki1@lrcustomer.com.broken       |
+	| Contact First Name                     | PRO                                        |
+	| Contact Last Name                      | Koroneiki1                                 |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | pro.koroneiki2@lrcustomer.com.broken       |
+	| Owner First Name                       | PRO                                        |
+	| Owner Last Name                        | Koroneiki2                                 |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Korpro - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | KORPARKORPAR                                   | |
+	| Contact Email Address | pro.koroneiki2@lrcustomer.com.broken           | |
+	| Description           | Test provisioning partner account on koroneiki | |
+	| Fax Number            | 555-555-9012                                   | |
+	| Name                  | Korpar - ${staticProjectName}                  | |
+	| Profile Email Address | pro.koroneiki2@lrcustomer.com.broken           | |
+	| Region                | United States                                  | |
+	| Status                | Active                                         | |
+	| Tier                  | T4                                             | |
+	| Website               | www.koroneikipartner.com                       | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korpar - ${staticProjectName}",
+			productName = "Solution Partnership - Reseller Program",
+			table = '''| Perpetual   | true     | |
+	| Quantity    | 1        | |
+	| Status      | Approved | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Partner");
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korpro");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korpro - ${staticProjectName}");
+
+		LocalFile.Provisioning.clickTab(tabName = "Details");
+
+		LocalFile.ProvisioningAccount.editAccountDetails(table = '''| Partner/Reseller/SI | Select Entity | Korpar - ${staticProjectName} | |
+	| First Line Support  | Select Entity | Korpar - ${staticProjectName} | |''');
+
+		LocalFile.ProvisioningAccount._viewAccountDetails(table = '''| Name           | Korpro - ${staticProjectName} |
+	| Code           | PROKORKORPRO                  |
+	| State          | ACTIVE                        |
+	| Support Region | United States                 |
+	| Country        | United States                 |
+	| SLA            | Platinum                      |
+	| Support Seats  | 1 / 3 Filled                  |
+	| Tier           | T4                            |
+	| FLS Partner    | Korpar - ${staticProjectName} |''');
+
+		LocalFile.ProvisioningAccount._viewAccountDetailsViaDetailsTab(table = '''| Account Name        | Korpro - ${staticProjectName} | |
+	| State               | ACTIVE                        | |
+	| Code                | PROKORKORPRO                  | |
+	| Tier                | T4                            | |
+	| Data Region         | United States                 | |
+	| Partner/Reseller/SI | Korpar - ${staticProjectName} |	|
+	| First Line Support  | Korpar - ${staticProjectName} |	|
+	| Street 1            | 456 Fake Street               | |
+	| Country             | United States                 | |
+	| City                | Diamond Bar                   | |
+	| State/Province      | California                    | |
+	| Postal Code         | 91765                         | |
+	| Primary             | true                          | |
+	| Dossiera Project    | ${staticDossieraProjectKey}   | |
+	| Salesforce Project  | ${staticSalesforceProjectKey} | |''');
+
+		LocalFile.KoroneikiAccountAPI._viewTeamRole(
+			accountName = "Korpro - ${staticProjectName}",
+			teamName = "Korpar - ${staticProjectName}",
+			teamRoleName = "Partner");
+
+		LocalFile.KoroneikiAccountAPI._viewTeamRole(
+			accountName = "Korpro - ${staticProjectName}",
+			teamName = "Korpar - ${staticProjectName}",
+			teamRoleName = "First Line Support");
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korpro");
+
+		LocalFile.Provisioning._viewAccountViaIndex(
+			accountName = "Korpro - ${staticProjectName}",
+			table = '''| Name    | Korpro - ${staticProjectName} |
+	| Code    | PROKORKORPRO                  |
+	| Partner | Korpar - ${staticProjectName} |
+	| Region  | United States                 |
+	| SLA     | Platinum                      |
+	| Tier    | T4                            |
+	| State   | ACTIVE                        |''');
+	}
+
+	test AddpartnerwithValueAddedResellerPartnership {
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Prokor - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Contact Email Address                  | pro.koroneiki1@lrcustomer.com.broken       |
+	| Contact First Name                     | PRO                                        |
+	| Contact Last Name                      | Koroneiki1                                 |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | pro.koroneiki2@lrcustomer.com.broken       |
+	| Owner First Name                       | PRO                                        |
+	| Owner Last Name                        | Koroneiki2                                 |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Korpro - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | KORPARKORPAR                                   | |
+	| Contact Email Address | pro.koroneiki2@lrcustomer.com.broken           | |
+	| Description           | Test provisioning partner account on koroneiki | |
+	| Fax Number            | 555-555-9012                                   | |
+	| Name                  | Korpar - ${staticProjectName}                  | |
+	| Profile Email Address | pro.koroneiki2@lrcustomer.com.broken           | |
+	| Region                | United States                                  | |
+	| Status                | Active                                         | |
+	| Tier                  | T4                                             | |
+	| Website               | www.koroneikipartner.com                       | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korpar - ${staticProjectName}",
+			productName = "Value-Added Reseller Partnership",
+			table = '''| Perpetual   | true     | |
+	| Quantity    | 1        | |
+	| Status      | Approved | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Partner");
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korpro");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korpro - ${staticProjectName}");
+
+		LocalFile.Provisioning.clickTab(tabName = "Details");
+
+		LocalFile.ProvisioningAccount.editAccountDetails(table = '''| Partner/Reseller/SI | Select Entity | Korpar - ${staticProjectName} | |
+	| First Line Support  | Select Entity | Korpar - ${staticProjectName} | |''');
+
+		LocalFile.ProvisioningAccount._viewAccountDetails(table = '''| Name           | Korpro - ${staticProjectName} |
+	| Code           | PROKORKORPRO                  |
+	| State          | ACTIVE                        |
+	| Support Region | United States                 |
+	| Country        | United States                 |
+	| SLA            | Platinum                      |
+	| Support Seats  | 1 / 3 Filled                  |
+	| Tier           | T4                            |
+	| FLS Partner    | Korpar - ${staticProjectName} |''');
+
+		LocalFile.ProvisioningAccount._viewAccountDetailsViaDetailsTab(table = '''| Account Name        | Korpro - ${staticProjectName} | |
+	| State               | ACTIVE                        | |
+	| Code                | PROKORKORPRO                  | |
+	| Tier                | T4                            | |
+	| Data Region         | United States                 | |
+	| Partner/Reseller/SI | Korpar - ${staticProjectName} |	|
+	| First Line Support  | Korpar - ${staticProjectName} |	|
+	| Street 1            | 456 Fake Street               | |
+	| Country             | United States                 | |
+	| City                | Diamond Bar                   | |
+	| State/Province      | California                    | |
+	| Postal Code         | 91765                         | |
+	| Primary             | true                          | |
+	| Dossiera Project    | ${staticDossieraProjectKey}   | |
+	| Salesforce Project  | ${staticSalesforceProjectKey} | |''');
+
+		LocalFile.KoroneikiAccountAPI._viewTeamRole(
+			accountName = "Korpro - ${staticProjectName}",
+			teamName = "Korpar - ${staticProjectName}",
+			teamRoleName = "Partner");
+
+		LocalFile.KoroneikiAccountAPI._viewTeamRole(
+			accountName = "Korpro - ${staticProjectName}",
+			teamName = "Korpar - ${staticProjectName}",
+			teamRoleName = "First Line Support");
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korpro");
+
+		LocalFile.Provisioning._viewAccountViaIndex(
+			accountName = "Korpro - ${staticProjectName}",
+			table = '''| Name    | Korpro - ${staticProjectName} |
+	| Code    | PROKORKORPRO                  |
+	| Partner | Korpar - ${staticProjectName} |
+	| Region  | United States                 |
+	| SLA     | Platinum                      |
+	| Tier    | T4                            |
+	| State   | ACTIVE                        |''');
+	}
+
+	test Removeflspartner {
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Prokor - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Contact Email Address                  | pro.koroneiki1@lrcustomer.com.broken       |
+	| Contact First Name                     | PRO                                        |
+	| Contact Last Name                      | Koroneiki1                                 |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | pro.koroneiki2@lrcustomer.com.broken       |
+	| Owner First Name                       | PRO                                        |
+	| Owner Last Name                        | Koroneiki2                                 |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Korpro - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | KORPARKORPAR                                   | |
+	| Contact Email Address | pro.koroneiki2@lrcustomer.com.broken           | |
+	| Description           | Test provisioning partner account on koroneiki | |
+	| Fax Number            | 555-555-9012                                   | |
+	| Name                  | Korpar - ${staticProjectName}                  | |
+	| Profile Email Address | pro.koroneiki2@lrcustomer.com.broken           | |
+	| Region                | United States                                  | |
+	| Status                | Active                                         | |
+	| Tier                  | T4                                             | |
+	| Website               | www.koroneikipartner.com                       | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korpar - ${staticProjectName}",
+			productName = "Service Partnership",
+			table = '''| Perpetual   | true     | |
+	| Quantity    | 1        | |
+	| Status      | Approved | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Partner");
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korpro");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korpro - ${staticProjectName}");
+
+		LocalFile.Provisioning.clickTab(tabName = "Details");
+
+		LocalFile.ProvisioningAccount.editAccountDetails(table = '''| Partner/Reseller/SI | Select Entity | Korpar - ${staticProjectName} | |
+	| First Line Support  | Select Entity | Korpar - ${staticProjectName} | |''');
+
+		LocalFile.ProvisioningAccount._viewAccountDetails(table = '''| Name           | Korpro - ${staticProjectName} |
+	| Code           | PROKORKORPRO                  |
+	| State          | ACTIVE                        |
+	| Support Region | United States                 |
+	| Country        | United States                 |
+	| SLA            | Platinum                      |
+	| Support Seats  | 1 / 3 Filled                  |
+	| Tier           | T4                            |
+	| FLS Partner    | Korpar - ${staticProjectName} |''');
+
+		LocalFile.ProvisioningAccount._viewAccountDetailsViaDetailsTab(table = '''| Account Name        | Korpro - ${staticProjectName} | |
+	| State               | ACTIVE                        | |
+	| Code                | PROKORKORPRO                  | |
+	| Tier                | T4                            | |
+	| Data Region         | United States                 | |
+	| Partner/Reseller/SI | Korpar - ${staticProjectName} |	|
+	| First Line Support  | Korpar - ${staticProjectName} |	|
+	| Street 1            | 456 Fake Street               | |
+	| Country             | United States                 | |
+	| City                | Diamond Bar                   | |
+	| State/Province      | California                    | |
+	| Postal Code         | 91765                         | |
+	| Primary             | true                          | |
+	| Dossiera Project    | ${staticDossieraProjectKey}   | |
+	| Salesforce Project  | ${staticSalesforceProjectKey} | |''');
+
+		LocalFile.ProvisioningAccount.editAccountDetails(table = '''| First Line Support | Delete Entity | | |''');
+
+		LocalFile.ProvisioningAccount._viewAccountDetailsViaDetailsTab(table = '''| Account Name        | Korpro - ${staticProjectName} | |
+	| State               | ACTIVE                        | |
+	| Code                | PROKORKORPRO                  | |
+	| Tier                | T4                            | |
+	| Data Region         | United States                 | |
+	| Partner/Reseller/SI | Korpar - ${staticProjectName} |	|
+	| First Line Support  | -                             |	|
+	| Street 1            | 456 Fake Street               | |
+	| Country             | United States                 | |
+	| City                | Diamond Bar                   | |
+	| State/Province      | California                    | |
+	| Postal Code         | 91765                         | |
+	| Primary             | true                          | |
+	| Dossiera Project    | ${staticDossieraProjectKey}   | |
+	| Salesforce Project  | ${staticSalesforceProjectKey} | |''');
+
+		LocalFile.KoroneikiAccountAPI._viewTeamRole(
+			accountName = "Korpro - ${staticProjectName}",
+			teamName = "Korpar - ${staticProjectName}",
+			teamRoleName = "Partner");
+
+		LocalFile.KoroneikiAccountAPI._viewNoTeamRole(
+			accountName = "Korpro - ${staticProjectName}",
+			teamName = "Korpar - ${staticProjectName}",
+			teamRoleName = "First Line Support");
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korpro");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korpro - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount._viewAccountDetails(table = '''| FLS Partner | - |''');
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korpar");
+
+		LocalFile.Provisioning.removeAdvancedSearchFilters(table = '''| Subscription State: Active      |
+	| Subscription State: Cancelled   |
+	| Subscription State: Expired     |
+	| Subscription State: Unactivated |''');
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korpar - ${staticProjectName}");
+
+		LocalFile.Provisioning.clickTab(tabName = "Teams");
+
+		LocalFile.ProvisioningAccount._viewAccountTeam(
+			table = '''| Name                         | Korpar - ${staticProjectName} |
+	| Partner/Reseller/SI Accounts | 1                             |
+	| First Line Support Accounts  | 0                             |''',
+			teamName = "Korpar - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.clickTeamLink(teamName = "Korpar - ${staticProjectName}");
+
+		LocalFile.Provisioning.clickTab(tabName = "Partner/Reseller/SI Accounts");
+
+		LocalFile.ProvisioningTeam._viewTeamAccount(
+			accountName = "Korpro - ${staticProjectName}",
+			table = '''| Account Name  | Korpro - ${staticProjectName} |
+	| Code          | PROKORKORPRO                  |
+	| Region        | United States                 |
+	| SLA           | Platinum                      |
+	| Tier          | T4                            |
+	| Account State | ACTIVE                        |''');
+
+		LocalFile.Provisioning.clickTab(tabName = "First Line Support Accounts");
+
+		LocalFile.ProvisioningTeam._viewNoAccount(accountName = "Korpro - ${staticProjectName}");
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korpro");
+
+		LocalFile.Provisioning._viewAccountViaIndex(
+			accountName = "Korpro - ${staticProjectName}",
+			table = '''| Name    | Korpro - ${staticProjectName} |
+	| Code    | PROKORKORPRO                  |
+	| Partner | Korpar - ${staticProjectName} |
+	| Region  | United States                 |
+	| SLA     | Platinum                      |
+	| Tier    | T4                            |
+	| State   | ACTIVE                        |''');
+	}
+
+	test Removepartner {
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Prokor - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Contact Email Address                  | pro.koroneiki1@lrcustomer.com.broken       |
+	| Contact First Name                     | PRO                                        |
+	| Contact Last Name                      | Koroneiki1                                 |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | pro.koroneiki2@lrcustomer.com.broken       |
+	| Owner First Name                       | PRO                                        |
+	| Owner Last Name                        | Koroneiki2                                 |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Korpro - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | KORPARKORPAR                                   | |
+	| Contact Email Address | pro.koroneiki2@lrcustomer.com.broken           | |
+	| Description           | Test provisioning partner account on koroneiki | |
+	| Fax Number            | 555-555-9012                                   | |
+	| Name                  | Korpar - ${staticProjectName}                  | |
+	| Profile Email Address | pro.koroneiki2@lrcustomer.com.broken           | |
+	| Region                | United States                                  | |
+	| Status                | Active                                         | |
+	| Tier                  | T4                                             | |
+	| Website               | www.koroneikipartner.com                       | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korpar - ${staticProjectName}",
+			productName = "Service Partnership",
+			table = '''| Perpetual   | true     | |
+	| Quantity    | 1        | |
+	| Status      | Approved | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Partner");
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korpro");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korpro - ${staticProjectName}");
+
+		LocalFile.Provisioning.clickTab(tabName = "Details");
+
+		LocalFile.ProvisioningAccount.editAccountDetails(table = '''| Partner/Reseller/SI | Select Entity | Korpar - ${staticProjectName} | |
+	| First Line Support  | Select Entity | Korpar - ${staticProjectName} | |''');
+
+		LocalFile.ProvisioningAccount._viewAccountDetails(table = '''| Name           | Korpro - ${staticProjectName} |
+	| Code           | PROKORKORPRO                  |
+	| State          | ACTIVE                        |
+	| Support Region | United States                 |
+	| Country        | United States                 |
+	| SLA            | Platinum                      |
+	| Support Seats  | 1 / 3 Filled                  |
+	| Tier           | T4                            |
+	| FLS Partner    | Korpar - ${staticProjectName} |''');
+
+		LocalFile.ProvisioningAccount._viewAccountDetailsViaDetailsTab(table = '''| Account Name        | Korpro - ${staticProjectName} | |
+	| State               | ACTIVE                        | |
+	| Code                | PROKORKORPRO                  | |
+	| Tier                | T4                            | |
+	| Data Region         | United States                 | |
+	| Partner/Reseller/SI | Korpar - ${staticProjectName} |	|
+	| First Line Support  | Korpar - ${staticProjectName} |	|
+	| Street 1            | 456 Fake Street               | |
+	| Country             | United States                 | |
+	| City                | Diamond Bar                   | |
+	| State/Province      | California                    | |
+	| Postal Code         | 91765                         | |
+	| Primary             | true                          | |
+	| Dossiera Project    | ${staticDossieraProjectKey}   | |
+	| Salesforce Project  | ${staticSalesforceProjectKey} | |''');
+
+		LocalFile.ProvisioningAccount.editAccountDetails(table = '''| Partner/Reseller/SI | Delete Entity | | |''');
+
+		LocalFile.ProvisioningAccount._viewAccountDetailsViaDetailsTab(table = '''| Account Name        | Korpro - ${staticProjectName} | |
+	| State               | ACTIVE                        | |
+	| Code                | PROKORKORPRO                  | |
+	| Tier                | T4                            | |
+	| Data Region         | United States                 | |
+	| Partner/Reseller/SI | -                             |	|
+	| First Line Support  | Korpar - ${staticProjectName} |	|
+	| Street 1            | 456 Fake Street               | |
+	| Country             | United States                 | |
+	| City                | Diamond Bar                   | |
+	| State/Province      | California                    | |
+	| Postal Code         | 91765                         | |
+	| Primary             | true                          | |
+	| Dossiera Project    | ${staticDossieraProjectKey}   | |
+	| Salesforce Project  | ${staticSalesforceProjectKey} | |''');
+
+		LocalFile.KoroneikiAccountAPI._viewNoTeamRole(
+			accountName = "Korpro - ${staticProjectName}",
+			teamName = "Korpar - ${staticProjectName}",
+			teamRoleName = "Partner");
+
+		LocalFile.KoroneikiAccountAPI._viewTeamRole(
+			accountName = "Korpro - ${staticProjectName}",
+			teamName = "Korpar - ${staticProjectName}",
+			teamRoleName = "First Line Support");
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korpro");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korpro - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.clickPartnerLinkViaAccountHeader();
+
+		LocalFile.ProvisioningTeam._viewTeamDetails(table = '''| Name | Korpar - ${staticProjectName} |''');
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korpar");
+
+		LocalFile.Provisioning.removeAdvancedSearchFilters(table = '''| Subscription State: Active      |
+	| Subscription State: Cancelled   |
+	| Subscription State: Expired     |
+	| Subscription State: Unactivated |''');
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korpar - ${staticProjectName}");
+
+		LocalFile.Provisioning.clickTab(tabName = "Teams");
+
+		LocalFile.ProvisioningAccount._viewAccountTeam(
+			table = '''| Name                         | Korpar - ${staticProjectName} |
+	| Partner/Reseller/SI Accounts | 0                             |
+	| First Line Support Accounts  | 1                             |''',
+			teamName = "Korpar - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.clickTeamLink(teamName = "Korpar - ${staticProjectName}");
+
+		LocalFile.Provisioning.clickTab(tabName = "Partner/Reseller/SI Accounts");
+
+		LocalFile.ProvisioningTeam._viewNoAccount(accountName = "Korpro - ${staticProjectName}");
+
+		LocalFile.Provisioning.clickTab(tabName = "First Line Support Accounts");
+
+		LocalFile.ProvisioningTeam._viewTeamAccount(
+			accountName = "Korpro - ${staticProjectName}",
+			table = '''| Account Name  | Korpro - ${staticProjectName} |
+	| Code          | PROKORKORPRO                  |
+	| Region        | United States                 |
+	| SLA           | Platinum                      |
+	| Tier          | T4                            |
+	| Account State | ACTIVE                        |''');
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korpro");
+
+		LocalFile.Provisioning._viewAccountViaIndex(
+			accountName = "Korpro - ${staticProjectName}",
+			table = '''| Name    | Korpro - ${staticProjectName} |
+	| Code    | PROKORKORPRO                  |
+	| Partner | -                             |
+	| Region  | United States                 |
+	| SLA     | Platinum                      |
+	| Tier    | T4                            |
+	| State   | ACTIVE                        |''');
+	}
+
+	test Removepartnerandflspartner {
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Prokor - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Contact Email Address                  | pro.koroneiki1@lrcustomer.com.broken       |
+	| Contact First Name                     | PRO                                        |
+	| Contact Last Name                      | Koroneiki1                                 |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | pro.koroneiki2@lrcustomer.com.broken       |
+	| Owner First Name                       | PRO                                        |
+	| Owner Last Name                        | Koroneiki2                                 |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Korpro - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | KORPARKORPAR                                   | |
+	| Contact Email Address | pro.koroneiki2@lrcustomer.com.broken           | |
+	| Description           | Test provisioning partner account on koroneiki | |
+	| Fax Number            | 555-555-9012                                   | |
+	| Name                  | Korpar - ${staticProjectName}                  | |
+	| Profile Email Address | pro.koroneiki2@lrcustomer.com.broken           | |
+	| Region                | United States                                  | |
+	| Status                | Active                                         | |
+	| Tier                  | T4                                             | |
+	| Website               | www.koroneikipartner.com                       | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korpar - ${staticProjectName}",
+			productName = "Service Partnership",
+			table = '''| Perpetual   | true     | |
+	| Quantity    | 1        | |
+	| Status      | Approved | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Partner");
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korpro");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korpro - ${staticProjectName}");
+
+		LocalFile.Provisioning.clickTab(tabName = "Details");
+
+		LocalFile.ProvisioningAccount.editAccountDetails(table = '''| Partner/Reseller/SI | Select Entity | Korpar - ${staticProjectName} | |
+	| First Line Support  | Select Entity | Korpar - ${staticProjectName} | |''');
+
+		LocalFile.ProvisioningAccount._viewAccountDetails(table = '''| Name           | Korpro - ${staticProjectName} |
+	| Code           | PROKORKORPRO                  |
+	| State          | ACTIVE                        |
+	| Support Region | United States                 |
+	| Country        | United States                 |
+	| SLA            | Platinum                      |
+	| Support Seats  | 1 / 3 Filled                  |
+	| Tier           | T4                            |
+	| FLS Partner    | Korpar - ${staticProjectName} |''');
+
+		LocalFile.ProvisioningAccount._viewAccountDetailsViaDetailsTab(table = '''| Account Name        | Korpro - ${staticProjectName} | |
+	| State               | ACTIVE                        | |
+	| Code                | PROKORKORPRO                  | |
+	| Tier                | T4                            | |
+	| Data Region         | United States                 | |
+	| Partner/Reseller/SI | Korpar - ${staticProjectName} |	|
+	| First Line Support  | Korpar - ${staticProjectName} |	|
+	| Street 1            | 456 Fake Street               | |
+	| Country             | United States                 | |
+	| City                | Diamond Bar                   | |
+	| State/Province      | California                    | |
+	| Postal Code         | 91765                         | |
+	| Primary             | true                          | |
+	| Dossiera Project    | ${staticDossieraProjectKey}   | |
+	| Salesforce Project  | ${staticSalesforceProjectKey} | |''');
+
+		LocalFile.ProvisioningAccount.editAccountDetails(table = '''| Partner/Reseller/SI | Delete Entity | | |
+	| First Line Support  | Delete Entity | | |''');
+
+		LocalFile.ProvisioningAccount._viewAccountDetailsViaDetailsTab(table = '''| Account Name        | Korpro - ${staticProjectName} | |
+	| State               | ACTIVE                        | |
+	| Code                | PROKORKORPRO                  | |
+	| Tier                | T4                            | |
+	| Data Region         | United States                 | |
+	| Partner/Reseller/SI | -                             |	|
+	| First Line Support  | -                             |	|
+	| Street 1            | 456 Fake Street               | |
+	| Country             | United States                 | |
+	| City                | Diamond Bar                   | |
+	| State/Province      | California                    | |
+	| Postal Code         | 91765                         | |
+	| Primary             | true                          | |
+	| Dossiera Project    | ${staticDossieraProjectKey}   | |
+	| Salesforce Project  | ${staticSalesforceProjectKey} | |''');
+
+		LocalFile.KoroneikiAccountAPI._viewNoAccountTeam(
+			accountName = "Korpro - ${staticProjectName}",
+			teamName = "Korpar - ${staticProjectName}");
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korpro");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korpro - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount._viewAccountDetails(table = '''| FLS Partner | - |''');
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korpar");
+
+		LocalFile.Provisioning.removeAdvancedSearchFilters(table = '''| Subscription State: Active      |
+	| Subscription State: Cancelled   |
+	| Subscription State: Expired     |
+	| Subscription State: Unactivated |''');
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korpar - ${staticProjectName}");
+
+		LocalFile.Provisioning.clickTab(tabName = "Teams");
+
+		LocalFile.ProvisioningAccount._viewAccountTeam(
+			table = '''| Name                         | Korpar - ${staticProjectName} |
+	| Partner/Reseller/SI Accounts | 0                             |
+	| First Line Support Accounts  | 0                             |''',
+			teamName = "Korpar - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.clickTeamLink(teamName = "Korpar - ${staticProjectName}");
+
+		LocalFile.Provisioning.clickTab(tabName = "Partner/Reseller/SI Accounts");
+
+		LocalFile.ProvisioningTeam._viewNoAccount(accountName = "Korpro - ${staticProjectName}");
+
+		LocalFile.Provisioning.clickTab(tabName = "First Line Support Accounts");
+
+		LocalFile.ProvisioningTeam._viewNoAccount(accountName = "Korpro - ${staticProjectName}");
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korpro");
+
+		LocalFile.Provisioning._viewAccountViaIndex(
+			accountName = "Korpro - ${staticProjectName}",
+			table = '''| Name    | Korpro - ${staticProjectName} |
+	| Code    | PROKORKORPRO                  |
+	| Partner | -                             |
+	| Region  | United States                 |
+	| SLA     | Platinum                      |
+	| Tier    | T4                            |
+	| State   | ACTIVE                        |''');
+	}
+
+	test Updateaccountcontainingpartner {
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Prokor - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Contact Email Address                  | pro.koroneiki1@lrcustomer.com.broken       |
+	| Contact First Name                     | PRO                                        |
+	| Contact Last Name                      | Koroneiki1                                 |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | pro.koroneiki2@lrcustomer.com.broken       |
+	| Owner First Name                       | PRO                                        |
+	| Owner Last Name                        | Koroneiki2                                 |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Korpro - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | KORPARKORPAR                                   | |
+	| Contact Email Address | pro.koroneiki2@lrcustomer.com.broken           | |
+	| Description           | Test provisioning partner account on koroneiki | |
+	| Fax Number            | 555-555-9012                                   | |
+	| Name                  | Korpar - ${staticProjectName}                  | |
+	| Profile Email Address | pro.koroneiki2@lrcustomer.com.broken           | |
+	| Region                | United States                                  | |
+	| Status                | Active                                         | |
+	| Tier                  | T4                                             | |
+	| Website               | www.koroneikipartner.com                       | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korpar - ${staticProjectName}",
+			productName = "Service Partnership",
+			table = '''| Perpetual   | true     | |
+	| Quantity    | 1        | |
+	| Status      | Approved | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Partner");
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korpro");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korpro - ${staticProjectName}");
+
+		LocalFile.Provisioning.clickTab(tabName = "Details");
+
+		LocalFile.ProvisioningAccount.editAccountDetails(table = '''| Partner/Reseller/SI | Select Entity | Korpar - ${staticProjectName} | |
+	| First Line Support  | Select Entity | Korpar - ${staticProjectName} | |''');
+
+		LocalFile.ProvisioningAccount._viewAccountDetails(table = '''| Name           | Korpro - ${staticProjectName} |
+	| Code           | PROKORKORPRO                  |
+	| State          | ACTIVE                        |
+	| Support Region | United States                 |
+	| Country        | United States                 |
+	| SLA            | Platinum                      |
+	| Support Seats  | 1 / 3 Filled                  |
+	| Tier           | T4                            |
+	| FLS Partner    | Korpar - ${staticProjectName} |''');
+
+		LocalFile.ProvisioningAccount._viewAccountDetailsViaDetailsTab(table = '''| Account Name        | Korpro - ${staticProjectName} | |
+	| State               | ACTIVE                        | |
+	| Code                | PROKORKORPRO                  | |
+	| Tier                | T4                            | |
+	| Data Region         | United States                 | |
+	| Partner/Reseller/SI | Korpar - ${staticProjectName} |	|
+	| First Line Support  | Korpar - ${staticProjectName} |	|
+	| Street 1            | 456 Fake Street               | |
+	| Country             | United States                 | |
+	| City                | Diamond Bar                   | |
+	| State/Province      | California                    | |
+	| Postal Code         | 91765                         | |
+	| Primary             | true                          | |
+	| Dossiera Project    | ${staticDossieraProjectKey}   | |
+	| Salesforce Project  | ${staticSalesforceProjectKey} | |''');
+
+		LocalFile.KoroneikiAccountAPI._viewTeamRole(
+			accountName = "Korpro - ${staticProjectName}",
+			teamName = "Korpar - ${staticProjectName}",
+			teamRoleName = "Partner");
+
+		LocalFile.KoroneikiAccountAPI._viewTeamRole(
+			accountName = "Korpro - ${staticProjectName}",
+			teamName = "Korpar - ${staticProjectName}",
+			teamRoleName = "First Line Support");
+
+		LocalFile.KoroneikiAccountAPI._updateAccount(
+			accountName = "Korpro - ${staticProjectName}",
+			table = '''| Code         | ONEPROONEPRO                             | |
+	| Description  | Test update account on koroneiki         | |
+	| Fax Number   | 555-555-4321                             | |
+	| Name         | Onepro - ${staticProjectName}            | |
+	| Phone Number | 555-555-8765                             | |
+	| Region       | Global                                   | |
+	| Status       | Active                                   | |
+	| Tier         | T1                                       | |
+	| Website      | www.koroneikiupdate.com                  | |''');
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Onepro");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Onepro - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.clickPartnerLinkViaAccountHeader();
+
+		LocalFile.ProvisioningTeam._viewTeamDetails(table = '''| Name | Korpar - ${staticProjectName} |''');
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korpar");
+
+		LocalFile.Provisioning.removeAdvancedSearchFilters(table = '''| Subscription State: Active      |
+	| Subscription State: Cancelled   |
+	| Subscription State: Expired     |
+	| Subscription State: Unactivated |''');
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korpar - ${staticProjectName}");
+
+		LocalFile.Provisioning.clickTab(tabName = "Teams");
+
+		LocalFile.ProvisioningAccount._viewAccountTeam(
+			table = '''| Name                         | Korpar - ${staticProjectName} |
+	| Partner/Reseller/SI Accounts | 1                             |
+	| First Line Support Accounts  | 1                             |''',
+			teamName = "Korpar - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.clickTeamLink(teamName = "Korpar - ${staticProjectName}");
+
+		LocalFile.Provisioning.clickTab(tabName = "Partner/Reseller/SI Accounts");
+
+		LocalFile.ProvisioningTeam._viewTeamAccount(
+			accountName = "Onepro - ${staticProjectName}",
+			table = '''| Account Name  | Onepro - ${staticProjectName} |
+	| Code          | ONEPROONEPRO                  |
+	| Region        | Global                        |
+	| SLA           | Platinum                      |
+	| Tier          | T1                            |
+	| Account State | ACTIVE                        |''');
+
+		LocalFile.ProvisioningTeam._viewNoAccount(accountName = "Korpro - ${staticProjectName}");
+
+		LocalFile.Provisioning.clickTab(tabName = "First Line Support Accounts");
+
+		LocalFile.ProvisioningTeam._viewTeamAccount(
+			accountName = "Onepro - ${staticProjectName}",
+			table = '''| Account Name  | Onepro - ${staticProjectName} |
+	| Code          | ONEPROONEPRO                  |
+	| Region        | Global                        |
+	| SLA           | Platinum                      |
+	| Tier          | T1                            |
+	| Account State | ACTIVE                        |''');
+
+		LocalFile.ProvisioningTeam._viewNoAccount(accountName = "Korpro - ${staticProjectName}");
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Onepro");
+
+		LocalFile.Provisioning._viewAccountViaIndex(
+			accountName = "Onepro - ${staticProjectName}",
+			table = '''| Name    | Onepro - ${staticProjectName} |
+	| Code    | ONEPROONEPRO                  |
+	| Partner | Korpar - ${staticProjectName} |
+	| Region  | Global                        |
+	| SLA     | Platinum                      |
+	| Tier    | T1                            |
+	| State   | ACTIVE                        |''');
+	}
+
+	test Updatepartner {
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Prokor - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Contact Email Address                  | pro.koroneiki1@lrcustomer.com.broken       |
+	| Contact First Name                     | PRO                                        |
+	| Contact Last Name                      | Koroneiki1                                 |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | pro.koroneiki2@lrcustomer.com.broken       |
+	| Owner First Name                       | PRO                                        |
+	| Owner Last Name                        | Koroneiki2                                 |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Korpro - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountTeam(
+			accountName = "Korpro - ${staticProjectName}",
+			teamName = "Koroneiki Partner");
+
+		LocalFile.KoroneikiAccountAPI._assignTeamRolesToTeam(
+			accountName = "Korpro - ${staticProjectName}",
+			table = '''| Partner |''',
+			teamName = "Koroneiki Partner");
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | KORPARKORPAR                                   | |
+	| Contact Email Address | pro.koroneiki2@lrcustomer.com.broken           | |
+	| Description           | Test provisioning partner account on koroneiki | |
+	| Fax Number            | 555-555-9012                                   | |
+	| Name                  | Korpar - ${staticProjectName}                  | |
+	| Profile Email Address | pro.koroneiki1@lrcustomer.com.broken           | |
+	| Region                | United States                                  | |
+	| Status                | Active                                         | |
+	| Tier                  | T4                                             | |
+	| Website               | www.koroneikipartner.com                       | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korpar - ${staticProjectName}",
+			productName = "Service Partnership",
+			table = '''| Perpetual   | true     | |
+	| Quantity    | 1        | |
+	| Status      | Approved | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Partner");
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korpro");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korpro - ${staticProjectName}");
+
+		LocalFile.Provisioning.clickTab(tabName = "Details");
+
+		LocalFile.ProvisioningAccount.editAccountDetails(table = '''| Partner/Reseller/SI | Select Entity | Korpar - ${staticProjectName} | |
+	| First Line Support  | Select Entity | Korpar - ${staticProjectName} | |''');
+
+		LocalFile.ProvisioningAccount._viewAccountDetails(table = '''| Name           | Korpro - ${staticProjectName} |
+	| Code           | PROKORKORPRO                  |
+	| State          | ACTIVE                        |
+	| Support Region | United States                 |
+	| Country        | United States                 |
+	| SLA            | Platinum                      |
+	| Support Seats  | 1 / 3 Filled                  |
+	| Tier           | T4                            |
+	| FLS Partner    | Korpar - ${staticProjectName} |''');
+
+		LocalFile.ProvisioningAccount._viewAccountDetailsViaDetailsTab(table = '''| Account Name        | Korpro - ${staticProjectName} | |
+	| State               | ACTIVE                        | |
+	| Code                | PROKORKORPRO                  | |
+	| Tier                | T4                            | |
+	| Data Region         | United States                 | |
+	| Partner/Reseller/SI | Korpar - ${staticProjectName} |	|
+	| First Line Support  | Korpar - ${staticProjectName} |	|
+	| Street 1            | 456 Fake Street               | |
+	| Country             | United States                 | |
+	| City                | Diamond Bar                   | |
+	| State/Province      | California                    | |
+	| Postal Code         | 91765                         | |
+	| Primary             | true                          | |
+	| Dossiera Project    | ${staticDossieraProjectKey}   | |
+	| Salesforce Project  | ${staticSalesforceProjectKey} | |''');
+
+		LocalFile.KoroneikiAccountAPI._viewTeamRole(
+			accountName = "Korpro - ${staticProjectName}",
+			teamName = "Korpar - ${staticProjectName}",
+			teamRoleName = "Partner");
+
+		LocalFile.KoroneikiAccountAPI._viewTeamRole(
+			accountName = "Korpro - ${staticProjectName}",
+			teamName = "Korpar - ${staticProjectName}",
+			teamRoleName = "First Line Support");
+
+		LocalFile.KoroneikiAccountAPI._viewNoTeamRole(
+			accountName = "Korpro - ${staticProjectName}",
+			teamName = "Koroneiki Partner",
+			teamRoleName = "Partner");
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korpro");
+
+		LocalFile.Provisioning._viewAccountViaIndex(
+			accountName = "Korpro - ${staticProjectName}",
+			table = '''| Name    | Korpro - ${staticProjectName} |
+	| Code    | PROKORKORPRO                  |
+	| Partner | Korpar - ${staticProjectName} |
+	| Region  | United States                 |
+	| SLA     | Platinum                      |
+	| Tier    | T4                            |
+	| State   | ACTIVE                        |''');
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korpro - ${staticProjectName}");
+
+		LocalFile.Provisioning.clickTab(tabName = "History");
+
+		LocalFile.KoroneikiAccountAPI._generateAccountId(accountName = "Korpro - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "contactEmailAddress",
+			keyword = "Auto > Added Account",
+			table = '''| Update Description          | Auto > Added Account                 |
+	| Update Field Name           | contactEmailAddress                  |
+	| Update Field Original Value | N/A                                  |
+	| Update Field New Value      | pro.koroneiki2@lrcustomer.com.broken |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "internal",
+			keyword = "Auto > Added Account",
+			table = '''| Update Description          | Auto > Added Account |
+	| Update Field Name           | internal             |
+	| Update Field Original Value | N/A                  |
+	| Update Field New Value      | false                |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "code",
+			keyword = "Auto > Added Account",
+			table = '''| Update Description          | Auto > Added Account |
+	| Update Field Name           | code                 |
+	| Update Field Original Value | N/A                  |
+	| Update Field New Value      | PROKORKORPRO         |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "region",
+			keyword = "Auto > Added Account",
+			table = '''| Update Description          | Auto > Added Account |
+	| Update Field Name           | region               |
+	| Update Field Original Value | N/A                  |
+	| Update Field New Value      | United States        |''');
+
+		LocalFile.KoroneikiAccountAPI._generateAccountId(accountName = "Prokor - ${staticCompanyName}");
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "parentAccountId",
+			keyword = "Auto > Added Account",
+			table = '''| Update Description          | Auto > Added Account |
+	| Update Field Name           | parentAccountId      |
+	| Update Field Original Value | N/A                  |
+	| Update Field New Value      | ${staticAccountId}   |''');
+
+		LocalFile.KoroneikiAccountAPI._generateAccountId(accountName = "Korpro - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "accountId",
+			keyword = "Auto > Added Account",
+			table = '''| Update Description          | Auto > Added Account |
+	| Update Field Name           | accountId            |
+	| Update Field Original Value | N/A                  |
+	| Update Field New Value      | ${staticAccountId}   |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "name",
+			keyword = "Auto > Added Account",
+			table = '''| Update Description          | Auto > Added Account          |
+	| Update Field Name           | name                          |
+	| Update Field Original Value | N/A                           |
+	| Update Field New Value      | Korpro - ${staticProjectName} |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "status",
+			keyword = "Auto > Added Account",
+			table = '''| Update Description          | Auto > Added Account |
+	| Update Field Name           | status               |
+	| Update Field Original Value | N/A                  |
+	| Update Field New Value      | Active               |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "tier",
+			keyword = "Auto > Added Account",
+			table = '''| Update Description          | Auto > Added Account |
+	| Update Field Name           | tier                 |
+	| Update Field Original Value | N/A                  |
+	| Update Field New Value      | T4                   |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "Team Role",
+			keyword = "Test Test > Unassigned Team",
+			table = '''| Update Description          | Test Test > Unassigned Team > Koroneiki Partner |
+	| Update Field Name           | Team Role                                       |
+	| Update Field Original Value | Partner                                         |
+	| Update Field New Value      | N/A                                             |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeywordAndPosition(
+			fieldName = "Team Role",
+			keyword = "Test Test > Assigned Team",
+			positionValue = 1,
+			table = '''| Update Description          | Test Test > Assigned Team > Korpar - ${staticProjectName} |
+	| Update Field Name           | Team Role                                                 |
+	| Update Field Original Value | N/A                                                       |
+	| Update Field New Value      | Partner                                                   |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeywordAndPosition(
+			fieldName = "Team Role",
+			keyword = "Test Test > Assigned Team",
+			positionValue = 2,
+			table = '''| Update Description          | Test Test > Assigned Team > Korpar - ${staticProjectName} |
+	| Update Field Name           | Team Role                                                 |
+	| Update Field Original Value | N/A                                                       |
+	| Update Field New Value      | First Line Support                                        |''');
+	}
+
+}

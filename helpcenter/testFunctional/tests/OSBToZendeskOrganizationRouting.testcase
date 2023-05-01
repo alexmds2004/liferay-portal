@@ -1,0 +1,114 @@
+definition {
+
+	property testray.main.component.name = "Support QA";
+	property type = "zendesk.integration";
+
+	tearDown {
+		LocalFile.ZendeskUserAPI._getDefaultUserId(organizationName = "Osbzen - ${staticProjectName}");
+
+		LocalFile.ZendeskTicketAPI._tearDownTicketByIds(ticketIdList = ${staticRequestIdList});
+
+		LocalFile.OSBAdminProject.tearDownProjects(table = '''| OSBZENOSBZEN |''');
+
+		LocalFile.KoroneikiAccountAPI._tearDownAccounts(table = '''| Osbzen - ${staticProjectName} |''');
+
+		LocalFile.KoroneikiAccountAPI._tearDownAccountsViaAccountFieldNameAndValue(
+			fieldName = "Code",
+			table = '''| OSBZENOSBZEN |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Gold Subscription");
+
+		LocalFile.JSONUser.tearDownUsers(table = '''| osb.customer1@lrcustomer.com.broken |''');
+
+		LocalFile.JSONUser.tearDownUsersViaSupport(table = '''| osb.customer1@lrcustomer.com.broken |''');
+
+		LocalFile.JSONUser.tearDownUsersViaKoroneiki(table = '''| osb.customer1@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiContactAPI._tearDownContacts(table = '''| osb.customer1@lrcustomer.com.broken |''');
+
+		LocalFile.JSONOkta.tearDownUsers(table = '''| osb.customer1@lrcustomer.com.broken |''');
+
+		LocalFile.ZendeskUserAPI._getMultipleUserIdsByEmailAddress(table = '''| osb.customer1@lrcustomer.com.broken |''');
+
+		LocalFile.ZendeskUserAPI._tearDownUsersByIdList(userIds = ${staticUserIdList});
+
+		LocalFile.ZendeskOrganizationAPI._getMultipleOrganizationExternalIdsByOrganizationNameIfStillPresent(table = '''| Osbzen - ${staticProjectName} |''');
+
+		LocalFile.ZendeskOrganizationAPI._tearDownOrganizationsByExternalIdList(organizationExternalIds = ${staticOrganizationExternalIdList});
+
+		LocalFile.ZendeskUserAPI._tearDownUserById(userId = ${staticDefaultUserId});
+	}
+
+	test Viewaccountcodeandexternalidfields {
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | osb.customer1                       |
+	| Email Address | osb.customer1@lrcustomer.com.broken |
+	| First Name    | OSB                                 |
+	| Last Name     | Customer1                           |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code     | OSBZENOSBZEN                  | |
+	| Language | English                       | |
+	| Name     | Osbzen - ${staticProjectName} | |
+	| Region   | United States                 | |
+	| Status   | Active                        | |
+	| Tier     | T1                            | |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Osbzen - ${staticProjectName}",
+			contactEmailAddress = "osb.customer1@lrcustomer.com.broken",
+			table = '''| Support Requester |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Osbzen - ${staticProjectName}",
+			productName = "Portal Production",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Osbzen - ${staticProjectName}",
+			productName = "Gold Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Gold Subscription");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - Portal");
+
+		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "OSBZENOSBZEN");
+
+		LocalFile.ZendeskOrganizationAPI._viewOrganizationSyncFromOsb(organizationName = "Osbzen - ${staticProjectName}");
+
+		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+
+		LocalFile.ZendeskRequestAPI._createRequest(
+			requesterEmail = "osb.customer1@lrcustomer.com.broken",
+			table = '''| Product           | prd_liferay_portal_6_2                           |
+	| Component         | activation_key_project_administration            |
+	| System Status     | production_functioning_with_limited_capabilities |
+	| Subject           | Request Subject                                  |
+	| Description       | Request Description                              |
+	| Organization Name | Osbzen - ${staticProjectName}                    |''');
+
+		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+
+		LocalFile.ZendeskTicketAPI._viewAccountCodeAndExternalId(
+			organizationName = "Osbzen - ${staticProjectName}",
+			ticketIdList = ${staticRequestIdList});
+	}
+
+}

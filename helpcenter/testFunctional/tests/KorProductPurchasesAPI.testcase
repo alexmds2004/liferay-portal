@@ -1,0 +1,384 @@
+definition {
+
+	property testray.main.component.name = "Support QA";
+	property type = "koroneiki";
+
+	tearDown {
+		LocalFile.KoroneikiAccountAPI._tearDownAccounts(table = '''| Koroneiki Automotive |''');
+
+		LocalFile.KoroneikiProductAPI._tearDownProducts(table = '''| Liferay Digital Experience Platform |''');
+	}
+
+	test Createandviewcancelledandapprovedpurchasesforthesameproductonsameaccount {
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | KORAUTO                                  | |
+	| Contact Email Address | koroneiki.contact1@lrcustomer.com.broken | |
+	| Description           | Test automotive account on koroneiki     | |
+	| Fax Number            | 555-555-1234                             | |
+	| Name                  | Koroneiki Automotive                     | |
+	| Phone Number          | 555-555-5678                             | |
+	| Profile Email Address | koroneiki.contact1@lrcustomer.com.broken | |
+	| Region                | United States                            | |
+	| Status                | Active                                   | |
+	| Tier                  | T4                                       | |
+	| Website               | www.koroneikiautomotive.com              | |''');
+
+		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | Liferay Digital Experience Platform | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFutureStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Koroneiki Automotive",
+			productName = "Liferay Digital Experience Platform",
+			table = '''| End Date                | ${staticEndDate}         |                |
+	| Original End Date       | ${staticOriginalEndDate} |                |
+	| Perpetual               | false                    |                |
+	| Product Field and Value | additionalProp1          | propertyValue1 |
+	| Product Field and Value | additionalProp2          | propertyValue2 |
+	| Product Field and Value | additionalProp3          | propertyValue3 |
+	| Quantity                | 1                        |                |
+	| Start Date              | ${staticStartDate}       |                |
+	| Status                  | Approved                 |                |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Koroneiki Automotive",
+			productName = "Liferay Digital Experience Platform",
+			table = '''| End Date                | ${staticFutureEndDate}         |                |
+	| Original End Date       | ${staticFutureOriginalEndDate} |                |
+	| Perpetual               | false                          |                |
+	| Product Field and Value | additionalProp4                | propertyValue4 |
+	| Product Field and Value | additionalProp5                | propertyValue5 |
+	| Product Field and Value | additionalProp6                | propertyValue6 |
+	| Quantity                | 1                              |                |
+	| Start Date              | ${staticFutureStartDate}       |                |
+	| Status                  | Cancelled                      |                |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchaseWithFieldValue(
+			accountName = "Koroneiki Automotive",
+			fieldName = "startDate",
+			fieldValue = ${staticStartDate},
+			productName = "Liferay Digital Experience Platform",
+			table = '''| End Date                | ${staticEndDate}         |                |
+	| Original End Date       | ${staticOriginalEndDate} |                |
+	| Perpetual               | false                    |                |
+	| Product Field and Value | additionalProp1          | propertyValue1 |
+	| Product Field and Value | additionalProp2          | propertyValue2 |
+	| Product Field and Value | additionalProp3          | propertyValue3 |
+	| Quantity                | 1                        |                |
+	| Start Date              | ${staticStartDate}       |                |
+	| Status                  | Approved                 |                |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchaseWithFieldValue(
+			accountName = "Koroneiki Automotive",
+			fieldName = "startDate",
+			fieldValue = ${staticFutureStartDate},
+			productName = "Liferay Digital Experience Platform",
+			table = '''| End Date                | ${staticFutureEndDate}         |                |
+	| Original End Date       | ${staticFutureOriginalEndDate} |                |
+	| Perpetual               | false                          |                |
+	| Product Field and Value | additionalProp4                | propertyValue4 |
+	| Product Field and Value | additionalProp5                | propertyValue5 |
+	| Product Field and Value | additionalProp6                | propertyValue6 |
+	| Quantity                | 1                              |                |
+	| Start Date              | ${staticFutureStartDate}       |                |
+	| Status                  | Cancelled                      |                |''');
+
+		LocalFile.KoroneikiAccountAPI._viewProduct(
+			accountName = "Koroneiki Automotive",
+			filterName = "All",
+			productName = "Liferay Digital Experience Platform",
+			table = '''| Name | Liferay Digital Experience Platform | |''');
+
+		LocalFile.KoroneikiAccountAPI._viewProduct(
+			accountName = "Koroneiki Automotive",
+			filterName = "Active",
+			productName = "Liferay Digital Experience Platform",
+			table = '''| Name | Liferay Digital Experience Platform | |''');
+
+		LocalFile.KoroneikiAccountAPI._viewNoProduct(
+			accountName = "Koroneiki Automotive",
+			filterName = "Cancelled",
+			productName = "Liferay Digital Experience Platform");
+	}
+
+	test Createandviewcancelledpurchasesforthesameproductonsameaccount {
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | KORAUTO                                  | |
+	| Contact Email Address | koroneiki.contact1@lrcustomer.com.broken | |
+	| Description           | Test automotive account on koroneiki     | |
+	| Fax Number            | 555-555-1234                             | |
+	| Name                  | Koroneiki Automotive                     | |
+	| Phone Number          | 555-555-5678                             | |
+	| Profile Email Address | koroneiki.contact1@lrcustomer.com.broken | |
+	| Region                | United States                            | |
+	| Status                | Active                                   | |
+	| Tier                  | T4                                       | |
+	| Website               | www.koroneikiautomotive.com              | |''');
+
+		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | Liferay Digital Experience Platform | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFutureStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Koroneiki Automotive",
+			productName = "Liferay Digital Experience Platform",
+			table = '''| End Date                | ${staticEndDate}         |                |
+	| Original End Date       | ${staticOriginalEndDate} |                |
+	| Perpetual               | false                    |                |
+	| Product Field and Value | additionalProp1          | propertyValue1 |
+	| Product Field and Value | additionalProp2          | propertyValue2 |
+	| Product Field and Value | additionalProp3          | propertyValue3 |
+	| Quantity                | 1                        |                |
+	| Start Date              | ${staticStartDate}       |                |
+	| Status                  | Cancelled                |                |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Koroneiki Automotive",
+			productName = "Liferay Digital Experience Platform",
+			table = '''| End Date                | ${staticFutureEndDate}         |                |
+	| Original End Date       | ${staticFutureOriginalEndDate} |                |
+	| Perpetual               | false                          |                |
+	| Product Field and Value | additionalProp4                | propertyValue4 |
+	| Product Field and Value | additionalProp5                | propertyValue5 |
+	| Product Field and Value | additionalProp6                | propertyValue6 |
+	| Quantity                | 1                              |                |
+	| Start Date              | ${staticFutureStartDate}       |                |
+	| Status                  | Cancelled                      |                |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchaseWithFieldValue(
+			accountName = "Koroneiki Automotive",
+			fieldName = "startDate",
+			fieldValue = ${staticStartDate},
+			productName = "Liferay Digital Experience Platform",
+			table = '''| End Date                | ${staticEndDate}         |                |
+	| Original End Date       | ${staticOriginalEndDate} |                |
+	| Perpetual               | false                    |                |
+	| Product Field and Value | additionalProp1          | propertyValue1 |
+	| Product Field and Value | additionalProp2          | propertyValue2 |
+	| Product Field and Value | additionalProp3          | propertyValue3 |
+	| Quantity                | 1                        |                |
+	| Start Date              | ${staticStartDate}       |                |
+	| Status                  | Cancelled                |                |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchaseWithFieldValue(
+			accountName = "Koroneiki Automotive",
+			fieldName = "startDate",
+			fieldValue = ${staticFutureStartDate},
+			productName = "Liferay Digital Experience Platform",
+			table = '''| End Date                | ${staticFutureEndDate}         |                |
+	| Original End Date       | ${staticFutureOriginalEndDate} |                |
+	| Perpetual               | false                          |                |
+	| Product Field and Value | additionalProp4                | propertyValue4 |
+	| Product Field and Value | additionalProp5                | propertyValue5 |
+	| Product Field and Value | additionalProp6                | propertyValue6 |
+	| Quantity                | 1                              |                |
+	| Start Date              | ${staticFutureStartDate}       |                |
+	| Status                  | Cancelled                      |                |''');
+
+		LocalFile.KoroneikiAccountAPI._viewProduct(
+			accountName = "Koroneiki Automotive",
+			filterName = "All",
+			productName = "Liferay Digital Experience Platform",
+			table = '''| Name | Liferay Digital Experience Platform | |''');
+
+		LocalFile.KoroneikiAccountAPI._viewProduct(
+			accountName = "Koroneiki Automotive",
+			filterName = "Cancelled",
+			productName = "Liferay Digital Experience Platform",
+			table = '''| Name | Liferay Digital Experience Platform | |''');
+
+		LocalFile.KoroneikiAccountAPI._viewNoProduct(
+			accountName = "Koroneiki Automotive",
+			filterName = "Active",
+			productName = "Liferay Digital Experience Platform");
+	}
+
+	test Createandviewpastandfuturepurchasesforthesameproductonsameaccount {
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | KORAUTO                                  | |
+	| Contact Email Address | koroneiki.contact1@lrcustomer.com.broken | |
+	| Description           | Test automotive account on koroneiki     | |
+	| Fax Number            | 555-555-1234                             | |
+	| Name                  | Koroneiki Automotive                     | |
+	| Phone Number          | 555-555-5678                             | |
+	| Profile Email Address | koroneiki.contact1@lrcustomer.com.broken | |
+	| Region                | United States                            | |
+	| Status                | Active                                   | |
+	| Tier                  | T4                                       | |
+	| Website               | www.koroneikiautomotive.com              | |''');
+
+		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | Liferay Digital Experience Platform | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticPastStartAndEndDate();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFutureStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Koroneiki Automotive",
+			productName = "Liferay Digital Experience Platform",
+			table = '''| End Date                | ${staticPastEndDate}         |                |
+	| Original End Date       | ${staticPastOriginalEndDate} |                |
+	| Perpetual               | false                        |                |
+	| Product Field and Value | additionalProp1              | propertyValue1 |
+	| Product Field and Value | additionalProp2              | propertyValue2 |
+	| Product Field and Value | additionalProp3              | propertyValue3 |
+	| Quantity                | 1                            |                |
+	| Start Date              | ${staticPastStartDate}       |                |
+	| Status                  | Approved                     |                |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Koroneiki Automotive",
+			productName = "Liferay Digital Experience Platform",
+			table = '''| End Date                | ${staticFutureEndDate}         |                |
+	| Original End Date       | ${staticFutureOriginalEndDate} |                |
+	| Perpetual               | false                          |                |
+	| Product Field and Value | additionalProp4                | propertyValue4 |
+	| Product Field and Value | additionalProp5                | propertyValue5 |
+	| Product Field and Value | additionalProp6                | propertyValue6 |
+	| Quantity                | 1                              |                |
+	| Start Date              | ${staticFutureStartDate}       |                |
+	| Status                  | Approved                       |                |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchaseWithFieldValue(
+			accountName = "Koroneiki Automotive",
+			fieldName = "startDate",
+			fieldValue = ${staticPastStartDate},
+			productName = "Liferay Digital Experience Platform",
+			table = '''| End Date                | ${staticPastEndDate}         |                |
+	| Original End Date       | ${staticPastOriginalEndDate} |                |
+	| Perpetual               | false                        |                |
+	| Product Field and Value | additionalProp1              | propertyValue1 |
+	| Product Field and Value | additionalProp2              | propertyValue2 |
+	| Product Field and Value | additionalProp3              | propertyValue3 |
+	| Quantity                | 1                            |                |
+	| Start Date              | ${staticPastStartDate}       |                |
+	| Status                  | Approved                     |                |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchaseWithFieldValue(
+			accountName = "Koroneiki Automotive",
+			fieldName = "startDate",
+			fieldValue = ${staticFutureStartDate},
+			productName = "Liferay Digital Experience Platform",
+			table = '''| End Date                | ${staticFutureEndDate}         |                |
+	| Original End Date       | ${staticFutureOriginalEndDate} |                |
+	| Perpetual               | false                          |                |
+	| Product Field and Value | additionalProp4                | propertyValue4 |
+	| Product Field and Value | additionalProp5                | propertyValue5 |
+	| Product Field and Value | additionalProp6                | propertyValue6 |
+	| Quantity                | 1                              |                |
+	| Start Date              | ${staticFutureStartDate}       |                |
+	| Status                  | Approved                       |                |''');
+
+		LocalFile.KoroneikiAccountAPI._viewProduct(
+			accountName = "Koroneiki Automotive",
+			filterName = "All",
+			productName = "Liferay Digital Experience Platform",
+			table = '''| Name | Liferay Digital Experience Platform | |''');
+
+		LocalFile.KoroneikiAccountAPI._viewProduct(
+			accountName = "Koroneiki Automotive",
+			filterName = "Unactivated",
+			productName = "Liferay Digital Experience Platform",
+			table = '''| Name | Liferay Digital Experience Platform | |''');
+
+		LocalFile.KoroneikiAccountAPI._viewNoProduct(
+			accountName = "Koroneiki Automotive",
+			filterName = "Active",
+			productName = "Liferay Digital Experience Platform");
+	}
+
+	test Createandviewpurchasesforthesameproductonsameaccount {
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | KORAUTO                                  | |
+	| Contact Email Address | koroneiki.contact1@lrcustomer.com.broken | |
+	| Description           | Test automotive account on koroneiki     | |
+	| Fax Number            | 555-555-1234                             | |
+	| Name                  | Koroneiki Automotive                     | |
+	| Phone Number          | 555-555-5678                             | |
+	| Profile Email Address | koroneiki.contact1@lrcustomer.com.broken | |
+	| Region                | United States                            | |
+	| Status                | Active                                   | |
+	| Tier                  | T4                                       | |
+	| Website               | www.koroneikiautomotive.com              | |''');
+
+		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | Liferay Digital Experience Platform | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFutureStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Koroneiki Automotive",
+			productName = "Liferay Digital Experience Platform",
+			table = '''| End Date                | ${staticEndDate}         |                |
+	| Original End Date       | ${staticOriginalEndDate} |                |
+	| Perpetual               | false                    |                |
+	| Product Field and Value | additionalProp1          | propertyValue1 |
+	| Product Field and Value | additionalProp2          | propertyValue2 |
+	| Product Field and Value | additionalProp3          | propertyValue3 |
+	| Quantity                | 1                        |                |
+	| Start Date              | ${staticStartDate}       |                |
+	| Status                  | Approved                 |                |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Koroneiki Automotive",
+			productName = "Liferay Digital Experience Platform",
+			table = '''| End Date                | ${staticFutureEndDate}         |                |
+	| Original End Date       | ${staticFutureOriginalEndDate} |                |
+	| Perpetual               | false                          |                |
+	| Product Field and Value | additionalProp4                | propertyValue4 |
+	| Product Field and Value | additionalProp5                | propertyValue5 |
+	| Product Field and Value | additionalProp6                | propertyValue6 |
+	| Quantity                | 1                              |                |
+	| Start Date              | ${staticFutureStartDate}       |                |
+	| Status                  | Approved                       |                |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchaseWithFieldValue(
+			accountName = "Koroneiki Automotive",
+			fieldName = "startDate",
+			fieldValue = ${staticStartDate},
+			productName = "Liferay Digital Experience Platform",
+			table = '''| End Date                | ${staticEndDate}         |                |
+	| Original End Date       | ${staticOriginalEndDate} |                |
+	| Perpetual               | false                    |                |
+	| Product Field and Value | additionalProp1          | propertyValue1 |
+	| Product Field and Value | additionalProp2          | propertyValue2 |
+	| Product Field and Value | additionalProp3          | propertyValue3 |
+	| Quantity                | 1                        |                |
+	| Start Date              | ${staticStartDate}       |                |
+	| Status                  | Approved                 |                |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchaseWithFieldValue(
+			accountName = "Koroneiki Automotive",
+			fieldName = "startDate",
+			fieldValue = ${staticFutureStartDate},
+			productName = "Liferay Digital Experience Platform",
+			table = '''| End Date                | ${staticFutureEndDate}         |                |
+	| Original End Date       | ${staticFutureOriginalEndDate} |                |
+	| Perpetual               | false                          |                |
+	| Product Field and Value | additionalProp4                | propertyValue4 |
+	| Product Field and Value | additionalProp5                | propertyValue5 |
+	| Product Field and Value | additionalProp6                | propertyValue6 |
+	| Quantity                | 1                              |                |
+	| Start Date              | ${staticFutureStartDate}       |                |
+	| Status                  | Approved                       |                |''');
+
+		LocalFile.KoroneikiAccountAPI._viewProduct(
+			accountName = "Koroneiki Automotive",
+			filterName = "All",
+			productName = "Liferay Digital Experience Platform",
+			table = '''| Name | Liferay Digital Experience Platform | |''');
+
+		LocalFile.KoroneikiAccountAPI._viewProduct(
+			accountName = "Koroneiki Automotive",
+			filterName = "Active",
+			productName = "Liferay Digital Experience Platform",
+			table = '''| Name | Liferay Digital Experience Platform | |''');
+
+		LocalFile.KoroneikiAccountAPI._viewNoProduct(
+			accountName = "Koroneiki Automotive",
+			filterName = "Unactivated",
+			productName = "Liferay Digital Experience Platform");
+	}
+
+}

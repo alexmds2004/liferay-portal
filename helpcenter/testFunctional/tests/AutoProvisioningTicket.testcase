@@ -1,0 +1,2040 @@
+definition {
+
+	property testray.main.component.name = "Support QA";
+	property type = "auto.provisioning";
+
+	setUp {
+		LocalFile.Passwords.getPasswords();
+
+		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | usr.provisioning1                       |
+	| Email Address | usr.provisioning1@lrcustomer.com.broken |
+	| First Name    | USR                                     |
+	| Last Name     | Provisioning1                           |''');
+	}
+
+	tearDown {
+		LocalFile.ZendeskUserAPI._getDefaultUserId(organizationName = "Provis - ${staticProjectName}");
+
+		LocalFile.ZendeskUserAPI._renameFirstDefaultUserIdVariable();
+
+		LocalFile.ZendeskUserAPI._getDefaultUserId(organizationName = "Propar - ${staticCompanyName}");
+
+		LocalFile.ZendeskUserAPI._renameSecondDefaultUserIdVariable();
+
+		LocalFile.OSBAdminProject.tearDownProjects(table = '''| PROPAR       |
+	| VISPROPROVIS |''');
+
+		LocalFile.KoroneikiAccountAPI._tearDownAccounts(table = '''| Propar - ${staticCompanyName} |
+	| Provis - ${staticProjectName} |
+	| Vispro - ${staticCompanyName} |''');
+
+		LocalFile.KoroneikiAccountAPI._tearDownAccountsViaAccountFieldNameAndValue(
+			fieldName = "Code",
+			table = '''| PROPAR       |
+	| VISPROPROVIS |
+	| VISPRO       |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+
+		LocalFile.JSONUser.tearDownUsers(table = '''| usr.provisioning1@lrcustomer.com.broken |''');
+
+		LocalFile.JSONUser.tearDownUsersViaSupport(table = '''| usr.provisioning1@lrcustomer.com.broken |''');
+
+		LocalFile.JSONUser.tearDownUsersViaKoroneiki(table = '''| usr.provisioning1@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiContactAPI._tearDownContacts(table = '''| usr.provisioning1@lrcustomer.com.broken |''');
+
+		LocalFile.JSONOkta.tearDownUsers(table = '''| usr.provisioning1@lrcustomer.com.broken |''');
+
+		LocalFile.ZendeskTicketAPI._tearDownTicketsByKeywords(table = '''| New Subscription(s) for Propar - ${staticCompanyName} |
+	| New Subscription(s) for Provis - ${staticProjectName} |''');
+
+		LocalFile.ZendeskUserAPI._getMultipleUserIdsByEmailAddress(table = '''| usr.provisioning1@lrcustomer.com.broken |''');
+
+		LocalFile.ZendeskUserAPI._tearDownUsersByIdList(userIds = ${staticUserIdList});
+
+		LocalFile.ZendeskOrganizationAPI._getMultipleOrganizationExternalIdsByOrganizationNameIfStillPresent(table = '''| Propar - ${staticCompanyName} |
+	| Provis - ${staticProjectName} |''');
+
+		LocalFile.ZendeskOrganizationAPI._tearDownOrganizationsByExternalIdList(organizationExternalIds = ${staticOrganizationExternalIdList});
+
+		LocalFile.ZendeskUserAPI._tearDownUserById(userId = ${staticDefaultUserId1});
+
+		LocalFile.ZendeskUserAPI._tearDownUserById(userId = ${staticDefaultUserId2});
+	}
+
+	test CreateprojectforAustraliaSupportRegionandviewticket {
+		LocalFile.OSBAdminRabbitMQ.generateStaticVariables();
+
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningCompanyName();
+
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		LocalFile.OSBAdmin.loginToSupport(
+			userEmailAddress = ${staticSupportAdminEmailAdress},
+			userPassword = ${staticSupportAdminPassword});
+
+		LocalFile.OSBAdminRabbitMQ.publishCreatePartnerAccountMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Propar - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Dossiera Account Key                   | abcdefgh1234567890                         |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Professional Services (Technical/Web/IT)   |
+	| Owner Email Address                    | usr.provisioning1@lrcustomer.com.broken    |
+	| Owner First Name                       | USR                                        |
+	| Owner Last Name                        | Provisioning1                              |
+	| Partner First Line Support             | false                                      |
+	| Product Name                           | Service Partnership                        |
+	| Product Type                           | New                                        |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | 000000a1b2c3d4e5f6e7f                      |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Partner");
+
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Vispro - ${staticCompanyName}              |
+	| Address City                           | Sydney                                     |
+	| Address Country                        | Australia                                  |
+	| Address Postal Code                    | 2000                                       |
+	| Address Region                         | New South Wales                            |
+	| Address Street                         | 227 Elizabeth Street                       |
+	| Contact Email Address                  | usr.provisioning1@lrcustomer.com.broken    |
+	| Contact First Name                     | USR                                        |
+	| Contact Last Name                      | Provisioning1                              |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Engineering                                |
+	| Owner Email Address                    | usr.provisioning1@lrcustomer.com.broken    |
+	| Owner First Name                       | USR                                        |
+	| Owner Last Name                        | Provisioning1                              |
+	| Partner First Line Support             | false                                      |
+	| Partner Dossiera Key                   | abcdefgh1234567890                         |
+	| Partner Name                           | Propar - ${staticCompanyName}              |
+	| Partner Support Level                  | Platinum                                   |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Provis - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay Australia                          |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | Australia                                  |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Provis");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Provis - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.clickSyncToZendeskButton();
+
+		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "VISPROPROVIS");
+
+		LocalFile.ZendeskTicketAPI._viewTicketSyncByKeywords(keywords = "New Subscription(s) for Provis - ${staticProjectName}");
+
+		LocalFile.ZendeskTicketAPI._viewTicketSupportRegion(
+			keywords = "New Subscription(s) for Provis - ${staticProjectName}",
+			supportRegion = "provisioning_australia");
+
+		LocalFile.ZendeskTicketAPI._viewTicketPrimaryAddressCountry(
+			keywords = "New Subscription(s) for Provis - ${staticProjectName}",
+			primaryAddressCountry = "Australia");
+
+		LocalFile.OSBAdmin.gotoOSBAdmin();
+
+		LocalFile.OSBAdminProject.view(
+			projectName = "Provis - ${staticProjectName}",
+			table = '''| Koroneiki Account Key | Obtain from project name      |
+	| Project Name          | Provis - ${staticProjectName} |
+	| Code                  | VISPROPROVIS                  |
+	| Partner               | Propar - ${staticCompanyName} |
+	| Addresses             | 227 Elizabeth Street          |
+	| Addresses             | Australia                     |
+	| Addresses             | New South Wales               |
+	| Addresses             | Sydney                        |
+	| Addresses             | 2000                          |
+	| Addresses             | Primary                       |
+	| Tier                  | T4                            |
+	| Language              | English                       |''');
+
+		LocalFile.KoroneikiAccountAPI._viewAccount(
+			accountName = "Provis - ${staticProjectName}",
+			table = '''| Language    | English   | |
+	| Region      | Australia | |
+	| Data Region | Japan     | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchase(
+			accountName = "Provis - ${staticProjectName}",
+			productName = "DXP Production",
+			table = '''| Quantity | 1        | |
+	| Status   | Approved | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchase(
+			accountName = "Provis - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| Quantity | 1        | |
+	| Status   | Approved | |''');
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Provis - ${staticProjectName}",
+			contactEmailAddress = "usr.provisioning1@lrcustomer.com.broken",
+			contactRoleName = "Support Administrator");
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Provis - ${staticProjectName}",
+			contactEmailAddress = "usr.provisioning1@lrcustomer.com.broken",
+			contactRoleName = "Liferay Sales");
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Provis - ${staticProjectName}",
+			contactEmailAddress = "usr.provisioning1@lrcustomer.com.broken",
+			contactRoleName = "Secondary Contact");
+	}
+
+	test CreateprojectforBrazilSupportRegionandviewticket {
+		LocalFile.OSBAdminRabbitMQ.generateStaticVariables();
+
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningCompanyName();
+
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		LocalFile.OSBAdmin.loginToSupport(
+			userEmailAddress = ${staticSupportAdminEmailAdress},
+			userPassword = ${staticSupportAdminPassword});
+
+		LocalFile.OSBAdminRabbitMQ.publishCreatePartnerAccountMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Propar - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Dossiera Account Key                   | abcdefgh1234567890                         |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Professional Services (Technical/Web/IT)   |
+	| Owner Email Address                    | usr.provisioning1@lrcustomer.com.broken    |
+	| Owner First Name                       | USR                                        |
+	| Owner Last Name                        | Provisioning1                              |
+	| Partner First Line Support             | false                                      |
+	| Product Name                           | Service Partnership                        |
+	| Product Type                           | New                                        |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | 000000a1b2c3d4e5f6e7f                      |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Partner");
+
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Vispro - ${staticCompanyName}              |
+	| Address City                           | Sao Paulo                                  |
+	| Address Country                        | Brazil                                     |
+	| Address Postal Code                    | 04642-000                                  |
+	| Address Region                         | São Paulo                                  |
+	| Address Street                         | Rua Visconde de Porto Seguro 1238          |
+	| Contact Email Address                  | usr.provisioning1@lrcustomer.com.broken    |
+	| Contact First Name                     | USR                                        |
+	| Contact Last Name                      | Provisioning1                              |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Engineering                                |
+	| Owner Email Address                    | usr.provisioning1@lrcustomer.com.broken    |
+	| Owner First Name                       | USR                                        |
+	| Owner Last Name                        | Provisioning1                              |
+	| Partner First Line Support             | false                                      |
+	| Partner Dossiera Key                   | abcdefgh1234567890                         |
+	| Partner Name                           | Propar - ${staticCompanyName}              |
+	| Partner Support Level                  | Platinum                                   |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Provis - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay Brazil                             |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | Brazil                                     |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Provis");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Provis - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.clickSyncToZendeskButton();
+
+		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "VISPROPROVIS");
+
+		LocalFile.ZendeskTicketAPI._viewTicketSyncByKeywords(keywords = "New Subscription(s) for Provis - ${staticProjectName}");
+
+		LocalFile.ZendeskTicketAPI._viewTicketSupportRegion(
+			keywords = "New Subscription(s) for Provis - ${staticProjectName}",
+			supportRegion = "provisioning_brazil");
+
+		LocalFile.ZendeskTicketAPI._viewTicketPrimaryAddressCountry(
+			keywords = "New Subscription(s) for Provis - ${staticProjectName}",
+			primaryAddressCountry = "Brazil");
+
+		LocalFile.OSBAdmin.gotoOSBAdmin();
+
+		LocalFile.OSBAdminProject.view(
+			projectName = "Provis - ${staticProjectName}",
+			table = '''| Koroneiki Account Key | Obtain from project name          |
+	| Project Name          | Provis - ${staticProjectName}     |
+	| Code                  | VISPROPROVIS                      |
+	| Partner               | Propar - ${staticCompanyName}     |
+	| Addresses             | Rua Visconde de Porto Seguro 1238 |
+	| Addresses             | Brazil                            |
+	| Addresses             | Sao Paulo                         |
+	| Addresses             | São Paulo                         |
+	| Addresses             | 04642-000                         |
+	| Addresses             | Primary                           |
+	| Tier                  | T4                                |
+	| Language              | Portuguese                        |''');
+
+		LocalFile.KoroneikiAccountAPI._viewAccount(
+			accountName = "Provis - ${staticProjectName}",
+			table = '''| Language    | Portuguese | |
+	| Region      | Brazil     | |
+	| Data Region | Brazil     | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchase(
+			accountName = "Provis - ${staticProjectName}",
+			productName = "DXP Production",
+			table = '''| Quantity | 1        | |
+	| Status   | Approved | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchase(
+			accountName = "Provis - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| Quantity | 1        | |
+	| Status   | Approved | |''');
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Provis - ${staticProjectName}",
+			contactEmailAddress = "usr.provisioning1@lrcustomer.com.broken",
+			contactRoleName = "Support Administrator");
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Provis - ${staticProjectName}",
+			contactEmailAddress = "usr.provisioning1@lrcustomer.com.broken",
+			contactRoleName = "Liferay Sales");
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Provis - ${staticProjectName}",
+			contactEmailAddress = "usr.provisioning1@lrcustomer.com.broken",
+			contactRoleName = "Secondary Contact");
+	}
+
+	test CreateprojectforBrazilSupportRegionwithblankaddressandviewticket {
+		LocalFile.OSBAdminRabbitMQ.generateStaticVariables();
+
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningCompanyName();
+
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		LocalFile.OSBAdmin.loginToSupport(
+			userEmailAddress = ${staticSupportAdminEmailAdress},
+			userPassword = ${staticSupportAdminPassword});
+
+		LocalFile.OSBAdminRabbitMQ.publishCreatePartnerAccountMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Propar - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Dossiera Account Key                   | abcdefgh1234567890                         |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Professional Services (Technical/Web/IT)   |
+	| Owner Email Address                    | usr.provisioning1@lrcustomer.com.broken    |
+	| Owner First Name                       | USR                                        |
+	| Owner Last Name                        | Provisioning1                              |
+	| Partner First Line Support             | false                                      |
+	| Product Name                           | Service Partnership                        |
+	| Product Type                           | New                                        |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | 000000a1b2c3d4e5f6e7f                      |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Partner");
+
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Vispro - ${staticCompanyName}              |
+	| Address City                           |                                            |
+	| Address Country                        |                                            |
+	| Address Postal Code                    |                                            |
+	| Address Region                         |                                            |
+	| Address Street                         |                                            |
+	| Contact Email Address                  | usr.provisioning1@lrcustomer.com.broken    |
+	| Contact First Name                     | USR                                        |
+	| Contact Last Name                      | Provisioning1                              |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Engineering                                |
+	| Owner Email Address                    | usr.provisioning1@lrcustomer.com.broken    |
+	| Owner First Name                       | USR                                        |
+	| Owner Last Name                        | Provisioning1                              |
+	| Partner First Line Support             | false                                      |
+	| Partner Dossiera Key                   | abcdefgh1234567890                         |
+	| Partner Name                           | Propar - ${staticCompanyName}              |
+	| Partner Support Level                  | Platinum                                   |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Provis - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay Brazil                             |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | Brazil                                     |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Provis");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Provis - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.clickSyncToZendeskButton();
+
+		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "VISPROPROVIS");
+
+		LocalFile.ZendeskTicketAPI._viewTicketSyncByKeywords(keywords = "New Subscription(s) for Provis - ${staticProjectName}");
+
+		LocalFile.ZendeskTicketAPI._viewTicketSupportRegion(
+			keywords = "New Subscription(s) for Provis - ${staticProjectName}",
+			supportRegion = "provisioning_brazil");
+
+		LocalFile.OSBAdmin.gotoOSBAdmin();
+
+		LocalFile.OSBAdminProject.view(
+			projectName = "Provis - ${staticProjectName}",
+			table = '''| Koroneiki Account Key | Obtain from project name      |
+	| Project Name          | Provis - ${staticProjectName} |
+	| Code                  | VISPROPROVIS                  |
+	| Partner               | Propar - ${staticCompanyName} |
+	| Addresses             | Primary                       |
+	| Tier                  | T4                            |
+	| Language              | Spanish                       |''');
+
+		LocalFile.KoroneikiAccountAPI._viewAccount(
+			accountName = "Provis - ${staticProjectName}",
+			table = '''| Language    | Spanish | |
+	| Region      | Brazil  | |
+	| Data Region | Brazil  | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchase(
+			accountName = "Provis - ${staticProjectName}",
+			productName = "DXP Production",
+			table = '''| Quantity | 1        | |
+	| Status   | Approved | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchase(
+			accountName = "Provis - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| Quantity | 1        | |
+	| Status   | Approved | |''');
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Provis - ${staticProjectName}",
+			contactEmailAddress = "usr.provisioning1@lrcustomer.com.broken",
+			contactRoleName = "Support Administrator");
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Provis - ${staticProjectName}",
+			contactEmailAddress = "usr.provisioning1@lrcustomer.com.broken",
+			contactRoleName = "Liferay Sales");
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Provis - ${staticProjectName}",
+			contactEmailAddress = "usr.provisioning1@lrcustomer.com.broken",
+			contactRoleName = "Secondary Contact");
+	}
+
+	test CreateprojectforBrazilSupportRegionwithnonBraziladdressandviewticket {
+		LocalFile.OSBAdminRabbitMQ.generateStaticVariables();
+
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningCompanyName();
+
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		LocalFile.OSBAdmin.loginToSupport(
+			userEmailAddress = ${staticSupportAdminEmailAdress},
+			userPassword = ${staticSupportAdminPassword});
+
+		LocalFile.OSBAdminRabbitMQ.publishCreatePartnerAccountMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Propar - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Dossiera Account Key                   | abcdefgh1234567890                         |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Professional Services (Technical/Web/IT)   |
+	| Owner Email Address                    | usr.provisioning1@lrcustomer.com.broken    |
+	| Owner First Name                       | USR                                        |
+	| Owner Last Name                        | Provisioning1                              |
+	| Partner First Line Support             | false                                      |
+	| Product Name                           | Service Partnership                        |
+	| Product Type                           | New                                        |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | 000000a1b2c3d4e5f6e7f                      |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Partner");
+
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Vispro - ${staticCompanyName}              |
+	| Address City                           | Santiago                                   |
+	| Address Country                        | Chile                                      |
+	| Address Postal Code                    | 54123                                      |
+	| Address Region                         | Santiago                                   |
+	| Address Street                         | Calle Falsa 389                            |
+	| Contact Email Address                  | usr.provisioning1@lrcustomer.com.broken    |
+	| Contact First Name                     | USR                                        |
+	| Contact Last Name                      | Provisioning1                              |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Engineering                                |
+	| Owner Email Address                    | usr.provisioning1@lrcustomer.com.broken    |
+	| Owner First Name                       | USR                                        |
+	| Owner Last Name                        | Provisioning1                              |
+	| Partner First Line Support             | false                                      |
+	| Partner Dossiera Key                   | abcdefgh1234567890                         |
+	| Partner Name                           | Propar - ${staticCompanyName}              |
+	| Partner Support Level                  | Platinum                                   |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Provis - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay Brazil                             |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | Brazil                                     |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Provis");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Provis - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.clickSyncToZendeskButton();
+
+		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "VISPROPROVIS");
+
+		LocalFile.ZendeskTicketAPI._viewTicketSyncByKeywords(keywords = "New Subscription(s) for Provis - ${staticProjectName}");
+
+		LocalFile.ZendeskTicketAPI._viewTicketSupportRegion(
+			keywords = "New Subscription(s) for Provis - ${staticProjectName}",
+			supportRegion = "provisioning_brazil");
+
+		LocalFile.OSBAdmin.gotoOSBAdmin();
+
+		LocalFile.OSBAdminProject.view(
+			projectName = "Provis - ${staticProjectName}",
+			table = '''| Koroneiki Account Key | Obtain from project name      |
+	| Project Name          | Provis - ${staticProjectName} |
+	| Code                  | VISPROPROVIS                  |
+	| Partner               | Propar - ${staticCompanyName} |
+	| Addresses             | Primary                       |
+	| Addresses             | Calle Falsa 389               |
+	| Addresses             | Chile                         |
+	| Addresses             | Santiago                      |
+	| Addresses             | Santiago                      |
+	| Addresses             | 54123                         |
+	| Tier                  | T4                            |
+	| Language              | Spanish                       |''');
+
+		LocalFile.KoroneikiAccountAPI._viewAccount(
+			accountName = "Provis - ${staticProjectName}",
+			table = '''| Language    | Spanish       | |
+	| Region      | Brazil        | |
+	| Data Region | United States | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchase(
+			accountName = "Provis - ${staticProjectName}",
+			productName = "DXP Production",
+			table = '''| Quantity | 1        | |
+	| Status   | Approved | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchase(
+			accountName = "Provis - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| Quantity | 1        | |
+	| Status   | Approved | |''');
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Provis - ${staticProjectName}",
+			contactEmailAddress = "usr.provisioning1@lrcustomer.com.broken",
+			contactRoleName = "Support Administrator");
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Provis - ${staticProjectName}",
+			contactEmailAddress = "usr.provisioning1@lrcustomer.com.broken",
+			contactRoleName = "Liferay Sales");
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Provis - ${staticProjectName}",
+			contactEmailAddress = "usr.provisioning1@lrcustomer.com.broken",
+			contactRoleName = "Secondary Contact");
+	}
+
+	test CreateprojectforChinaSupportRegionandviewticket {
+		LocalFile.OSBAdminRabbitMQ.generateStaticVariables();
+
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningCompanyName();
+
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		LocalFile.OSBAdmin.loginToSupport(
+			userEmailAddress = ${staticSupportAdminEmailAdress},
+			userPassword = ${staticSupportAdminPassword});
+
+		LocalFile.OSBAdminRabbitMQ.publishCreatePartnerAccountMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Propar - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Dossiera Account Key                   | abcdefgh1234567890                         |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Professional Services (Technical/Web/IT)   |
+	| Owner Email Address                    | usr.provisioning1@lrcustomer.com.broken    |
+	| Owner First Name                       | USR                                        |
+	| Owner Last Name                        | Provisioning1                              |
+	| Partner First Line Support             | false                                      |
+	| Product Name                           | Service Partnership                        |
+	| Product Type                           | New                                        |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | 000000a1b2c3d4e5f6e7f                      |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Partner");
+
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Vispro - ${staticCompanyName}              |
+	| Address City                           | Qingdao Shi                                |
+	| Address Region                         | Shandong                                   |
+	| Address Country                        | China                                      |
+	| Address Postal Code                    | 266033                                     |
+	| Address Street                         | 63 Renmin Lu                               |
+	| Contact Email Address                  | usr.provisioning1@lrcustomer.com.broken    |
+	| Contact First Name                     | USR                                        |
+	| Contact Last Name                      | Provisioning1                              |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Engineering                                |
+	| Owner Email Address                    | usr.provisioning1@lrcustomer.com.broken    |
+	| Owner First Name                       | USR                                        |
+	| Owner Last Name                        | Provisioning1                              |
+	| Partner First Line Support             | false                                      |
+	| Partner Dossiera Key                   | abcdefgh1234567890                         |
+	| Partner Name                           | Propar - ${staticCompanyName}              |
+	| Partner Support Level                  | Platinum                                   |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Provis - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay China                              |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | China                                      |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Provis");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Provis - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.clickSyncToZendeskButton();
+
+		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "VISPROPROVIS");
+
+		LocalFile.ZendeskTicketAPI._viewTicketSyncByKeywords(keywords = "New Subscription(s) for Provis - ${staticProjectName}");
+
+		LocalFile.ZendeskTicketAPI._viewTicketSupportRegion(
+			keywords = "New Subscription(s) for Provis - ${staticProjectName}",
+			supportRegion = "provisioning_china");
+
+		LocalFile.ZendeskTicketAPI._viewTicketPrimaryAddressCountry(
+			keywords = "New Subscription(s) for Provis - ${staticProjectName}",
+			primaryAddressCountry = "China");
+
+		LocalFile.OSBAdmin.gotoOSBAdmin();
+
+		LocalFile.OSBAdminProject.view(
+			projectName = "Provis - ${staticProjectName}",
+			table = '''| Koroneiki Account Key | Obtain from project name      |
+	| Project Name          | Provis - ${staticProjectName} |
+	| Code                  | VISPROPROVIS                  |
+	| Partner               | Propar - ${staticCompanyName} |
+	| Addresses             | 63 Renmin Lu                  |
+	| Addresses             | China                         |
+	| Addresses             | Shandong                      |
+	| Addresses             | Qingdao Shi                   |
+	| Addresses             | 266033                        |
+	| Addresses             | Primary                       |
+	| Tier                  | T4                            |
+	| Language              | Chinese                       |''');
+
+		LocalFile.KoroneikiAccountAPI._viewAccount(
+			accountName = "Provis - ${staticProjectName}",
+			table = '''| Language    | Chinese       | |
+	| Region      | China         | |
+	| Data Region | United States | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchase(
+			accountName = "Provis - ${staticProjectName}",
+			productName = "DXP Production",
+			table = '''| Quantity | 1        | |
+	| Status   | Approved | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchase(
+			accountName = "Provis - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| Quantity | 1        | |
+	| Status   | Approved | |''');
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Provis - ${staticProjectName}",
+			contactEmailAddress = "usr.provisioning1@lrcustomer.com.broken",
+			contactRoleName = "Support Administrator");
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Provis - ${staticProjectName}",
+			contactEmailAddress = "usr.provisioning1@lrcustomer.com.broken",
+			contactRoleName = "Liferay Sales");
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Provis - ${staticProjectName}",
+			contactEmailAddress = "usr.provisioning1@lrcustomer.com.broken",
+			contactRoleName = "Secondary Contact");
+	}
+
+	test CreateprojectforGlobalSupportRegionandviewticket {
+		LocalFile.OSBAdminRabbitMQ.generateStaticVariables();
+
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningCompanyName();
+
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		LocalFile.OSBAdmin.loginToSupport(
+			userEmailAddress = ${staticSupportAdminEmailAdress},
+			userPassword = ${staticSupportAdminPassword});
+
+		LocalFile.OSBAdminRabbitMQ.publishCreatePartnerAccountMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Propar - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Dossiera Account Key                   | abcdefgh1234567890                         |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Professional Services (Technical/Web/IT)   |
+	| Owner Email Address                    | usr.provisioning1@lrcustomer.com.broken    |
+	| Owner First Name                       | USR                                        |
+	| Owner Last Name                        | Provisioning1                              |
+	| Partner First Line Support             | false                                      |
+	| Product Name                           | Service Partnership                        |
+	| Product Type                           | New                                        |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | 000000a1b2c3d4e5f6e7f                      |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Partner");
+
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Vispro - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Contact Email Address                  | usr.provisioning1@lrcustomer.com.broken    |
+	| Contact First Name                     | USR                                        |
+	| Contact Last Name                      | Provisioning1                              |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Engineering                                |
+	| Owner Email Address                    | usr.provisioning1@lrcustomer.com.broken    |
+	| Owner First Name                       | USR                                        |
+	| Owner Last Name                        | Provisioning1                              |
+	| Partner First Line Support             | false                                      |
+	| Partner Dossiera Key                   | abcdefgh1234567890                         |
+	| Partner Name                           | Propar - ${staticCompanyName}              |
+	| Partner Support Level                  | Platinum                                   |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Provis - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay Global                             |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | Global                                     |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Provis");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Provis - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.clickSyncToZendeskButton();
+
+		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "VISPROPROVIS");
+
+		LocalFile.ZendeskTicketAPI._viewTicketSyncByKeywords(keywords = "New Subscription(s) for Provis - ${staticProjectName}");
+
+		LocalFile.ZendeskTicketAPI._viewTicketSupportRegion(
+			keywords = "New Subscription(s) for Provis - ${staticProjectName}",
+			supportRegion = "provisioning_global");
+
+		LocalFile.ZendeskTicketAPI._viewTicketPrimaryAddressCountry(
+			keywords = "New Subscription(s) for Provis - ${staticProjectName}",
+			primaryAddressCountry = "United States");
+
+		LocalFile.OSBAdmin.gotoOSBAdmin();
+
+		LocalFile.OSBAdminProject.view(
+			projectName = "Provis - ${staticProjectName}",
+			table = '''| Koroneiki Account Key | Obtain from project name      |
+	| Project Name          | Provis - ${staticProjectName} |
+	| Code                  | VISPROPROVIS                  |
+	| Partner               | Propar - ${staticCompanyName} |
+	| Addresses             | 456 Fake Street               |
+	| Addresses             | United States                 |
+	| Addresses             | California                    |
+	| Addresses             | Diamond Bar                   |
+	| Addresses             | 91765                         |
+	| Addresses             | Primary                       |
+	| Tier                  | T4                            |
+	| Language              | English                       |''');
+
+		LocalFile.KoroneikiAccountAPI._viewAccount(
+			accountName = "Provis - ${staticProjectName}",
+			table = '''| Language    | English | |
+	| Region      | Global  | |
+	| Data Region | Hungary | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchase(
+			accountName = "Provis - ${staticProjectName}",
+			productName = "DXP Production",
+			table = '''| Quantity | 1        | |
+	| Status   | Approved | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchase(
+			accountName = "Provis - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| Quantity | 1        | |
+	| Status   | Approved | |''');
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Provis - ${staticProjectName}",
+			contactEmailAddress = "usr.provisioning1@lrcustomer.com.broken",
+			contactRoleName = "Support Administrator");
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Provis - ${staticProjectName}",
+			contactEmailAddress = "usr.provisioning1@lrcustomer.com.broken",
+			contactRoleName = "Liferay Sales");
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Provis - ${staticProjectName}",
+			contactEmailAddress = "usr.provisioning1@lrcustomer.com.broken",
+			contactRoleName = "Secondary Contact");
+	}
+
+	test CreateprojectforHungarySupportRegionandviewticket {
+		LocalFile.OSBAdminRabbitMQ.generateStaticVariables();
+
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningCompanyName();
+
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		LocalFile.OSBAdmin.loginToSupport(
+			userEmailAddress = ${staticSupportAdminEmailAdress},
+			userPassword = ${staticSupportAdminPassword});
+
+		LocalFile.OSBAdminRabbitMQ.publishCreatePartnerAccountMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Propar - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Dossiera Account Key                   | abcdefgh1234567890                         |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Professional Services (Technical/Web/IT)   |
+	| Owner Email Address                    | usr.provisioning1@lrcustomer.com.broken    |
+	| Owner First Name                       | USR                                        |
+	| Owner Last Name                        | Provisioning1                              |
+	| Partner First Line Support             | false                                      |
+	| Product Name                           | Service Partnership                        |
+	| Product Type                           | New                                        |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | 000000a1b2c3d4e5f6e7f                      |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Partner");
+
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Vispro - ${staticCompanyName}              |
+	| Address City                           | Budapest                                   |
+	| Address Country                        | Hungary                                    |
+	| Address Postal Code                    | 1037                                       |
+	| Address Street                         | Virag Ter 3. IV. 61                        |
+	| Contact Email Address                  | usr.provisioning1@lrcustomer.com.broken    |
+	| Contact First Name                     | USR                                        |
+	| Contact Last Name                      | Provisioning1                              |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Engineering                                |
+	| Owner Email Address                    | usr.provisioning1@lrcustomer.com.broken    |
+	| Owner First Name                       | USR                                        |
+	| Owner Last Name                        | Provisioning1                              |
+	| Partner First Line Support             | false                                      |
+	| Partner Dossiera Key                   | abcdefgh1234567890                         |
+	| Partner Name                           | Propar - ${staticCompanyName}              |
+	| Partner Support Level                  | Platinum                                   |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Provis - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay Hungary                            |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | Hungary                                    |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Provis");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Provis - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.clickSyncToZendeskButton();
+
+		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "VISPROPROVIS");
+
+		LocalFile.ZendeskTicketAPI._viewTicketSyncByKeywords(keywords = "New Subscription(s) for Provis - ${staticProjectName}");
+
+		LocalFile.ZendeskTicketAPI._viewTicketSupportRegion(
+			keywords = "New Subscription(s) for Provis - ${staticProjectName}",
+			supportRegion = "provisioning_hungary");
+
+		LocalFile.ZendeskTicketAPI._viewTicketPrimaryAddressCountry(
+			keywords = "New Subscription(s) for Provis - ${staticProjectName}",
+			primaryAddressCountry = "Hungary");
+
+		LocalFile.OSBAdmin.gotoOSBAdmin();
+
+		LocalFile.OSBAdminProject.view(
+			projectName = "Provis - ${staticProjectName}",
+			table = '''| Koroneiki Account Key | Obtain from project name      |
+	| Project Name          | Provis - ${staticProjectName} |
+	| Code                  | VISPROPROVIS                  |
+	| Partner               | Propar - ${staticCompanyName} |
+	| Addresses             | Virag Ter 3. IV. 61           |
+	| Addresses             | Hungary                       |
+	| Addresses             | Budapest                      |
+	| Addresses             | 1037                          |
+	| Addresses             | Primary                       |
+	| Tier                  | T4                            |
+	| Language              | English                       |''');
+
+		LocalFile.KoroneikiAccountAPI._viewAccount(
+			accountName = "Provis - ${staticProjectName}",
+			table = '''| Language    | English | |
+	| Region      | Hungary | |
+	| Data Region | Hungary | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchase(
+			accountName = "Provis - ${staticProjectName}",
+			productName = "DXP Production",
+			table = '''| Quantity | 1        | |
+	| Status   | Approved | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchase(
+			accountName = "Provis - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| Quantity | 1        | |
+	| Status   | Approved | |''');
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Provis - ${staticProjectName}",
+			contactEmailAddress = "usr.provisioning1@lrcustomer.com.broken",
+			contactRoleName = "Support Administrator");
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Provis - ${staticProjectName}",
+			contactEmailAddress = "usr.provisioning1@lrcustomer.com.broken",
+			contactRoleName = "Liferay Sales");
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Provis - ${staticProjectName}",
+			contactEmailAddress = "usr.provisioning1@lrcustomer.com.broken",
+			contactRoleName = "Secondary Contact");
+	}
+
+	test CreateprojectforHungarySupportRegionSoldByItalyandviewticket {
+		LocalFile.OSBAdminRabbitMQ.generateStaticVariables();
+
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningCompanyName();
+
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		LocalFile.OSBAdmin.loginToSupport(
+			userEmailAddress = ${staticSupportAdminEmailAdress},
+			userPassword = ${staticSupportAdminPassword});
+
+		LocalFile.OSBAdminRabbitMQ.publishCreatePartnerAccountMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Propar - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Dossiera Account Key                   | abcdefgh1234567890                         |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Professional Services (Technical/Web/IT)   |
+	| Owner Email Address                    | usr.provisioning1@lrcustomer.com.broken    |
+	| Owner First Name                       | USR                                        |
+	| Owner Last Name                        | Provisioning1                              |
+	| Partner First Line Support             | false                                      |
+	| Product Name                           | Service Partnership                        |
+	| Product Type                           | New                                        |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | 000000a1b2c3d4e5f6e7f                      |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Partner");
+
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Vispro - ${staticCompanyName}              |
+	| Address City                           | Rome                                       |
+	| Address Country                        | Italy                                      |
+	| Address Postal Code                    | 00144                                      |
+	| Address Street                         | Viale Europa 22                            |
+	| Contact Email Address                  | usr.provisioning1@lrcustomer.com.broken    |
+	| Contact First Name                     | USR                                        |
+	| Contact Last Name                      | Provisioning1                              |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Engineering                                |
+	| Owner Email Address                    | usr.provisioning1@lrcustomer.com.broken    |
+	| Owner First Name                       | USR                                        |
+	| Owner Last Name                        | Provisioning1                              |
+	| Partner First Line Support             | false                                      |
+	| Partner Dossiera Key                   | abcdefgh1234567890                         |
+	| Partner Name                           | Propar - ${staticCompanyName}              |
+	| Partner Support Level                  | Platinum                                   |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Provis - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay Italy                              |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | Italy                                      |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Provis");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Provis - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.clickSyncToZendeskButton();
+
+		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "VISPROPROVIS");
+
+		LocalFile.ZendeskTicketAPI._viewTicketSyncByKeywords(keywords = "New Subscription(s) for Provis - ${staticProjectName}");
+
+		LocalFile.ZendeskTicketAPI._viewTicketSupportRegion(
+			keywords = "New Subscription(s) for Provis - ${staticProjectName}",
+			supportRegion = "provisioning_hungary");
+
+		LocalFile.ZendeskTicketAPI._viewTicketPrimaryAddressCountry(
+			keywords = "New Subscription(s) for Provis - ${staticProjectName}",
+			primaryAddressCountry = "Italy");
+
+		LocalFile.OSBAdmin.gotoOSBAdmin();
+
+		LocalFile.OSBAdminProject.view(
+			projectName = "Provis - ${staticProjectName}",
+			table = '''| Koroneiki Account Key | Obtain from project name      |
+	| Project Name          | Provis - ${staticProjectName} |
+	| Code                  | VISPROPROVIS                  |
+	| Partner               | Propar - ${staticCompanyName} |
+	| Addresses             | Viale Europa 22               |
+	| Addresses             | Italy                         |
+	| Addresses             | Rome                          |
+	| Addresses             | 00144                         |
+	| Addresses             | Primary                       |
+	| Tier                  | T4                            |
+	| Language              | English                       |''');
+
+		LocalFile.KoroneikiAccountAPI._viewAccount(
+			accountName = "Provis - ${staticProjectName}",
+			table = '''| Language    | English | |
+	| Region      | Hungary | |
+	| Data Region | Hungary | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchase(
+			accountName = "Provis - ${staticProjectName}",
+			productName = "DXP Production",
+			table = '''| Quantity | 1        | |
+	| Status   | Approved | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchase(
+			accountName = "Provis - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| Quantity | 1        | |
+	| Status   | Approved | |''');
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Provis - ${staticProjectName}",
+			contactEmailAddress = "usr.provisioning1@lrcustomer.com.broken",
+			contactRoleName = "Support Administrator");
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Provis - ${staticProjectName}",
+			contactEmailAddress = "usr.provisioning1@lrcustomer.com.broken",
+			contactRoleName = "Liferay Sales");
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Provis - ${staticProjectName}",
+			contactEmailAddress = "usr.provisioning1@lrcustomer.com.broken",
+			contactRoleName = "Secondary Contact");
+	}
+
+	test CreateprojectforIndiaSupportRegionandviewticket {
+		LocalFile.OSBAdminRabbitMQ.generateStaticVariables();
+
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningCompanyName();
+
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		LocalFile.OSBAdmin.loginToSupport(
+			userEmailAddress = ${staticSupportAdminEmailAdress},
+			userPassword = ${staticSupportAdminPassword});
+
+		LocalFile.OSBAdminRabbitMQ.publishCreatePartnerAccountMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Propar - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Dossiera Account Key                   | abcdefgh1234567890                         |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Professional Services (Technical/Web/IT)   |
+	| Owner Email Address                    | usr.provisioning1@lrcustomer.com.broken    |
+	| Owner First Name                       | USR                                        |
+	| Owner Last Name                        | Provisioning1                              |
+	| Partner First Line Support             | false                                      |
+	| Product Name                           | Service Partnership                        |
+	| Product Type                           | New                                        |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | 000000a1b2c3d4e5f6e7f                      |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Partner");
+
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Vispro - ${staticCompanyName}              |
+	| Address City                           | New Delhi                                  |
+	| Address Country                        | India                                      |
+	| Address Postal Code                    | 110034                                     |
+	| Address Region                         | Delhi                                      |
+	| Address Street                         | Flat No. 100 Triveni Apartments Pitam Pura |
+	| Contact Email Address                  | usr.provisioning1@lrcustomer.com.broken    |
+	| Contact First Name                     | USR                                        |
+	| Contact Last Name                      | Provisioning1                              |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Engineering                                |
+	| Owner Email Address                    | usr.provisioning1@lrcustomer.com.broken    |
+	| Owner First Name                       | USR                                        |
+	| Owner Last Name                        | Provisioning1                              |
+	| Partner First Line Support             | false                                      |
+	| Partner Dossiera Key                   | abcdefgh1234567890                         |
+	| Partner Name                           | Propar - ${staticCompanyName}              |
+	| Partner Support Level                  | Platinum                                   |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Provis - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay India                              |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | India                                      |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Provis");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Provis - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.clickSyncToZendeskButton();
+
+		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "VISPROPROVIS");
+
+		LocalFile.ZendeskTicketAPI._viewTicketSyncByKeywords(keywords = "New Subscription(s) for Provis - ${staticProjectName}");
+
+		LocalFile.ZendeskTicketAPI._viewTicketSupportRegion(
+			keywords = "New Subscription(s) for Provis - ${staticProjectName}",
+			supportRegion = "provisioning_india");
+
+		LocalFile.ZendeskTicketAPI._viewTicketPrimaryAddressCountry(
+			keywords = "New Subscription(s) for Provis - ${staticProjectName}",
+			primaryAddressCountry = "India");
+
+		LocalFile.OSBAdmin.gotoOSBAdmin();
+
+		LocalFile.OSBAdminProject.view(
+			projectName = "Provis - ${staticProjectName}",
+			table = '''| Koroneiki Account Key | Obtain from project name                   |
+	| Project Name          | Provis - ${staticProjectName}              |
+	| Code                  | VISPROPROVIS                               |
+	| Partner               | Propar - ${staticCompanyName}              |
+	| Addresses             | Flat No. 100 Triveni Apartments Pitam Pura |
+	| Addresses             | India                                      |
+	| Addresses             | New Delhi                                  |
+	| Addresses             | Delhi                                      |
+	| Addresses             | 110034                                     |
+	| Addresses             | Primary                                    |
+	| Tier                  | T4                                         |
+	| Language              | English                                    |''');
+
+		LocalFile.KoroneikiAccountAPI._viewAccount(
+			accountName = "Provis - ${staticProjectName}",
+			table = '''| Language    | English       | |
+	| Region      | India         | |
+	| Data Region | United States | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchase(
+			accountName = "Provis - ${staticProjectName}",
+			productName = "DXP Production",
+			table = '''| Quantity | 1        | |
+	| Status   | Approved | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchase(
+			accountName = "Provis - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| Quantity | 1        | |
+	| Status   | Approved | |''');
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Provis - ${staticProjectName}",
+			contactEmailAddress = "usr.provisioning1@lrcustomer.com.broken",
+			contactRoleName = "Support User");
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Provis - ${staticProjectName}",
+			contactEmailAddress = "usr.provisioning1@lrcustomer.com.broken",
+			contactRoleName = "Liferay Sales");
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Provis - ${staticProjectName}",
+			contactEmailAddress = "usr.provisioning1@lrcustomer.com.broken",
+			contactRoleName = "Secondary Contact");
+	}
+
+	test CreateprojectforJapanSupportRegionandviewticket {
+		LocalFile.OSBAdminRabbitMQ.generateStaticVariables();
+
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningCompanyName();
+
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		LocalFile.OSBAdmin.loginToSupport(
+			userEmailAddress = ${staticSupportAdminEmailAdress},
+			userPassword = ${staticSupportAdminPassword});
+
+		LocalFile.OSBAdminRabbitMQ.publishCreatePartnerAccountMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Propar - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Dossiera Account Key                   | abcdefgh1234567890                         |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Professional Services (Technical/Web/IT)   |
+	| Owner Email Address                    | usr.provisioning1@lrcustomer.com.broken    |
+	| Owner First Name                       | USR                                        |
+	| Owner Last Name                        | Provisioning1                              |
+	| Partner First Line Support             | false                                      |
+	| Product Name                           | Service Partnership                        |
+	| Product Type                           | New                                        |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | 000000a1b2c3d4e5f6e7f                      |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Partner");
+
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Vispro - ${staticCompanyName}              |
+	| Address City                           | Akasaka, Minato-ku                         |
+	| Address Country                        | Japan                                      |
+	| Address Postal Code                    | 107-0052                                   |
+	| Address Street                         | 2 Chome-13-3                               |
+	| Contact Email Address                  | usr.provisioning1@lrcustomer.com.broken    |
+	| Contact First Name                     | USR                                        |
+	| Contact Last Name                      | Provisioning1                              |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Engineering                                |
+	| Owner Email Address                    | usr.provisioning1@lrcustomer.com.broken    |
+	| Owner First Name                       | USR                                        |
+	| Owner Last Name                        | Provisioning1                              |
+	| Partner First Line Support             | false                                      |
+	| Partner Dossiera Key                   | abcdefgh1234567890                         |
+	| Partner Name                           | Propar - ${staticCompanyName}              |
+	| Partner Support Level                  | Platinum                                   |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Provis - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay Japan                              |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | Japan                                      |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Provis");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Provis - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.clickSyncToZendeskButton();
+
+		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "VISPROPROVIS");
+
+		LocalFile.ZendeskTicketAPI._viewTicketSyncByKeywords(keywords = "New Subscription(s) for Provis - ${staticProjectName}");
+
+		LocalFile.ZendeskTicketAPI._viewTicketSupportRegion(
+			keywords = "New Subscription(s) for Provis - ${staticProjectName}",
+			supportRegion = "provisioning_japan");
+
+		LocalFile.ZendeskTicketAPI._viewTicketPrimaryAddressCountry(
+			keywords = "New Subscription(s) for Provis - ${staticProjectName}",
+			primaryAddressCountry = "Japan");
+
+		LocalFile.OSBAdmin.gotoOSBAdmin();
+
+		LocalFile.OSBAdminProject.view(
+			projectName = "Provis - ${staticProjectName}",
+			table = '''| Koroneiki Account Key | Obtain from project name      |
+	| Project Name          | Provis - ${staticProjectName} |
+	| Code                  | VISPROPROVIS                  |
+	| Partner               | Propar - ${staticCompanyName} |
+	| Addresses             | 2 Chome-13-3                  |
+	| Addresses             | Japan                         |
+	| Addresses             | Akasaka, Minato-ku            |
+	| Addresses             | 107-0052                      |
+	| Addresses             | Primary                       |
+	| Tier                  | T4                            |
+	| Language              | Japanese                      |''');
+
+		LocalFile.KoroneikiAccountAPI._viewAccount(
+			accountName = "Provis - ${staticProjectName}",
+			table = '''| Language    | Japanese | |
+	| Region      | Japan    | |
+	| Data Region | Japan    | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchase(
+			accountName = "Provis - ${staticProjectName}",
+			productName = "DXP Production",
+			table = '''| Quantity | 1        | |
+	| Status   | Approved | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchase(
+			accountName = "Provis - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| Quantity | 1        | |
+	| Status   | Approved | |''');
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Provis - ${staticProjectName}",
+			contactEmailAddress = "usr.provisioning1@lrcustomer.com.broken",
+			contactRoleName = "Support Administrator");
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Provis - ${staticProjectName}",
+			contactEmailAddress = "usr.provisioning1@lrcustomer.com.broken",
+			contactRoleName = "Liferay Sales");
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Provis - ${staticProjectName}",
+			contactEmailAddress = "usr.provisioning1@lrcustomer.com.broken",
+			contactRoleName = "Secondary Contact");
+	}
+
+	test CreateprojectforSpainSupportRegionandviewticket {
+		LocalFile.OSBAdminRabbitMQ.generateStaticVariables();
+
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningCompanyName();
+
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		LocalFile.OSBAdmin.loginToSupport(
+			userEmailAddress = ${staticSupportAdminEmailAdress},
+			userPassword = ${staticSupportAdminPassword});
+
+		LocalFile.OSBAdminRabbitMQ.publishCreatePartnerAccountMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Propar - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Dossiera Account Key                   | abcdefgh1234567890                         |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Professional Services (Technical/Web/IT)   |
+	| Owner Email Address                    | usr.provisioning1@lrcustomer.com.broken    |
+	| Owner First Name                       | USR                                        |
+	| Owner Last Name                        | Provisioning1                              |
+	| Partner First Line Support             | false                                      |
+	| Product Name                           | Service Partnership                        |
+	| Product Type                           | New                                        |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | 000000a1b2c3d4e5f6e7f                      |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Partner");
+
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Vispro - ${staticCompanyName}              |
+	| Address City                           | Madrid                                     |
+	| Address Region                         | Madrid                                     |
+	| Address Country                        | Spain                                      |
+	| Address Postal Code                    | 28070                                      |
+	| Address Street                         | Calle Aduana, 29                           |
+	| Contact Email Address                  | usr.provisioning1@lrcustomer.com.broken    |
+	| Contact First Name                     | USR                                        |
+	| Contact Last Name                      | Provisioning1                              |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Engineering                                |
+	| Owner Email Address                    | usr.provisioning1@lrcustomer.com.broken    |
+	| Owner First Name                       | USR                                        |
+	| Owner Last Name                        | Provisioning1                              |
+	| Partner First Line Support             | false                                      |
+	| Partner Dossiera Key                   | abcdefgh1234567890                         |
+	| Partner Name                           | Propar - ${staticCompanyName}              |
+	| Partner Support Level                  | Platinum                                   |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Provis - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay Spain                              |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | Spain                                      |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Provis");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Provis - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.clickSyncToZendeskButton();
+
+		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "VISPROPROVIS");
+
+		LocalFile.ZendeskTicketAPI._viewTicketSyncByKeywords(keywords = "New Subscription(s) for Provis - ${staticProjectName}");
+
+		LocalFile.ZendeskTicketAPI._viewTicketSupportRegion(
+			keywords = "New Subscription(s) for Provis - ${staticProjectName}",
+			supportRegion = "provisioning_spain");
+
+		LocalFile.ZendeskTicketAPI._viewTicketPrimaryAddressCountry(
+			keywords = "New Subscription(s) for Provis - ${staticProjectName}",
+			primaryAddressCountry = "Spain");
+
+		LocalFile.OSBAdmin.gotoOSBAdmin();
+
+		LocalFile.OSBAdminProject.view(
+			projectName = "Provis - ${staticProjectName}",
+			table = '''| Koroneiki Account Key | Obtain from project name      |
+	| Project Name          | Provis - ${staticProjectName} |
+	| Code                  | VISPROPROVIS                  |
+	| Partner               | Propar - ${staticCompanyName} |
+	| Addresses             | Calle Aduana, 29              |
+	| Addresses             | Spain                         |
+	| Addresses             | Madrid                        |
+	| Addresses             | Madrid                        |
+	| Addresses             | 28070                         |
+	| Addresses             | Primary                       |
+	| Tier                  | T4                            |
+	| Language              | Spanish                       |''');
+
+		LocalFile.KoroneikiAccountAPI._viewAccount(
+			accountName = "Provis - ${staticProjectName}",
+			table = '''| Language    | Spanish | |
+	| Region      | Spain   | |
+	| Data Region | Hungary | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchase(
+			accountName = "Provis - ${staticProjectName}",
+			productName = "DXP Production",
+			table = '''| Quantity | 1        | |
+	| Status   | Approved | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchase(
+			accountName = "Provis - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| Quantity | 1        | |
+	| Status   | Approved | |''');
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Provis - ${staticProjectName}",
+			contactEmailAddress = "usr.provisioning1@lrcustomer.com.broken",
+			contactRoleName = "Support Administrator");
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Provis - ${staticProjectName}",
+			contactEmailAddress = "usr.provisioning1@lrcustomer.com.broken",
+			contactRoleName = "Liferay Sales");
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Provis - ${staticProjectName}",
+			contactEmailAddress = "usr.provisioning1@lrcustomer.com.broken",
+			contactRoleName = "Secondary Contact");
+	}
+
+	@help.center.acceptance = "true"
+	test CreateprojectforUSSupportRegionandviewticket {
+		LocalFile.OSBAdminRabbitMQ.generateStaticVariables();
+
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningCompanyName();
+
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		LocalFile.OSBAdmin.loginToSupport(
+			userEmailAddress = ${staticSupportAdminEmailAdress},
+			userPassword = ${staticSupportAdminPassword});
+
+		LocalFile.OSBAdminRabbitMQ.publishCreatePartnerAccountMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Propar - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Dossiera Account Key                   | abcdefgh1234567890                         |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Professional Services (Technical/Web/IT)   |
+	| Owner Email Address                    | usr.provisioning1@lrcustomer.com.broken    |
+	| Owner First Name                       | USR                                        |
+	| Owner Last Name                        | Provisioning1                              |
+	| Partner First Line Support             | false                                      |
+	| Product Name                           | Service Partnership                        |
+	| Product Type                           | New                                        |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | 000000a1b2c3d4e5f6e7f                      |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Partner");
+
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Vispro - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Contact Email Address                  | usr.provisioning1@lrcustomer.com.broken    |
+	| Contact First Name                     | USR                                        |
+	| Contact Last Name                      | Provisioning1                              |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Engineering                                |
+	| Owner Email Address                    | usr.provisioning1@lrcustomer.com.broken    |
+	| Owner First Name                       | USR                                        |
+	| Owner Last Name                        | Provisioning1                              |
+	| Partner First Line Support             | false                                      |
+	| Partner Dossiera Key                   | abcdefgh1234567890                         |
+	| Partner Name                           | Propar - ${staticCompanyName}              |
+	| Partner Support Level                  | Platinum                                   |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Provis - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Provis");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Provis - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.clickSyncToZendeskButton();
+
+		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "VISPROPROVIS");
+
+		LocalFile.ZendeskTicketAPI._viewTicketSyncByKeywords(keywords = "New Subscription(s) for Provis - ${staticProjectName}");
+
+		LocalFile.ZendeskTicketAPI._viewTicketSupportRegion(
+			keywords = "New Subscription(s) for Provis - ${staticProjectName}",
+			supportRegion = "provisioning_united_states");
+
+		LocalFile.ZendeskTicketAPI._viewTicketPrimaryAddressCountry(
+			keywords = "New Subscription(s) for Provis - ${staticProjectName}",
+			primaryAddressCountry = "United States");
+
+		LocalFile.OSBAdmin.gotoOSBAdmin();
+
+		LocalFile.OSBAdminProject.view(
+			projectName = "Provis - ${staticProjectName}",
+			table = '''| Koroneiki Account Key | Obtain from project name      |
+	| Project Name          | Provis - ${staticProjectName} |
+	| Code                  | VISPROPROVIS                  |
+	| Partner               | Propar - ${staticCompanyName} |
+	| Addresses             | 456 Fake Street               |
+	| Addresses             | United States                 |
+	| Addresses             | California                    |
+	| Addresses             | Diamond Bar                   |
+	| Addresses             | 91765                         |
+	| Addresses             | Primary                       |
+	| Tier                  | T4                            |
+	| Language              | English                       |''');
+
+		LocalFile.KoroneikiAccountAPI._viewAccount(
+			accountName = "Provis - ${staticProjectName}",
+			table = '''| Language    | English       | |
+	| Region      | United States | |
+	| Data Region | United States | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchase(
+			accountName = "Provis - ${staticProjectName}",
+			productName = "DXP Production",
+			table = '''| Quantity | 1        | |
+	| Status   | Approved | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchase(
+			accountName = "Provis - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| Quantity | 1        | |
+	| Status   | Approved | |''');
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Provis - ${staticProjectName}",
+			contactEmailAddress = "usr.provisioning1@lrcustomer.com.broken",
+			contactRoleName = "Support Administrator");
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Provis - ${staticProjectName}",
+			contactEmailAddress = "usr.provisioning1@lrcustomer.com.broken",
+			contactRoleName = "Liferay Sales");
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Provis - ${staticProjectName}",
+			contactEmailAddress = "usr.provisioning1@lrcustomer.com.broken",
+			contactRoleName = "Secondary Contact");
+	}
+
+}

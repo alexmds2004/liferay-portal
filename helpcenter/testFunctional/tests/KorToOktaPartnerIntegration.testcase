@@ -1,0 +1,640 @@
+definition {
+
+	property testray.main.component.name = "Support QA";
+	property type = "okta.integration";
+
+	setUp {
+		LocalFile.Passwords.getPasswords();
+
+		LocalFile.OSBAdminRabbitMQ.generateStaticVariables();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningCompanyName();
+
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | okt.partner1                      |
+	| Email Address | okt.partner1@lrpartner.com.broken |
+	| First Name    | OKT                               |
+	| Last Name     | Partner1                          |''');
+	}
+
+	tearDown {
+		LocalFile.ZendeskUserAPI._getDefaultUserId(organizationName = "Oktkor - ${staticProjectName}");
+
+		LocalFile.ZendeskUserAPI._renameFirstDefaultUserIdVariable();
+
+		LocalFile.ZendeskUserAPI._getDefaultUserId(organizationName = "Oktpar - ${staticCompanyName}");
+
+		LocalFile.ZendeskUserAPI._renameSecondDefaultUserIdVariable();
+
+		LocalFile.OSBAdminProject.tearDownProjects(table = '''| OKTKOROKTKOR |
+	| OKTPAROKTPAR |''');
+
+		LocalFile.KoroneikiAccountAPI._tearDownAccounts(table = '''| Oktkor - ${staticProjectName} |
+	| Oktpar - ${staticCompanyName} |''');
+
+		LocalFile.KoroneikiAccountAPI._tearDownAccountsViaAccountFieldNameAndValue(
+			fieldName = "Code",
+			table = '''| OKTKOROKTKOR |
+	| OKTPAROKTPAR |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+
+		LocalFile.JSONUser.tearDownUsers(table = '''| okt.partner1@lrpartner.com.broken |
+	| okt.partner2@lrpartner.com.broken |''');
+
+		LocalFile.JSONUser.tearDownUsersViaSupport(table = '''| okt.partner1@lrpartner.com.broken |
+	| okt.partner2@lrpartner.com.broken |''');
+
+		LocalFile.JSONUser.tearDownUsersViaKoroneiki(table = '''| okt.partner1@lrpartner.com.broken |
+	| okt.partner2@lrpartner.com.broken |''');
+
+		LocalFile.KoroneikiContactAPI._tearDownContacts(table = '''| okt.partner1@lrpartner.com.broken |
+	| okt.partner2@lrpartner.com.broken |''');
+
+		LocalFile.JSONOkta.tearDownUsers(table = '''| okt.partner1@lrpartner.com.broken |
+	| okt.partner2@lrpartner.com.broken |''');
+
+		LocalFile.ZendeskUserAPI._getMultipleUserIdsByEmailAddress(table = '''| okt.partner1@lrpartner.com.broken |
+	| okt.partner2@lrpartner.com.broken |''');
+
+		LocalFile.ZendeskUserAPI._tearDownUsersByIdList(userIds = ${staticUserIdList});
+
+		LocalFile.ZendeskOrganizationAPI._getMultipleOrganizationExternalIdsByOrganizationNameIfStillPresent(table = '''| Oktkor - ${staticProjectName} |
+	| Oktpar - ${staticCompanyName} |''');
+
+		LocalFile.ZendeskOrganizationAPI._tearDownOrganizationsByExternalIdList(organizationExternalIds = ${staticOrganizationExternalIdList});
+
+		LocalFile.ZendeskUserAPI._tearDownUserById(userId = ${staticDefaultUserId1});
+
+		LocalFile.ZendeskUserAPI._tearDownUserById(userId = ${staticDefaultUserId2});
+	}
+
+	test Syncpartnergroupmembershipremovalviakoroneikitookta {
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Name   | Oktpar - ${staticCompanyName} | |
+	| Code   | OKTPAROKTPAR                  | |
+	| Status | Active                        | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Oktpar - ${staticCompanyName}",
+			productName = "Service Partnership",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Oktpar - ${staticCompanyName}",
+			contactEmailAddress = "okt.partner1@lrpartner.com.broken",
+			table = '''| Partner Member |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Partner");
+
+		LocalFile.KoroneikiAccountAPI._createAssignedTeamNestedField(
+			accountName = "Oktkor - ${staticProjectName}",
+			teamName = "Oktpar - ${staticCompanyName}");
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Assigned Team Nested Field | ${staticAssignedTeamNestedField} | |
+	| Code                       | OKTKOROKTKOR                     | |
+	| Language                   | English                          | |
+	| Name                       | Oktkor - ${staticProjectName}    | |
+	| Region                     | United States                    | |
+	| Status                     | Active                           | |
+	| Tier                       | T1                               | |''');
+
+		LocalFile.KoroneikiAccountAPI._assignTeamRolesToTeam(
+			accountName = "Oktkor - ${staticProjectName}",
+			table = '''| Partner |''',
+			teamName = "Oktpar - ${staticCompanyName}");
+
+		LocalFile.KoroneikiAccountAPI._assignTeamRolesToTeam(
+			accountName = "Oktkor - ${staticProjectName}",
+			table = '''| First Line Support |''',
+			teamName = "Oktpar - ${staticCompanyName}");
+
+		LocalFile.KoroneikiAccountAPI._createAccountPostalAddress(
+			accountName = "Oktkor - ${staticProjectName}",
+			table = '''| Country               | United States   |
+	| Locality              | Diamond Bar     |
+	| Region                | California      |
+	| Type                  | Business        |
+	| Mailing               | True            |
+	| Postal Code           | 91765           |
+	| Primary               | True            |
+	| Street Address Line 1 | 123 Main Street |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Oktkor - ${staticProjectName}",
+			productName = "Portal Production",
+			table = '''| End Date                | ${staticEndDate}         |   |
+	| Original End Date       | ${staticOriginalEndDate} |   |
+	| Perpetual               | false                    |   |
+	| Product Field and Value | sizing                   | 1 |
+	| Product Field and Value | licenses                 | 1 |
+	| Product Field and Value | version                  | 6 |
+	| Quantity                | 1                        |   |
+	| Start Date              | ${staticStartDate}       |   |
+	| Status                  | Approved                 |   |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Oktkor - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Partner");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Partner");
+
+		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "OKTPAROKTPAR");
+
+		LocalFile.JSONOkta.viewOktaUserGroupMembership(
+			groupName = "Partners",
+			userEmailAddress = "okt.partner1@lrpartner.com.broken");
+
+		LocalFile.ProvisioningContactAPI._unassignContactRolesToContact(
+			accountName = "Oktpar - ${staticCompanyName}",
+			table = '''| Partner Member |''',
+			userEmailAddress = "okt.partner1@lrpartner.com.broken");
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Partner");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Partner");
+
+		LocalFile.JSONOkta.viewNoOktaUserGroupMembership(
+			groupName = "Partners",
+			userEmailAddress = "okt.partner1@lrpartner.com.broken");
+
+		LocalFile.KoroneikiContactAPI._viewContactUuidAndUserUuidComparison(contactEmailAddress = "okt.partner1@lrpartner.com.broken");
+	}
+
+	test Syncpartnergroupmembershipremovalviaprovisioningtookta {
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Name   | Oktpar - ${staticCompanyName} | |
+	| Code   | OKTPAROKTPAR                  | |
+	| Status | Active                        | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Oktpar - ${staticCompanyName}",
+			productName = "Service Partnership",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Oktpar - ${staticCompanyName}",
+			contactEmailAddress = "okt.partner1@lrpartner.com.broken",
+			table = '''| Partner Member |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Partner");
+
+		LocalFile.KoroneikiAccountAPI._createAssignedTeamNestedField(
+			accountName = "Oktkor - ${staticProjectName}",
+			teamName = "Oktpar - ${staticCompanyName}");
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Assigned Team Nested Field | ${staticAssignedTeamNestedField} | |
+	| Code                       | OKTKOROKTKOR                     | |
+	| Language                   | English                          | |
+	| Name                       | Oktkor - ${staticProjectName}    | |
+	| Region                     | United States                    | |
+	| Status                     | Active                           | |
+	| Tier                       | T1                               | |''');
+
+		LocalFile.KoroneikiAccountAPI._assignTeamRolesToTeam(
+			accountName = "Oktkor - ${staticProjectName}",
+			table = '''| Partner |''',
+			teamName = "Oktpar - ${staticCompanyName}");
+
+		LocalFile.KoroneikiAccountAPI._assignTeamRolesToTeam(
+			accountName = "Oktkor - ${staticProjectName}",
+			table = '''| First Line Support |''',
+			teamName = "Oktpar - ${staticCompanyName}");
+
+		LocalFile.KoroneikiAccountAPI._createAccountPostalAddress(
+			accountName = "Oktkor - ${staticProjectName}",
+			table = '''| Country               | United States   |
+	| Locality              | Diamond Bar     |
+	| Region                | California      |
+	| Type                  | Business        |
+	| Mailing               | True            |
+	| Postal Code           | 91765           |
+	| Primary               | True            |
+	| Street Address Line 1 | 123 Main Street |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Oktkor - ${staticProjectName}",
+			productName = "Portal Production",
+			table = '''| End Date                | ${staticEndDate}         |   |
+	| Original End Date       | ${staticOriginalEndDate} |   |
+	| Perpetual               | false                    |   |
+	| Product Field and Value | sizing                   | 1 |
+	| Product Field and Value | licenses                 | 1 |
+	| Product Field and Value | version                  | 6 |
+	| Quantity                | 1                        |   |
+	| Start Date              | ${staticStartDate}       |   |
+	| Status                  | Approved                 |   |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Oktkor - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Partner");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Partner");
+
+		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "OKTPAROKTPAR");
+
+		LocalFile.JSONOkta.viewOktaUserGroupMembership(
+			groupName = "Partners",
+			userEmailAddress = "okt.partner1@lrpartner.com.broken");
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Oktpar");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Oktpar - ${staticCompanyName}");
+
+		LocalFile.Provisioning.clickTab(tabName = "Contacts");
+
+		LocalFile.ProvisioningAccount.clickContactActionDropdownButton(
+			action = "Unassign",
+			emailAddress = "okt.partner1@lrpartner.com.broken");
+
+		LocalFile.ProvisioningAccount._viewNoAccountContact(emailAddress = "okt.partner1@lrpartner.com.broken");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Partner");
+
+		LocalFile.Provisioning.gotoUsers();
+
+		LocalFile.Provisioning.searchUsers(keyword = "okt.partner1");
+
+		LocalFile.Provisioning.clickUser(userName = "OKT Partner1");
+
+		LocalFile.ProvisioningUser.clickSyncWithOktaButton();
+
+		LocalFile.ZendeskHomepage.pause(timeInSeconds = 10);
+
+		LocalFile.JSONOkta.viewNoOktaUserGroupMembership(
+			groupName = "Partners",
+			userEmailAddress = "okt.partner1@lrpartner.com.broken");
+
+		LocalFile.KoroneikiContactAPI._viewContactUuidAndUserUuidComparison(contactEmailAddress = "okt.partner1@lrpartner.com.broken");
+	}
+
+	test Syncpartnergroupmembershipviakoroneikitookta {
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Name   | Oktpar - ${staticCompanyName} | |
+	| Code   | OKTPAROKTPAR                  | |
+	| Status | Active                        | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Oktpar - ${staticCompanyName}",
+			productName = "Service Partnership",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Oktpar - ${staticCompanyName}",
+			contactEmailAddress = "okt.partner1@lrpartner.com.broken",
+			table = '''| Partner Member |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Partner");
+
+		LocalFile.KoroneikiAccountAPI._createAssignedTeamNestedField(
+			accountName = "Oktkor - ${staticProjectName}",
+			teamName = "Oktpar - ${staticCompanyName}");
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Assigned Team Nested Field | ${staticAssignedTeamNestedField} | |
+	| Code                       | OKTKOROKTKOR                     | |
+	| Language                   | English                          | |
+	| Name                       | Oktkor - ${staticProjectName}    | |
+	| Region                     | United States                    | |
+	| Status                     | Active                           | |
+	| Tier                       | T1                               | |''');
+
+		LocalFile.KoroneikiAccountAPI._assignTeamRolesToTeam(
+			accountName = "Oktkor - ${staticProjectName}",
+			table = '''| Partner |''',
+			teamName = "Oktpar - ${staticCompanyName}");
+
+		LocalFile.KoroneikiAccountAPI._assignTeamRolesToTeam(
+			accountName = "Oktkor - ${staticProjectName}",
+			table = '''| First Line Support |''',
+			teamName = "Oktpar - ${staticCompanyName}");
+
+		LocalFile.KoroneikiAccountAPI._createAccountPostalAddress(
+			accountName = "Oktkor - ${staticProjectName}",
+			table = '''| Country               | United States   |
+	| Locality              | Diamond Bar     |
+	| Region                | California      |
+	| Type                  | Business        |
+	| Mailing               | True            |
+	| Postal Code           | 91765           |
+	| Primary               | True            |
+	| Street Address Line 1 | 123 Main Street |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Oktkor - ${staticProjectName}",
+			productName = "Portal Production",
+			table = '''| End Date                | ${staticEndDate}         |   |
+	| Original End Date       | ${staticOriginalEndDate} |   |
+	| Perpetual               | false                    |   |
+	| Product Field and Value | sizing                   | 1 |
+	| Product Field and Value | licenses                 | 1 |
+	| Product Field and Value | version                  | 6 |
+	| Quantity                | 1                        |   |
+	| Start Date              | ${staticStartDate}       |   |
+	| Status                  | Approved                 |   |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Oktkor - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Partner");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Partner");
+
+		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "OKTPAROKTPAR");
+
+		LocalFile.JSONOkta.viewOktaUserGroupMembership(
+			groupName = "Partners",
+			userEmailAddress = "okt.partner1@lrpartner.com.broken");
+
+		LocalFile.KoroneikiContactAPI._viewContactUuidAndUserUuidComparison(contactEmailAddress = "okt.partner1@lrpartner.com.broken");
+	}
+
+	test Syncpartnergroupmembershipviaprovisioningtookta {
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Name   | Oktpar - ${staticCompanyName} | |
+	| Code   | OKTPAROKTPAR                  | |
+	| Status | Active                        | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Oktpar - ${staticCompanyName}",
+			productName = "Service Partnership",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Partner");
+
+		LocalFile.KoroneikiAccountAPI._createAssignedTeamNestedField(
+			accountName = "Oktkor - ${staticProjectName}",
+			teamName = "Oktpar - ${staticCompanyName}");
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Assigned Team Nested Field | ${staticAssignedTeamNestedField} | |
+	| Code                       | OKTKOROKTKOR                     | |
+	| Language                   | English                          | |
+	| Name                       | Oktkor - ${staticProjectName}    | |
+	| Region                     | United States                    | |
+	| Status                     | Active                           | |
+	| Tier                       | T1                               | |''');
+
+		LocalFile.KoroneikiAccountAPI._assignTeamRolesToTeam(
+			accountName = "Oktkor - ${staticProjectName}",
+			table = '''| Partner |''',
+			teamName = "Oktpar - ${staticCompanyName}");
+
+		LocalFile.KoroneikiAccountAPI._assignTeamRolesToTeam(
+			accountName = "Oktkor - ${staticProjectName}",
+			table = '''| First Line Support |''',
+			teamName = "Oktpar - ${staticCompanyName}");
+
+		LocalFile.KoroneikiAccountAPI._createAccountPostalAddress(
+			accountName = "Oktkor - ${staticProjectName}",
+			table = '''| Country               | United States   |
+	| Locality              | Diamond Bar     |
+	| Region                | California      |
+	| Type                  | Business        |
+	| Mailing               | True            |
+	| Postal Code           | 91765           |
+	| Primary               | True            |
+	| Street Address Line 1 | 123 Main Street |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Oktkor - ${staticProjectName}",
+			productName = "Portal Production",
+			table = '''| End Date                | ${staticEndDate}         |   |
+	| Original End Date       | ${staticOriginalEndDate} |   |
+	| Perpetual               | false                    |   |
+	| Product Field and Value | sizing                   | 1 |
+	| Product Field and Value | licenses                 | 1 |
+	| Product Field and Value | version                  | 6 |
+	| Quantity                | 1                        |   |
+	| Start Date              | ${staticStartDate}       |   |
+	| Status                  | Approved                 |   |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Oktkor - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Partner");
+
+		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "OKTPAROKTPAR");
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Oktpar");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Oktpar - ${staticCompanyName}");
+
+		LocalFile.Provisioning.clickTab(tabName = "Contacts");
+
+		LocalFile.ProvisioningAccount.clickAssignContactButton();
+
+		LocalFile.ProvisioningAccount.populateAssignContactFormAndSave(table = '''| Email Address | okt.partner1@lrpartner.com.broken |
+	| Assign Role   | Partner Member                    |''');
+
+		LocalFile.ProvisioningAccount._viewAccountContact(
+			emailAddress = "okt.partner1@lrpartner.com.broken",
+			table = '''| Name          | OKT Partner1                      |
+	| Email Address | okt.partner1@lrpartner.com.broken |
+	| Role          | Partner Member                    |
+	| User Status   | VERIFIED                          |''');
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Partner");
+
+		LocalFile.Provisioning.gotoUsers();
+
+		LocalFile.Provisioning.searchUsers(keyword = "okt.partner1");
+
+		LocalFile.Provisioning.clickUser(userName = "OKT Partner1");
+
+		LocalFile.ProvisioningUser.clickSyncWithOktaButton();
+
+		LocalFile.ZendeskHomepage.pause(timeInSeconds = 10);
+
+		LocalFile.JSONOkta.viewOktaUserGroupMembership(
+			groupName = "Partners",
+			userEmailAddress = "okt.partner1@lrpartner.com.broken");
+
+		LocalFile.KoroneikiContactAPI._viewContactUuidAndUserUuidComparison(contactEmailAddress = "okt.partner1@lrpartner.com.broken");
+	}
+
+	test Syncpartneruserupdatestookta {
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Name   | Oktpar - ${staticCompanyName} | |
+	| Code   | OKTPAROKTPAR                  | |
+	| Status | Active                        | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Oktpar - ${staticCompanyName}",
+			productName = "Service Partnership",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Oktpar - ${staticCompanyName}",
+			contactEmailAddress = "okt.partner1@lrpartner.com.broken",
+			table = '''| Partner Member |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Partner");
+
+		LocalFile.KoroneikiAccountAPI._createAssignedTeamNestedField(
+			accountName = "Oktkor - ${staticProjectName}",
+			teamName = "Oktpar - ${staticCompanyName}");
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Assigned Team Nested Field | ${staticAssignedTeamNestedField} | |
+	| Code                       | OKTKOROKTKOR                     | |
+	| Language                   | English                          | |
+	| Name                       | Oktkor - ${staticProjectName}    | |
+	| Region                     | United States                    | |
+	| Status                     | Active                           | |
+	| Tier                       | T1                               | |''');
+
+		LocalFile.KoroneikiAccountAPI._assignTeamRolesToTeam(
+			accountName = "Oktkor - ${staticProjectName}",
+			table = '''| Partner |''',
+			teamName = "Oktpar - ${staticCompanyName}");
+
+		LocalFile.KoroneikiAccountAPI._assignTeamRolesToTeam(
+			accountName = "Oktkor - ${staticProjectName}",
+			table = '''| First Line Support |''',
+			teamName = "Oktpar - ${staticCompanyName}");
+
+		LocalFile.KoroneikiAccountAPI._createAccountPostalAddress(
+			accountName = "Oktkor - ${staticProjectName}",
+			table = '''| Country               | United States   |
+	| Locality              | Diamond Bar     |
+	| Region                | California      |
+	| Type                  | Business        |
+	| Mailing               | True            |
+	| Postal Code           | 91765           |
+	| Primary               | True            |
+	| Street Address Line 1 | 123 Main Street |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Oktkor - ${staticProjectName}",
+			productName = "Portal Production",
+			table = '''| End Date                | ${staticEndDate}         |   |
+	| Original End Date       | ${staticOriginalEndDate} |   |
+	| Perpetual               | false                    |   |
+	| Product Field and Value | sizing                   | 1 |
+	| Product Field and Value | licenses                 | 1 |
+	| Product Field and Value | version                  | 6 |
+	| Quantity                | 1                        |   |
+	| Start Date              | ${staticStartDate}       |   |
+	| Status                  | Approved                 |   |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Oktkor - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Partner");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Partner");
+
+		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "OKTPAROKTPAR");
+
+		LocalFile.JSONOkta.viewOktaUserGroupMembership(
+			groupName = "Partners",
+			userEmailAddress = "okt.partner1@lrpartner.com.broken");
+
+		LocalFile.KoroneikiContactAPI._updateContactViaEmailAddress(
+			contactEmailAddress = "okt.partner1@lrpartner.com.broken",
+			table = '''| Email Address | okt.partner2@lrpartner.com.broken |
+	| First Name    | OKT                               |
+	| Last Name     | Partner2                          |''');
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoUsers();
+
+		LocalFile.Provisioning.searchUsers(keyword = "okt.partner2");
+
+		LocalFile.Provisioning.clickUser(userName = "OKT Partner2");
+
+		LocalFile.ProvisioningUser.clickSyncWithOktaButton();
+
+		LocalFile.ZendeskHomepage.pause(timeInSeconds = 10);
+
+		LocalFile.JSONOkta.viewOktaUser(userEmailAddress = "okt.partner2@lrpartner.com.broken");
+
+		LocalFile.KoroneikiContactAPI._viewContactUuidAndUserUuidComparison(contactEmailAddress = "okt.partner2@lrpartner.com.broken");
+	}
+
+}

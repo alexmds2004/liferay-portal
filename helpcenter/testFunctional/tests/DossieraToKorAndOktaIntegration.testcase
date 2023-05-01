@@ -1,0 +1,213 @@
+definition {
+
+	property testray.main.component.name = "Support QA";
+	property type = "provisioning.integration";
+
+	tearDown {
+		LocalFile.ZendeskUserAPI._getDefaultUserId(organizationName = "Oktpro - ${staticProjectName}");
+
+		LocalFile.ZendeskUserAPI._renameFirstDefaultUserIdVariable();
+
+		LocalFile.ZendeskUserAPI._getDefaultUserId(organizationName = "Prookt - ${staticCompanyName}");
+
+		LocalFile.ZendeskUserAPI._renameSecondDefaultUserIdVariable();
+
+		LocalFile.OSBAdminProject.tearDownProjects(table = '''| PROOKTOKTPRO |
+	| PROOKT       |''');
+
+		LocalFile.KoroneikiAccountAPI._tearDownAccounts(table = '''| Oktpro - ${staticProjectName} |
+	| Prookt - ${staticCompanyName} |''');
+
+		LocalFile.KoroneikiAccountAPI._tearDownAccountsViaAccountFieldNameAndValue(
+			fieldName = "Code",
+			table = '''| PROOKTOKTPRO |
+	| PROOKT       |''');
+
+		LocalFile.ZendeskTicketAPI._tearDownTicketsByKeywords(table = '''| New Subscription(s) for Oktpro - ${staticProjectName} |
+	| New Subscription(s) for Prookt - ${staticCompanyName} |''');
+
+		LocalFile.JSONUser.tearDownUsers(table = '''| okta.koroneiki1@lrcustomer.com.broken |
+	| okta.koroneiki2@lrcustomer.com.broken |''');
+
+		LocalFile.JSONUser.tearDownUsersViaSupport(table = '''| okta.koroneiki1@lrcustomer.com.broken |
+	| okta.koroneiki2@lrcustomer.com.broken |''');
+
+		LocalFile.JSONUser.tearDownUsersViaKoroneiki(table = '''| okta.koroneiki1@lrcustomer.com.broken |
+	| okta.koroneiki2@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiContactAPI._tearDownContacts(table = '''| okta.koroneiki1@lrcustomer.com.broken |
+	| okta.koroneiki2@lrcustomer.com.broken |''');
+
+		LocalFile.JSONOkta.tearDownUsers(table = '''| okta.koroneiki1@lrcustomer.com.broken |
+	| okta.koroneiki2@lrcustomer.com.broken |''');
+
+		LocalFile.ZendeskUserAPI._getMultipleUserIdsByEmailAddress(table = '''| okta.koroneiki1@lrcustomer.com.broken |
+	| okta.koroneiki2@lrcustomer.com.broken |''');
+
+		LocalFile.ZendeskUserAPI._tearDownUsersByIdList(userIds = ${staticUserIdList});
+
+		LocalFile.ZendeskOrganizationAPI._getMultipleOrganizationExternalIdsByOrganizationNameIfStillPresent(table = '''| Oktpro - ${staticProjectName} |
+	| Prookt - ${staticCompanyName} |''');
+
+		LocalFile.ZendeskOrganizationAPI._tearDownOrganizationsByExternalIdList(organizationExternalIds = ${staticOrganizationExternalIdList});
+
+		LocalFile.ZendeskUserAPI._tearDownUserById(userId = ${staticDefaultUserId1});
+
+		LocalFile.ZendeskUserAPI._tearDownUserById(userId = ${staticDefaultUserId2});
+	}
+
+	test Createentitieswithdeactivatedusers {
+		LocalFile.OSBAdminRabbitMQ.generateStaticVariables();
+
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningCompanyName();
+
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | okta.koroneiki1                       |
+	| Email Address | okta.koroneiki1@lrcustomer.com.broken |
+	| First Name    | OKTA                                  |
+	| Last Name     | Koroneiki1                            |''');
+
+		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | okta.koroneiki2                       |
+	| Email Address | okta.koroneiki2@lrcustomer.com.broken |
+	| First Name    | OKTA                                  |
+	| Last Name     | Koroneiki2                            |''');
+
+		LocalFile.JSONOkta.deactivateOktaUser(userEmailAddress = "okta.koroneiki1@lrcustomer.com.broken");
+
+		LocalFile.JSONOkta.deactivateOktaUser(userEmailAddress = "okta.koroneiki2@lrcustomer.com.broken");
+
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Prookt - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Contact Email Address                  | okta.koroneiki1@lrcustomer.com.broken      |
+	| Contact First Name                     | OKTA                                       |
+	| Contact Last Name                      | Koroneiki1                                 |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | okta.koroneiki2@lrcustomer.com.broken      |
+	| Owner First Name                       | OKTA                                       |
+	| Owner Last Name                        | Koroneiki2                                 |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Oktpro - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.KoroneikiAccountAPI._viewAccount(
+			accountName = "Oktpro - ${staticProjectName}",
+			table = '''| Code                  | PROOKTOKTPRO                          | |
+	| Parent Account Name   | Prookt - ${staticCompanyName}         | |
+	| Contact Email Address | okta.koroneiki2@lrcustomer.com.broken | |
+	| Name                  | Oktpro - ${staticProjectName}         | |
+	| Region                | United States                         | |
+	| Status                | Active                                | |''');
+
+		LocalFile.KoroneikiPostalAddressAPI._viewPostalAddress(
+			accountName = "Oktpro - ${staticProjectName}",
+			streetAddressLine1 = "456 Fake Street",
+			table = '''| Country               | United States   |
+	| Locality              | Diamond Bar     |
+	| Region                | California      |
+	| Postal Code           | 91765           |
+	| Street Address Line 1 | 456 Fake Street |''');
+
+		LocalFile.KoroneikiAccountAPI._viewAccountExternalLinkViaIdAndDomain(
+			accountName = "Oktpro - ${staticProjectName}",
+			domain = "salesforce",
+			entityId = ${staticDossieraAccountKey},
+			table = '''| Domain      | salesforce                  |
+	| Entity Id   | ${staticDossieraAccountKey} |
+	| Entity Name | account                     |''');
+
+		LocalFile.KoroneikiAccountAPI._viewAccountExternalLinkViaIdAndDomain(
+			accountName = "Oktpro - ${staticProjectName}",
+			domain = "dossiera",
+			entityId = ${staticDossieraProjectKey},
+			table = '''| Domain      | dossiera                    |
+	| Entity Id   | ${staticDossieraProjectKey} |
+	| Entity Name | project                     |''');
+
+		LocalFile.KoroneikiAccountAPI._viewAccountExternalLink(
+			accountName = "Oktpro - ${staticProjectName}",
+			entityId = ${staticSalesforceProjectKey},
+			table = '''| Domain      | salesforce                    |
+	| Entity Id   | ${staticSalesforceProjectKey} |
+	| Entity Name | project                       |''');
+
+		LocalFile.KoroneikiAccountAPI._viewAccountExternalLinkViaIdAndDomain(
+			accountName = "Prookt - ${staticCompanyName}",
+			domain = "salesforce",
+			entityId = ${staticDossieraAccountKey},
+			table = '''| Domain      | salesforce                  |
+	| Entity Id   | ${staticDossieraAccountKey} |
+	| Entity Name | account                     |''');
+
+		LocalFile.KoroneikiAccountAPI._viewAccountExternalLinkViaIdAndDomain(
+			accountName = "Prookt - ${staticCompanyName}",
+			domain = "dossiera",
+			entityId = ${staticDossieraAccountKey},
+			table = '''| Domain      | dossiera                    |
+	| Entity Id   | ${staticDossieraAccountKey} |
+	| Entity Name | account                     |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchaseExternalLink(
+			accountName = "Oktpro - ${staticProjectName}",
+			entityId = ${staticSalesforceOpportunityKey},
+			productName = "DXP Production",
+			table = '''| Domain      | salesforce                        |
+	| Entity Id   | ${staticSalesforceOpportunityKey} |
+	| Entity Name | opportunity                       |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchaseExternalLink(
+			accountName = "Oktpro - ${staticProjectName}",
+			entityId = ${staticSalesforceOpportunityKey},
+			productName = "Platinum Subscription",
+			table = '''| Domain      | salesforce                        |
+	| Entity Id   | ${staticSalesforceOpportunityKey} |
+	| Entity Name | opportunity                       |''');
+
+		LocalFile.KoroneikiContactAPI._viewNoContact(contactEmailAddress = "okta.koroneiki1@lrcustomer.com.broken");
+
+		LocalFile.KoroneikiContactAPI._viewNoContact(contactEmailAddress = "okta.koroneiki2@lrcustomer.com.broken");
+
+		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchase(
+			accountName = "Oktpro - ${staticProjectName}",
+			productName = "DXP Production",
+			table = '''| Quantity | 1        | |
+	| Status   | Approved | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchase(
+			accountName = "Oktpro - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| Quantity | 1        | |
+	| Status   | Approved | |''');
+	}
+
+}

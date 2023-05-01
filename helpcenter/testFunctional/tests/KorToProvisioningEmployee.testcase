@@ -1,0 +1,404 @@
+definition {
+
+	property testray.main.component.name = "Support QA";
+	property type = "provisioning.integration";
+
+	setUp {
+		LocalFile.Passwords.getPasswords();
+
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningCompanyName();
+
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		LocalFile.Data.generateSupportUser();
+
+		LocalFile.Data._renameFirstSupportUserVariables();
+
+		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | ${staticScreenNameValue1}       |
+	| Email Address | ${staticEmailValue1}            |
+	| First Name    | ${staticContactFirstNameValue1} |
+	| Last Name     | ${staticContactLastNameValue1}  |
+	| Group         | Employees                       |''');
+
+		LocalFile.Data.generateSupportUser();
+
+		LocalFile.Data._renameSecondSupportUserVariables();
+
+		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | ${staticScreenNameValue2}       |
+	| Email Address | ${staticEmailValue2}            |
+	| First Name    | ${staticContactFirstNameValue2} |
+	| Last Name     | ${staticContactLastNameValue2}  |
+	| Group         | Employees                       |''');
+	}
+
+	tearDown {
+		LocalFile.ZendeskUserAPI._getDefaultUserId(organizationName = "Korpro - ${staticProjectName}");
+
+		LocalFile.ZendeskUserAPI._renameFirstDefaultUserIdVariable();
+
+		LocalFile.ZendeskUserAPI._getDefaultUserId(organizationName = "Prokor - ${staticCompanyName}");
+
+		LocalFile.ZendeskUserAPI._renameSecondDefaultUserIdVariable();
+
+		LocalFile.JSONUser.tearDownUsers(table = '''| ${staticEmailValue1} |
+	| ${staticEmailValue2} |''');
+
+		LocalFile.JSONUser.tearDownUsersViaSupport(table = '''| ${staticEmailValue1} |
+	| ${staticEmailValue2} |''');
+
+		LocalFile.KoroneikiContactAPI._tearDownContacts(table = '''| ${staticEmailValue1} |
+	| ${staticEmailValue2} |''');
+
+		LocalFile.JSONOkta.tearDownUsers(table = '''| ${staticEmailValue1} |
+	| ${staticEmailValue2} |''');
+
+		LocalFile.KoroneikiTeamAPI._tearDownTeams(table = '''| Koroneiki Partner |
+	| Updated Partner   |''');
+
+		LocalFile.OSBAdminProject.tearDownProjects(table = '''| PROKORKORPRO |
+	| PROKOR       |''');
+
+		LocalFile.KoroneikiAccountAPI._tearDownAccounts(table = '''| Korpro - ${staticProjectName} |
+	| Prokor - ${staticCompanyName} |''');
+
+		LocalFile.KoroneikiAccountAPI._tearDownAccountsViaAccountFieldNameAndValue(
+			fieldName = "Code",
+			table = '''| PROKORKORPRO |
+	| PROKOR       |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Gold Subscription");
+
+		LocalFile.ZendeskTicketAPI._tearDownTicketsByKeywords(table = '''| New Subscription(s) for Korpro - ${staticProjectName} |
+	| New Subscription(s) for Prokor - ${staticCompanyName} |''');
+
+		LocalFile.ZendeskUserAPI._getMultipleUserIdsByEmailAddress(table = '''| ${staticEmailValue1} |
+	| ${staticEmailValue2} |''');
+
+		LocalFile.ZendeskUserAPI._tearDownUsersByIdList(userIds = ${staticUserIdList});
+
+		LocalFile.ZendeskOrganizationAPI._getMultipleOrganizationExternalIdsByOrganizationNameIfStillPresent(table = '''| Korpro - ${staticProjectName} |
+	| Prokor - ${staticCompanyName} |''');
+
+		LocalFile.ZendeskOrganizationAPI._tearDownOrganizationsByExternalIdList(organizationExternalIds = ${staticOrganizationExternalIdList});
+
+		LocalFile.ZendeskUserAPI._tearDownUserById(userId = ${staticDefaultUserId1});
+
+		LocalFile.ZendeskUserAPI._tearDownUserById(userId = ${staticDefaultUserId2});
+	}
+
+	test DeactivateLiferayemployee {
+		LocalFile.KoroneikiContactAPI._viewContactSyncViaEmailAddress(contactEmailAddress = ${staticEmailValue1});
+
+		LocalFile.KoroneikiContactAPI._viewAccountSyncViaUuid(
+			accountName = "Liferay, Inc.",
+			contactEmailAddress = ${staticEmailValue1});
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - DXP");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - Portal");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - Commerce");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Liferay Employee");
+
+		LocalFile.JSONOkta.deactivateOktaUser(userEmailAddress = ${staticEmailValue1});
+
+		LocalFile.KoroneikiContactAPI._viewNoAccountSyncViaUuid(
+			accountName = "Liferay, Inc.",
+			contactEmailAddress = ${staticEmailValue1});
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - DXP");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - Portal");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - Commerce");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Liferay Employee");
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Liferay,");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Liferay, Inc.");
+
+		LocalFile.Provisioning.clickTab(tabName = "Contacts");
+
+		LocalFile.ProvisioningAccount.searchAndFilter(table = '''| Keyword | ${staticEmailValue1} |''');
+
+		LocalFile.ProvisioningAccount._viewNoAccountContact(emailAddress = ${staticEmailValue1});
+
+		LocalFile.Provisioning.gotoUsers();
+
+		LocalFile.Provisioning.searchUsers(keyword = ${staticScreenNameValue1});
+
+		LocalFile.Provisioning._viewUserViaIndex(
+			table = '''| Name               | ${staticContactFirstNameValue1} ${staticContactLastNameValue1} |
+	| Email Address      | ${staticEmailValue1}                                           |
+	| Entitlements       |                                                                |
+	| Number of Accounts | 0                                                              |
+	| Status             | VERIFIED                                                       |''',
+			userName = "${staticContactFirstNameValue1} ${staticContactLastNameValue1}");
+	}
+
+	@help.center.acceptance = "true"
+	test RemoveLiferayemployee {
+		LocalFile.KoroneikiContactAPI._viewContactSyncViaEmailAddress(contactEmailAddress = ${staticEmailValue1});
+
+		LocalFile.KoroneikiContactAPI._viewAccountSyncViaUuid(
+			accountName = "Liferay, Inc.",
+			contactEmailAddress = ${staticEmailValue1});
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - DXP");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - Portal");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - Commerce");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Liferay Employee");
+
+		LocalFile.JSONOkta.removeUserFromOktaGroup(
+			groupName = "Employees",
+			userEmailAddress = ${staticEmailValue1});
+
+		LocalFile.KoroneikiContactAPI._viewNoAccountSyncViaUuid(
+			accountName = "Liferay, Inc.",
+			contactEmailAddress = ${staticEmailValue1});
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - DXP");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - Portal");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - Commerce");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Liferay Employee");
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Liferay,");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Liferay, Inc.");
+
+		LocalFile.Provisioning.clickTab(tabName = "Contacts");
+
+		LocalFile.ProvisioningAccount.searchAndFilter(table = '''| Keyword | ${staticEmailValue1} |''');
+
+		LocalFile.ProvisioningAccount._viewNoAccountContact(emailAddress = ${staticEmailValue1});
+
+		LocalFile.Provisioning.gotoUsers();
+
+		LocalFile.Provisioning.searchUsers(keyword = ${staticScreenNameValue1});
+
+		LocalFile.Provisioning._viewUserViaIndex(
+			table = '''| Name               | ${staticContactFirstNameValue1} ${staticContactLastNameValue1} |
+	| Email Address      | ${staticEmailValue1}                                           |
+	| Entitlements       |                                                                |
+	| Number of Accounts | 0                                                              |
+	| Status             | VERIFIED                                                       |''',
+			userName = "${staticContactFirstNameValue1} ${staticContactLastNameValue1}");
+	}
+
+	test ViewemployeeaddedasaSupportRequestertoaProfessionalServicesManagedServicesaccount {
+		LocalFile.KoroneikiContactAPI._viewContactSyncViaEmailAddress(contactEmailAddress = ${staticEmailValue1});
+
+		LocalFile.KoroneikiContactAPI._viewContactSyncViaEmailAddress(contactEmailAddress = ${staticEmailValue2});
+
+		LocalFile.KoroneikiContactAPI._viewAccountSyncViaUuid(
+			accountName = "Liferay, Inc.",
+			contactEmailAddress = ${staticEmailValue1});
+
+		LocalFile.KoroneikiContactAPI._viewAccountSyncViaUuid(
+			accountName = "Liferay, Inc.",
+			contactEmailAddress = ${staticEmailValue2});
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - DXP");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - Portal");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - Commerce");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Liferay Employee");
+
+		LocalFile.OSBAdminRabbitMQ.generateStaticVariables();
+
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Prokor - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Contact Email Address                  | ${staticEmailValue1}                       |
+	| Contact First Name                     | ${staticContactFirstNameValue1}            |
+	| Contact Last Name                      | ${staticContactLastNameValue1}             |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | ${staticEmailValue2}                       |
+	| Owner First Name                       | ${staticContactFirstNameValue2}            |
+	| Owner Last Name                        | ${staticContactLastNameValue2}             |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Professional Services- Managed Services    |
+	| Project Name                           | Korpro - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountTeam(
+			accountName = "Korpro - ${staticProjectName}",
+			teamName = "Koroneiki Partner");
+
+		LocalFile.KoroneikiAccountAPI._assignTeamRolesToTeam(
+			accountName = "Korpro - ${staticProjectName}",
+			table = '''| First Line Support |''',
+			teamName = "Koroneiki Partner");
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korpro");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korpro - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount._viewAccountDetails(table = '''| Name           | Korpro - ${staticProjectName} |
+	| Code           | PROKORKORPRO                  |
+	| State          | ACTIVE                        |
+	| Support Region | United States                 |
+	| Country        | United States                 |
+	| SLA            | Platinum                      |
+	| Support Seats  | 0 / 10 Filled                 |
+	| Tier           | T4                            |
+	| FLS Partner    | Koroneiki Partner             |''');
+
+		LocalFile.Provisioning.clickTab(tabName = "Contacts");
+
+		LocalFile.ProvisioningAccount.searchAndFilter(table = '''| Keyword | ${staticEmailValue1} |''');
+
+		LocalFile.ProvisioningAccount._viewAccountContact(
+			emailAddress = ${staticEmailValue1},
+			table = '''| Name          | ${staticContactFirstNameValue1} ${staticContactLastNameValue1} |
+	| Email Address | ${staticEmailValue1}                                           |
+	| Role          | Support Requester                                              |
+	| Role          | Support Administrator                                          |
+	| User Status   | VERIFIED                                                       |''');
+
+		LocalFile.Provisioning.gotoUsers();
+
+		LocalFile.Provisioning.searchUsers(keyword = ${staticScreenNameValue1});
+
+		LocalFile.Provisioning._viewUserViaIndex(
+			table = '''| Name               | ${staticContactFirstNameValue1} ${staticContactLastNameValue1}                     |
+	| Email Address      | ${staticEmailValue1}                                                               |
+	| Entitlements       | Customer, Customer - Commerce, Customer - DXP, Customer - Portal, Liferay Employee |
+	| Number of Accounts | 2                                                                                  |
+	| Status             | VERIFIED                                                                           |''',
+			userName = "${staticContactFirstNameValue1} ${staticContactLastNameValue1}");
+
+		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchase(
+			accountName = "Korpro - ${staticProjectName}",
+			productName = "Professional Services - Managed Services",
+			table = '''| Quantity | 1        | |
+	| Status   | Approved | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchase(
+			accountName = "Korpro - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| Quantity | 1        | |
+	| Status   | Approved | |''');
+	}
+
+	@help.center.acceptance = "true"
+	test ViewLiferayemployee {
+		LocalFile.KoroneikiContactAPI._viewContactSyncViaEmailAddress(contactEmailAddress = ${staticEmailValue1});
+
+		LocalFile.KoroneikiContactAPI._viewAccountSyncViaUuid(
+			accountName = "Liferay, Inc.",
+			contactEmailAddress = ${staticEmailValue1});
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - DXP");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - Portal");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - Commerce");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Liferay Employee");
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Liferay,");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Liferay, Inc.");
+
+		LocalFile.Provisioning.clickTab(tabName = "Contacts");
+
+		LocalFile.ProvisioningAccount.searchAndFilter(table = '''| Keyword | ${staticEmailValue1} |''');
+
+		LocalFile.ProvisioningAccount._viewAccountContact(
+			emailAddress = ${staticEmailValue1},
+			table = '''| Name          | ${staticContactFirstNameValue1} ${staticContactLastNameValue1} |
+	| Email Address | ${staticEmailValue1}                                           |
+	| Role          | Member                                                         |
+	| User Status   | VERIFIED                                                       |''');
+
+		LocalFile.Provisioning.gotoUsers();
+
+		LocalFile.Provisioning.searchUsers(keyword = ${staticScreenNameValue1});
+
+		LocalFile.Provisioning._viewUserViaIndex(
+			table = '''| Name               | ${staticContactFirstNameValue1} ${staticContactLastNameValue1}                     |
+	| Email Address      | ${staticEmailValue1}                                                               |
+	| Entitlements       | Customer, Customer - Commerce, Customer - DXP, Customer - Portal, Liferay Employee |
+	| Number of Accounts | 1                                                                                  |
+	| Status             | VERIFIED                                                                           |''',
+			userName = "${staticContactFirstNameValue1} ${staticContactLastNameValue1}");
+	}
+
+}

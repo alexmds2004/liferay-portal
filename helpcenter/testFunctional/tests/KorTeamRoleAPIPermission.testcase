@@ -1,0 +1,415 @@
+definition {
+
+	property testray.main.component.name = "Support QA";
+	property type = "koroneiki";
+
+	tearDown {
+		LocalFile.KoroneikiTeamRoleAPI._tearDownTeamRolePermissions(teamRoleName = "Default Account Role");
+
+		LocalFile.KoroneikiTeamRoleAPI._tearDownTeamRolePermissions(teamRoleName = "Optional Account Role");
+
+		LocalFile.KoroneikiTeamRoleAPI._tearDownTeamRoles(table = '''| Default Account Role  |
+	| Optional Account Role |''');
+	}
+
+	test Createteamroleattempt {
+		LocalFile.KoroneikiTeamRoleAPIPermissionCheck._createTeamRoleAttempt(table = '''| Description | This is the default role for accounts |
+	| Name        | Default Account Role                  |
+	| Type        | Account                               |''');
+
+		LocalFile.KoroneikiTeamRoleAPI._viewNoTeamRole(teamRoleName = "Default Account Role");
+	}
+
+	test Deleteaccountteamroleattempt {
+		LocalFile.KoroneikiTeamRoleAPI._createTeamRole(table = '''| Description | This is the default role for accounts |
+	| Name        | Default Account Role                  |
+	| Type        | Account                               |''');
+
+		LocalFile.KoroneikiTeamRoleAPIPermissionCheck._deleteTeamRoleAttempt(teamRoleName = "Default Account Role");
+
+		LocalFile.KoroneikiTeamRoleAPI._viewTeamRole(
+			table = '''| Description | This is the default role for accounts |
+	| Name        | Default Account Role                  |
+	| Type        | Account                               |''',
+			teamRoleName = "Default Account Role");
+
+		LocalFile.KoroneikiTeamRoleAPIPermissionCheck._viewNoTeamRole(teamRoleName = "Default Account Role");
+	}
+
+	test Deleteaccountteamroleattemptasnewlynonpermissioneduser {
+		LocalFile.KoroneikiTeamRoleAPI._createTeamRole(table = '''| Description | This is the default role for accounts |
+	| Name        | Default Account Role                  |
+	| Type        | Account                               |''');
+
+		LocalFile.KoroneikiTeamRoleAPI._setTeamRolePermissions(
+			table = '''| Delete | true |''',
+			teamRoleName = "Default Account Role");
+
+		LocalFile.KoroneikiTeamRoleAPI._unsetTeamRolePermissions(
+			table = '''| Delete | true |''',
+			teamRoleName = "Default Account Role");
+
+		LocalFile.KoroneikiTeamRoleAPIPermissionCheck._deleteTeamRoleAttempt(teamRoleName = "Default Account Role");
+
+		LocalFile.KoroneikiTeamRoleAPI._viewTeamRole(
+			table = '''| Description | This is the default role for accounts |
+	| Name        | Default Account Role                  |
+	| Type        | Account                               |''',
+			teamRoleName = "Default Account Role");
+
+		LocalFile.KoroneikiTeamRoleAPIPermissionCheck._viewNoTeamRole(teamRoleName = "Default Account Role");
+	}
+
+	test Deleteteamroleaspermissioneduser {
+		LocalFile.KoroneikiTeamRoleAPI._createTeamRole(table = '''| Description | This is the default role for accounts |
+	| Name        | Default Account Role                  |
+	| Type        | Account                               |''');
+
+		LocalFile.KoroneikiTeamRoleAPI._setTeamRolePermissions(
+			table = '''| Delete | true |''',
+			teamRoleName = "Default Account Role");
+
+		LocalFile.KoroneikiTeamRoleAPIPermissionCheck._deleteTeamRole(teamRoleName = "Default Account Role");
+
+		LocalFile.KoroneikiTeamRoleAPI._viewNoTeamRole(teamRoleName = "Default Account Role");
+	}
+
+	test Setteamrolepermissionsaspermissioneduser {
+		LocalFile.KoroneikiTeamRoleAPI._createTeamRole(table = '''| Description | This is the default role for accounts |
+	| Name        | Default Account Role                  |
+	| Type        | Account                               |''');
+
+		LocalFile.KoroneikiTeamRoleAPI._setTeamRolePermissions(
+			table = '''| Permissions | true |''',
+			teamRoleName = "Default Account Role");
+
+		LocalFile.KoroneikiTeamRoleAPIPermissionCheck._setTeamRolePermissions(
+			table = '''| Update | true |
+	| View   | true |''',
+			teamRoleName = "Default Account Role");
+
+		LocalFile.KoroneikiTeamRoleAPIPermissionCheck._updateTeamRole(
+			table = '''| Description | This is the optional role for accounts |
+	| Name        | Optional Account Role                  |
+	| Type        | Account                                |''',
+			teamRoleName = "Default Account Role");
+
+		LocalFile.KoroneikiTeamRoleAPI._viewTeamRole(
+			table = '''| Description | This is the optional role for accounts |
+	| Name        | Optional Account Role                  |
+	| Type        | Account                                |''',
+			teamRoleName = "Optional Account Role");
+
+		LocalFile.KoroneikiTeamRoleAPI._viewNoTeamRole(teamRoleName = "Default Account Role");
+
+		LocalFile.KoroneikiTeamRoleAPIPermissionCheck._viewTeamRole(
+			table = '''| Description | This is the optional role for accounts |
+	| Name        | Optional Account Role                  |
+	| Type        | Account                                |''',
+			teamRoleName = "Optional Account Role");
+	}
+
+	test Setteamrolepermissionsattempt {
+		LocalFile.KoroneikiTeamRoleAPI._createTeamRole(table = '''| Description | This is the default role for accounts |
+	| Name        | Default Account Role                  |
+	| Type        | Account                               |''');
+
+		LocalFile.KoroneikiTeamRoleAPIPermissionCheck._setTeamRolePermissionsAttempt(
+			table = '''| Update | true |
+	| View   | true |''',
+			teamRoleName = "Default Account Role");
+
+		LocalFile.KoroneikiTeamRoleAPIPermissionCheck._updateTeamRoleAttempt(
+			table = '''| Description | This is the optional role for accounts |
+	| Name        | Optional Account Role                  |
+	| Type        | Account                                |''',
+			teamRoleName = "Default Account Role");
+
+		LocalFile.KoroneikiTeamRoleAPI._viewTeamRole(
+			table = '''| Description | This is the default role for accounts |
+	| Name        | Default Account Role                  |
+	| Type        | Account                               |''',
+			teamRoleName = "Default Account Role");
+
+		LocalFile.KoroneikiTeamRoleAPI._viewNoTeamRole(teamRoleName = "Optional Account Role");
+
+		LocalFile.KoroneikiTeamRoleAPIPermissionCheck._viewNoTeamRole(teamRoleName = "Default Account Role");
+	}
+
+	test Setteamrolepermissionsattemptasnewlynonpermissioneduser {
+		LocalFile.KoroneikiTeamRoleAPI._createTeamRole(table = '''| Description | This is the default role for accounts |
+	| Name        | Default Account Role                  |
+	| Type        | Account                               |''');
+
+		LocalFile.KoroneikiTeamRoleAPI._setTeamRolePermissions(
+			table = '''| Permissions | true |''',
+			teamRoleName = "Default Account Role");
+
+		LocalFile.KoroneikiTeamRoleAPI._unsetTeamRolePermissions(
+			table = '''| Permissions | true |''',
+			teamRoleName = "Default Account Role");
+
+		LocalFile.KoroneikiTeamRoleAPIPermissionCheck._setTeamRolePermissionsAttempt(
+			table = '''| Update | true |
+	| View   | true |''',
+			teamRoleName = "Default Account Role");
+
+		LocalFile.KoroneikiTeamRoleAPIPermissionCheck._updateTeamRoleAttempt(
+			table = '''| Description | This is the optional role for accounts |
+	| Name        | Optional Account Role                  |
+	| Type        | Account                                |''',
+			teamRoleName = "Default Account Role");
+
+		LocalFile.KoroneikiTeamRoleAPI._viewTeamRole(
+			table = '''| Description | This is the default role for accounts |
+	| Name        | Default Account Role                  |
+	| Type        | Account                               |''',
+			teamRoleName = "Default Account Role");
+
+		LocalFile.KoroneikiTeamRoleAPI._viewNoTeamRole(teamRoleName = "Optional Account Role");
+
+		LocalFile.KoroneikiTeamRoleAPIPermissionCheck._viewNoTeamRole(teamRoleName = "Default Account Role");
+	}
+
+	test Unsetteamrolepermissionsaspermissioneduser {
+		LocalFile.KoroneikiTeamRoleAPI._createTeamRole(table = '''| Description | This is the default role for accounts |
+	| Name        | Default Account Role                  |
+	| Type        | Account                               |''');
+
+		LocalFile.KoroneikiTeamRoleAPI._setTeamRolePermissions(
+			table = '''| Permissions | true |''',
+			teamRoleName = "Default Account Role");
+
+		LocalFile.KoroneikiTeamRoleAPIPermissionCheck._setTeamRolePermissions(
+			table = '''| Update | true |
+	| View   | true |''',
+			teamRoleName = "Default Account Role");
+
+		LocalFile.KoroneikiTeamRoleAPIPermissionCheck._unsetTeamRolePermissions(
+			table = '''| Update | true |
+	| View   | true |''',
+			teamRoleName = "Default Account Role");
+
+		LocalFile.KoroneikiTeamRoleAPIPermissionCheck._updateTeamRoleAttempt(
+			table = '''| Description | This is the optional role for accounts |
+	| Name        | Optional Account Role                  |
+	| Type        | Account                                |''',
+			teamRoleName = "Default Account Role");
+
+		LocalFile.KoroneikiTeamRoleAPI._viewTeamRole(
+			table = '''| Description | This is the default role for accounts |
+	| Name        | Default Account Role                  |
+	| Type        | Account                               |''',
+			teamRoleName = "Default Account Role");
+
+		LocalFile.KoroneikiTeamRoleAPI._viewNoTeamRole(teamRoleName = "Optional Account Role");
+
+		LocalFile.KoroneikiTeamRoleAPIPermissionCheck._viewNoTeamRole(teamRoleName = "Default Account Role");
+	}
+
+	test Unsetteamrolepermissionsattempt {
+		LocalFile.KoroneikiTeamRoleAPI._createTeamRole(table = '''| Description | This is the default role for accounts |
+	| Name        | Default Account Role                  |
+	| Type        | Account                               |''');
+
+		LocalFile.KoroneikiTeamRoleAPI._setTeamRolePermissions(
+			table = '''| Update | true |
+	| View   | true |''',
+			teamRoleName = "Default Account Role");
+
+		LocalFile.KoroneikiTeamRoleAPIPermissionCheck._unsetTeamRolePermissionsAttempt(
+			table = '''| Update | true |
+	| View   | true |''',
+			teamRoleName = "Default Account Role");
+
+		LocalFile.KoroneikiTeamRoleAPIPermissionCheck._updateTeamRole(
+			table = '''| Description | This is the optional role for accounts |
+	| Name        | Optional Account Role                  |
+	| Type        | Account                                |''',
+			teamRoleName = "Default Account Role");
+
+		LocalFile.KoroneikiTeamRoleAPI._viewTeamRole(
+			table = '''| Description | This is the optional role for accounts |
+	| Name        | Optional Account Role                  |
+	| Type        | Account                                |''',
+			teamRoleName = "Optional Account Role");
+
+		LocalFile.KoroneikiTeamRoleAPI._viewNoTeamRole(teamRoleName = "Default Account Role");
+
+		LocalFile.KoroneikiTeamRoleAPIPermissionCheck._viewTeamRole(
+			table = '''| Description | This is the optional role for accounts |
+	| Name        | Optional Account Role                  |
+	| Type        | Account                                |''',
+			teamRoleName = "Optional Account Role");
+	}
+
+	test Unsetteamrolepermissionsattemptasnewlynonpermissioneduser {
+		LocalFile.KoroneikiTeamRoleAPI._createTeamRole(table = '''| Description | This is the default role for accounts |
+	| Name        | Default Account Role                  |
+	| Type        | Account                               |''');
+
+		LocalFile.KoroneikiTeamRoleAPI._setTeamRolePermissions(
+			table = '''| Permissions | true |
+	| Update      | true |
+	| View        | true |''',
+			teamRoleName = "Default Account Role");
+
+		LocalFile.KoroneikiTeamRoleAPI._unsetTeamRolePermissions(
+			table = '''| Permissions | true |''',
+			teamRoleName = "Default Account Role");
+
+		LocalFile.KoroneikiTeamRoleAPIPermissionCheck._unsetTeamRolePermissionsAttempt(
+			table = '''| Update | true |
+	| View   | true |''',
+			teamRoleName = "Default Account Role");
+
+		LocalFile.KoroneikiTeamRoleAPIPermissionCheck._updateTeamRole(
+			table = '''| Description | This is the optional role for accounts |
+	| Name        | Optional Account Role                  |
+	| Type        | Account                                |''',
+			teamRoleName = "Default Account Role");
+
+		LocalFile.KoroneikiTeamRoleAPI._viewTeamRole(
+			table = '''| Description | This is the optional role for accounts |
+	| Name        | Optional Account Role                  |
+	| Type        | Account                                |''',
+			teamRoleName = "Optional Account Role");
+
+		LocalFile.KoroneikiTeamRoleAPI._viewNoTeamRole(teamRoleName = "Default Account Role");
+
+		LocalFile.KoroneikiTeamRoleAPIPermissionCheck._viewTeamRole(
+			table = '''| Description | This is the optional role for accounts |
+	| Name        | Optional Account Role                  |
+	| Type        | Account                                |''',
+			teamRoleName = "Optional Account Role");
+	}
+
+	test Updateteamroleaspermissioneduser {
+		LocalFile.KoroneikiTeamRoleAPI._createTeamRole(table = '''| Description | This is the default role for accounts |
+	| Name        | Default Account Role                  |
+	| Type        | Account                               |''');
+
+		LocalFile.KoroneikiTeamRoleAPI._setTeamRolePermissions(
+			table = '''| Update | true |''',
+			teamRoleName = "Default Account Role");
+
+		LocalFile.KoroneikiTeamRoleAPIPermissionCheck._updateTeamRole(
+			table = '''| Description | This is the optional role for accounts |
+	| Name        | Optional Account Role                  |
+	| Type        | Account                                |''',
+			teamRoleName = "Default Account Role");
+
+		LocalFile.KoroneikiTeamRoleAPI._viewTeamRole(
+			table = '''| Description | This is the optional role for accounts |
+	| Name        | Optional Account Role                  |
+	| Type        | Account                                |''',
+			teamRoleName = "Optional Account Role");
+
+		LocalFile.KoroneikiTeamRoleAPI._viewNoTeamRole(teamRoleName = "Default Account Role");
+	}
+
+	test Updateteamroleattempt {
+		LocalFile.KoroneikiTeamRoleAPI._createTeamRole(table = '''| Description | This is the default role for accounts |
+	| Name        | Default Account Role                  |
+	| Type        | Account                               |''');
+
+		LocalFile.KoroneikiTeamRoleAPIPermissionCheck._updateTeamRoleAttempt(
+			table = '''| Description | This is the optional role for accounts |
+	| Name        | Optional Account Role                  |
+	| Type        | Account                                |''',
+			teamRoleName = "Default Account Role");
+
+		LocalFile.KoroneikiTeamRoleAPI._viewTeamRole(
+			table = '''| Description | This is the default role for accounts |
+	| Name        | Default Account Role                  |
+	| Type        | Account                               |''',
+			teamRoleName = "Default Account Role");
+
+		LocalFile.KoroneikiTeamRoleAPI._viewNoTeamRole(teamRoleName = "Optional Account Role");
+
+		LocalFile.KoroneikiTeamRoleAPIPermissionCheck._viewNoTeamRole(teamRoleName = "Default Account Role");
+	}
+
+	test Updateteamroleattemptasnewlynonpermissioneduser {
+		LocalFile.KoroneikiTeamRoleAPI._createTeamRole(table = '''| Description | This is the default role for accounts |
+	| Name        | Default Account Role                  |
+	| Type        | Account                               |''');
+
+		LocalFile.KoroneikiTeamRoleAPI._setTeamRolePermissions(
+			table = '''| Update | true |''',
+			teamRoleName = "Default Account Role");
+
+		LocalFile.KoroneikiTeamRoleAPI._unsetTeamRolePermissions(
+			table = '''| Update | true |''',
+			teamRoleName = "Default Account Role");
+
+		LocalFile.KoroneikiTeamRoleAPIPermissionCheck._updateTeamRoleAttempt(
+			table = '''| Description | This is the optional role for accounts |
+	| Name        | Optional Account Role                  |
+	| Type        | Account                                |''',
+			teamRoleName = "Default Account Role");
+
+		LocalFile.KoroneikiTeamRoleAPI._viewTeamRole(
+			table = '''| Description | This is the default role for accounts |
+	| Name        | Default Account Role                  |
+	| Type        | Account                               |''',
+			teamRoleName = "Default Account Role");
+
+		LocalFile.KoroneikiTeamRoleAPI._viewNoTeamRole(teamRoleName = "Optional Account Role");
+
+		LocalFile.KoroneikiTeamRoleAPIPermissionCheck._viewNoTeamRole(teamRoleName = "Default Account Role");
+	}
+
+	test Viewteamroleaspermissioneduser {
+		LocalFile.KoroneikiTeamRoleAPI._createTeamRole(table = '''| Description | This is the default role for accounts |
+	| Name        | Default Account Role                  |
+	| Type        | Account                               |''');
+
+		LocalFile.KoroneikiTeamRoleAPI._setTeamRolePermissions(
+			table = '''| View | true |''',
+			teamRoleName = "Default Account Role");
+
+		LocalFile.KoroneikiTeamRoleAPIPermissionCheck._viewTeamRole(
+			table = '''| Description | This is the default role for accounts |
+	| Name        | Default Account Role                  |
+	| Type        | Account                               |''',
+			teamRoleName = "Default Account Role");
+	}
+
+	test Viewteamroleattempt {
+		LocalFile.KoroneikiTeamRoleAPI._createTeamRole(table = '''| Description | This is the default role for accounts |
+	| Name        | Default Account Role                  |
+	| Type        | Account                               |''');
+
+		LocalFile.KoroneikiTeamRoleAPI._viewTeamRole(
+			table = '''| Description | This is the default role for accounts |
+	| Name        | Default Account Role                  |
+	| Type        | Account                               |''',
+			teamRoleName = "Default Account Role");
+
+		LocalFile.KoroneikiTeamRoleAPIPermissionCheck._viewNoTeamRole(teamRoleName = "Default Account Role");
+	}
+
+	test Viewteamroleattemptasnewlynonpermissioneduser {
+		LocalFile.KoroneikiTeamRoleAPI._createTeamRole(table = '''| Description | This is the default role for accounts |
+	| Name        | Default Account Role                  |
+	| Type        | Account                               |''');
+
+		LocalFile.KoroneikiTeamRoleAPI._setTeamRolePermissions(
+			table = '''| View | true |''',
+			teamRoleName = "Default Account Role");
+
+		LocalFile.KoroneikiTeamRoleAPI._unsetTeamRolePermissions(
+			table = '''| View | true |''',
+			teamRoleName = "Default Account Role");
+
+		LocalFile.KoroneikiTeamRoleAPI._viewTeamRole(
+			table = '''| Description | This is the default role for accounts |
+	| Name        | Default Account Role                  |
+	| Type        | Account                               |''',
+			teamRoleName = "Default Account Role");
+
+		LocalFile.KoroneikiTeamRoleAPIPermissionCheck._viewNoTeamRole(teamRoleName = "Default Account Role");
+	}
+
+}

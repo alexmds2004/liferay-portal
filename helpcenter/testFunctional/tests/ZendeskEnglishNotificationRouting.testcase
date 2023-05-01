@@ -1,0 +1,1041 @@
+definition {
+
+	property testray.main.component.name = "Support QA";
+	property type = "zendesk.api";
+
+	setUp {
+		LocalFile.Passwords.getPasswords();
+	}
+
+	tearDown {
+		LocalFile.ZendeskTicketAPI._tearDownTicketByIds(ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskUserAPI._tearDownUsersByExternalIdTable(table = '''| User1  |
+	| Agent1 |''');
+
+		LocalFile.ZendeskOrganizationAPI._tearDownOrganizationsByExternalIdTable(table = '''| 12345678 |''');
+
+		LocalFile.ZendeskHomepage.pause(timeInSeconds = 3);
+	}
+
+	@help.center.acceptance = "true"
+	test Notifyassigneeofassignment {
+		LocalFile.ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved            |
+	| Name             | Organization Name 1 |
+	| Tags             | liferay_dxp         |
+	| Shared Tickets   | true                |
+	| Shared Comments  | true                |
+	| SLA              | Gold                |
+	| Tier             | T4                  |
+	| Support Region   | US                  |
+	| Support Language | English             |
+	| External ID      | 12345678            |''');
+
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
+	| Tags             | osb_customer,osb_kb              |
+	| Password         | ${staticZendeskAdminPassword}    |
+	| Role             | End-user                         |
+	| Access           | Organization                     |
+	| Email            | zendesk.user1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                |
+	| Organization     | Organization Name 1              |
+	| Language         | English                          |
+	| Time Zone        | Pacific Time (US & Canada)       |
+	| External ID      | User1                            |''');
+
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk Agent1                    |
+	| Password         | ${staticZendeskAdminPassword}     |
+	| Role             | Agent                             |
+	| Email            | zendesk.agent1@liferay.com.broken |
+	| Phone Number     | +1 (555) 555-5555                 |
+	| Language         | English                           |
+	| Time Zone        | Pacific Time (US & Canada)        |
+	| External ID      | Agent1                            |''');
+
+		LocalFile.ZendeskUserAPI._assignUserToGroup(
+			groupName = "CSE - US",
+			userEmailAddress = "zendesk.agent1@liferay.com.broken");
+
+		LocalFile.ZendeskRequestAPI._createRequest(
+			requesterEmail = "zendesk.user1@zendesk.com.broken",
+			table = '''| Product                  | prd_liferay_dxp_7_4                              |
+	| Component                | authentication                                   |
+	| System Status            | production_functioning_with_limited_capabilities |
+	| Subject                  | Request Subject                                  |
+	| Description              | Request Description                              |
+	| Organization External ID | 12345678                                         |''');
+
+		LocalFile.ZendeskTicketAPI._assignTicket(
+			ticketId = ${staticRequestIdList},
+			userEmailAddress = "zendesk.agent1@liferay.com.broken");
+
+		LocalFile.ZendeskTicketAPI._viewTicketAssignmentEmailToAssignee(
+			supportLanguage = "English",
+			table = '''| Recipients | Zendesk Agent1                                                                    |
+	| Subject    | [{{ticket.organization.name}}] ({{ticket.priority}}) Assignment: {{ticket.title}} |
+	| Body       | You have been assigned to this ticket                                             |
+	| Body       | {{ticket.id}})                                                                    |
+	| Body       | {{ticket.comments_formatted}}                                                     |''',
+			ticketId = ${staticRequestIdList});
+	}
+
+	@help.center.acceptance = "true"
+	test Notifyassigneeofcommentupdate {
+		LocalFile.ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved            |
+	| Name             | Organization Name 1 |
+	| Tags             | liferay_dxp         |
+	| Shared Tickets   | true                |
+	| Shared Comments  | true                |
+	| SLA              | Gold                |
+	| Tier             | T4                  |
+	| Support Region   | US                  |
+	| Support Language | English             |
+	| External ID      | 12345678            |''');
+
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
+	| Tags             | osb_customer,osb_kb              |
+	| Password         | ${staticZendeskAdminPassword}    |
+	| Role             | End-user                         |
+	| Access           | Organization                     |
+	| Email            | zendesk.user1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                |
+	| Organization     | Organization Name 1              |
+	| Language         | English                          |
+	| Time Zone        | Pacific Time (US & Canada)       |
+	| External ID      | User1                            |''');
+
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk Agent1                    |
+	| Password         | ${staticZendeskAdminPassword}     |
+	| Role             | Agent                             |
+	| Email            | zendesk.agent1@liferay.com.broken |
+	| Phone Number     | +1 (555) 555-5555                 |
+	| Language         | English                           |
+	| Time Zone        | Pacific Time (US & Canada)        |
+	| External ID      | Agent1                            |''');
+
+		LocalFile.ZendeskUserAPI._assignUserToGroup(
+			groupName = "CSE - US",
+			userEmailAddress = "zendesk.agent1@liferay.com.broken");
+
+		LocalFile.ZendeskRequestAPI._createRequest(
+			requesterEmail = "zendesk.user1@zendesk.com.broken",
+			table = '''| Product                  | prd_liferay_dxp_7_4                              |
+	| Component                | authentication                                   |
+	| System Status            | production_functioning_with_limited_capabilities |
+	| Subject                  | Request Subject                                  |
+	| Description              | Request Description                              |
+	| Organization External ID | 12345678                                         |''');
+
+		LocalFile.ZendeskTicketAPI._assignTicket(
+			ticketId = ${staticRequestIdList},
+			userEmailAddress = "zendesk.agent1@liferay.com.broken");
+
+		LocalFile.ZendeskRequestAPI._createRequestComment(
+			commentAuthorEmail = "zendesk.user1@zendesk.com.broken",
+			commentBody = "Comment Body",
+			ticketId = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewTicketCommentEmailToAssignee(
+			commentBody = "Comment Body",
+			supportLanguage = "English",
+			table = '''| Recipients | Zendesk Agent1                                                            |
+	| Subject    | [{{ticket.organization.name}}] ({{ticket.priority}}) Re: {{ticket.title}} |
+	| Body       | This ticket                                                               |
+	| Body       | {{ticket.id}}) has been updated                                           |
+	| Body       | {{ticket.latest_comment_formatted}}                                       |''',
+			ticketId = ${staticRequestIdList});
+	}
+
+	test Notifyassigneeofreopenedticket {
+		LocalFile.ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved            |
+	| Name             | Organization Name 1 |
+	| Tags             | liferay_dxp         |
+	| Shared Tickets   | true                |
+	| Shared Comments  | true                |
+	| SLA              | Gold                |
+	| Tier             | T4                  |
+	| Support Region   | US                  |
+	| Support Language | English             |
+	| External ID      | 12345678            |''');
+
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
+	| Tags             | osb_customer,osb_kb              |
+	| Password         | ${staticZendeskAdminPassword}    |
+	| Role             | End-user                         |
+	| Access           | Organization                     |
+	| Email            | zendesk.user1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                |
+	| Organization     | Organization Name 1              |
+	| Language         | English                          |
+	| Time Zone        | Pacific Time (US & Canada)       |
+	| External ID      | User1                            |''');
+
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk Agent1                    |
+	| Password         | ${staticZendeskAdminPassword}     |
+	| Role             | Agent                             |
+	| Email            | zendesk.agent1@liferay.com.broken |
+	| Phone Number     | +1 (555) 555-5555                 |
+	| Language         | English                           |
+	| Time Zone        | Pacific Time (US & Canada)        |
+	| External ID      | Agent1                            |''');
+
+		LocalFile.ZendeskUserAPI._assignUserToGroup(
+			groupName = "CSE - US",
+			userEmailAddress = "zendesk.agent1@liferay.com.broken");
+
+		LocalFile.ZendeskRequestAPI._createRequest(
+			requesterEmail = "zendesk.user1@zendesk.com.broken",
+			table = '''| Product                  | prd_liferay_dxp_7_4                              |
+	| Component                | authentication                                   |
+	| System Status            | production_functioning_with_limited_capabilities |
+	| Subject                  | Request Subject                                  |
+	| Description              | Request Description                              |
+	| Organization External ID | 12345678                                         |''');
+
+		LocalFile.ZendeskTicketAPI._assignTicket(
+			ticketId = ${staticRequestIdList},
+			userEmailAddress = "zendesk.agent1@liferay.com.broken");
+
+		LocalFile.ZendeskTicketAPI._changeTicketStatusAndSubStatusAndLongTermResolution(
+			ticketId = ${staticRequestIdList},
+			ticketLongTermResolution = "bug_fix",
+			ticketStatus = "solved",
+			ticketSubStatus = "solution_proposed");
+
+		LocalFile.ZendeskTicketAPI._changeTicketStatus(
+			ticketId = ${staticRequestIdList},
+			ticketStatus = "open");
+
+		LocalFile.ZendeskTicketAPI._viewReopenedTicketEmailToAssignee(
+			supportLanguage = "English",
+			table = '''| Recipients | Zendesk Agent1                                      |
+	| Subject    | [{{ticket.organization.name}}] Re: {{ticket.title}} |
+	| Body       | This ticket                                         |
+	| Body       | {{ticket.id}}) has been reopened                    |
+	| Body       | {{ticket.comments_formatted}}                       |''',
+			ticketId = ${staticRequestIdList});
+	}
+
+	test NotifyProvisioningUSofassignment {
+		LocalFile.ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved            |
+	| Name             | Organization Name 1 |
+	| Tags             | liferay_dxp         |
+	| Shared Tickets   | true                |
+	| Shared Comments  | true                |
+	| SLA              | Gold                |
+	| Tier             | T4                  |
+	| Support Region   | US                  |
+	| Support Language | English             |
+	| External ID      | 12345678            |''');
+
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
+	| Tags             | osb_customer,osb_kb              |
+	| Password         | ${staticZendeskAdminPassword}    |
+	| Role             | End-user                         |
+	| Access           | Organization                     |
+	| Email            | zendesk.user1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                |
+	| Organization     | Organization Name 1              |
+	| Language         | English                          |
+	| Time Zone        | Pacific Time (US & Canada)       |
+	| External ID      | User1                            |''');
+
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk Agent1                    |
+	| Password         | ${staticZendeskAdminPassword}     |
+	| Role             | Agent                             |
+	| Email            | zendesk.agent1@liferay.com.broken |
+	| Phone Number     | +1 (555) 555-5555                 |
+	| Language         | English                           |
+	| Time Zone        | Pacific Time (US & Canada)        |
+	| External ID      | Agent1                            |''');
+
+		LocalFile.ZendeskUserAPI._assignUserToGroup(
+			groupName = "Provisioning - US",
+			userEmailAddress = "zendesk.agent1@liferay.com.broken");
+
+		LocalFile.ZendeskRequestAPI._createRequest(
+			requesterEmail = "zendesk.user1@zendesk.com.broken",
+			table = '''| Product                  | prd_liferay_dxp_7_4                              |
+	| Component                | authentication                                   |
+	| System Status            | production_functioning_with_limited_capabilities |
+	| Subject                  | Request Subject                                  |
+	| Description              | Request Description                              |
+	| Organization External ID | 12345678                                         |''');
+
+		LocalFile.ZendeskTicketAPI._assignTicket(
+			ticketId = ${staticRequestIdList},
+			userEmailAddress = "zendesk.agent1@liferay.com.broken");
+
+		LocalFile.ZendeskTicketAPI._viewTicketAssignmentEmailToCAS(
+			supportLanguage = "English",
+			supportRegion = "US",
+			table = '''| Recipients | Zendesk Agent1                                                                   |
+	| Subject    | [New Ticket][{{ticket.organization.name}}]:  {{ticket.title}}                    |
+	| Body       | This ticket                                                                      |
+	| Body       | {{ticket.id}}) has been created and is assigned to group '{{ticket.group.name}}' |
+	| Body       | {{ticket.comments_formatted}}                                                    |''',
+			ticketId = ${staticRequestIdList});
+	}
+
+	test NotifyProvisioningUSofcommentupdate {
+		LocalFile.ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved            |
+	| Name             | Organization Name 1 |
+	| Tags             | liferay_dxp         |
+	| Shared Tickets   | true                |
+	| Shared Comments  | true                |
+	| SLA              | Gold                |
+	| Tier             | T4                  |
+	| Support Region   | US                  |
+	| Support Language | English             |
+	| External ID      | 12345678            |''');
+
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
+	| Tags             | osb_customer,osb_kb              |
+	| Password         | ${staticZendeskAdminPassword}    |
+	| Role             | End-user                         |
+	| Access           | Organization                     |
+	| Email            | zendesk.user1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                |
+	| Organization     | Organization Name 1              |
+	| Language         | English                          |
+	| Time Zone        | Pacific Time (US & Canada)       |
+	| External ID      | User1                            |''');
+
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk Agent1                    |
+	| Password         | ${staticZendeskAdminPassword}     |
+	| Role             | Agent                             |
+	| Email            | zendesk.agent1@liferay.com.broken |
+	| Phone Number     | +1 (555) 555-5555                 |
+	| Language         | English                           |
+	| Time Zone        | Pacific Time (US & Canada)        |
+	| External ID      | Agent1                            |''');
+
+		LocalFile.ZendeskUserAPI._assignUserToGroup(
+			groupName = "Provisioning - US",
+			userEmailAddress = "zendesk.agent1@liferay.com.broken");
+
+		LocalFile.ZendeskRequestAPI._createRequest(
+			requesterEmail = "zendesk.user1@zendesk.com.broken",
+			table = '''| Product                  | prd_liferay_dxp_7_4                              |
+	| Component                | authentication                                   |
+	| System Status            | production_functioning_with_limited_capabilities |
+	| Subject                  | Request Subject                                  |
+	| Description              | Request Description                              |
+	| Organization External ID | 12345678                                         |''');
+
+		LocalFile.ZendeskTicketAPI._assignTicket(
+			ticketId = ${staticRequestIdList},
+			userEmailAddress = "zendesk.agent1@liferay.com.broken");
+
+		LocalFile.ZendeskRequestAPI._createRequestComment(
+			commentAuthorEmail = "zendesk.user1@zendesk.com.broken",
+			commentBody = "Comment Body",
+			ticketId = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewTicketCommentEmailToCAS(
+			commentBody = "Comment Body",
+			supportLanguage = "English",
+			supportRegion = "US",
+			table = '''| Recipients | Zendesk Agent1                                      |
+	| Subject    | [{{ticket.organization.name}}] Re: {{ticket.title}} |
+	| Body       | This ticket                                         |
+	| Body       | {{ticket.id}}) has been updated                     |
+	| Body       | {{ticket.latest_comment_html}}                      |''',
+			ticketId = ${staticRequestIdList});
+	}
+
+	test NotifyProvisioningUSofreopenedticket {
+		LocalFile.ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved            |
+	| Name             | Organization Name 1 |
+	| Tags             | liferay_dxp         |
+	| Shared Tickets   | true                |
+	| Shared Comments  | true                |
+	| SLA              | Gold                |
+	| Tier             | T4                  |
+	| Support Region   | US                  |
+	| Support Language | English             |
+	| External ID      | 12345678            |''');
+
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
+	| Tags             | osb_customer,osb_kb              |
+	| Password         | ${staticZendeskAdminPassword}    |
+	| Role             | End-user                         |
+	| Access           | Organization                     |
+	| Email            | zendesk.user1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                |
+	| Organization     | Organization Name 1              |
+	| Language         | English                          |
+	| Time Zone        | Pacific Time (US & Canada)       |
+	| External ID      | User1                            |''');
+
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk Agent1                    |
+	| Password         | ${staticZendeskAdminPassword}     |
+	| Role             | Agent                             |
+	| Email            | zendesk.agent1@liferay.com.broken |
+	| Phone Number     | +1 (555) 555-5555                 |
+	| Language         | English                           |
+	| Time Zone        | Pacific Time (US & Canada)        |
+	| External ID      | Agent1                            |''');
+
+		LocalFile.ZendeskUserAPI._assignUserToGroup(
+			groupName = "Provisioning - US",
+			userEmailAddress = "zendesk.agent1@liferay.com.broken");
+
+		LocalFile.ZendeskRequestAPI._createRequest(
+			requesterEmail = "zendesk.user1@zendesk.com.broken",
+			table = '''| Product                  | prd_liferay_dxp_7_4                              |
+	| Component                | authentication                                   |
+	| System Status            | production_functioning_with_limited_capabilities |
+	| Subject                  | Request Subject                                  |
+	| Description              | Request Description                              |
+	| Organization External ID | 12345678                                         |''');
+
+		LocalFile.ZendeskTicketAPI._assignTicket(
+			ticketId = ${staticRequestIdList},
+			userEmailAddress = "zendesk.agent1@liferay.com.broken");
+
+		LocalFile.ZendeskTicketAPI._changeTicketStatusAndSubStatusAndLongTermResolution(
+			ticketId = ${staticRequestIdList},
+			ticketLongTermResolution = "bug_fix",
+			ticketStatus = "solved",
+			ticketSubStatus = "solution_proposed");
+
+		LocalFile.ZendeskTicketAPI._changeTicketStatus(
+			ticketId = ${staticRequestIdList},
+			ticketStatus = "open");
+
+		LocalFile.ZendeskTicketAPI._viewReopenedTicketEmailToCAS(
+			supportLanguage = "English",
+			supportRegion = "US",
+			table = '''| Recipients | Zendesk Agent1                                      |
+	| Subject    | [{{ticket.organization.name}}] Re: {{ticket.title}} |
+	| Body       | This ticket                                         |
+	| Body       | {{ticket.id}}) has been reopened                    |
+	| Body       | {{ticket.comments_formatted}}                       |''',
+			ticketId = ${staticRequestIdList});
+	}
+
+	@help.center.acceptance = "true"
+	test Notifyrequesterofcommentupdate {
+		LocalFile.ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved            |
+	| Name             | Organization Name 1 |
+	| Tags             | liferay_dxp         |
+	| Shared Tickets   | true                |
+	| Shared Comments  | true                |
+	| SLA              | Gold                |
+	| Tier             | T4                  |
+	| Support Region   | US                  |
+	| Support Language | English             |
+	| External ID      | 12345678            |''');
+
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
+	| Tags             | osb_customer,osb_kb              |
+	| Password         | ${staticZendeskAdminPassword}    |
+	| Role             | End-user                         |
+	| Access           | Organization                     |
+	| Email            | zendesk.user1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                |
+	| Organization     | Organization Name 1              |
+	| Language         | English                          |
+	| Time Zone        | Pacific Time (US & Canada)       |
+	| External ID      | User1                            |''');
+
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk Agent1                    |
+	| Password         | ${staticZendeskAdminPassword}     |
+	| Role             | Agent                             |
+	| Email            | zendesk.agent1@liferay.com.broken |
+	| Phone Number     | +1 (555) 555-5555                 |
+	| Language         | English                           |
+	| Time Zone        | Pacific Time (US & Canada)        |
+	| External ID      | Agent1                            |''');
+
+		LocalFile.ZendeskUserAPI._assignUserToGroup(
+			groupName = "CSE - US",
+			userEmailAddress = "zendesk.agent1@liferay.com.broken");
+
+		LocalFile.ZendeskRequestAPI._createRequest(
+			requesterEmail = "zendesk.user1@zendesk.com.broken",
+			table = '''| Product                  | prd_liferay_dxp_7_4                              |
+	| Component                | authentication                                   |
+	| System Status            | production_functioning_with_limited_capabilities |
+	| Subject                  | Request Subject                                  |
+	| Description              | Request Description                              |
+	| Organization External ID | 12345678                                         |''');
+
+		LocalFile.ZendeskTicketAPI._assignTicket(
+			ticketId = ${staticRequestIdList},
+			userEmailAddress = "zendesk.agent1@liferay.com.broken");
+
+		LocalFile.ZendeskRequestAPI._createRequestComment(
+			commentAuthorEmail = "zendesk.agent1@liferay.com.broken",
+			commentBody = "Comment Body",
+			ticketId = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewTicketCommentEmailToRequester(
+			commentBody = "Comment Body",
+			supportLanguage = "English",
+			table = '''| Recipients | Zendesk User1                                                                      |
+	| Subject    | Re: [Liferay Support] {{ticket.organization.name}} {{ticket.id}}: {{ticket.title}} |
+	| Body       | Your ticket                                                                        |
+	| Body       | {{ticket.id}}) has been updated                                                    |
+	| Body       | {{ticket.latest_public_comment_html}}                                              |''',
+			ticketId = ${staticRequestIdList});
+	}
+
+	test Notifyrequesterofcommentupdateonorganizationwithnolanguage {
+		LocalFile.ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved            |
+	| Name             | Organization Name 1 |
+	| Tags             | liferay_dxp         |
+	| Shared Tickets   | true                |
+	| Shared Comments  | true                |
+	| SLA              | Gold                |
+	| Tier             | T4                  |
+	| Support Region   | US                  |
+	| External ID      | 12345678            |''');
+
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
+	| Tags             | osb_customer,osb_kb              |
+	| Password         | ${staticZendeskAdminPassword}    |
+	| Role             | End-user                         |
+	| Access           | Organization                     |
+	| Email            | zendesk.user1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                |
+	| Organization     | Organization Name 1              |
+	| Language         | English                          |
+	| Time Zone        | Pacific Time (US & Canada)       |
+	| External ID      | User1                            |''');
+
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk Agent1                    |
+	| Password         | ${staticZendeskAdminPassword}     |
+	| Role             | Agent                             |
+	| Email            | zendesk.agent1@liferay.com.broken |
+	| Phone Number     | +1 (555) 555-5555                 |
+	| Language         | English                           |
+	| Time Zone        | Pacific Time (US & Canada)        |
+	| External ID      | Agent1                            |''');
+
+		LocalFile.ZendeskUserAPI._assignUserToGroup(
+			groupName = "CSE - US",
+			userEmailAddress = "zendesk.agent1@liferay.com.broken");
+
+		LocalFile.ZendeskRequestAPI._createRequest(
+			requesterEmail = "zendesk.user1@zendesk.com.broken",
+			table = '''| Product                  | prd_liferay_dxp_7_4                              |
+	| Component                | authentication                                   |
+	| System Status            | production_functioning_with_limited_capabilities |
+	| Subject                  | Request Subject                                  |
+	| Description              | Request Description                              |
+	| Organization External ID | 12345678                                         |''');
+
+		LocalFile.ZendeskTicketAPI._assignTicket(
+			ticketId = ${staticRequestIdList},
+			userEmailAddress = "zendesk.agent1@liferay.com.broken");
+
+		LocalFile.ZendeskRequestAPI._createRequestComment(
+			commentAuthorEmail = "zendesk.agent1@liferay.com.broken",
+			commentBody = "Comment Body",
+			ticketId = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewTicketCommentEmailToRequester(
+			commentBody = "Comment Body",
+			supportLanguage = "English",
+			table = '''| Recipients | Zendesk User1                                                                      |
+	| Subject    | Re: [Liferay Support] {{ticket.organization.name}} {{ticket.id}}: {{ticket.title}} |
+	| Body       | Your ticket                                                                        |
+	| Body       | {{ticket.id}}) has been updated                                                    |
+	| Body       | {{ticket.latest_public_comment_html}}                                              |''',
+			ticketId = ${staticRequestIdList});
+	}
+
+	@help.center.acceptance = "true"
+	test Notifyrequesterofreceivedrequest {
+		LocalFile.ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved            |
+	| Name             | Organization Name 1 |
+	| Shared Tickets   | true                |
+	| Shared Comments  | true                |
+	| SLA              | Gold                |
+	| Tier             | T4                  |
+	| Support Region   | US                  |
+	| Support Language | English             |
+	| External ID      | 12345678            |''');
+
+		LocalFile.ZendeskOrganizationAPI._assignTagsToOrganizationViaOrganizationExternalID(
+			organizationExternalId = 12345678,
+			table = '''| developer_tools         |
+	| enterprise_search       |
+	| liferay_analytics_cloud |
+	| liferay_commerce        |
+	| liferay_dxp             |
+	| lxc_sm                  |
+	| management_tools_lcs    |
+	| mobile_device_detection |
+	| mobile_experience       |
+	| productivity_tools_sync |
+	| social_office           |''');
+
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
+	| Tags             | osb_customer,osb_kb              |
+	| Password         | ${staticZendeskAdminPassword}    |
+	| Role             | End-user                         |
+	| Access           | Organization                     |
+	| Email            | zendesk.user1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                |
+	| Organization     | Organization Name 1              |
+	| Language         | English                          |
+	| Time Zone        | Pacific Time (US & Canada)       |
+	| External ID      | User1                            |''');
+
+		LocalFile.ZendeskRequestAPI._createMultipleRequestsWithProductAndComponentValues(
+			requesterEmail = "zendesk.user1@zendesk.com.broken",
+			table = '''| prd_developer_tools         |                                       |
+	| prd_enterprise_search       | monitoring                            |
+	| prd_liferay_analytics_cloud |                                       |
+	| prd_liferay_commerce_1_1    | activation_key_project_administration |
+	| prd_liferay_commerce_2_0    | commerce_insights                     |
+	| prd_liferay_commerce_2_1    | configuration_and_settings            |
+	| prd_liferay_commerce_3_0    | connectors                            |
+	| prd_liferay_commerce_4_0    | digital_merchandise_management        |
+	| prd_liferay_dxp_7_4         | authentication                        |
+	| prd_liferay_dxp_7_3         | caching_clustering                    |
+	| prd_liferay_dxp_7_2         | calendar                              |
+	| prd_liferay_dxp_7_1         | collaboration                         |
+	| prd_liferay_dxp_7_0         | content_management                    |
+	| prd_lxc_sm                  | backup_recovery                       |
+	| prd_management_tools_lcs    |                                       |
+	| prd_mobile_device_detection |                                       |
+	| prd_mobile_experience       |                                       |
+	| prd_productivity_tools_sync |                                       |
+	| prd_social_office           |                                       |''');
+
+		LocalFile.ZendeskTicketAPI._viewMultipleTicketReceptionEmails(
+			supportLanguage = "English",
+			table = '''| Recipients | Zendesk User1                                                                                                                    |
+	| Subject    | [Liferay Support] {{ticket.organization.name}} {{ticket.id}}: {{ticket.title}}                                                   |
+	| Body       | Hello {{ticket.requester.first_name}}                                                                                            |
+	| Body       | Thank you for contacting the Liferay Support Team regarding your {{ticket.organization.name}} project                            |
+	| Body       | At this time, one of our Customer Support Engineers is carefully reviewing your request                                          |
+	| Body       | {{ticket.id}})                                                                                                                   |
+	| Body       | and will be responding shortly                                                                                                   |
+	| Body       | Please be sure that you have included all relevant information or attachments and if applicable, steps to reproduce the behavior |
+	| Body       | Regards                                                                                                                          |
+	| Body       | Liferay Support                                                                                                                  |''',
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewNoMultipleLegacyVersionTicketReceptionEmails(
+			portalLegacyVersion = "6.2",
+			supportLanguage = "English",
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewNoMultipleLegacyVersionTicketReceptionEmails(
+			portalLegacyVersion = "6.1",
+			supportLanguage = "English",
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewNoMultipleLegacyVersionTicketReceptionEmails(
+			portalLegacyVersion = "6.0",
+			supportLanguage = "English",
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewNoMultipleLegacyVersionTicketReceptionEmails(
+			portalLegacyVersion = "5.2",
+			supportLanguage = "English",
+			ticketIdList = ${staticRequestIdList});
+	}
+
+	test Notifyrequesterofreceivedrequestand52EOSLPolicy {
+		LocalFile.ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved            |
+	| Name             | Organization Name 1 |
+	| Tags             | liferay_portal      |
+	| Shared Tickets   | true                |
+	| Shared Comments  | true                |
+	| SLA              | Gold                |
+	| Tier             | T4                  |
+	| Support Region   | US                  |
+	| Support Language | English             |
+	| External ID      | 12345678            |''');
+
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
+	| Tags             | osb_customer,osb_kb              |
+	| Password         | ${staticZendeskAdminPassword}    |
+	| Role             | End-user                         |
+	| Access           | Organization                     |
+	| Email            | zendesk.user1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                |
+	| Organization     | Organization Name 1              |
+	| Language         | English                          |
+	| Time Zone        | Pacific Time (US & Canada)       |
+	| External ID      | User1                            |''');
+
+		LocalFile.ZendeskRequestAPI._createMultipleRequestsWithProductAndComponentValues(
+			requesterEmail = "zendesk.user1@zendesk.com.broken",
+			table = '''| prd_liferay_portal_5_2 | activation_key_project_administration |
+	| prd_liferay_portal_5_2 | authentication                        |''');
+
+		LocalFile.ZendeskTicketAPI._viewMultipleLegacyVersionTicketReceptionEmails(
+			portalLegacyVersion = "5.2",
+			supportLanguage = "English",
+			table = '''| Recipients | Zendesk User1                                                                                                                    |
+	| Subject    | [Liferay Support] {{ticket.organization.name}} {{ticket.id}}: {{ticket.title}}                                                   |
+	| Body       | Hello {{ticket.requester.first_name}}                                                                                            |
+	| Body       | Thank you for contacting the Liferay Support Team                                                                                |
+	| Body       | At this time, one of our Customer Support Engineers is carefully reviewing your request                                          |
+	| Body       | {{ticket.id}})                                                                                                                   |
+	| Body       | and will be responding shortly                                                                                                   |
+	| Body       | Please note, however, that the End of Version date for Liferay Portal 5.2 EE has passed and your support services may be limited |
+	| Body       | Please review our End of Service Life Policy and reach out to your sales representative for available options                    |
+	| Body       | Regards                                                                                                                          |
+	| Body       | Liferay Support                                                                                                                  |''',
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewNoMultipleTicketReceptionEmails(
+			supportLanguage = "English",
+			ticketIdList = ${staticRequestIdList});
+	}
+
+	test Notifyrequesterofreceivedrequestand60EOSLPolicy {
+		LocalFile.ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved            |
+	| Name             | Organization Name 1 |
+	| Tags             | liferay_portal      |
+	| Shared Tickets   | true                |
+	| Shared Comments  | true                |
+	| SLA              | Gold                |
+	| Tier             | T4                  |
+	| Support Region   | US                  |
+	| Support Language | English             |
+	| External ID      | 12345678            |''');
+
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
+	| Tags             | osb_customer,osb_kb              |
+	| Password         | ${staticZendeskAdminPassword}    |
+	| Role             | End-user                         |
+	| Access           | Organization                     |
+	| Email            | zendesk.user1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                |
+	| Organization     | Organization Name 1              |
+	| Language         | English                          |
+	| Time Zone        | Pacific Time (US & Canada)       |
+	| External ID      | User1                            |''');
+
+		LocalFile.ZendeskRequestAPI._createMultipleRequestsWithProductAndComponentValues(
+			requesterEmail = "zendesk.user1@zendesk.com.broken",
+			table = '''| prd_liferay_portal_6_0 | activation_key_project_administration |
+	| prd_liferay_portal_6_0 | authentication                        |''');
+
+		LocalFile.ZendeskTicketAPI._viewMultipleLegacyVersionTicketReceptionEmails(
+			portalLegacyVersion = "6.0",
+			supportLanguage = "English",
+			table = '''| Recipients | Zendesk User1                                                                                                                    |
+	| Subject    | [Liferay Support] {{ticket.organization.name}} {{ticket.id}}: {{ticket.title}}                                                   |
+	| Body       | Hello {{ticket.requester.first_name}}                                                                                            |
+	| Body       | Thank you for contacting the Liferay Support Team                                                                                |
+	| Body       | At this time, one of our Customer Support Engineers is carefully reviewing your request                                          |
+	| Body       | {{ticket.id}})                                                                                                                   |
+	| Body       | and will be responding shortly                                                                                                   |
+	| Body       | Please note, however, that the End of Version date for Liferay Portal 6.0 EE has passed and your support services may be limited |
+	| Body       | Please review our End of Service Life Policy and reach out to your sales representative for available options                    |
+	| Body       | Regards                                                                                                                          |
+	| Body       | Liferay Support                                                                                                                  |''',
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewNoMultipleTicketReceptionEmails(
+			supportLanguage = "English",
+			ticketIdList = ${staticRequestIdList});
+	}
+
+	test Notifyrequesterofreceivedrequestand61EOSLPolicy {
+		LocalFile.ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved            |
+	| Name             | Organization Name 1 |
+	| Tags             | liferay_portal      |
+	| Shared Tickets   | true                |
+	| Shared Comments  | true                |
+	| SLA              | Gold                |
+	| Tier             | T4                  |
+	| Support Region   | US                  |
+	| Support Language | English             |
+	| External ID      | 12345678            |''');
+
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
+	| Tags             | osb_customer,osb_kb              |
+	| Password         | ${staticZendeskAdminPassword}    |
+	| Role             | End-user                         |
+	| Access           | Organization                     |
+	| Email            | zendesk.user1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                |
+	| Organization     | Organization Name 1              |
+	| Language         | English                          |
+	| Time Zone        | Pacific Time (US & Canada)       |
+	| External ID      | User1                            |''');
+
+		LocalFile.ZendeskRequestAPI._createMultipleRequestsWithProductAndComponentValues(
+			requesterEmail = "zendesk.user1@zendesk.com.broken",
+			table = '''| prd_liferay_portal_6_1 | activation_key_project_administration |
+	| prd_liferay_portal_6_1 | authentication                        |''');
+
+		LocalFile.ZendeskTicketAPI._viewMultipleLegacyVersionTicketReceptionEmails(
+			portalLegacyVersion = "6.1",
+			supportLanguage = "English",
+			table = '''| Recipients | Zendesk User1                                                                                                                      |
+	| Subject    | [Liferay Support] {{ticket.organization.name}} {{ticket.id}}: {{ticket.title}}                                                     |
+	| Body       | Hello {{ticket.requester.first_name}}                                                                                              |
+	| Body       | Thank you for contacting the Liferay Support Team                                                                                  |
+	| Body       | At this time, one of our Customer Support Engineers is carefully reviewing your request                                            |
+	| Body       | {{ticket.id}})                                                                                                                     |
+	| Body       | and will be responding shortly                                                                                                     |
+	| Body       | Please note, however, that the Premium Support Phase for Liferay Portal 6.1 EE has passed and your support services may be limited |
+	| Body       | Please review our End of Service Life Policy and reach out to your sales representative for available options                      |
+	| Body       | Regards                                                                                                                            |
+	| Body       | Liferay Support                                                                                                                    |''',
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewNoMultipleTicketReceptionEmails(
+			supportLanguage = "English",
+			ticketIdList = ${staticRequestIdList});
+	}
+
+	test Notifyrequesterofreceivedrequestand62EOSLPolicy {
+		LocalFile.ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved            |
+	| Name             | Organization Name 1 |
+	| Tags             | liferay_portal      |
+	| Shared Tickets   | true                |
+	| Shared Comments  | true                |
+	| SLA              | Gold                |
+	| Tier             | T4                  |
+	| Support Region   | US                  |
+	| Support Language | English             |
+	| External ID      | 12345678            |''');
+
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
+	| Tags             | osb_customer,osb_kb              |
+	| Password         | ${staticZendeskAdminPassword}    |
+	| Role             | End-user                         |
+	| Access           | Organization                     |
+	| Email            | zendesk.user1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                |
+	| Organization     | Organization Name 1              |
+	| Language         | English                          |
+	| Time Zone        | Pacific Time (US & Canada)       |
+	| External ID      | User1                            |''');
+
+		LocalFile.ZendeskRequestAPI._createMultipleRequestsWithProductAndComponentValues(
+			requesterEmail = "zendesk.user1@zendesk.com.broken",
+			table = '''| prd_liferay_portal_6_2 | activation_key_project_administration |
+	| prd_liferay_portal_6_2 | authentication                        |''');
+
+		LocalFile.ZendeskTicketAPI._viewMultipleLegacyVersionTicketReceptionEmails(
+			portalLegacyVersion = "6.2",
+			supportLanguage = "English",
+			table = '''| Recipients | Zendesk User1                                                                                                                      |
+	| Subject    | [Liferay Support] {{ticket.organization.name}} {{ticket.id}}: {{ticket.title}}                                                     |
+	| Body       | Hello {{ticket.requester.first_name}}                                                                                              |
+	| Body       | Thank you for contacting the Liferay Support Team                                                                                  |
+	| Body       | At this time, one of our Customer Support Engineers is carefully reviewing your request                                            |
+	| Body       | {{ticket.id}})                                                                                                                     |
+	| Body       | and will be responding shortly                                                                                                     |	
+	| Body       | Please note, however, that the Premium Support Phase for Liferay Portal 6.2 EE has passed and your support services may be limited |
+	| Body       | Please review our End of Service Life Policy and reach out to your sales representative for available options                      |
+	| Body       | Regards                                                                                                                            |
+	| Body       | Liferay Support                                                                                                                    |''',
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewNoMultipleTicketReceptionEmails(
+			supportLanguage = "English",
+			ticketIdList = ${staticRequestIdList});
+	}
+
+	test NotifyUSleadsofassignment {
+		LocalFile.ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved            |
+	| Name             | Organization Name 1 |
+	| Tags             | liferay_dxp         |
+	| Shared Tickets   | true                |
+	| Shared Comments  | true                |
+	| SLA              | Gold                |
+	| Tier             | T4                  |
+	| Support Region   | US                  |
+	| Support Language | English             |
+	| External ID      | 12345678            |''');
+
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
+	| Tags             | osb_customer,osb_kb              |
+	| Password         | ${staticZendeskAdminPassword}    |
+	| Role             | End-user                         |
+	| Access           | Organization                     |
+	| Email            | zendesk.user1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                |
+	| Organization     | Organization Name 1              |
+	| Language         | English                          |
+	| Time Zone        | Pacific Time (US & Canada)       |
+	| External ID      | User1                            |''');
+
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk Agent1                    |
+	| Password         | ${staticZendeskAdminPassword}     |
+	| Role             | Agent                             |
+	| Email            | zendesk.agent1@liferay.com.broken |
+	| Phone Number     | +1 (555) 555-5555                 |
+	| Language         | English                           |
+	| Time Zone        | Pacific Time (US & Canada)        |
+	| External ID      | Agent1                            |''');
+
+		LocalFile.ZendeskUserAPI._assignUserToGroup(
+			groupName = "Leads - US",
+			userEmailAddress = "zendesk.agent1@liferay.com.broken");
+
+		LocalFile.ZendeskRequestAPI._createRequest(
+			requesterEmail = "zendesk.user1@zendesk.com.broken",
+			table = '''| Product                  | prd_liferay_dxp_7_4                              |
+	| Component                | authentication                                   |
+	| System Status            | production_functioning_with_limited_capabilities |
+	| Subject                  | Request Subject                                  |
+	| Description              | Request Description                              |
+	| Organization External ID | 12345678                                         |''');
+
+		LocalFile.ZendeskTicketAPI._assignTicket(
+			ticketId = ${staticRequestIdList},
+			userEmailAddress = "zendesk.agent1@liferay.com.broken");
+
+		LocalFile.ZendeskTicketAPI._viewTicketAssignmentEmailToLeads(
+			supportLanguage = "English",
+			table = '''| Recipients | Zendesk Agent1                                                                   |
+	| Subject    | [New Ticket][{{ticket.organization.name}}]:  {{ticket.title}}                    |
+	| Body       | This ticket                                                                      |
+	| Body       | {{ticket.id}}) has been created and is assigned to group '{{ticket.group.name}}' |
+	| Body       | {{ticket.comments_formatted}}                                                    |''',
+			ticketId = ${staticRequestIdList});
+	}
+
+	test NotifyUSleadsofcommentupdate {
+		LocalFile.ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved            |
+	| Name             | Organization Name 1 |
+	| Tags             | liferay_dxp         |
+	| Shared Tickets   | true                |
+	| Shared Comments  | true                |
+	| SLA              | Gold                |
+	| Tier             | T4                  |
+	| Support Region   | US                  |
+	| Support Language | English             |
+	| External ID      | 12345678            |''');
+
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
+	| Tags             | osb_customer,osb_kb              |
+	| Password         | ${staticZendeskAdminPassword}    |
+	| Role             | End-user                         |
+	| Access           | Organization                     |
+	| Email            | zendesk.user1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                |
+	| Organization     | Organization Name 1              |
+	| Language         | English                          |
+	| Time Zone        | Pacific Time (US & Canada)       |
+	| External ID      | User1                            |''');
+
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk Agent1                    |
+	| Password         | ${staticZendeskAdminPassword}     |
+	| Role             | Agent                             |
+	| Email            | zendesk.agent1@liferay.com.broken |
+	| Phone Number     | +1 (555) 555-5555                 |
+	| Language         | English                           |
+	| Time Zone        | Pacific Time (US & Canada)        |
+	| External ID      | Agent1                            |''');
+
+		LocalFile.ZendeskUserAPI._assignUserToGroup(
+			groupName = "Leads - US",
+			userEmailAddress = "zendesk.agent1@liferay.com.broken");
+
+		LocalFile.ZendeskRequestAPI._createRequest(
+			requesterEmail = "zendesk.user1@zendesk.com.broken",
+			table = '''| Product                  | prd_liferay_dxp_7_4                              |
+	| Component                | authentication                                   |
+	| System Status            | production_functioning_with_limited_capabilities |
+	| Subject                  | Request Subject                                  |
+	| Description              | Request Description                              |
+	| Organization External ID | 12345678                                         |''');
+
+		LocalFile.ZendeskTicketAPI._assignTicket(
+			ticketId = ${staticRequestIdList},
+			userEmailAddress = "zendesk.agent1@liferay.com.broken");
+
+		LocalFile.ZendeskRequestAPI._createRequestComment(
+			commentAuthorEmail = "zendesk.user1@zendesk.com.broken",
+			commentBody = "Comment Body",
+			ticketId = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewTicketCommentEmailToLeads(
+			commentBody = "Comment Body",
+			supportLanguage = "English",
+			table = '''| Recipients | Zendesk Agent1                                      |
+	| Subject    | [{{ticket.organization.name}}] Re: {{ticket.title}} |
+	| Body       | This ticket                                         |
+	| Body       | {{ticket.id}}) has been updated                     |
+	| Body       | {{ticket.latest_comment_formatted}}                 |''',
+			ticketId = ${staticRequestIdList});
+	}
+
+	test NotifyUSleadsofreopenedticket {
+		LocalFile.ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved            |
+	| Name             | Organization Name 1 |
+	| Tags             | liferay_dxp         |
+	| Shared Tickets   | true                |
+	| Shared Comments  | true                |
+	| SLA              | Gold                |
+	| Tier             | T4                  |
+	| Support Region   | US                  |
+	| Support Language | English             |
+	| External ID      | 12345678            |''');
+
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
+	| Tags             | osb_customer,osb_kb              |
+	| Password         | ${staticZendeskAdminPassword}    |
+	| Role             | End-user                         |
+	| Access           | Organization                     |
+	| Email            | zendesk.user1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                |
+	| Organization     | Organization Name 1              |
+	| Language         | English                          |
+	| Time Zone        | Pacific Time (US & Canada)       |
+	| External ID      | User1                            |''');
+
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk Agent1                    |
+	| Password         | ${staticZendeskAdminPassword}     |
+	| Role             | Agent                             |
+	| Email            | zendesk.agent1@liferay.com.broken |
+	| Phone Number     | +1 (555) 555-5555                 |
+	| Language         | English                           |
+	| Time Zone        | Pacific Time (US & Canada)        |
+	| External ID      | Agent1                            |''');
+
+		LocalFile.ZendeskUserAPI._assignUserToGroup(
+			groupName = "Leads - US",
+			userEmailAddress = "zendesk.agent1@liferay.com.broken");
+
+		LocalFile.ZendeskRequestAPI._createRequest(
+			requesterEmail = "zendesk.user1@zendesk.com.broken",
+			table = '''| Product                  | prd_liferay_dxp_7_4                              |
+	| Component                | authentication                                   |
+	| System Status            | production_functioning_with_limited_capabilities |
+	| Subject                  | Request Subject                                  |
+	| Description              | Request Description                              |
+	| Organization External ID | 12345678                                         |''');
+
+		LocalFile.ZendeskTicketAPI._assignTicket(
+			ticketId = ${staticRequestIdList},
+			userEmailAddress = "zendesk.agent1@liferay.com.broken");
+
+		LocalFile.ZendeskTicketAPI._changeTicketStatusAndSubStatusAndLongTermResolution(
+			ticketId = ${staticRequestIdList},
+			ticketLongTermResolution = "bug_fix",
+			ticketStatus = "solved",
+			ticketSubStatus = "solution_proposed");
+
+		LocalFile.ZendeskTicketAPI._changeTicketStatus(
+			ticketId = ${staticRequestIdList},
+			ticketStatus = "open");
+
+		LocalFile.ZendeskTicketAPI._viewReopenedTicketEmailToLeads(
+			supportLanguage = "English",
+			table = '''| Recipients | Zendesk Agent1                                      |
+	| Subject    | [{{ticket.organization.name}}] Re: {{ticket.title}} |
+	| Body       | This ticket                                         |
+	| Body       | {{ticket.id}}) has been reopened                    |
+	| Body       | {{ticket.comments_formatted}}                       |''',
+			ticketId = ${staticRequestIdList});
+	}
+
+}

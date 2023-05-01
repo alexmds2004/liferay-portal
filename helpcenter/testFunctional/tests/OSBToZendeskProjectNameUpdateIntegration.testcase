@@ -1,0 +1,252 @@
+definition {
+
+	property testray.main.component.name = "Support QA";
+	property type = "zendesk.integration";
+
+	tearDown {
+		LocalFile.ZendeskUserAPI._getDefaultUserId(organizationName = "Osbdsk - ${staticProjectName}");
+
+		LocalFile.ZendeskUserAPI._renameFirstDefaultUserIdVariable();
+
+		LocalFile.ZendeskUserAPI._getDefaultUserId(organizationName = "Osbzen - ${staticProjectName}");
+
+		LocalFile.ZendeskUserAPI._renameSecondDefaultUserIdVariable();
+
+		LocalFile.OSBAdminProject.tearDownProjects(table = '''| OSBDSKOSBDSK |
+	| OSBZENOSBZEN |''');
+
+		LocalFile.KoroneikiAccountAPI._tearDownAccounts(table = '''| Osbdsk - ${staticProjectName} |
+	| Osbzen - ${staticProjectName} |''');
+
+		LocalFile.KoroneikiAccountAPI._tearDownAccountsViaAccountFieldNameAndValue(
+			fieldName = "Code",
+			table = '''| OSBDSKOSBDSK |
+	| OSBZENOSBZEN |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Gold Subscription");
+
+		LocalFile.ZendeskOrganizationAPI._getMultipleOrganizationExternalIdsByOrganizationNameIfStillPresent(table = '''| Osbdsk - ${staticProjectName} |
+	| Osbzen - ${staticProjectName} |''');
+
+		LocalFile.ZendeskOrganizationAPI._tearDownOrganizationsByExternalIdList(organizationExternalIds = ${staticOrganizationExternalIdList});
+
+		LocalFile.ZendeskUserAPI._tearDownUserById(userId = ${staticDefaultUserId1});
+
+		LocalFile.ZendeskUserAPI._tearDownUserById(userId = ${staticDefaultUserId2});
+	}
+
+	test Updateprojectnameandcode {
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code     | OSBZENOSBZEN                  | |
+	| Language | English                       | |
+	| Name     | Osbzen - ${staticProjectName} | |
+	| Region   | United States                 | |
+	| Status   | Active                        | |
+	| Tier     | T1                            | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountPostalAddress(
+			accountName = "Osbzen - ${staticProjectName}",
+			table = '''| Country               | United States   |
+	| Locality              | Diamond Bar     |
+	| Region                | California      |
+	| Type                  | Business        |
+	| Mailing               | True            |
+	| Postal Code           | 91765           |
+	| Primary               | True            |
+	| Street Address Line 1 | 123 Main Street |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Osbzen - ${staticProjectName}",
+			productName = "Portal Production",
+			table = '''| End Date                | ${staticEndDate}         |   |
+	| Original End Date       | ${staticOriginalEndDate} |   |
+	| Perpetual               | false                    |   |
+	| Product Field and Value | sizing                   | 1 |
+	| Product Field and Value | licenses                 | 1 |
+	| Product Field and Value | version                  | 6 |
+	| Quantity                | 1                        |   |
+	| Start Date              | ${staticStartDate}       |   |
+	| Status                  | Approved                 |   |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Osbzen - ${staticProjectName}",
+			productName = "Gold Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Gold Subscription");
+
+		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "OSBZENOSBZEN");
+
+		LocalFile.ZendeskOrganizationAPI._viewOrganizationSyncFromOsb(organizationName = "Osbzen - ${staticProjectName}");
+
+		LocalFile.KoroneikiAccountAPI._updateAccount(
+			accountName = "Osbzen - ${staticProjectName}",
+			table = '''| Name         | Osbdsk - ${staticProjectName} | |
+	| Code         | OSBDSKOSBDSK                  | |''');
+
+		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+
+		LocalFile.ZendeskOrganizationAPI._viewOrganizationSyncFromOsb(organizationName = "Osbdsk - ${staticProjectName}");
+
+		LocalFile.ZendeskOrganizationAPI._viewOrganizationParameterSync(
+			organizationName = "Osbdsk - ${staticProjectName}",
+			table = '''| Name         | Osbdsk - ${staticProjectName} |
+	| Account Code | OSBDSKOSBDSK                  |''');
+
+		LocalFile.OSBAdminProject._matchOsbProjectIdWithZendeskOrganizationId(projectCode = "OSBDSKOSBDSK");
+
+		LocalFile.ZendeskOrganizationAPI._viewOrganizationTagSync(
+			organizationName = "Osbdsk - ${staticProjectName}",
+			tag = "liferay_portal");
+
+		LocalFile.ZendeskOrganizationAPI._viewOrganizationTagSync(
+			organizationName = "Osbdsk - ${staticProjectName}",
+			tag = "t1");
+
+		LocalFile.ZendeskOrganizationAPI._viewOrganizationTagSync(
+			organizationName = "Osbdsk - ${staticProjectName}",
+			tag = "us");
+
+		LocalFile.ZendeskOrganizationAPI._viewOrganizationTagSync(
+			organizationName = "Osbdsk - ${staticProjectName}",
+			tag = "gold");
+
+		LocalFile.ZendeskOrganizationAPI._viewOrganizationTagSync(
+			organizationName = "Osbdsk - ${staticProjectName}",
+			tag = "english");
+
+		LocalFile.ZendeskOrganizationAPI._viewOrganizationTagSync(
+			organizationName = "Osbdsk - ${staticProjectName}",
+			tag = "approved");
+	}
+
+	test Updateprojectnameandcodeonexpiredproject {
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code     | OSBZENOSBZEN                  | |
+	| Language | English                       | |
+	| Name     | Osbzen - ${staticProjectName} | |
+	| Region   | United States                 | |
+	| Status   | Active                        | |
+	| Tier     | T1                            | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountPostalAddress(
+			accountName = "Osbzen - ${staticProjectName}",
+			table = '''| Country               | United States   |
+	| Locality              | Diamond Bar     |
+	| Region                | California      |
+	| Type                  | Business        |
+	| Mailing               | True            |
+	| Postal Code           | 91765           |
+	| Primary               | True            |
+	| Street Address Line 1 | 123 Main Street |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Osbzen - ${staticProjectName}",
+			productName = "Portal Production",
+			table = '''| End Date                | ${staticEndDate}         |   |
+	| Original End Date       | ${staticOriginalEndDate} |   |
+	| Perpetual               | false                    |   |
+	| Product Field and Value | sizing                   | 1 |
+	| Product Field and Value | licenses                 | 1 |
+	| Product Field and Value | version                  | 6 |
+	| Quantity                | 1                        |   |
+	| Start Date              | ${staticStartDate}       |   |
+	| Status                  | Approved                 |   |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Osbzen - ${staticProjectName}",
+			productName = "Gold Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Gold Subscription");
+
+		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "OSBZENOSBZEN");
+
+		LocalFile.ZendeskOrganizationAPI._viewOrganizationSyncFromOsb(organizationName = "Osbzen - ${staticProjectName}");
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticPastStartAndEndDate();
+
+		LocalFile.KoroneikiProductPurchaseAPI._updateProductPurchase(
+			accountName = "Osbzen - ${staticProjectName}",
+			productName = "Portal Production",
+			table = '''| End Date                | ${staticPastEndDate}         | |
+	| Original End Date       | ${staticPastOriginalEndDate} | |
+	| Perpetual               | false                        | |
+	| Start Date              | ${staticPastStartDate}       | |
+	| Status                  | Approved                     | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._updateProductPurchase(
+			accountName = "Osbzen - ${staticProjectName}",
+			productName = "Gold Subscription",
+			table = '''| End Date                | ${staticPastEndDate}         | |
+	| Original End Date       | ${staticPastOriginalEndDate} | |
+	| Perpetual               | false                        | |
+	| Start Date              | ${staticPastStartDate}       | |
+	| Status                  | Approved                     | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Gold Subscription");
+
+		LocalFile.ZendeskOrganizationAPI._viewOrganizationSyncFromOsb(organizationName = "Osbzen - ${staticProjectName}");
+
+		LocalFile.KoroneikiAccountAPI._updateAccount(
+			accountName = "Osbzen - ${staticProjectName}",
+			table = '''| Name         | Osbdsk - ${staticProjectName} | |
+	| Code         | OSBDSKOSBDSK                  | |''');
+
+		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+
+		LocalFile.ZendeskOrganizationAPI._viewOrganizationSyncFromOsb(organizationName = "Osbdsk - ${staticProjectName}");
+
+		LocalFile.ZendeskOrganizationAPI._viewOrganizationParameterSync(
+			organizationName = "Osbdsk - ${staticProjectName}",
+			table = '''| Name         | Osbdsk - ${staticProjectName} |
+	| Account Code | OSBDSKOSBDSK                  |''');
+
+		LocalFile.OSBAdminProject._matchOsbProjectIdWithZendeskOrganizationId(projectCode = "OSBDSKOSBDSK");
+
+		LocalFile.ZendeskOrganizationAPI._viewOrganizationNoTagSync(
+			organizationName = "Osbdsk - ${staticProjectName}",
+			tag = "liferay_portal");
+
+		LocalFile.ZendeskOrganizationAPI._viewOrganizationTagSync(
+			organizationName = "Osbdsk - ${staticProjectName}",
+			tag = "t1");
+
+		LocalFile.ZendeskOrganizationAPI._viewOrganizationTagSync(
+			organizationName = "Osbdsk - ${staticProjectName}",
+			tag = "us");
+
+		LocalFile.ZendeskOrganizationAPI._viewOrganizationNoTagSync(
+			organizationName = "Osbdsk - ${staticProjectName}",
+			tag = "gold");
+
+		LocalFile.ZendeskOrganizationAPI._viewOrganizationTagSync(
+			organizationName = "Osbdsk - ${staticProjectName}",
+			tag = "english");
+
+		LocalFile.ZendeskOrganizationAPI._viewOrganizationTagSync(
+			organizationName = "Osbdsk - ${staticProjectName}",
+			tag = "expired");
+
+		LocalFile.ZendeskOrganizationAPI._viewOrganizationNoTagSync(
+			organizationName = "Osbdsk - ${staticProjectName}",
+			tag = "approved");
+	}
+
+}

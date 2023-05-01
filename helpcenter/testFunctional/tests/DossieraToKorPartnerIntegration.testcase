@@ -1,0 +1,264 @@
+definition {
+
+	property testray.main.component.name = "Support QA";
+	property type = "provisioning.integration";
+
+	setUp {
+		LocalFile.OSBAdminRabbitMQ.generateStaticVariables();
+
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningCompanyName();
+
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | par.koroneiki1                       |
+	| Email Address | par.koroneiki1@lrcustomer.com.broken |
+	| First Name    | PAR                                  |
+	| Last Name     | Koroneiki1                           |''');
+	}
+
+	tearDown {
+		LocalFile.ZendeskUserAPI._getDefaultUserId(organizationName = "Korpar - ${staticCompanyName}");
+
+		LocalFile.OSBAdminProject.tearDownProjects(table = '''| KORPAR |''');
+
+		LocalFile.KoroneikiAccountAPI._tearDownAccounts(table = '''| Korpar - ${staticCompanyName} |''');
+
+		LocalFile.KoroneikiAccountAPI._tearDownAccountsViaAccountFieldNameAndValue(
+			fieldName = "Code",
+			table = '''| KORPAR |''');
+
+		LocalFile.JSONUser.tearDownUsers(table = '''| par.koroneiki1@lrcustomer.com.broken |''');
+
+		LocalFile.JSONUser.tearDownUsersViaSupport(table = '''| par.koroneiki1@lrcustomer.com.broken |''');
+
+		LocalFile.JSONUser.tearDownUsersViaKoroneiki(table = '''| par.koroneiki1@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiContactAPI._tearDownContacts(table = '''| par.koroneiki1@lrcustomer.com.broken |''');
+
+		LocalFile.JSONOkta.tearDownUsers(table = '''| par.koroneiki1@lrcustomer.com.broken |''');
+
+		LocalFile.ZendeskTicketAPI._tearDownTicketsByKeywords(table = '''| New Subscription(s) for Korpar - ${staticCompanyName} |''');
+
+		LocalFile.ZendeskUserAPI._getMultipleUserIdsByEmailAddress(table = '''| par.koroneiki1@lrcustomer.com.broken |''');
+
+		LocalFile.ZendeskUserAPI._tearDownUsersByIdList(userIds = ${staticUserIdList});
+
+		LocalFile.ZendeskOrganizationAPI._getMultipleOrganizationExternalIdsByOrganizationNameIfStillPresent(table = '''| Korpar - ${staticCompanyName} |''');
+
+		LocalFile.ZendeskOrganizationAPI._tearDownOrganizationsByExternalIdList(organizationExternalIds = ${staticOrganizationExternalIdList});
+
+		LocalFile.ZendeskUserAPI._tearDownUserById(userId = ${staticDefaultUserId});
+	}
+
+	test Createpartneraccount {
+		LocalFile.OSBAdminRabbitMQ.publishCreatePartnerAccountMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Korpar - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Professional Services (Technical/Web/IT)   |
+	| Owner Email Address                    | par.koroneiki1@lrcustomer.com.broken       |
+	| Owner First Name                       | PAR                                        |
+	| Owner Last Name                        | Koroneiki1                                 |
+	| Partner First Line Support             | false                                      |
+	| Product Name                           | Service Partnership                        |
+	| Product Type                           | New                                        |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |''');
+
+		LocalFile.KoroneikiAccountAPI._viewAccount(
+			accountName = "Korpar - ${staticCompanyName}",
+			table = '''| Code                  | KORPAR                               | |
+	| Contact Email Address | par.koroneiki1@lrcustomer.com.broken | |
+	| Name                  | Korpar - ${staticCompanyName}        | |
+	| Region                | United States                        | |
+	| Status                | Active                               | |''');
+
+		LocalFile.KoroneikiPostalAddressAPI._viewPostalAddress(
+			accountName = "Korpar - ${staticCompanyName}",
+			streetAddressLine1 = "456 Fake Street",
+			table = '''| Country               | United States   |
+	| Locality              | Diamond Bar     |
+	| Region                | California      |
+	| Postal Code           | 91765           |
+	| Street Address Line 1 | 456 Fake Street |''');
+
+		LocalFile.KoroneikiAccountAPI._viewAccountExternalLinkViaIdAndDomain(
+			accountName = "Korpar - ${staticCompanyName}",
+			domain = "salesforce",
+			entityId = ${staticDossieraAccountKey},
+			table = '''| Domain      | salesforce                  |
+	| Entity Id   | ${staticDossieraAccountKey} |
+	| Entity Name | account                     |''');
+
+		LocalFile.KoroneikiAccountAPI._viewAccountExternalLinkViaIdAndDomain(
+			accountName = "Korpar - ${staticCompanyName}",
+			domain = "dossiera",
+			entityId = ${staticDossieraAccountKey},
+			table = '''| Domain      | dossiera                    |
+	| Entity Id   | ${staticDossieraAccountKey} |
+	| Entity Name | account                     |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchaseExternalLink(
+			accountName = "Korpar - ${staticCompanyName}",
+			entityId = ${staticSalesforceOpportunityKey},
+			productName = "Service Partnership",
+			table = '''| Domain      | salesforce                        |
+	| Entity Id   | ${staticSalesforceOpportunityKey} |
+	| Entity Name | opportunity                       |''');
+
+		LocalFile.KoroneikiProductAPI._viewProduct(
+			productName = "Service Partnership",
+			table = '''| Name | Service Partnership | |''');
+
+		LocalFile.KoroneikiProductAPI._viewProductExternalLink(
+			entityId = "Service Partnership",
+			productName = "Service Partnership",
+			table = '''| Domain      | dossiera            |
+	| Entity Id   | Service Partnership |
+	| Entity Name | product             |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchase(
+			accountName = "Korpar - ${staticCompanyName}",
+			productName = "Service Partnership",
+			table = '''| Quantity | 1        | |
+	| Status   | Approved | |''');
+	}
+
+	test Createpartneraccountwithadditionalproduct {
+		LocalFile.OSBAdminRabbitMQ.publishCreatePartnerAccountWithAdditionalProductMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Korpar - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Professional Services (Technical/Web/IT)   |
+	| Owner Email Address                    | par.koroneiki1@lrcustomer.com.broken       |
+	| Owner First Name                       | PAR                                        |
+	| Owner Last Name                        | Koroneiki1                                 |
+	| Partner First Line Support             | false                                      |
+	| Product Name 1                         | Service Partnership                        |
+	| Product Type 1                         | New                                        |
+	| Product Name 2                         | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Product Type 2                         | New                                        |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |''');
+
+		LocalFile.KoroneikiAccountAPI._viewAccount(
+			accountName = "Korpar - ${staticCompanyName}",
+			table = '''| Code                  | KORPAR                               | |
+	| Contact Email Address | par.koroneiki1@lrcustomer.com.broken | |
+	| Name                  | Korpar - ${staticCompanyName}        | |
+	| Region                | United States                        | |
+	| Status                | Active                               | |''');
+
+		LocalFile.KoroneikiPostalAddressAPI._viewPostalAddress(
+			accountName = "Korpar - ${staticCompanyName}",
+			streetAddressLine1 = "456 Fake Street",
+			table = '''| Country               | United States   |
+	| Locality              | Diamond Bar     |
+	| Region                | California      |
+	| Postal Code           | 91765           |
+	| Street Address Line 1 | 456 Fake Street |''');
+
+		LocalFile.KoroneikiAccountAPI._viewAccountExternalLinkViaIdAndDomain(
+			accountName = "Korpar - ${staticCompanyName}",
+			domain = "salesforce",
+			entityId = ${staticDossieraAccountKey},
+			table = '''| Domain      | salesforce                  |
+	| Entity Id   | ${staticDossieraAccountKey} |
+	| Entity Name | account                     |''');
+
+		LocalFile.KoroneikiAccountAPI._viewAccountExternalLinkViaIdAndDomain(
+			accountName = "Korpar - ${staticCompanyName}",
+			domain = "dossiera",
+			entityId = ${staticDossieraAccountKey},
+			table = '''| Domain      | dossiera                    |
+	| Entity Id   | ${staticDossieraAccountKey} |
+	| Entity Name | account                     |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchaseExternalLink(
+			accountName = "Korpar - ${staticCompanyName}",
+			entityId = ${staticSalesforceOpportunityKey},
+			productName = "Service Partnership",
+			table = '''| Domain      | salesforce                        |
+	| Entity Id   | ${staticSalesforceOpportunityKey} |
+	| Entity Name | opportunity                       |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchaseExternalLink(
+			accountName = "Korpar - ${staticCompanyName}",
+			entityId = ${staticSalesforceOpportunityKey},
+			productName = "DXP Production",
+			table = '''| Domain      | salesforce                        |
+	| Entity Id   | ${staticSalesforceOpportunityKey} |
+	| Entity Name | opportunity                       |''');
+
+		LocalFile.KoroneikiProductAPI._viewProduct(
+			productName = "Service Partnership",
+			table = '''| Name | Service Partnership | |''');
+
+		LocalFile.KoroneikiProductAPI._viewProduct(
+			productName = "DXP Production",
+			table = '''| Name | DXP Production | |''');
+
+		LocalFile.KoroneikiProductAPI._viewProductExternalLink(
+			entityId = "Service Partnership",
+			productName = "Service Partnership",
+			table = '''| Domain      | dossiera            |
+	| Entity Id   | Service Partnership |
+	| Entity Name | product             |''');
+
+		LocalFile.KoroneikiProductAPI._viewProductExternalLink(
+			entityId = "DXP Production",
+			productName = "DXP Production",
+			table = '''| Domain      | dossiera       |
+	| Entity Id   | DXP Production |
+	| Entity Name | product        |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchase(
+			accountName = "Korpar - ${staticCompanyName}",
+			productName = "Service Partnership",
+			table = '''| Quantity | 1        | |
+	| Status   | Approved | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchase(
+			accountName = "Korpar - ${staticCompanyName}",
+			productName = "DXP Production",
+			table = '''| Quantity | 1        | |
+	| Status   | Approved | |''');
+	}
+
+}

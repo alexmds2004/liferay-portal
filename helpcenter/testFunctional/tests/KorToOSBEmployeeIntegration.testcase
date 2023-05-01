@@ -1,0 +1,578 @@
+definition {
+
+	property testray.main.component.name = "Support QA";
+	property type = "employee.integration";
+
+	setUp {
+		LocalFile.Data.generateSupportUser();
+
+		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | ${staticScreenNameValue}       |
+	| Email Address | ${staticEmailValue}            |
+	| First Name    | ${staticContactFirstNameValue} |
+	| Last Name     | ${staticContactLastNameValue1} |
+	| Group         | Employees                      |''');
+	}
+
+	tearDown {
+		LocalFile.JSONUser.tearDownUsers(table = '''| ${staticEmailValue} |''');
+
+		LocalFile.JSONUser.tearDownUsersViaSupport(table = '''| ${staticEmailValue} |''');
+
+		LocalFile.KoroneikiContactAPI._tearDownContacts(table = '''| ${staticEmailValue} |''');
+
+		LocalFile.JSONOkta.tearDownUsers(table = '''| ${staticEmailValue} |''');
+
+		LocalFile.ZendeskUserAPI._getMultipleUserIdsByEmailAddress(table = '''| ${staticEmailValue} |''');
+
+		LocalFile.ZendeskUserAPI._tearDownUsersByIdList(userIds = ${staticUserIdList});
+	}
+
+	@help.center.acceptance = "true"
+	test RemoveLiferayemployee {
+		LocalFile.KoroneikiContactAPI._viewContactSyncViaEmailAddress(contactEmailAddress = ${staticEmailValue});
+
+		LocalFile.KoroneikiContactAPI._viewAccountSyncViaUuid(
+			accountName = "Liferay, Inc.",
+			contactEmailAddress = ${staticEmailValue});
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - DXP");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - Portal");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - Commerce");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Liferay Employee");
+
+		LocalFile.JSONUser.viewSupportUserSync(userEmailAddress = ${staticEmailValue});
+
+		LocalFile.JSONUser.viewSupportUserOrganizationSync(
+			organizationName = "Employees",
+			userEmailAddress = ${staticEmailValue});
+
+		LocalFile.JSONOkta.removeUserFromOktaGroup(
+			groupName = "Employees",
+			userEmailAddress = ${staticEmailValue});
+
+		LocalFile.KoroneikiContactAPI._viewNoAccountSyncViaUuid(
+			accountName = "Liferay, Inc.",
+			contactEmailAddress = ${staticEmailValue});
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - DXP");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - Portal");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - Commerce");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Liferay Employee");
+
+		LocalFile.JSONUser.viewNoSupportUserOrganizationSync(
+			organizationName = "Employees",
+			userEmailAddress = ${staticEmailValue});
+
+		LocalFile.JSONUser.viewNoSupportUserOrganizationSync(
+			organizationName = "Koroneiki Customer",
+			userEmailAddress = ${staticEmailValue});
+
+		LocalFile.JSONUser.viewNoSupportUserOrganizationSync(
+			organizationName = "Koroneiki Customer - DXP",
+			userEmailAddress = ${staticEmailValue});
+
+		LocalFile.JSONUser.viewNoSupportUserOrganizationSync(
+			organizationName = "Koroneiki Customer - Portal",
+			userEmailAddress = ${staticEmailValue});
+
+		LocalFile.JSONUser.viewNoSupportUserOrganizationSync(
+			organizationName = "Koroneiki Customer - Commerce",
+			userEmailAddress = ${staticEmailValue});
+	}
+
+	test RemoveLiferayemployeeandloginviaokta {
+		LocalFile.KoroneikiContactAPI._viewContactSyncViaEmailAddress(contactEmailAddress = ${staticEmailValue});
+
+		LocalFile.KoroneikiContactAPI._viewAccountSyncViaUuid(
+			accountName = "Liferay, Inc.",
+			contactEmailAddress = ${staticEmailValue});
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - DXP");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - Portal");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - Commerce");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Liferay Employee");
+
+		LocalFile.JSONUser.viewSupportUserSync(userEmailAddress = ${staticEmailValue});
+
+		LocalFile.JSONUser.viewSupportUserOrganizationSync(
+			organizationName = "Employees",
+			userEmailAddress = ${staticEmailValue});
+
+		LocalFile.JSONOkta.removeUserFromOktaGroup(
+			groupName = "Employees",
+			userEmailAddress = ${staticEmailValue});
+
+		LocalFile.KoroneikiContactAPI._viewNoAccountSyncViaUuid(
+			accountName = "Liferay, Inc.",
+			contactEmailAddress = ${staticEmailValue});
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - DXP");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - Portal");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - Commerce");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Liferay Employee");
+
+		LocalFile.Passwords.getPasswords();
+
+		LocalFile.OSBAdmin.loginToSupportViaOkta(
+			userEmailAddress = ${staticEmailValue},
+			userPassword = ${staticOktaUserPassword});
+
+		LocalFile.JSONUser.viewNoSupportUserOrganizationSync(
+			organizationName = "Employees",
+			userEmailAddress = ${staticEmailValue});
+
+		LocalFile.JSONUser.viewNoSupportUserOrganizationSync(
+			organizationName = "Koroneiki Customer",
+			userEmailAddress = ${staticEmailValue});
+
+		LocalFile.JSONUser.viewNoSupportUserOrganizationSync(
+			organizationName = "Koroneiki Customer - DXP",
+			userEmailAddress = ${staticEmailValue});
+
+		LocalFile.JSONUser.viewNoSupportUserOrganizationSync(
+			organizationName = "Koroneiki Customer - Portal",
+			userEmailAddress = ${staticEmailValue});
+
+		LocalFile.JSONUser.viewNoSupportUserOrganizationSync(
+			organizationName = "Koroneiki Customer - Commerce",
+			userEmailAddress = ${staticEmailValue});
+	}
+
+	test ResyncdeletedLiferayemployeefromcustomer {
+		LocalFile.KoroneikiContactAPI._viewContactSyncViaEmailAddress(contactEmailAddress = ${staticEmailValue});
+
+		LocalFile.KoroneikiContactAPI._viewAccountSyncViaUuid(
+			accountName = "Liferay, Inc.",
+			contactEmailAddress = ${staticEmailValue});
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - DXP");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - Portal");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - Commerce");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Liferay Employee");
+
+		LocalFile.JSONUser.viewSupportUserSync(userEmailAddress = ${staticEmailValue});
+
+		LocalFile.JSONUser.viewSupportUserOrganizationSync(
+			organizationName = "Employees",
+			userEmailAddress = ${staticEmailValue});
+
+		LocalFile.JSONUser.deleteSupportUser(userEmailAddress = ${staticEmailValue});
+
+		LocalFile.Passwords.getPasswords();
+
+		LocalFile.OSBAdmin.loginToSupportViaOkta(
+			userEmailAddress = ${staticEmailValue},
+			userPassword = ${staticOktaUserPassword});
+
+		LocalFile.JSONUser.viewSupportUserSync(userEmailAddress = ${staticEmailValue});
+
+		LocalFile.JSONUser.viewSupportUserOrganizationSync(
+			organizationName = "Employees",
+			userEmailAddress = ${staticEmailValue});
+	}
+
+	test ResyncremovedLiferayemployeefromcustomerorganizations {
+		LocalFile.KoroneikiContactAPI._viewContactSyncViaEmailAddress(contactEmailAddress = ${staticEmailValue});
+
+		LocalFile.KoroneikiContactAPI._viewAccountSyncViaUuid(
+			accountName = "Liferay, Inc.",
+			contactEmailAddress = ${staticEmailValue});
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - DXP");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - Portal");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - Commerce");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Liferay Employee");
+
+		LocalFile.JSONUser.viewSupportUserSync(userEmailAddress = ${staticEmailValue});
+
+		LocalFile.JSONUser.viewSupportUserOrganizationSync(
+			organizationName = "Employees",
+			userEmailAddress = ${staticEmailValue});
+
+		LocalFile.JSONUser.unsetUserFromSupportOrganization(
+			organizationName = "Employees",
+			userEmailAddress = ${staticEmailValue});
+
+		LocalFile.Passwords.getPasswords();
+
+		LocalFile.OSBAdmin.loginToSupportViaOkta(
+			userEmailAddress = ${staticEmailValue},
+			userPassword = ${staticOktaUserPassword});
+
+		LocalFile.JSONUser.viewSupportUserSync(userEmailAddress = ${staticEmailValue});
+
+		LocalFile.JSONUser.viewSupportUserOrganizationSync(
+			organizationName = "Employees",
+			userEmailAddress = ${staticEmailValue});
+	}
+
+	test ViewLiferayCSDataAccessEUemployee {
+		LocalFile.KoroneikiContactAPI._viewContactSyncViaEmailAddress(contactEmailAddress = ${staticEmailValue});
+
+		LocalFile.KoroneikiContactAPI._viewAccountSyncViaUuid(
+			accountName = "Liferay, Inc.",
+			contactEmailAddress = ${staticEmailValue});
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - DXP");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - Portal");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - Commerce");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Liferay Employee");
+
+		LocalFile.JSONUser.viewSupportUserSync(userEmailAddress = ${staticEmailValue});
+
+		LocalFile.JSONUser.viewSupportUserOrganizationSync(
+			organizationName = "Employees",
+			userEmailAddress = ${staticEmailValue});
+
+		LocalFile.Passwords.getPasswords();
+
+		LocalFile.JSONOkta.assignUserToOktaGroup(
+			groupName = "CS - Data Access EU",
+			userEmailAddress = ${staticEmailValue});
+
+		LocalFile.KoroneikiContactAPI._viewTeamSyncViaUuid(
+			contactEmailAddress = ${staticEmailValue},
+			teamName = "Account Access EU");
+
+		LocalFile.OSBAdmin.loginToSupportViaOkta(
+			userEmailAddress = ${staticEmailValue},
+			userPassword = ${staticOktaUserPassword});
+
+		LocalFile.JSONUser.viewSupportUserOrganizationSync(
+			organizationName = "Data Access EU",
+			userEmailAddress = ${staticEmailValue});
+	}
+
+	test ViewLiferayCSDataAccessUSemployee {
+		LocalFile.KoroneikiContactAPI._viewContactSyncViaEmailAddress(contactEmailAddress = ${staticEmailValue});
+
+		LocalFile.KoroneikiContactAPI._viewAccountSyncViaUuid(
+			accountName = "Liferay, Inc.",
+			contactEmailAddress = ${staticEmailValue});
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - DXP");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - Portal");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - Commerce");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Liferay Employee");
+
+		LocalFile.JSONUser.viewSupportUserSync(userEmailAddress = ${staticEmailValue});
+
+		LocalFile.JSONUser.viewSupportUserOrganizationSync(
+			organizationName = "Employees",
+			userEmailAddress = ${staticEmailValue});
+
+		LocalFile.Passwords.getPasswords();
+
+		LocalFile.JSONOkta.assignUserToOktaGroup(
+			groupName = "CS - Data Access US",
+			userEmailAddress = ${staticEmailValue});
+
+		LocalFile.KoroneikiContactAPI._viewTeamSyncViaUuid(
+			contactEmailAddress = ${staticEmailValue},
+			teamName = "Account Access US");
+
+		LocalFile.OSBAdmin.loginToSupportViaOkta(
+			userEmailAddress = ${staticEmailValue},
+			userPassword = ${staticOktaUserPassword});
+
+		LocalFile.JSONUser.viewSupportUserOrganizationSync(
+			organizationName = "Data Access US",
+			userEmailAddress = ${staticEmailValue});
+	}
+
+	test ViewLiferayDataAccessEUemployee {
+		LocalFile.KoroneikiContactAPI._viewContactSyncViaEmailAddress(contactEmailAddress = ${staticEmailValue});
+
+		LocalFile.KoroneikiContactAPI._viewAccountSyncViaUuid(
+			accountName = "Liferay, Inc.",
+			contactEmailAddress = ${staticEmailValue});
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - DXP");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - Portal");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - Commerce");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Liferay Employee");
+
+		LocalFile.JSONUser.viewSupportUserSync(userEmailAddress = ${staticEmailValue});
+
+		LocalFile.JSONUser.viewSupportUserOrganizationSync(
+			organizationName = "Employees",
+			userEmailAddress = ${staticEmailValue});
+
+		LocalFile.Passwords.getPasswords();
+
+		LocalFile.JSONOkta.assignUserToOktaGroup(
+			groupName = "Data Access EU",
+			userEmailAddress = ${staticEmailValue});
+
+		LocalFile.KoroneikiContactAPI._viewTeamSyncViaUuid(
+			contactEmailAddress = ${staticEmailValue},
+			teamName = "Account Access EU");
+
+		LocalFile.OSBAdmin.loginToSupportViaOkta(
+			userEmailAddress = ${staticEmailValue},
+			userPassword = ${staticOktaUserPassword});
+
+		LocalFile.JSONUser.viewSupportUserOrganizationSync(
+			organizationName = "Data Access EU",
+			userEmailAddress = ${staticEmailValue});
+	}
+
+	test ViewLiferayDataAccessUSemployee {
+		LocalFile.KoroneikiContactAPI._viewContactSyncViaEmailAddress(contactEmailAddress = ${staticEmailValue});
+
+		LocalFile.KoroneikiContactAPI._viewAccountSyncViaUuid(
+			accountName = "Liferay, Inc.",
+			contactEmailAddress = ${staticEmailValue});
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - DXP");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - Portal");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - Commerce");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Liferay Employee");
+
+		LocalFile.JSONUser.viewSupportUserSync(userEmailAddress = ${staticEmailValue});
+
+		LocalFile.JSONUser.viewSupportUserOrganizationSync(
+			organizationName = "Employees",
+			userEmailAddress = ${staticEmailValue});
+
+		LocalFile.Passwords.getPasswords();
+
+		LocalFile.JSONOkta.assignUserToOktaGroup(
+			groupName = "Data Access US",
+			userEmailAddress = ${staticEmailValue});
+
+		LocalFile.KoroneikiContactAPI._viewTeamSyncViaUuid(
+			contactEmailAddress = ${staticEmailValue},
+			teamName = "Account Access US");
+
+		LocalFile.OSBAdmin.loginToSupportViaOkta(
+			userEmailAddress = ${staticEmailValue},
+			userPassword = ${staticOktaUserPassword});
+
+		LocalFile.JSONUser.viewSupportUserOrganizationSync(
+			organizationName = "Data Access US",
+			userEmailAddress = ${staticEmailValue});
+	}
+
+	@help.center.acceptance = "true"
+	test ViewLiferayemployee {
+		LocalFile.KoroneikiContactAPI._viewContactSyncViaEmailAddress(contactEmailAddress = ${staticEmailValue});
+
+		LocalFile.KoroneikiContactAPI._viewAccountSyncViaUuid(
+			accountName = "Liferay, Inc.",
+			contactEmailAddress = ${staticEmailValue});
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - DXP");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - Portal");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - Commerce");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Liferay Employee");
+
+		LocalFile.JSONUser.viewSupportUserSync(userEmailAddress = ${staticEmailValue});
+
+		LocalFile.JSONUser.viewSupportUserOrganizationSync(
+			organizationName = "Employees",
+			userEmailAddress = ${staticEmailValue});
+
+		LocalFile.JSONUser.viewSupportUserOrganizationSync(
+			organizationName = "Koroneiki Customer",
+			userEmailAddress = ${staticEmailValue});
+
+		LocalFile.JSONUser.viewSupportUserOrganizationSync(
+			organizationName = "Koroneiki Customer - DXP",
+			userEmailAddress = ${staticEmailValue});
+
+		LocalFile.JSONUser.viewSupportUserOrganizationSync(
+			organizationName = "Koroneiki Customer - Portal",
+			userEmailAddress = ${staticEmailValue});
+
+		LocalFile.JSONUser.viewSupportUserOrganizationSync(
+			organizationName = "Koroneiki Customer - Commerce",
+			userEmailAddress = ${staticEmailValue});
+	}
+
+	test ViewLiferayGSDataAccessEUemployee {
+		LocalFile.KoroneikiContactAPI._viewContactSyncViaEmailAddress(contactEmailAddress = ${staticEmailValue});
+
+		LocalFile.KoroneikiContactAPI._viewAccountSyncViaUuid(
+			accountName = "Liferay, Inc.",
+			contactEmailAddress = ${staticEmailValue});
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - DXP");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - Portal");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - Commerce");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Liferay Employee");
+
+		LocalFile.JSONUser.viewSupportUserSync(userEmailAddress = ${staticEmailValue});
+
+		LocalFile.JSONUser.viewSupportUserOrganizationSync(
+			organizationName = "Employees",
+			userEmailAddress = ${staticEmailValue});
+
+		LocalFile.Passwords.getPasswords();
+
+		LocalFile.JSONOkta.assignUserToOktaGroup(
+			groupName = "GS - Data Access EU",
+			userEmailAddress = ${staticEmailValue});
+
+		LocalFile.KoroneikiContactAPI._viewTeamSyncViaUuid(
+			contactEmailAddress = ${staticEmailValue},
+			teamName = "Account Access EU");
+
+		LocalFile.OSBAdmin.loginToSupportViaOkta(
+			userEmailAddress = ${staticEmailValue},
+			userPassword = ${staticOktaUserPassword});
+
+		LocalFile.JSONUser.viewSupportUserOrganizationSync(
+			organizationName = "Data Access EU",
+			userEmailAddress = ${staticEmailValue});
+	}
+
+	test ViewLiferayGSDataAccessUSemployee {
+		LocalFile.KoroneikiContactAPI._viewContactSyncViaEmailAddress(contactEmailAddress = ${staticEmailValue});
+
+		LocalFile.KoroneikiContactAPI._viewAccountSyncViaUuid(
+			accountName = "Liferay, Inc.",
+			contactEmailAddress = ${staticEmailValue});
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - DXP");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - Portal");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - Commerce");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Liferay Employee");
+
+		LocalFile.JSONUser.viewSupportUserSync(userEmailAddress = ${staticEmailValue});
+
+		LocalFile.JSONUser.viewSupportUserOrganizationSync(
+			organizationName = "Employees",
+			userEmailAddress = ${staticEmailValue});
+
+		LocalFile.Passwords.getPasswords();
+
+		LocalFile.JSONOkta.assignUserToOktaGroup(
+			groupName = "GS - Data Access US",
+			userEmailAddress = ${staticEmailValue});
+
+		LocalFile.KoroneikiContactAPI._viewTeamSyncViaUuid(
+			contactEmailAddress = ${staticEmailValue},
+			teamName = "Account Access US");
+
+		LocalFile.OSBAdmin.loginToSupportViaOkta(
+			userEmailAddress = ${staticEmailValue},
+			userPassword = ${staticOktaUserPassword});
+
+		LocalFile.JSONUser.viewSupportUserOrganizationSync(
+			organizationName = "Data Access US",
+			userEmailAddress = ${staticEmailValue});
+	}
+
+	test ViewLiferaySubscriptionServicesemployee {
+		LocalFile.KoroneikiContactAPI._viewContactSyncViaEmailAddress(contactEmailAddress = ${staticEmailValue});
+
+		LocalFile.KoroneikiContactAPI._viewAccountSyncViaUuid(
+			accountName = "Liferay, Inc.",
+			contactEmailAddress = ${staticEmailValue});
+
+		LocalFile.KoroneikiContactAPI._viewTeamSyncViaUuid(
+			contactEmailAddress = ${staticEmailValue},
+			teamName = "Systems - Provisioning");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - DXP");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - Portal");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - Commerce");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Liferay Employee");
+
+		LocalFile.JSONUser.viewSupportUserSync(userEmailAddress = ${staticEmailValue});
+
+		LocalFile.JSONOkta.viewOktaUserGroupMembership(
+			groupName = "Employees",
+			userEmailAddress = ${staticEmailValue});
+
+		LocalFile.JSONOkta.viewOktaUserGroupMembership(
+			groupName = "Division - Subscription Services",
+			userEmailAddress = ${staticEmailValue});
+
+		LocalFile.Passwords.getPasswords();
+
+		LocalFile.OSBAdmin.loginToSupportViaOkta(
+			userEmailAddress = ${staticEmailValue},
+			userPassword = ${staticOktaUserPassword});
+
+		LocalFile.JSONUser.viewSupportUserOrganizationSync(
+			organizationName = "Employees",
+			userEmailAddress = ${staticEmailValue});
+
+		LocalFile.JSONUser.viewSupportUserOrganizationSync(
+			organizationName = "Division - Subscription Services",
+			userEmailAddress = ${staticEmailValue});
+	}
+
+}

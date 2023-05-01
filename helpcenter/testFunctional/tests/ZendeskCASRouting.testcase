@@ -1,0 +1,389 @@
+definition {
+
+	property testray.main.component.name = "Support QA";
+	property type = "zendesk.api";
+
+	setUp {
+		LocalFile.Passwords.getPasswords();
+	}
+
+	tearDown {
+		LocalFile.ZendeskTicketAPI._tearDownTicketByIds(ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskUserAPI._tearDownUsersByExternalIdTable(table = '''| User1 |''');
+
+		LocalFile.ZendeskOrganizationAPI._tearDownOrganizationsByExternalIdTable(table = '''| 12345678 |''');
+
+		LocalFile.ZendeskHomepage.pause(timeInSeconds = 3);
+	}
+
+	test CASAURouting {
+		LocalFile.ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved                                    |
+	| Name             | Organization Name 1                         |
+	| Tags             | liferay_dxp,liferay_portal,liferay_commerce |
+	| Shared Tickets   | true                                        |
+	| Shared Comments  | true                                        |
+	| SLA              | Gold                                        |
+	| Tier             | T4                                          |
+	| Support Region   | Australia                                   |
+	| Support Language | English                                     |
+	| External ID      | 12345678                                    |''');
+
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
+	| Tags             | osb_customer,osb_kb              |
+	| Password         | ${staticZendeskAdminPassword}    |
+	| Role             | End-user                         |
+	| Access           | Organization                     |
+	| Email            | zendesk.user1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                |
+	| Organization     | Organization Name 1              |
+	| Language         | English                          |
+	| Time Zone        | Sydney                           |
+	| External ID      | User1                            |''');
+
+		LocalFile.ZendeskRequestAPI._createMultipleRequestsWithProductAndComponentValues(
+			requesterEmail = "zendesk.user1@zendesk.com.broken",
+			table = '''| prd_liferay_commerce_1_1 | activation_key_project_administration |
+	| prd_liferay_commerce_2_0 | activation_key_project_administration |
+	| prd_liferay_commerce_2_1 | activation_key_project_administration |
+	| prd_liferay_commerce_3_0 | activation_key_project_administration |
+	| prd_liferay_commerce_4_0 | activation_key_project_administration |
+	| prd_liferay_dxp_7_4      | activation_key_project_administration |
+	| prd_liferay_dxp_7_3      | activation_key_project_administration |
+	| prd_liferay_dxp_7_2      | activation_key_project_administration |
+	| prd_liferay_dxp_7_1      | activation_key_project_administration |
+	| prd_liferay_dxp_7_0      | activation_key_project_administration |
+	| prd_liferay_portal_6_2   | activation_key_project_administration |
+	| prd_liferay_portal_6_1   | activation_key_project_administration |
+	| prd_liferay_portal_6_0   | activation_key_project_administration |
+	| prd_liferay_portal_5_2   | activation_key_project_administration |''');
+
+		LocalFile.ZendeskTicketAPI._viewMultipleTicketGroupAssignees(
+			groupAssignee = "CAS - AU",
+			ticketIdList = ${staticRequestIdList});
+	}
+
+	test CASBRRouting {
+		LocalFile.ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved                                    |
+	| Name             | Organization Name 1                         |
+	| Tags             | liferay_dxp,liferay_portal,liferay_commerce |
+	| Shared Tickets   | true                                        |
+	| Shared Comments  | true                                        |
+	| SLA              | Gold                                        |
+	| Tier             | T4                                          |
+	| Support Region   | Brazil                                      |
+	| Support Language | Portuguese                                  |
+	| External ID      | 12345678                                    |''');
+
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
+	| Tags             | osb_customer,osb_kb              |
+	| Password         | ${staticZendeskAdminPassword}    |
+	| Role             | End-user                         |
+	| Access           | Organization                     |
+	| Email            | zendesk.user1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                |
+	| Organization     | Organization Name 1              |
+	| Language         | Portuguese                       |
+	| Time Zone        | Brasilia                         |
+	| External ID      | User1                            |''');
+
+		LocalFile.ZendeskRequestAPI._createMultipleRequestsWithProductAndComponentValues(
+			requesterEmail = "zendesk.user1@zendesk.com.broken",
+			table = '''| prd_liferay_commerce_1_1 | activation_key_project_administration |
+	| prd_liferay_commerce_2_0 | activation_key_project_administration |
+	| prd_liferay_commerce_2_1 | activation_key_project_administration |
+	| prd_liferay_commerce_3_0 | activation_key_project_administration |
+	| prd_liferay_commerce_4_0 | activation_key_project_administration |
+	| prd_liferay_dxp_7_4      | activation_key_project_administration |
+	| prd_liferay_dxp_7_3      | activation_key_project_administration |
+	| prd_liferay_dxp_7_2      | activation_key_project_administration |
+	| prd_liferay_dxp_7_1      | activation_key_project_administration |
+	| prd_liferay_dxp_7_0      | activation_key_project_administration |
+	| prd_liferay_portal_6_2   | activation_key_project_administration |
+	| prd_liferay_portal_6_1   | activation_key_project_administration |
+	| prd_liferay_portal_6_0   | activation_key_project_administration |
+	| prd_liferay_portal_5_2   | activation_key_project_administration |''');
+
+		LocalFile.ZendeskTicketAPI._viewMultipleTicketGroupAssignees(
+			groupAssignee = "CAS - BR",
+			ticketIdList = ${staticRequestIdList});
+	}
+
+	test CASCNRouting {
+		LocalFile.ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved                                    |
+	| Name             | Organization Name 1                         |
+	| Tags             | liferay_dxp,liferay_portal,liferay_commerce |
+	| Shared Tickets   | true                                        |
+	| Shared Comments  | true                                        |
+	| SLA              | Gold                                        |
+	| Tier             | T4                                          |
+	| Support Region   | China                                       |
+	| Support Language | Chinese                                     |
+	| External ID      | 12345678                                    |''');
+
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
+	| Tags             | osb_customer,osb_kb              |
+	| Password         | ${staticZendeskAdminPassword}    |
+	| Role             | End-user                         |
+	| Access           | Organization                     |
+	| Email            | zendesk.user1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                |
+	| Organization     | Organization Name 1              |
+	| Language         | Chinese                          |
+	| Time Zone        | Beijing                          |
+	| External ID      | User1                            |''');
+
+		LocalFile.ZendeskRequestAPI._createMultipleRequestsWithProductAndComponentValues(
+			requesterEmail = "zendesk.user1@zendesk.com.broken",
+			table = '''| prd_liferay_commerce_1_1 | activation_key_project_administration |
+	| prd_liferay_commerce_2_0 | activation_key_project_administration |
+	| prd_liferay_commerce_2_1 | activation_key_project_administration |
+	| prd_liferay_commerce_3_0 | activation_key_project_administration |
+	| prd_liferay_commerce_4_0 | activation_key_project_administration |
+	| prd_liferay_dxp_7_4      | activation_key_project_administration |
+	| prd_liferay_dxp_7_3      | activation_key_project_administration |
+	| prd_liferay_dxp_7_2      | activation_key_project_administration |
+	| prd_liferay_dxp_7_1      | activation_key_project_administration |
+	| prd_liferay_dxp_7_0      | activation_key_project_administration |
+	| prd_liferay_portal_6_2   | activation_key_project_administration |
+	| prd_liferay_portal_6_1   | activation_key_project_administration |
+	| prd_liferay_portal_6_0   | activation_key_project_administration |
+	| prd_liferay_portal_5_2   | activation_key_project_administration |''');
+
+		LocalFile.ZendeskTicketAPI._viewMultipleTicketGroupAssignees(
+			groupAssignee = "CAS - CN",
+			ticketIdList = ${staticRequestIdList});
+	}
+
+	test CASESRouting {
+		LocalFile.ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved                                    |
+	| Name             | Organization Name 1                         |
+	| Tags             | liferay_dxp,liferay_portal,liferay_commerce |
+	| Shared Tickets   | true                                        |
+	| Shared Comments  | true                                        |
+	| SLA              | Gold                                        |
+	| Tier             | T4                                          |
+	| Support Region   | Spain                                       |
+	| Support Language | Spanish                                     |
+	| External ID      | 12345678                                    |''');
+
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
+	| Tags             | osb_customer,osb_kb              |
+	| Password         | ${staticZendeskAdminPassword}    |
+	| Role             | End-user                         |
+	| Access           | Organization                     |
+	| Email            | zendesk.user1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                |
+	| Organization     | Organization Name 1              |
+	| Language         | Spanish                          |
+	| Time Zone        | Madrid                           |
+	| External ID      | User1                            |''');
+
+		LocalFile.ZendeskRequestAPI._createMultipleRequestsWithProductAndComponentValues(
+			requesterEmail = "zendesk.user1@zendesk.com.broken",
+			table = '''| prd_liferay_commerce_1_1 | activation_key_project_administration |
+	| prd_liferay_commerce_2_0 | activation_key_project_administration |
+	| prd_liferay_commerce_2_1 | activation_key_project_administration |
+	| prd_liferay_commerce_3_0 | activation_key_project_administration |
+	| prd_liferay_commerce_4_0 | activation_key_project_administration |
+	| prd_liferay_dxp_7_4      | activation_key_project_administration |
+	| prd_liferay_dxp_7_3      | activation_key_project_administration |
+	| prd_liferay_dxp_7_2      | activation_key_project_administration |
+	| prd_liferay_dxp_7_1      | activation_key_project_administration |
+	| prd_liferay_dxp_7_0      | activation_key_project_administration |
+	| prd_liferay_portal_6_2   | activation_key_project_administration |
+	| prd_liferay_portal_6_1   | activation_key_project_administration |
+	| prd_liferay_portal_6_0   | activation_key_project_administration |
+	| prd_liferay_portal_5_2   | activation_key_project_administration |''');
+
+		LocalFile.ZendeskTicketAPI._viewMultipleTicketGroupAssignees(
+			groupAssignee = "CAS - ES",
+			ticketIdList = ${staticRequestIdList});
+	}
+
+	test CASHURouting {
+		LocalFile.ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved                                    |
+	| Name             | Organization Name 1                         |
+	| Tags             | liferay_dxp,liferay_portal,liferay_commerce |
+	| Shared Tickets   | true                                        |
+	| Shared Comments  | true                                        |
+	| SLA              | Gold                                        |
+	| Tier             | T4                                          |
+	| Support Region   | Hungary                                     |
+	| Support Language | English                                     |
+	| External ID      | 12345678                                    |''');
+
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
+	| Tags             | osb_customer,osb_kb              |
+	| Password         | ${staticZendeskAdminPassword}    |
+	| Role             | End-user                         |
+	| Access           | Organization                     |
+	| Email            | zendesk.user1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                |
+	| Organization     | Organization Name 1              |
+	| Language         | English                          |
+	| Time Zone        | Budapest                         |
+	| External ID      | User1                            |''');
+
+		LocalFile.ZendeskRequestAPI._createMultipleRequestsWithProductAndComponentValues(
+			requesterEmail = "zendesk.user1@zendesk.com.broken",
+			table = '''| prd_liferay_commerce_1_1 | activation_key_project_administration |
+	| prd_liferay_commerce_2_0 | activation_key_project_administration |
+	| prd_liferay_commerce_2_1 | activation_key_project_administration |
+	| prd_liferay_commerce_3_0 | activation_key_project_administration |
+	| prd_liferay_commerce_4_0 | activation_key_project_administration |
+	| prd_liferay_dxp_7_4      | activation_key_project_administration |
+	| prd_liferay_dxp_7_3      | activation_key_project_administration |
+	| prd_liferay_dxp_7_2      | activation_key_project_administration |
+	| prd_liferay_dxp_7_1      | activation_key_project_administration |
+	| prd_liferay_dxp_7_0      | activation_key_project_administration |
+	| prd_liferay_portal_6_2   | activation_key_project_administration |
+	| prd_liferay_portal_6_1   | activation_key_project_administration |
+	| prd_liferay_portal_6_0   | activation_key_project_administration |
+	| prd_liferay_portal_5_2   | activation_key_project_administration |''');
+
+		LocalFile.ZendeskTicketAPI._viewMultipleTicketGroupAssignees(
+			groupAssignee = "CAS - HU",
+			ticketIdList = ${staticRequestIdList});
+	}
+
+	test CASINRouting {
+		LocalFile.ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved                                    |
+	| Name             | Organization Name 1                         |
+	| Tags             | liferay_dxp,liferay_portal,liferay_commerce |
+	| Shared Tickets   | true                                        |
+	| Shared Comments  | true                                        |
+	| SLA              | Gold                                        |
+	| Tier             | T4                                          |
+	| Support Region   | India                                       |
+	| Support Language | English                                     |
+	| External ID      | 12345678                                    |''');
+
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
+	| Tags             | osb_customer,osb_kb              |
+	| Password         | ${staticZendeskAdminPassword}    |
+	| Role             | End-user                         |
+	| Access           | Organization                     |
+	| Email            | zendesk.user1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                |
+	| Organization     | Organization Name 1              |
+	| Language         | English                          |
+	| Time Zone        | Mumbai                           |
+	| External ID      | User1                            |''');
+
+		LocalFile.ZendeskRequestAPI._createMultipleRequestsWithProductAndComponentValues(
+			requesterEmail = "zendesk.user1@zendesk.com.broken",
+			table = '''| prd_liferay_commerce_1_1 | activation_key_project_administration |
+	| prd_liferay_commerce_2_0 | activation_key_project_administration |
+	| prd_liferay_commerce_2_1 | activation_key_project_administration |
+	| prd_liferay_commerce_3_0 | activation_key_project_administration |
+	| prd_liferay_commerce_4_0 | activation_key_project_administration |
+	| prd_liferay_dxp_7_4      | activation_key_project_administration |
+	| prd_liferay_dxp_7_3      | activation_key_project_administration |
+	| prd_liferay_dxp_7_2      | activation_key_project_administration |
+	| prd_liferay_dxp_7_1      | activation_key_project_administration |
+	| prd_liferay_dxp_7_0      | activation_key_project_administration |
+	| prd_liferay_portal_6_2   | activation_key_project_administration |
+	| prd_liferay_portal_6_1   | activation_key_project_administration |
+	| prd_liferay_portal_6_0   | activation_key_project_administration |
+	| prd_liferay_portal_5_2   | activation_key_project_administration |''');
+
+		LocalFile.ZendeskTicketAPI._viewMultipleTicketGroupAssignees(
+			groupAssignee = "CAS - IN",
+			ticketIdList = ${staticRequestIdList});
+	}
+
+	test CASJPRouting {
+		LocalFile.ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved                                    |
+	| Name             | Organization Name 1                         |
+	| Tags             | liferay_dxp,liferay_portal,liferay_commerce |
+	| Shared Tickets   | true                                        |
+	| Shared Comments  | true                                        |
+	| SLA              | Gold                                        |
+	| Tier             | T4                                          |
+	| Support Region   | Japan                                       |
+	| Support Language | Japanese                                    |
+	| External ID      | 12345678                                    |''');
+
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
+	| Tags             | osb_customer,osb_kb              |
+	| Password         | ${staticZendeskAdminPassword}    |
+	| Role             | End-user                         |
+	| Access           | Organization                     |
+	| Email            | zendesk.user1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                |
+	| Organization     | Organization Name 1              |
+	| Language         | Japanese                         |
+	| Time Zone        | Tokyo                            |
+	| External ID      | User1                            |''');
+
+		LocalFile.ZendeskRequestAPI._createMultipleRequestsWithProductAndComponentValues(
+			requesterEmail = "zendesk.user1@zendesk.com.broken",
+			table = '''| prd_liferay_commerce_1_1 | activation_key_project_administration |
+	| prd_liferay_commerce_2_0 | activation_key_project_administration |
+	| prd_liferay_commerce_2_1 | activation_key_project_administration |
+	| prd_liferay_commerce_3_0 | activation_key_project_administration |
+	| prd_liferay_commerce_4_0 | activation_key_project_administration |
+	| prd_liferay_dxp_7_4      | activation_key_project_administration |
+	| prd_liferay_dxp_7_3      | activation_key_project_administration |
+	| prd_liferay_dxp_7_2      | activation_key_project_administration |
+	| prd_liferay_dxp_7_1      | activation_key_project_administration |
+	| prd_liferay_dxp_7_0      | activation_key_project_administration |
+	| prd_liferay_portal_6_2   | activation_key_project_administration |
+	| prd_liferay_portal_6_1   | activation_key_project_administration |
+	| prd_liferay_portal_6_0   | activation_key_project_administration |
+	| prd_liferay_portal_5_2   | activation_key_project_administration |''');
+
+		LocalFile.ZendeskTicketAPI._viewMultipleTicketGroupAssignees(
+			groupAssignee = "CAS - JP",
+			ticketIdList = ${staticRequestIdList});
+	}
+
+	@help.center.acceptance = "true"
+	test ProvisioningUSRouting {
+		LocalFile.ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved                                    |
+	| Name             | Organization Name 1                         |
+	| Tags             | liferay_dxp,liferay_portal,liferay_commerce |
+	| Shared Tickets   | true                                        |
+	| Shared Comments  | true                                        |
+	| SLA              | Gold                                        |
+	| Tier             | T4                                          |
+	| Support Region   | US                                          |
+	| Support Language | English                                     |
+	| External ID      | 12345678                                    |''');
+
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
+	| Tags             | osb_customer,osb_kb              |
+	| Password         | ${staticZendeskAdminPassword}    |
+	| Role             | End-user                         |
+	| Access           | Organization                     |
+	| Email            | zendesk.user1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                |
+	| Organization     | Organization Name 1              |
+	| Language         | English                          |
+	| Time Zone        | Pacific Time (US & Canada)       |
+	| External ID      | User1                            |''');
+
+		LocalFile.ZendeskRequestAPI._createMultipleRequestsWithProductAndComponentValues(
+			requesterEmail = "zendesk.user1@zendesk.com.broken",
+			table = '''| prd_liferay_commerce_1_1 | activation_key_project_administration |
+	| prd_liferay_commerce_2_0 | activation_key_project_administration |
+	| prd_liferay_commerce_2_1 | activation_key_project_administration |
+	| prd_liferay_commerce_3_0 | activation_key_project_administration |
+	| prd_liferay_commerce_4_0 | activation_key_project_administration |
+	| prd_liferay_dxp_7_4      | activation_key_project_administration |
+	| prd_liferay_dxp_7_3      | activation_key_project_administration |
+	| prd_liferay_dxp_7_2      | activation_key_project_administration |
+	| prd_liferay_dxp_7_1      | activation_key_project_administration |
+	| prd_liferay_dxp_7_0      | activation_key_project_administration |
+	| prd_liferay_portal_6_2   | activation_key_project_administration |
+	| prd_liferay_portal_6_1   | activation_key_project_administration |
+	| prd_liferay_portal_6_0   | activation_key_project_administration |
+	| prd_liferay_portal_5_2   | activation_key_project_administration |''');
+
+		LocalFile.ZendeskTicketAPI._viewMultipleTicketGroupAssignees(
+			groupAssignee = "Provisioning - US",
+			ticketIdList = ${staticRequestIdList});
+	}
+
+}

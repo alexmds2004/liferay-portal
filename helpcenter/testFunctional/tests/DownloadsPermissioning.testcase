@@ -1,0 +1,825 @@
+definition {
+
+	property testray.main.component.name = "Support QA";
+	property type = "customer.portal";
+
+	setUp {
+		LocalFile.Passwords.getPasswords();
+	}
+
+	tearDown {
+		LocalFile.ZendeskUserAPI._getDefaultUserId(organizationName = "Dwnzen - ${staticProjectName}");
+
+		LocalFile.OSBAdminProject.tearDownProjects(table = '''| DWNZENDWNZEN |''');
+
+		LocalFile.KoroneikiAccountAPI._tearDownAccounts(table = '''| Dwnzen - ${staticProjectName} |''');
+
+		LocalFile.KoroneikiAccountAPI._tearDownAccountsViaAccountFieldNameAndValue(
+			fieldName = "Code",
+			table = '''| DWNZENDWNZEN |''');
+
+		LocalFile.JSONUser.tearDownUsers(table = '''| dwn.customer1@lrcustomer.com.broken |
+	| dwn.customer2@lrcustomer.com.broken |''');
+
+		LocalFile.JSONUser.tearDownUsersViaSupport(table = '''| dwn.customer1@lrcustomer.com.broken |
+	| dwn.customer2@lrcustomer.com.broken |''');
+
+		LocalFile.JSONUser.tearDownUsersViaKoroneiki(table = '''| dwn.customer1@lrcustomer.com.broken |
+	| dwn.customer2@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiContactAPI._tearDownContacts(table = '''| dwn.customer1@lrcustomer.com.broken |
+	| dwn.customer2@lrcustomer.com.broken |''');
+
+		LocalFile.JSONOkta.tearDownUsers(table = '''| dwn.customer1@lrcustomer.com.broken |
+	| dwn.customer2@lrcustomer.com.broken |''');
+
+		LocalFile.ZendeskUserAPI._getMultipleUserIdsByEmailAddress(table = '''| dwn.customer1@lrcustomer.com.broken |
+	| dwn.customer2@lrcustomer.com.broken |''');
+
+		LocalFile.ZendeskUserAPI._tearDownUsersByIdList(userIds = ${staticUserIdList});
+
+		LocalFile.ZendeskOrganizationAPI._getMultipleOrganizationExternalIdsByOrganizationNameIfStillPresent(table = '''| Dwnzen - ${staticProjectName} |''');
+
+		LocalFile.ZendeskOrganizationAPI._tearDownOrganizationsByExternalIdList(organizationExternalIds = ${staticOrganizationExternalIdList});
+
+		LocalFile.ZendeskUserAPI._tearDownUserById(userId = ${staticDefaultUserId});
+	}
+
+	test AttempttoviewdownloadsasLXCBusinessPlancustomers {
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | dwn.customer1                       |
+	| Email Address | dwn.customer1@lrcustomer.com.broken |
+	| First Name    | DWN                                 |
+	| Last Name     | Customer1                           |''');
+
+		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | dwn.customer2                       |
+	| Email Address | dwn.customer2@lrcustomer.com.broken |
+	| First Name    | DWN                                 |
+	| Last Name     | Customer2                           |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code   | DWNZENDWNZEN                  | |
+	| Name   | Dwnzen - ${staticProjectName} | |
+	| Region | United States                 | |
+	| Status | Active                        | |
+	| Tier   | T1                            | |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Dwnzen - ${staticProjectName}",
+			contactEmailAddress = "dwn.customer1@lrcustomer.com.broken",
+			table = '''| Support Requester |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Dwnzen - ${staticProjectName}",
+			contactEmailAddress = "dwn.customer2@lrcustomer.com.broken",
+			table = '''| Support User |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Dwnzen - ${staticProjectName}",
+			productName = "LXC - Business Plan",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Dwnzen - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+
+		LocalFile.JSONUser.viewSupportUserSync(userEmailAddress = "dwn.customer1@lrcustomer.com.broken");
+
+		LocalFile.JSONUser.viewSupportUserSync(userEmailAddress = "dwn.customer2@lrcustomer.com.broken");
+
+		LocalFile.JSONUser.updateSupportPassword(
+			userEmailAddress = "dwn.customer1@lrcustomer.com.broken",
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.JSONUser.updateSupportPassword(
+			userEmailAddress = "dwn.customer2@lrcustomer.com.broken",
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.JSONUser.assignUserToSupportGroup(
+			groupName = "Help Center",
+			userEmailAddress = "dwn.customer1@lrcustomer.com.broken");
+
+		LocalFile.JSONUser.assignUserToSupportGroup(
+			groupName = "Help Center",
+			userEmailAddress = "dwn.customer2@lrcustomer.com.broken");
+
+		LocalFile.OSBAdmin.logoutAndLoginToSupport(
+			userEmailAddress = "dwn.customer1@lrcustomer.com.broken",
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.Downloads.viewNoDownloadsPage();
+	}
+
+	test AttempttoviewdownloadsasLXCEnterprisePlancustomers {
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | dwn.customer1                       |
+	| Email Address | dwn.customer1@lrcustomer.com.broken |
+	| First Name    | DWN                                 |
+	| Last Name     | Customer1                           |''');
+
+		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | dwn.customer2                       |
+	| Email Address | dwn.customer2@lrcustomer.com.broken |
+	| First Name    | DWN                                 |
+	| Last Name     | Customer2                           |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code   | DWNZENDWNZEN                  | |
+	| Name   | Dwnzen - ${staticProjectName} | |
+	| Region | United States                 | |
+	| Status | Active                        | |
+	| Tier   | T1                            | |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Dwnzen - ${staticProjectName}",
+			contactEmailAddress = "dwn.customer1@lrcustomer.com.broken",
+			table = '''| Support Requester |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Dwnzen - ${staticProjectName}",
+			contactEmailAddress = "dwn.customer2@lrcustomer.com.broken",
+			table = '''| Support User |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Dwnzen - ${staticProjectName}",
+			productName = "LXC - Enterprise Plan",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Dwnzen - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+
+		LocalFile.JSONUser.viewSupportUserSync(userEmailAddress = "dwn.customer1@lrcustomer.com.broken");
+
+		LocalFile.JSONUser.viewSupportUserSync(userEmailAddress = "dwn.customer2@lrcustomer.com.broken");
+
+		LocalFile.JSONUser.updateSupportPassword(
+			userEmailAddress = "dwn.customer1@lrcustomer.com.broken",
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.JSONUser.updateSupportPassword(
+			userEmailAddress = "dwn.customer2@lrcustomer.com.broken",
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.JSONUser.assignUserToSupportGroup(
+			groupName = "Help Center",
+			userEmailAddress = "dwn.customer1@lrcustomer.com.broken");
+
+		LocalFile.JSONUser.assignUserToSupportGroup(
+			groupName = "Help Center",
+			userEmailAddress = "dwn.customer2@lrcustomer.com.broken");
+
+		LocalFile.OSBAdmin.logoutAndLoginToSupport(
+			userEmailAddress = "dwn.customer1@lrcustomer.com.broken",
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.Downloads.viewNoDownloadsPage();
+	}
+
+	test AttempttoviewdownloadsasLXCProPlancustomers {
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | dwn.customer1                       |
+	| Email Address | dwn.customer1@lrcustomer.com.broken |
+	| First Name    | DWN                                 |
+	| Last Name     | Customer1                           |''');
+
+		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | dwn.customer2                       |
+	| Email Address | dwn.customer2@lrcustomer.com.broken |
+	| First Name    | DWN                                 |
+	| Last Name     | Customer2                           |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code   | DWNZENDWNZEN                  | |
+	| Name   | Dwnzen - ${staticProjectName} | |
+	| Region | United States                 | |
+	| Status | Active                        | |
+	| Tier   | T1                            | |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Dwnzen - ${staticProjectName}",
+			contactEmailAddress = "dwn.customer1@lrcustomer.com.broken",
+			table = '''| Support Requester |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Dwnzen - ${staticProjectName}",
+			contactEmailAddress = "dwn.customer2@lrcustomer.com.broken",
+			table = '''| Support User |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Dwnzen - ${staticProjectName}",
+			productName = "LXC - Pro Plan",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Dwnzen - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+
+		LocalFile.JSONUser.viewSupportUserSync(userEmailAddress = "dwn.customer1@lrcustomer.com.broken");
+
+		LocalFile.JSONUser.viewSupportUserSync(userEmailAddress = "dwn.customer2@lrcustomer.com.broken");
+
+		LocalFile.JSONUser.updateSupportPassword(
+			userEmailAddress = "dwn.customer1@lrcustomer.com.broken",
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.JSONUser.updateSupportPassword(
+			userEmailAddress = "dwn.customer2@lrcustomer.com.broken",
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.JSONUser.assignUserToSupportGroup(
+			groupName = "Help Center",
+			userEmailAddress = "dwn.customer1@lrcustomer.com.broken");
+
+		LocalFile.JSONUser.assignUserToSupportGroup(
+			groupName = "Help Center",
+			userEmailAddress = "dwn.customer2@lrcustomer.com.broken");
+
+		LocalFile.OSBAdmin.logoutAndLoginToSupport(
+			userEmailAddress = "dwn.customer1@lrcustomer.com.broken",
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.Downloads.viewNoDownloadsPage();
+	}
+
+	test Viewcommercedownloadsaspermissionedusers {
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | dwn.customer1                       |
+	| Email Address | dwn.customer1@lrcustomer.com.broken |
+	| First Name    | DWN                                 |
+	| Last Name     | Customer1                           |''');
+
+		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | dwn.customer2                       |
+	| Email Address | dwn.customer2@lrcustomer.com.broken |
+	| First Name    | DWN                                 |
+	| Last Name     | Customer2                           |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code   | DWNZENDWNZEN                  | |
+	| Name   | Dwnzen - ${staticProjectName} | |
+	| Region | United States                 | |
+	| Status | Active                        | |
+	| Tier   | T1                            | |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Dwnzen - ${staticProjectName}",
+			contactEmailAddress = "dwn.customer1@lrcustomer.com.broken",
+			table = '''| Support Requester |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Dwnzen - ${staticProjectName}",
+			contactEmailAddress = "dwn.customer2@lrcustomer.com.broken",
+			table = '''| Support User |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Dwnzen - ${staticProjectName}",
+			productName = "Commerce Subscription Production",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Dwnzen - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - Commerce");
+
+		LocalFile.JSONUser.viewSupportUserSync(userEmailAddress = "dwn.customer1@lrcustomer.com.broken");
+
+		LocalFile.JSONUser.viewSupportUserSync(userEmailAddress = "dwn.customer2@lrcustomer.com.broken");
+
+		LocalFile.JSONUser.updateSupportPassword(
+			userEmailAddress = "dwn.customer1@lrcustomer.com.broken",
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.JSONUser.updateSupportPassword(
+			userEmailAddress = "dwn.customer2@lrcustomer.com.broken",
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.JSONUser.assignUserToSupportGroup(
+			groupName = "Help Center",
+			userEmailAddress = "dwn.customer1@lrcustomer.com.broken");
+
+		LocalFile.JSONUser.assignUserToSupportGroup(
+			groupName = "Help Center",
+			userEmailAddress = "dwn.customer2@lrcustomer.com.broken");
+
+		LocalFile.OSBAdmin.logoutAndLoginToSupport(
+			userEmailAddress = "dwn.customer1@lrcustomer.com.broken",
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.Downloads.gotoDownloadsPage();
+
+		LocalFile.Downloads.setSearchFilters(
+			fileType = "Product",
+			productName = "Commerce");
+
+		LocalFile.Downloads.viewDownloadHeader(downloadName = "Liferay Commerce 2.1.3");
+
+		LocalFile.Downloads.viewDownloadHeader(downloadName = "Liferay Commerce 2.2.0");
+
+		LocalFile.OSBAdmin.logoutAndLoginToSupport(
+			userEmailAddress = "dwn.customer2@lrcustomer.com.broken",
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.Downloads.gotoDownloadsPage();
+
+		LocalFile.Downloads.setSearchFilters(
+			fileType = "Product",
+			productName = "Commerce");
+
+		LocalFile.Downloads.viewDownloadHeader(downloadName = "Liferay Commerce 2.1.3");
+
+		LocalFile.Downloads.viewDownloadHeader(downloadName = "Liferay Commerce 2.2.0");
+	}
+
+	@help.center.acceptance = "true"
+	test Viewdxpdownloadsaspermissionedusers {
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | dwn.customer1                       |
+	| Email Address | dwn.customer1@lrcustomer.com.broken |
+	| First Name    | DWN                                 |
+	| Last Name     | Customer1                           |''');
+
+		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | dwn.customer2                       |
+	| Email Address | dwn.customer2@lrcustomer.com.broken |
+	| First Name    | DWN                                 |
+	| Last Name     | Customer2                           |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code   | DWNZENDWNZEN                  | |
+	| Name   | Dwnzen - ${staticProjectName} | |
+	| Region | United States                 | |
+	| Status | Active                        | |
+	| Tier   | T1                            | |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Dwnzen - ${staticProjectName}",
+			contactEmailAddress = "dwn.customer1@lrcustomer.com.broken",
+			table = '''| Support Requester |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Dwnzen - ${staticProjectName}",
+			contactEmailAddress = "dwn.customer2@lrcustomer.com.broken",
+			table = '''| Support User |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Dwnzen - ${staticProjectName}",
+			productName = "DXP Production",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Dwnzen - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - DXP");
+
+		LocalFile.JSONUser.viewSupportUserSync(userEmailAddress = "dwn.customer1@lrcustomer.com.broken");
+
+		LocalFile.JSONUser.viewSupportUserSync(userEmailAddress = "dwn.customer2@lrcustomer.com.broken");
+
+		LocalFile.JSONUser.updateSupportPassword(
+			userEmailAddress = "dwn.customer1@lrcustomer.com.broken",
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.JSONUser.updateSupportPassword(
+			userEmailAddress = "dwn.customer2@lrcustomer.com.broken",
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.JSONUser.assignUserToSupportGroup(
+			groupName = "Help Center",
+			userEmailAddress = "dwn.customer1@lrcustomer.com.broken");
+
+		LocalFile.JSONUser.assignUserToSupportGroup(
+			groupName = "Help Center",
+			userEmailAddress = "dwn.customer2@lrcustomer.com.broken");
+
+		LocalFile.OSBAdmin.logoutAndLoginToSupport(
+			userEmailAddress = "dwn.customer1@lrcustomer.com.broken",
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.Downloads.gotoDownloadsPage();
+
+		LocalFile.Downloads.setSearchFilters(
+			fileType = "Product/Updates",
+			productName = "DXP 7.3");
+
+		LocalFile.Downloads.viewDownloadHeader(downloadName = "Liferay DXP 7.3 Service Pack 1");
+
+		LocalFile.Downloads.setSearchFilters(
+			fileType = "Fix Packs",
+			productName = "DXP 7.2");
+
+		LocalFile.Downloads.viewDownloadHeader(downloadName = "Liferay DXP 7.2 Fix Pack 2");
+
+		LocalFile.Downloads.viewDownloadHeader(downloadName = "Liferay DXP 7.2 Fix Pack 1");
+
+		LocalFile.Downloads.setSearchFilters(
+			fileType = "Fix Packs",
+			productName = "DXP 7.1");
+
+		LocalFile.Downloads.viewDownloadHeader(downloadName = "Liferay DXP 7.1 Fix Pack 14");
+
+		LocalFile.Downloads.viewDownloadHeader(downloadName = "Liferay DXP 7.1 Fix Pack 13");
+
+		LocalFile.Downloads.setSearchFilters(
+			fileType = "Fix Packs",
+			productName = "DXP 7.0");
+
+		LocalFile.Downloads.viewDownloadHeader(downloadName = "Liferay DXP 7.0 Fix Pack 86");
+
+		LocalFile.Downloads.viewDownloadHeader(downloadName = "Liferay DXP 7.0 Fix Pack 85");
+
+		LocalFile.OSBAdmin.logoutAndLoginToSupport(
+			userEmailAddress = "dwn.customer2@lrcustomer.com.broken",
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.Downloads.gotoDownloadsPage();
+
+		LocalFile.Downloads.setSearchFilters(
+			fileType = "Security Fix Packs",
+			productName = "DXP 7.3");
+
+		LocalFile.Downloads.viewDownloadHeader(downloadName = "Liferay DXP 7.3 Fix Pack 1");
+
+		LocalFile.Downloads.setSearchFilters(
+			fileType = "Fix Packs",
+			productName = "DXP 7.2");
+
+		LocalFile.Downloads.viewDownloadHeader(downloadName = "Liferay DXP 7.2 Fix Pack 2");
+
+		LocalFile.Downloads.viewDownloadHeader(downloadName = "Liferay DXP 7.2 Fix Pack 1");
+
+		LocalFile.Downloads.setSearchFilters(
+			fileType = "Fix Packs",
+			productName = "DXP 7.1");
+
+		LocalFile.Downloads.viewDownloadHeader(downloadName = "Liferay DXP 7.1 Fix Pack 14");
+
+		LocalFile.Downloads.viewDownloadHeader(downloadName = "Liferay DXP 7.1 Fix Pack 13");
+
+		LocalFile.Downloads.setSearchFilters(
+			fileType = "Fix Packs",
+			productName = "DXP 7.0");
+
+		LocalFile.Downloads.viewDownloadHeader(downloadName = "Liferay DXP 7.0 Fix Pack 86");
+
+		LocalFile.Downloads.viewDownloadHeader(downloadName = "Liferay DXP 7.0 Fix Pack 85");
+	}
+
+	test Viewenterprisesearchdownloadsaspermissionedusers {
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | dwn.customer1                       |
+	| Email Address | dwn.customer1@lrcustomer.com.broken |
+	| First Name    | DWN                                 |
+	| Last Name     | Customer1                           |''');
+
+		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | dwn.customer2                       |
+	| Email Address | dwn.customer2@lrcustomer.com.broken |
+	| First Name    | DWN                                 |
+	| Last Name     | Customer2                           |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code   | DWNZENDWNZEN                  | |
+	| Name   | Dwnzen - ${staticProjectName} | |
+	| Region | United States                 | |
+	| Status | Active                        | |
+	| Tier   | T1                            | |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Dwnzen - ${staticProjectName}",
+			contactEmailAddress = "dwn.customer1@lrcustomer.com.broken",
+			table = '''| Support Requester |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Dwnzen - ${staticProjectName}",
+			contactEmailAddress = "dwn.customer2@lrcustomer.com.broken",
+			table = '''| Support User |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Dwnzen - ${staticProjectName}",
+			productName = "DXP Production",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Dwnzen - ${staticProjectName}",
+			productName = "Enterprise Search - Production",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Dwnzen - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - Enterprise Search");
+
+		LocalFile.JSONUser.viewSupportUserSync(userEmailAddress = "dwn.customer1@lrcustomer.com.broken");
+
+		LocalFile.JSONUser.viewSupportUserSync(userEmailAddress = "dwn.customer2@lrcustomer.com.broken");
+
+		LocalFile.JSONUser.updateSupportPassword(
+			userEmailAddress = "dwn.customer1@lrcustomer.com.broken",
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.JSONUser.updateSupportPassword(
+			userEmailAddress = "dwn.customer2@lrcustomer.com.broken",
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.JSONUser.assignUserToSupportGroup(
+			groupName = "Help Center",
+			userEmailAddress = "dwn.customer1@lrcustomer.com.broken");
+
+		LocalFile.JSONUser.assignUserToSupportGroup(
+			groupName = "Help Center",
+			userEmailAddress = "dwn.customer2@lrcustomer.com.broken");
+
+		LocalFile.OSBAdmin.logoutAndLoginToSupport(
+			userEmailAddress = "dwn.customer1@lrcustomer.com.broken",
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.Downloads.gotoDownloadsPage();
+
+		LocalFile.Downloads.setSearchFilters(
+			fileType = "Product",
+			productName = "Enterprise Search");
+
+		LocalFile.Downloads.viewDownloadHeader(downloadName = "Liferay Enterprise Search for Liferay DXP 7.3");
+
+		LocalFile.Downloads.viewDownloadHeader(downloadName = "Liferay Enterprise Search for Liferay DXP 7.2");
+
+		LocalFile.Downloads.viewDownloadHeader(downloadName = "Liferay Enterprise Search for Liferay DXP 7.1");
+
+		LocalFile.Downloads.viewDownloadHeader(downloadName = "Liferay Enterprise Search for Liferay DXP 7.0");
+
+		LocalFile.Downloads.viewNoDownloadHeader(downloadName = "Enterprise Search Standard");
+
+		LocalFile.Downloads.viewNoDownloadHeader(downloadName = "Elasticsearch 6 Downloads");
+
+		LocalFile.OSBAdmin.logoutAndLoginToSupport(
+			userEmailAddress = "dwn.customer2@lrcustomer.com.broken",
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.Downloads.gotoDownloadsPage();
+
+		LocalFile.Downloads.setSearchFilters(
+			fileType = "Product",
+			productName = "Enterprise Search");
+
+		LocalFile.Downloads.viewDownloadHeader(downloadName = "Liferay Enterprise Search for Liferay DXP 7.3");
+
+		LocalFile.Downloads.viewDownloadHeader(downloadName = "Liferay Enterprise Search for Liferay DXP 7.2");
+
+		LocalFile.Downloads.viewDownloadHeader(downloadName = "Liferay Enterprise Search for Liferay DXP 7.1");
+
+		LocalFile.Downloads.viewDownloadHeader(downloadName = "Liferay Enterprise Search for Liferay DXP 7.0");
+
+		LocalFile.Downloads.viewNoDownloadHeader(downloadName = "Enterprise Search Standard");
+
+		LocalFile.Downloads.viewNoDownloadHeader(downloadName = "Elasticsearch 6 Downloads");
+	}
+
+	test Viewportaldownloadsaspermissionedusers {
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | dwn.customer1                       |
+	| Email Address | dwn.customer1@lrcustomer.com.broken |
+	| First Name    | DWN                                 |
+	| Last Name     | Customer1                           |''');
+
+		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | dwn.customer2                       |
+	| Email Address | dwn.customer2@lrcustomer.com.broken |
+	| First Name    | DWN                                 |
+	| Last Name     | Customer2                           |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code   | DWNZENDWNZEN                  | |
+	| Name   | Dwnzen - ${staticProjectName} | |
+	| Region | United States                 | |
+	| Status | Active                        | |
+	| Tier   | T1                            | |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Dwnzen - ${staticProjectName}",
+			contactEmailAddress = "dwn.customer1@lrcustomer.com.broken",
+			table = '''| Support Requester |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Dwnzen - ${staticProjectName}",
+			contactEmailAddress = "dwn.customer2@lrcustomer.com.broken",
+			table = '''| Support User |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Dwnzen - ${staticProjectName}",
+			productName = "Portal Production",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Dwnzen - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - Portal");
+
+		LocalFile.JSONUser.viewSupportUserSync(userEmailAddress = "dwn.customer1@lrcustomer.com.broken");
+
+		LocalFile.JSONUser.viewSupportUserSync(userEmailAddress = "dwn.customer2@lrcustomer.com.broken");
+
+		LocalFile.JSONUser.updateSupportPassword(
+			userEmailAddress = "dwn.customer1@lrcustomer.com.broken",
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.JSONUser.updateSupportPassword(
+			userEmailAddress = "dwn.customer2@lrcustomer.com.broken",
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.JSONUser.assignUserToSupportGroup(
+			groupName = "Help Center",
+			userEmailAddress = "dwn.customer1@lrcustomer.com.broken");
+
+		LocalFile.JSONUser.assignUserToSupportGroup(
+			groupName = "Help Center",
+			userEmailAddress = "dwn.customer2@lrcustomer.com.broken");
+
+		LocalFile.OSBAdmin.logoutAndLoginToSupport(
+			userEmailAddress = "dwn.customer1@lrcustomer.com.broken",
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.Downloads.gotoDownloadsPage();
+
+		LocalFile.Downloads.setSearchFilters(
+			fileType = "Fix Packs",
+			productName = "Portal 6.2");
+
+		LocalFile.Downloads.viewDownloadHeader(downloadName = "Liferay Portal 6.2 EE Update 2019-10-15 Portal-171");
+
+		LocalFile.Downloads.viewDownloadHeader(downloadName = "Liferay Portal 6.2 EE Update 2019-06-25 Portal-170");
+
+		LocalFile.Downloads.setSearchFilters(
+			fileType = "Fix Packs",
+			productName = "Portal 6.1");
+
+		LocalFile.Downloads.viewDownloadHeader(downloadName = "Liferay Portal 6.1 EE GA3 Update 2018-12-17 Portal-71");
+
+		LocalFile.Downloads.viewDownloadHeader(downloadName = "Liferay Portal 6.1 EE GA3 Update 2018-08-21 Portal-70");
+
+		LocalFile.Downloads.setSearchFilters(
+			fileType = "Fix Packs",
+			productName = "Portal 6.0");
+
+		LocalFile.Downloads.viewDownloadHeader(downloadName = "Liferay Portal 6.0 EE SP2 Update 2015-12-17 Hotfix-1285");
+
+		LocalFile.Downloads.viewDownloadHeader(downloadName = "Liferay Portal 6.0 EE SP2 Update 2013-01-14 All-1");
+
+		LocalFile.Downloads.setSearchFilters(
+			fileType = "Fix Packs",
+			productName = "Portal 5.2");
+
+		LocalFile.Downloads.viewDownloadHeader(downloadName = "Liferay Portal 5.2 EE SP5 Update 2011-02-24");
+
+		LocalFile.OSBAdmin.logoutAndLoginToSupport(
+			userEmailAddress = "dwn.customer2@lrcustomer.com.broken",
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.Downloads.gotoDownloadsPage();
+
+		LocalFile.Downloads.setSearchFilters(
+			fileType = "Fix Packs",
+			productName = "Portal 6.2");
+
+		LocalFile.Downloads.viewDownloadHeader(downloadName = "Liferay Portal 6.2 EE Update 2019-10-15 Portal-171");
+
+		LocalFile.Downloads.viewDownloadHeader(downloadName = "Liferay Portal 6.2 EE Update 2019-06-25 Portal-170");
+
+		LocalFile.Downloads.setSearchFilters(
+			fileType = "Fix Packs",
+			productName = "Portal 6.1");
+
+		LocalFile.Downloads.viewDownloadHeader(downloadName = "Liferay Portal 6.1 EE GA3 Update 2018-12-17 Portal-71");
+
+		LocalFile.Downloads.viewDownloadHeader(downloadName = "Liferay Portal 6.1 EE GA3 Update 2018-08-21 Portal-70");
+
+		LocalFile.Downloads.setSearchFilters(
+			fileType = "Fix Packs",
+			productName = "Portal 6.0");
+
+		LocalFile.Downloads.viewDownloadHeader(downloadName = "Liferay Portal 6.0 EE SP2 Update 2015-12-17 Hotfix-1285");
+
+		LocalFile.Downloads.viewDownloadHeader(downloadName = "Liferay Portal 6.0 EE SP2 Update 2013-01-14 All-1");
+
+		LocalFile.Downloads.setSearchFilters(
+			fileType = "Fix Packs",
+			productName = "Portal 5.2");
+
+		LocalFile.Downloads.viewDownloadHeader(downloadName = "Liferay Portal 5.2 EE SP5 Update 2011-02-24");
+	}
+
+}

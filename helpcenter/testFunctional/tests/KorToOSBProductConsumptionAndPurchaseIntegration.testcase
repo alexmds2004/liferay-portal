@@ -1,0 +1,929 @@
+definition {
+
+	property testray.main.component.name = "Support QA";
+	property type = "osb.integration";
+
+	tearDown {
+		LocalFile.ZendeskUserAPI._getDefaultUserId(organizationName = "Korone - ${staticProjectName}");
+
+		LocalFile.KoroneikiProductConsumptionAPI._tearDownProductConsumptions(
+			accountName = "Korone - ${staticProjectName}",
+			table = '''| A Liferay OSB Product |''');
+
+		LocalFile.OSBAdminProject.tearDownProjects(table = '''| KORONEKORONE |''');
+
+		LocalFile.KoroneikiAccountAPI._tearDownAccounts(table = '''| Korone - ${staticProjectName} |''');
+
+		LocalFile.KoroneikiAccountAPI._tearDownAccountsViaAccountFieldNameAndValue(
+			fieldName = "Code",
+			table = '''| KORONEKORONE |''');
+
+		LocalFile.KoroneikiProductAPI._tearDownProducts(table = '''| A Liferay OSB Product |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+
+		LocalFile.ZendeskOrganizationAPI._getMultipleOrganizationExternalIdsByOrganizationNameIfStillPresent(table = '''| Korone - ${staticProjectName} |''');
+
+		LocalFile.ZendeskOrganizationAPI._tearDownOrganizationsByExternalIdList(organizationExternalIds = ${staticOrganizationExternalIdList});
+
+		LocalFile.ZendeskUserAPI._tearDownUserById(userId = ${staticDefaultUserId});
+	}
+
+	@help.center.acceptance = "true"
+	test Createandviewproductconsumptionwithpurchase {
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | KORONEKORONE                         | |
+	| Contact Email Address | osb.koroneiki1@lrcustomer.com.broken | |
+	| Description           | Test osb account on koroneiki        | |
+	| Fax Number            | 555-555-1234                         | |
+	| Name                  | Korone - ${staticProjectName}        | |
+	| Phone Number          | 555-555-5678                         | |
+	| Profile Email Address | osb.koroneiki1@lrcustomer.com.broken | |
+	| Region                | United States                        | |
+	| Status                | Active                               | |
+	| Tier                  | T4                                   | |
+	| Website               | www.koroneikicorporation.com         | |''');
+
+		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | A Liferay OSB Product | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korone - ${staticProjectName}",
+			productName = "DXP Production",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | true                     | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korone - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | true                     | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korone - ${staticProjectName}",
+			productName = "A Liferay OSB Product",
+			table = '''| End Date                | ${staticEndDate}         |                |
+	| Original End Date       | ${staticOriginalEndDate} |                |
+	| Perpetual               | true                     |                |
+	| Product Field and Value | additionalProp1          | propertyValue1 |
+	| Product Field and Value | additionalProp2          | propertyValue2 |
+	| Product Field and Value | additionalProp3          | propertyValue3 |
+	| Quantity                | 1                        |                |
+	| Start Date              | ${staticStartDate}       |                |
+	| Status                  | Approved                 |                |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductConsumption(
+			accountName = "Korone - ${staticProjectName}",
+			productName = "A Liferay OSB Product",
+			table = '''| Product Purchase        | true            |                |
+	| Product Field and Value | additionalProp1 | propertyValue1 |
+	| Product Field and Value | additionalProp2 | propertyValue2 |
+	| Product Field and Value | additionalProp3 | propertyValue3 |''');
+
+		LocalFile.Passwords.getPasswords();
+
+		LocalFile.OSBAdmin.loginToSupport(
+			userEmailAddress = ${staticSupportAdminEmailAdress},
+			userPassword = ${staticSupportAdminPassword});
+
+		LocalFile.ProjectDetails.gotoProjectDetailsPage();
+
+		LocalFile.ProjectDetails.searchKeyword(keyword = "Korone");
+
+		LocalFile.ProjectDetails.gotoProject(projectName = "Korone - ${staticProjectName}");
+
+		LocalFile.ProjectDetails.gotoHistory();
+
+		LocalFile.KoroneikiAccountAPI._generateAccountId(accountName = "Korone - ${staticProjectName}");
+
+		LocalFile.KoroneikiProductAPI._generateProductId(productName = "A Liferay OSB Product");
+
+		LocalFile.KoroneikiProductPurchaseAPI._generateProductPurchaseId(
+			accountName = "Korone - ${staticProjectName}",
+			productName = "A Liferay OSB Product");
+
+		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+			fieldName = "quantity",
+			keyword1 = "Added Product Purchase",
+			keyword2 = "A Liferay OSB Product",
+			table = '''| Updater Name                | Koroneiki QA Service Producer |
+	| Update Summary              | Added Product Purchase        |
+	| Update Description          | A Liferay OSB Product         |
+	| Update Date                 | Today                         |
+	| Update Field Name           | quantity                      |
+	| Update Field Original Value | N/A                           |
+	| Update Field New Value      | 1                             |''');
+
+		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+			fieldName = "accountId",
+			keyword1 = "Added Product Purchase",
+			keyword2 = "A Liferay OSB Product",
+			table = '''| Updater Name                | Koroneiki QA Service Producer |
+	| Update Summary              | Added Product Purchase        |
+	| Update Description          | A Liferay OSB Product         |
+	| Update Date                 | Today                         |
+	| Update Field Name           | accountId                     |
+	| Update Field Original Value | N/A                           |
+	| Update Field New Value      | ${staticAccountId}            |''');
+
+		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+			fieldName = "productEntryId",
+			keyword1 = "Added Product Purchase",
+			keyword2 = "A Liferay OSB Product",
+			table = '''| Updater Name                | Koroneiki QA Service Producer |
+	| Update Summary              | Added Product Purchase        |
+	| Update Description          | A Liferay OSB Product         |
+	| Update Date                 | Today                         |
+	| Update Field Name           | productEntryId                |
+	| Update Field Original Value | N/A                           |
+	| Update Field New Value      | ${staticProductId}            |''');
+
+		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+			fieldName = "additionalProp1",
+			keyword1 = "Added Product Purchase",
+			keyword2 = "A Liferay OSB Product",
+			table = '''| Updater Name                | Koroneiki QA Service Producer |
+	| Update Summary              | Added Product Purchase        |
+	| Update Description          | A Liferay OSB Product         |
+	| Update Date                 | Today                         |
+	| Update Field Name           | additionalProp1               |
+	| Update Field Original Value | N/A                           |
+	| Update Field New Value      | propertyValue1                |''');
+
+		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+			fieldName = "additionalProp2",
+			keyword1 = "Added Product Purchase",
+			keyword2 = "A Liferay OSB Product",
+			table = '''| Updater Name                | Koroneiki QA Service Producer |
+	| Update Summary              | Added Product Purchase        |
+	| Update Description          | A Liferay OSB Product         |
+	| Update Date                 | Today                         |
+	| Update Field Name           | additionalProp2               |
+	| Update Field Original Value | N/A                           |
+	| Update Field New Value      | propertyValue2                |''');
+
+		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+			fieldName = "additionalProp3",
+			keyword1 = "Added Product Purchase",
+			keyword2 = "A Liferay OSB Product",
+			table = '''| Updater Name                | Koroneiki QA Service Producer |
+	| Update Summary              | Added Product Purchase        |
+	| Update Description          | A Liferay OSB Product         |
+	| Update Date                 | Today                         |
+	| Update Field Name           | additionalProp3               |
+	| Update Field Original Value | N/A                           |
+	| Update Field New Value      | propertyValue3                |''');
+
+		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+			fieldName = "status",
+			keyword1 = "Added Product Purchase",
+			keyword2 = "A Liferay OSB Product",
+			table = '''| Updater Name                | Koroneiki QA Service Producer |
+	| Update Summary              | Added Product Purchase        |
+	| Update Description          | A Liferay OSB Product         |
+	| Update Date                 | Today                         |
+	| Update Field Name           | status                        |
+	| Update Field Original Value | N/A                           |
+	| Update Field New Value      | 0                             |''');
+
+		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+			fieldName = "productPurchaseId",
+			keyword1 = "Added Product Consumption",
+			keyword2 = "A Liferay OSB Product",
+			table = '''| Updater Name                | Koroneiki QA Service Producer |
+	| Update Summary              | Added Product Consumption     |
+	| Update Description          | A Liferay OSB Product         |
+	| Update Date                 | Today                         |
+	| Update Field Name           | productPurchaseId             |
+	| Update Field Original Value | N/A                           |
+	| Update Field New Value      | ${staticProductPurchaseId}    |''');
+
+		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+			fieldName = "accountId",
+			keyword1 = "Added Product Consumption",
+			keyword2 = "A Liferay OSB Product",
+			table = '''| Updater Name                | Koroneiki QA Service Producer |
+	| Update Summary              | Added Product Consumption     |
+	| Update Description          | A Liferay OSB Product         |
+	| Update Date                 | Today                         |
+	| Update Field Name           | accountId                     |
+	| Update Field Original Value | N/A                           |
+	| Update Field New Value      | ${staticAccountId}            |''');
+
+		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+			fieldName = "productEntryId",
+			keyword1 = "Added Product Consumption",
+			keyword2 = "A Liferay OSB Product",
+			table = '''| Updater Name                | Koroneiki QA Service Producer |
+	| Update Summary              | Added Product Consumption     |
+	| Update Description          | A Liferay OSB Product         |
+	| Update Date                 | Today                         |
+	| Update Field Name           | productEntryId                |
+	| Update Field Original Value | N/A                           |
+	| Update Field New Value      | ${staticProductId}            |''');
+
+		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+			fieldName = "additionalProp1",
+			keyword1 = "Added Product Consumption",
+			keyword2 = "A Liferay OSB Product",
+			table = '''| Updater Name                | Koroneiki QA Service Producer |
+	| Update Summary              | Added Product Consumption     |
+	| Update Description          | A Liferay OSB Product         |
+	| Update Date                 | Today                         |
+	| Update Field Name           | additionalProp1               |
+	| Update Field Original Value | N/A                           |
+	| Update Field New Value      | propertyValue1                |''');
+
+		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+			fieldName = "additionalProp2",
+			keyword1 = "Added Product Consumption",
+			keyword2 = "A Liferay OSB Product",
+			table = '''| Updater Name                | Koroneiki QA Service Producer |
+	| Update Summary              | Added Product Consumption     |
+	| Update Description          | A Liferay OSB Product         |
+	| Update Date                 | Today                         |
+	| Update Field Name           | additionalProp2               |
+	| Update Field Original Value | N/A                           |
+	| Update Field New Value      | propertyValue2                |''');
+
+		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+			fieldName = "additionalProp3",
+			keyword1 = "Added Product Consumption",
+			keyword2 = "A Liferay OSB Product",
+			table = '''| Updater Name                | Koroneiki QA Service Producer |
+	| Update Summary              | Added Product Consumption     |
+	| Update Description          | A Liferay OSB Product         |
+	| Update Date                 | Today                         |
+	| Update Field Name           | additionalProp3               |
+	| Update Field Original Value | N/A                           |
+	| Update Field New Value      | propertyValue3                |''');
+	}
+
+	test Removeandviewproductconsumptionwithpurchase {
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | KORONEKORONE                         | |
+	| Contact Email Address | osb.koroneiki1@lrcustomer.com.broken | |
+	| Description           | Test osb account on koroneiki        | |
+	| Fax Number            | 555-555-1234                         | |
+	| Name                  | Korone - ${staticProjectName}        | |
+	| Phone Number          | 555-555-5678                         | |
+	| Profile Email Address | osb.koroneiki1@lrcustomer.com.broken | |
+	| Region                | United States                        | |
+	| Status                | Active                               | |
+	| Tier                  | T4                                   | |
+	| Website               | www.koroneikicorporation.com         | |''');
+
+		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | A Liferay OSB Product | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korone - ${staticProjectName}",
+			productName = "DXP Production",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | true                     | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korone - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | true                     | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korone - ${staticProjectName}",
+			productName = "A Liferay OSB Product",
+			table = '''| End Date                | ${staticEndDate}         |                |
+	| Original End Date       | ${staticOriginalEndDate} |                |
+	| Perpetual               | true                     |                |
+	| Product Field and Value | additionalProp1          | propertyValue1 |
+	| Product Field and Value | additionalProp2          | propertyValue2 |
+	| Product Field and Value | additionalProp3          | propertyValue3 |
+	| Quantity                | 1                        |                |
+	| Start Date              | ${staticStartDate}       |                |
+	| Status                  | Approved                 |                |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductConsumption(
+			accountName = "Korone - ${staticProjectName}",
+			productName = "A Liferay OSB Product",
+			table = '''| Product Purchase        | true            |                |
+	| Product Field and Value | additionalProp1 | propertyValue1 |
+	| Product Field and Value | additionalProp2 | propertyValue2 |
+	| Product Field and Value | additionalProp3 | propertyValue3 |''');
+
+		LocalFile.KoroneikiProductConsumptionAPI._deleteProductConsumption(
+			accountName = "Korone - ${staticProjectName}",
+			productName = "A Liferay OSB Product");
+
+		LocalFile.Passwords.getPasswords();
+
+		LocalFile.OSBAdmin.loginToSupport(
+			userEmailAddress = ${staticSupportAdminEmailAdress},
+			userPassword = ${staticSupportAdminPassword});
+
+		LocalFile.ProjectDetails.gotoProjectDetailsPage();
+
+		LocalFile.ProjectDetails.searchKeyword(keyword = "Korone");
+
+		LocalFile.ProjectDetails.gotoProject(projectName = "Korone - ${staticProjectName}");
+
+		LocalFile.ProjectDetails.gotoHistory();
+
+		LocalFile.KoroneikiAccountAPI._generateAccountId(accountName = "Korone - ${staticProjectName}");
+
+		LocalFile.KoroneikiProductAPI._generateProductId(productName = "A Liferay OSB Product");
+
+		LocalFile.KoroneikiProductPurchaseAPI._generateProductPurchaseId(
+			accountName = "Korone - ${staticProjectName}",
+			productName = "A Liferay OSB Product");
+
+		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+			fieldName = "quantity",
+			keyword1 = "Added Product Purchase",
+			keyword2 = "A Liferay OSB Product",
+			table = '''| Updater Name                | Koroneiki QA Service Producer |
+	| Update Summary              | Added Product Purchase        |
+	| Update Description          | A Liferay OSB Product         |
+	| Update Date                 | Today                         |
+	| Update Field Name           | quantity                      |
+	| Update Field Original Value | N/A                           |
+	| Update Field New Value      | 1                             |''');
+
+		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+			fieldName = "accountId",
+			keyword1 = "Added Product Purchase",
+			keyword2 = "A Liferay OSB Product",
+			table = '''| Updater Name                | Koroneiki QA Service Producer |
+	| Update Summary              | Added Product Purchase        |
+	| Update Description          | A Liferay OSB Product         |
+	| Update Date                 | Today                         |
+	| Update Field Name           | accountId                     |
+	| Update Field Original Value | N/A                           |
+	| Update Field New Value      | ${staticAccountId}            |''');
+
+		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+			fieldName = "productEntryId",
+			keyword1 = "Added Product Purchase",
+			keyword2 = "A Liferay OSB Product",
+			table = '''| Updater Name                | Koroneiki QA Service Producer |
+	| Update Summary              | Added Product Purchase        |
+	| Update Description          | A Liferay OSB Product         |
+	| Update Date                 | Today                         |
+	| Update Field Name           | productEntryId                |
+	| Update Field Original Value | N/A                           |
+	| Update Field New Value      | ${staticProductId}            |''');
+
+		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+			fieldName = "additionalProp1",
+			keyword1 = "Added Product Purchase",
+			keyword2 = "A Liferay OSB Product",
+			table = '''| Updater Name                | Koroneiki QA Service Producer |
+	| Update Summary              | Added Product Purchase        |
+	| Update Description          | A Liferay OSB Product         |
+	| Update Date                 | Today                         |
+	| Update Field Name           | additionalProp1               |
+	| Update Field Original Value | N/A                           |
+	| Update Field New Value      | propertyValue1                |''');
+
+		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+			fieldName = "additionalProp2",
+			keyword1 = "Added Product Purchase",
+			keyword2 = "A Liferay OSB Product",
+			table = '''| Updater Name                | Koroneiki QA Service Producer |
+	| Update Summary              | Added Product Purchase        |
+	| Update Description          | A Liferay OSB Product         |
+	| Update Date                 | Today                         |
+	| Update Field Name           | additionalProp2               |
+	| Update Field Original Value | N/A                           |
+	| Update Field New Value      | propertyValue2                |''');
+
+		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+			fieldName = "additionalProp3",
+			keyword1 = "Added Product Purchase",
+			keyword2 = "A Liferay OSB Product",
+			table = '''| Updater Name                | Koroneiki QA Service Producer |
+	| Update Summary              | Added Product Purchase        |
+	| Update Description          | A Liferay OSB Product         |
+	| Update Date                 | Today                         |
+	| Update Field Name           | additionalProp3               |
+	| Update Field Original Value | N/A                           |
+	| Update Field New Value      | propertyValue3                |''');
+
+		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+			fieldName = "status",
+			keyword1 = "Added Product Purchase",
+			keyword2 = "A Liferay OSB Product",
+			table = '''| Updater Name                | Koroneiki QA Service Producer |
+	| Update Summary              | Added Product Purchase        |
+	| Update Description          | A Liferay OSB Product         |
+	| Update Date                 | Today                         |
+	| Update Field Name           | status                        |
+	| Update Field Original Value | N/A                           |
+	| Update Field New Value      | 0                             |''');
+
+		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+			fieldName = "productPurchaseId",
+			keyword1 = "Added Product Consumption",
+			keyword2 = "A Liferay OSB Product",
+			table = '''| Updater Name                | Koroneiki QA Service Producer |
+	| Update Summary              | Added Product Consumption     |
+	| Update Description          | A Liferay OSB Product         |
+	| Update Date                 | Today                         |
+	| Update Field Name           | productPurchaseId             |
+	| Update Field Original Value | N/A                           |
+	| Update Field New Value      | ${staticProductPurchaseId}    |''');
+
+		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+			fieldName = "accountId",
+			keyword1 = "Added Product Consumption",
+			keyword2 = "A Liferay OSB Product",
+			table = '''| Updater Name                | Koroneiki QA Service Producer |
+	| Update Summary              | Added Product Consumption     |
+	| Update Description          | A Liferay OSB Product         |
+	| Update Date                 | Today                         |
+	| Update Field Name           | accountId                     |
+	| Update Field Original Value | N/A                           |
+	| Update Field New Value      | ${staticAccountId}            |''');
+
+		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+			fieldName = "productEntryId",
+			keyword1 = "Added Product Consumption",
+			keyword2 = "A Liferay OSB Product",
+			table = '''| Updater Name                | Koroneiki QA Service Producer |
+	| Update Summary              | Added Product Consumption     |
+	| Update Description          | A Liferay OSB Product         |
+	| Update Date                 | Today                         |
+	| Update Field Name           | productEntryId                |
+	| Update Field Original Value | N/A                           |
+	| Update Field New Value      | ${staticProductId}            |''');
+
+		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+			fieldName = "additionalProp1",
+			keyword1 = "Added Product Consumption",
+			keyword2 = "A Liferay OSB Product",
+			table = '''| Updater Name                | Koroneiki QA Service Producer |
+	| Update Summary              | Added Product Consumption     |
+	| Update Description          | A Liferay OSB Product         |
+	| Update Date                 | Today                         |
+	| Update Field Name           | additionalProp1               |
+	| Update Field Original Value | N/A                           |
+	| Update Field New Value      | propertyValue1                |''');
+
+		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+			fieldName = "additionalProp2",
+			keyword1 = "Added Product Consumption",
+			keyword2 = "A Liferay OSB Product",
+			table = '''| Updater Name                | Koroneiki QA Service Producer |
+	| Update Summary              | Added Product Consumption     |
+	| Update Description          | A Liferay OSB Product         |
+	| Update Date                 | Today                         |
+	| Update Field Name           | additionalProp2               |
+	| Update Field Original Value | N/A                           |
+	| Update Field New Value      | propertyValue2                |''');
+
+		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+			fieldName = "additionalProp3",
+			keyword1 = "Added Product Consumption",
+			keyword2 = "A Liferay OSB Product",
+			table = '''| Updater Name                | Koroneiki QA Service Producer |
+	| Update Summary              | Added Product Consumption     |
+	| Update Description          | A Liferay OSB Product         |
+	| Update Date                 | Today                         |
+	| Update Field Name           | additionalProp3               |
+	| Update Field Original Value | N/A                           |
+	| Update Field New Value      | propertyValue3                |''');
+
+		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+			fieldName = "productPurchaseId",
+			keyword1 = "Deleted Product Consumption",
+			keyword2 = "A Liferay OSB Product",
+			table = '''| Updater Name                | Koroneiki QA Service Producer |
+	| Update Summary              | Deleted Product Consumption   |
+	| Update Description          | A Liferay OSB Product         |
+	| Update Date                 | Today                         |
+	| Update Field Name           | productPurchaseId             |
+	| Update Field Original Value | ${staticProductPurchaseId}    |
+	| Update Field New Value      | N/A                           |''');
+
+		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+			fieldName = "accountId",
+			keyword1 = "Deleted Product Consumption",
+			keyword2 = "A Liferay OSB Product",
+			table = '''| Updater Name                | Koroneiki QA Service Producer |
+	| Update Summary              | Deleted Product Consumption   |
+	| Update Description          | A Liferay OSB Product         |
+	| Update Date                 | Today                         |
+	| Update Field Name           | accountId                     |
+	| Update Field Original Value | ${staticAccountId}            |
+	| Update Field New Value      | N/A                           |''');
+
+		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+			fieldName = "productEntryId",
+			keyword1 = "Deleted Product Consumption",
+			keyword2 = "A Liferay OSB Product",
+			table = '''| Updater Name                | Koroneiki QA Service Producer |
+	| Update Summary              | Deleted Product Consumption   |
+	| Update Description          | A Liferay OSB Product         |
+	| Update Date                 | Today                         |
+	| Update Field Name           | productEntryId                |
+	| Update Field Original Value | ${staticProductId}            |
+	| Update Field New Value      | N/A                           |''');
+
+		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+			fieldName = "additionalProp1",
+			keyword1 = "Deleted Product Consumption",
+			keyword2 = "A Liferay OSB Product",
+			table = '''| Updater Name                | Koroneiki QA Service Producer |
+	| Update Summary              | Deleted Product Consumption   |
+	| Update Description          | A Liferay OSB Product         |
+	| Update Date                 | Today                         |
+	| Update Field Name           | additionalProp1               |
+	| Update Field Original Value | propertyValue1                |
+	| Update Field New Value      | N/A                           |''');
+
+		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+			fieldName = "additionalProp2",
+			keyword1 = "Deleted Product Consumption",
+			keyword2 = "A Liferay OSB Product",
+			table = '''| Updater Name                | Koroneiki QA Service Producer |
+	| Update Summary              | Deleted Product Consumption   |
+	| Update Description          | A Liferay OSB Product         |
+	| Update Date                 | Today                         |
+	| Update Field Name           | additionalProp2               |
+	| Update Field Original Value | propertyValue2                |
+	| Update Field New Value      | N/A                           |''');
+
+		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+			fieldName = "additionalProp3",
+			keyword1 = "Deleted Product Consumption",
+			keyword2 = "A Liferay OSB Product",
+			table = '''| Updater Name                | Koroneiki QA Service Producer |
+	| Update Summary              | Deleted Product Consumption   |
+	| Update Description          | A Liferay OSB Product         |
+	| Update Date                 | Today                         |
+	| Update Field Name           | additionalProp3               |
+	| Update Field Original Value | propertyValue3                |
+	| Update Field New Value      | N/A                           |''');
+	}
+
+	test Updateandviewproductpurchaseonproductconsumption {
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | KORONEKORONE                         | |
+	| Contact Email Address | osb.koroneiki1@lrcustomer.com.broken | |
+	| Description           | Test osb account on koroneiki        | |
+	| Fax Number            | 555-555-1234                         | |
+	| Name                  | Korone - ${staticProjectName}        | |
+	| Phone Number          | 555-555-5678                         | |
+	| Profile Email Address | osb.koroneiki1@lrcustomer.com.broken | |
+	| Region                | United States                        | |
+	| Status                | Active                               | |
+	| Tier                  | T4                                   | |
+	| Website               | www.koroneikicorporation.com         | |''');
+
+		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | A Liferay OSB Product | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korone - ${staticProjectName}",
+			productName = "DXP Production",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | true                     | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korone - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | true                     | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korone - ${staticProjectName}",
+			productName = "A Liferay OSB Product",
+			table = '''| End Date                | ${staticEndDate}         |                |
+	| Original End Date       | ${staticOriginalEndDate} |                |
+	| Perpetual               | true                     |                |
+	| Product Field and Value | additionalProp1          | propertyValue1 |
+	| Product Field and Value | additionalProp2          | propertyValue2 |
+	| Product Field and Value | additionalProp3          | propertyValue3 |
+	| Quantity                | 1                        |                |
+	| Start Date              | ${staticStartDate}       |                |
+	| Status                  | Approved                 |                |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductConsumption(
+			accountName = "Korone - ${staticProjectName}",
+			productName = "A Liferay OSB Product",
+			table = '''| Product Purchase        | true            |                |
+	| Product Field and Value | additionalProp1 | propertyValue1 |
+	| Product Field and Value | additionalProp2 | propertyValue2 |
+	| Product Field and Value | additionalProp3 | propertyValue3 |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._updateProductPurchase(
+			accountName = "Korone - ${staticProjectName}",
+			productName = "A Liferay OSB Product",
+			table = '''| End Date                | ${staticEndDate}         |                |
+	| Original End Date       | ${staticOriginalEndDate} |                |
+	| Perpetual               | false                    |                |
+	| Product Field and Value | additionalProp4          | propertyValue4 |
+	| Product Field and Value | additionalProp5          | propertyValue5 |
+	| Product Field and Value | additionalProp6          | propertyValue6 |
+	| Quantity                | 1                        |                |
+	| Start Date              | ${staticStartDate}       |                |
+	| Status                  | Approved                 |                |''');
+
+		LocalFile.Passwords.getPasswords();
+
+		LocalFile.OSBAdmin.loginToSupport(
+			userEmailAddress = ${staticSupportAdminEmailAdress},
+			userPassword = ${staticSupportAdminPassword});
+
+		LocalFile.ProjectDetails.gotoProjectDetailsPage();
+
+		LocalFile.ProjectDetails.searchKeyword(keyword = "Korone");
+
+		LocalFile.ProjectDetails.gotoProject(projectName = "Korone - ${staticProjectName}");
+
+		LocalFile.ProjectDetails.gotoHistory();
+
+		LocalFile.KoroneikiAccountAPI._generateAccountId(accountName = "Korone - ${staticProjectName}");
+
+		LocalFile.KoroneikiProductAPI._generateProductId(productName = "A Liferay OSB Product");
+
+		LocalFile.KoroneikiProductPurchaseAPI._generateProductPurchaseId(
+			accountName = "Korone - ${staticProjectName}",
+			productName = "A Liferay OSB Product");
+
+		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+			fieldName = "quantity",
+			keyword1 = "Added Product Purchase",
+			keyword2 = "A Liferay OSB Product",
+			table = '''| Updater Name                | Koroneiki QA Service Producer |
+	| Update Summary              | Added Product Purchase        |
+	| Update Description          | A Liferay OSB Product         |
+	| Update Date                 | Today                         |
+	| Update Field Name           | quantity                      |
+	| Update Field Original Value | N/A                           |
+	| Update Field New Value      | 1                             |''');
+
+		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+			fieldName = "accountId",
+			keyword1 = "Added Product Purchase",
+			keyword2 = "A Liferay OSB Product",
+			table = '''| Updater Name                | Koroneiki QA Service Producer |
+	| Update Summary              | Added Product Purchase        |
+	| Update Description          | A Liferay OSB Product         |
+	| Update Date                 | Today                         |
+	| Update Field Name           | accountId                     |
+	| Update Field Original Value | N/A                           |
+	| Update Field New Value      | ${staticAccountId}            |''');
+
+		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+			fieldName = "productEntryId",
+			keyword1 = "Added Product Purchase",
+			keyword2 = "A Liferay OSB Product",
+			table = '''| Updater Name                | Koroneiki QA Service Producer |
+	| Update Summary              | Added Product Purchase        |
+	| Update Description          | A Liferay OSB Product         |
+	| Update Date                 | Today                         |
+	| Update Field Name           | productEntryId                |
+	| Update Field Original Value | N/A                           |
+	| Update Field New Value      | ${staticProductId}            |''');
+
+		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+			fieldName = "additionalProp1",
+			keyword1 = "Added Product Purchase",
+			keyword2 = "A Liferay OSB Product",
+			table = '''| Updater Name                | Koroneiki QA Service Producer |
+	| Update Summary              | Added Product Purchase        |
+	| Update Description          | A Liferay OSB Product         |
+	| Update Date                 | Today                         |
+	| Update Field Name           | additionalProp1               |
+	| Update Field Original Value | N/A                           |
+	| Update Field New Value      | propertyValue1                |''');
+
+		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+			fieldName = "additionalProp2",
+			keyword1 = "Added Product Purchase",
+			keyword2 = "A Liferay OSB Product",
+			table = '''| Updater Name                | Koroneiki QA Service Producer |
+	| Update Summary              | Added Product Purchase        |
+	| Update Description          | A Liferay OSB Product         |
+	| Update Date                 | Today                         |
+	| Update Field Name           | additionalProp2               |
+	| Update Field Original Value | N/A                           |
+	| Update Field New Value      | propertyValue2                |''');
+
+		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+			fieldName = "additionalProp3",
+			keyword1 = "Added Product Purchase",
+			keyword2 = "A Liferay OSB Product",
+			table = '''| Updater Name                | Koroneiki QA Service Producer |
+	| Update Summary              | Added Product Purchase        |
+	| Update Description          | A Liferay OSB Product         |
+	| Update Date                 | Today                         |
+	| Update Field Name           | additionalProp3               |
+	| Update Field Original Value | N/A                           |
+	| Update Field New Value      | propertyValue3                |''');
+
+		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+			fieldName = "status",
+			keyword1 = "Added Product Purchase",
+			keyword2 = "A Liferay OSB Product",
+			table = '''| Updater Name                | Koroneiki QA Service Producer |
+	| Update Summary              | Added Product Purchase        |
+	| Update Description          | A Liferay OSB Product         |
+	| Update Date                 | Today                         |
+	| Update Field Name           | status                        |
+	| Update Field Original Value | N/A                           |
+	| Update Field New Value      | 0                             |''');
+
+		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+			fieldName = "productPurchaseId",
+			keyword1 = "Added Product Consumption",
+			keyword2 = "A Liferay OSB Product",
+			table = '''| Updater Name                | Koroneiki QA Service Producer |
+	| Update Summary              | Added Product Consumption     |
+	| Update Description          | A Liferay OSB Product         |
+	| Update Date                 | Today                         |
+	| Update Field Name           | productPurchaseId             |
+	| Update Field Original Value | N/A                           |
+	| Update Field New Value      | ${staticProductPurchaseId}    |''');
+
+		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+			fieldName = "accountId",
+			keyword1 = "Added Product Consumption",
+			keyword2 = "A Liferay OSB Product",
+			table = '''| Updater Name                | Koroneiki QA Service Producer |
+	| Update Summary              | Added Product Consumption     |
+	| Update Description          | A Liferay OSB Product         |
+	| Update Date                 | Today                         |
+	| Update Field Name           | accountId                     |
+	| Update Field Original Value | N/A                           |
+	| Update Field New Value      | ${staticAccountId}            |''');
+
+		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+			fieldName = "productEntryId",
+			keyword1 = "Added Product Consumption",
+			keyword2 = "A Liferay OSB Product",
+			table = '''| Updater Name                | Koroneiki QA Service Producer |
+	| Update Summary              | Added Product Consumption     |
+	| Update Description          | A Liferay OSB Product         |
+	| Update Date                 | Today                         |
+	| Update Field Name           | productEntryId                |
+	| Update Field Original Value | N/A                           |
+	| Update Field New Value      | ${staticProductId}            |''');
+
+		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+			fieldName = "additionalProp1",
+			keyword1 = "Added Product Consumption",
+			keyword2 = "A Liferay OSB Product",
+			table = '''| Updater Name                | Koroneiki QA Service Producer |
+	| Update Summary              | Added Product Consumption     |
+	| Update Description          | A Liferay OSB Product         |
+	| Update Date                 | Today                         |
+	| Update Field Name           | additionalProp1               |
+	| Update Field Original Value | N/A                           |
+	| Update Field New Value      | propertyValue1                |''');
+
+		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+			fieldName = "additionalProp2",
+			keyword1 = "Added Product Consumption",
+			keyword2 = "A Liferay OSB Product",
+			table = '''| Updater Name                | Koroneiki QA Service Producer |
+	| Update Summary              | Added Product Consumption     |
+	| Update Description          | A Liferay OSB Product         |
+	| Update Date                 | Today                         |
+	| Update Field Name           | additionalProp2               |
+	| Update Field Original Value | N/A                           |
+	| Update Field New Value      | propertyValue2                |''');
+
+		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+			fieldName = "additionalProp3",
+			keyword1 = "Added Product Consumption",
+			keyword2 = "A Liferay OSB Product",
+			table = '''| Updater Name                | Koroneiki QA Service Producer |
+	| Update Summary              | Added Product Consumption     |
+	| Update Description          | A Liferay OSB Product         |
+	| Update Date                 | Today                         |
+	| Update Field Name           | additionalProp3               |
+	| Update Field Original Value | N/A                           |
+	| Update Field New Value      | propertyValue3                |''');
+
+		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+			fieldName = "additionalProp1",
+			keyword1 = "Updated Product Purchase",
+			keyword2 = "A Liferay OSB Product",
+			table = '''| Updater Name                | Koroneiki QA Service Producer |
+	| Update Summary              | Updated Product Purchase      |
+	| Update Description          | A Liferay OSB Product         |
+	| Update Date                 | Today                         |
+	| Update Field Name           | additionalProp1               |
+	| Update Field Original Value | propertyValue1                |
+	| Update Field New Value      | N/A                           |''');
+
+		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+			fieldName = "additionalProp2",
+			keyword1 = "Updated Product Purchase",
+			keyword2 = "A Liferay OSB Product",
+			table = '''| Updater Name                | Koroneiki QA Service Producer |
+	| Update Summary              | Updated Product Purchase      |
+	| Update Description          | A Liferay OSB Product         |
+	| Update Date                 | Today                         |
+	| Update Field Name           | additionalProp2               |
+	| Update Field Original Value | propertyValue2                |
+	| Update Field New Value      | N/A                           |''');
+
+		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+			fieldName = "additionalProp3",
+			keyword1 = "Updated Product Purchase",
+			keyword2 = "A Liferay OSB Product",
+			table = '''| Updater Name                | Koroneiki QA Service Producer |
+	| Update Summary              | Updated Product Purchase      |
+	| Update Description          | A Liferay OSB Product         |
+	| Update Date                 | Today                         |
+	| Update Field Name           | additionalProp3               |
+	| Update Field Original Value | propertyValue3                |
+	| Update Field New Value      | N/A                           |''');
+
+		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+			fieldName = "additionalProp4",
+			keyword1 = "Updated Product Purchase",
+			keyword2 = "A Liferay OSB Product",
+			table = '''| Updater Name                | Koroneiki QA Service Producer |
+	| Update Summary              | Updated Product Purchase      |
+	| Update Description          | A Liferay OSB Product         |
+	| Update Date                 | Today                         |
+	| Update Field Name           | additionalProp4               |
+	| Update Field Original Value | N/A                           |
+	| Update Field New Value      | propertyValue4                |''');
+
+		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+			fieldName = "additionalProp5",
+			keyword1 = "Updated Product Purchase",
+			keyword2 = "A Liferay OSB Product",
+			table = '''| Updater Name                | Koroneiki QA Service Producer |
+	| Update Summary              | Updated Product Purchase      |
+	| Update Description          | A Liferay OSB Product         |
+	| Update Date                 | Today                         |
+	| Update Field Name           | additionalProp5               |
+	| Update Field Original Value | N/A                           |
+	| Update Field New Value      | propertyValue5                |''');
+
+		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+			fieldName = "additionalProp6",
+			keyword1 = "Updated Product Purchase",
+			keyword2 = "A Liferay OSB Product",
+			table = '''| Updater Name                | Koroneiki QA Service Producer |
+	| Update Summary              | Updated Product Purchase      |
+	| Update Description          | A Liferay OSB Product         |
+	| Update Date                 | Today                         |
+	| Update Field Name           | additionalProp6               |
+	| Update Field Original Value | N/A                           |
+	| Update Field New Value      | propertyValue6                |''');
+
+		LocalFile.ProjectDetails.viewHistoryEntryByKeywords(
+			fieldName = "status",
+			keyword1 = "Updated Product Purchase",
+			keyword2 = "A Liferay OSB Product",
+			table = '''| Updater Name                | Koroneiki QA Service Producer |
+	| Update Summary              | Updated Product Purchase      |
+	| Update Description          | A Liferay OSB Product         |
+	| Update Date                 | Today                         |
+	| Update Field Name           | status                        |
+	| Update Field Original Value | 0                             |
+	| Update Field New Value      | 0                             |''');
+	}
+
+}

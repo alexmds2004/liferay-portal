@@ -1,0 +1,539 @@
+definition {
+
+	property testray.main.component.name = "Support QA";
+	property type = "customer.portal";
+
+	setUp {
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		LocalFile.Passwords.getPasswords();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.Data.generateSupportUser();
+
+		LocalFile.Data._renameFirstSupportUserVariables();
+
+		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | ${staticScreenNameValue1}       |
+	| Email Address | ${staticEmailValue1}            |
+	| First Name    | ${staticContactFirstNameValue1} |
+	| Last Name     | ${staticContactLastNameValue1}  |''');
+
+		LocalFile.Data.generateSupportUser();
+
+		LocalFile.Data._renameSecondSupportUserVariables();
+
+		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | ${staticScreenNameValue2}       |
+	| Email Address | ${staticEmailValue2}            |
+	| First Name    | ${staticContactFirstNameValue2} |
+	| Last Name     | ${staticContactLastNameValue2}  |
+	| Group         | Employees                       |''');
+	}
+
+	tearDown {
+		LocalFile.ZendeskUserAPI._getDefaultUserId(organizationName = "Sfpzen - ${staticProjectName}");
+
+		LocalFile.OSBAdminProject.tearDownProjects(table = '''| SFPZENSFPZEN |''');
+
+		LocalFile.KoroneikiAccountAPI._tearDownAccounts(table = '''| Sfpzen - ${staticProjectName} |''');
+
+		LocalFile.KoroneikiAccountAPI._tearDownAccountsViaAccountFieldNameAndValue(
+			fieldName = "Code",
+			table = '''| SFPZENSFPZEN |''');
+
+		LocalFile.JSONUser.tearDownUsers(table = '''| ${staticEmailValue1} |
+	| ${staticEmailValue2} |''');
+
+		LocalFile.JSONUser.tearDownUsersViaSupport(table = '''| ${staticEmailValue1} |
+	| ${staticEmailValue2} |''');
+
+		LocalFile.JSONUser.tearDownUsersViaKoroneiki(table = '''| ${staticEmailValue1} |
+	| ${staticEmailValue2} |''');
+
+		LocalFile.KoroneikiContactAPI._tearDownContacts(table = '''| ${staticEmailValue1} |
+	| ${staticEmailValue2} |''');
+
+		LocalFile.JSONOkta.tearDownUsers(table = '''| ${staticEmailValue1} |
+	| ${staticEmailValue2} |''');
+
+		LocalFile.ZendeskUserAPI._getMultipleUserIdsByEmailAddress(table = '''| ${staticEmailValue1} |
+	| ${staticEmailValue2} |''');
+
+		LocalFile.ZendeskUserAPI._tearDownUsersByIdList(userIds = ${staticUserIdList});
+
+		LocalFile.ZendeskOrganizationAPI._getMultipleOrganizationExternalIdsByOrganizationNameIfStillPresent(table = '''| Sfpzen - ${staticProjectName} |''');
+
+		LocalFile.ZendeskOrganizationAPI._tearDownOrganizationsByExternalIdList(organizationExternalIds = ${staticOrganizationExternalIdList});
+
+		LocalFile.ZendeskUserAPI._tearDownUserById(userId = ${staticDefaultUserId});
+
+		LocalFile.Downloads.teardownDownloadedListedFiles(list = ${staticDownloadedListName});
+	}
+
+	test Downloaddxpselfprovisioninglicense {
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code   | SFPZENSFPZEN                  | |
+	| Name   | Sfpzen - ${staticProjectName} | |
+	| Region | United States                 | |
+	| Status | Active                        | |
+	| Tier   | T1                            | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Sfpzen - ${staticProjectName}",
+			productName = "DXP Production",
+			table = '''| End Date                | ${staticEndDate}         |   |
+	| Original End Date       | ${staticOriginalEndDate} |   |
+	| Perpetual               | false                    |   |
+	| Product Field and Value | sizing                   | 1 |
+	| Product Field and Value | licenses                 | 1 |
+	| Product Field and Value | version                  | 7 |
+	| Quantity                | 1                        |   |
+	| Start Date              | ${staticStartDate}       |   |
+	| Status                  | Approved                 |   |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Sfpzen - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Sfpzen - ${staticProjectName}",
+			contactEmailAddress = ${staticEmailValue1},
+			table = '''| Support Requester |''');
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - DXP");
+
+		LocalFile.JSONUser.viewSupportUserSync(userEmailAddress = ${staticEmailValue1});
+
+		LocalFile.JSONUser.updateSupportPassword(
+			userEmailAddress = ${staticEmailValue1},
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.JSONUser.assignUserToSupportGroup(
+			groupName = "Help Center",
+			userEmailAddress = ${staticEmailValue1});
+
+		LocalFile.JSONUser.assignUserToSupportRole(
+			roleName = "Customer - DXP",
+			userEmailAddress = ${staticEmailValue1});
+
+		LocalFile.JSONUser.assignUserToSupportUserGroup(
+			userEmailAddress = ${staticEmailValue1},
+			userGroupName = "customer");
+
+		LocalFile.OSBAdmin.logoutAndLoginToSupport(
+			userEmailAddress = ${staticEmailValue1},
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.SelfProvisioning.gotoSelfProvisioningPage();
+
+		LocalFile.SelfProvisioning.downloadSelfProvisioningLicense(table = '''| Project | Sfpzen - ${staticProjectName} |
+	| Product | DXP                           |
+	| Version | 7.4                           |''');
+
+		LocalFile.SelfProvisioning.downloadSelfProvisioningLicense(table = '''| Project | Sfpzen - ${staticProjectName} |
+	| Product | DXP                           |
+	| Version | 7.3                           |''');
+
+		LocalFile.SelfProvisioning.downloadSelfProvisioningLicense(table = '''| Project | Sfpzen - ${staticProjectName} |
+	| Product | DXP                           |
+	| Version | 7.2                           |''');
+
+		LocalFile.SelfProvisioning.downloadSelfProvisioningLicense(table = '''| Project | Sfpzen - ${staticProjectName} |
+	| Product | DXP                           |
+	| Version | 7.1                           |''');
+
+		LocalFile.SelfProvisioning.downloadSelfProvisioningLicense(table = '''| Project | Sfpzen - ${staticProjectName} |
+	| Product | DXP                           |
+	| Version | 7.0                           |''');
+
+		LocalFile.ProvisioningLicense.assertDownloadedLicensePresent(
+			fileType = "xml",
+			table = '''| License Type | activation-key            |
+	| Product      | DXP Development           |
+	| Version      | 7.4                       |
+	| License Name | Developer Activation Keys |''');
+
+		LocalFile.ProvisioningLicense.assertDownloadedLicensePresent(
+			fileType = "xml",
+			table = '''| License Type | activation-key            |
+	| Product      | DXP Development           |
+	| Version      | 7.3                       |
+	| License Name | Developer Activation Keys |''');
+
+		LocalFile.ProvisioningLicense.assertDownloadedLicensePresent(
+			fileType = "xml",
+			table = '''| License Type | activation-key            |
+	| Product      | DXP Development           |
+	| Version      | 7.1                       |
+	| License Name | Developer Activation Keys |''');
+
+		LocalFile.ProvisioningLicense.assertDownloadedLicensePresent(
+			fileType = "xml",
+			table = '''| License Type | activation-key            |
+	| Product      | DXP Development           |
+	| Version      | 7.0                       |
+	| License Name | Developer Activation Keys |''');
+	}
+
+	test Viewcommerceoptions {
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code   | SFPZENSFPZEN                  | |
+	| Name   | Sfpzen - ${staticProjectName} | |
+	| Region | United States                 | |
+	| Status | Active                        | |
+	| Tier   | T1                            | |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Sfpzen - ${staticProjectName}",
+			contactEmailAddress = ${staticEmailValue1},
+			table = '''| Support Requester |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Sfpzen - ${staticProjectName}",
+			productName = "DXP Production",
+			table = '''| End Date                | ${staticEndDate}         |   |
+	| Original End Date       | ${staticOriginalEndDate} |   |
+	| Perpetual               | false                    |   |
+	| Product Field and Value | sizing                   | 1 |
+	| Product Field and Value | licenses                 | 1 |
+	| Product Field and Value | version                  | 7 |
+	| Quantity                | 1                        |   |
+	| Start Date              | ${staticStartDate}       |   |
+	| Status                  | Approved                 |   |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Sfpzen - ${staticProjectName}",
+			productName = "Commerce Subscription Production",
+			table = '''| End Date                | ${staticEndDate}         |   |
+	| Original End Date       | ${staticOriginalEndDate} |   |
+	| Perpetual               | false                    |   |
+	| Product Field and Value | sizing                   | 1 |
+	| Product Field and Value | licenses                 | 1 |
+	| Product Field and Value | version                  | 0 |
+	| Quantity                | 1                        |   |
+	| Start Date              | ${staticStartDate}       |   |
+	| Status                  | Approved                 |   |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Sfpzen - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - DXP");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - Commerce");
+
+		LocalFile.JSONUser.viewSupportUserSync(userEmailAddress = ${staticEmailValue1});
+
+		LocalFile.JSONUser.updateSupportPassword(
+			userEmailAddress = ${staticEmailValue1},
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.JSONUser.assignUserToSupportGroup(
+			groupName = "Help Center",
+			userEmailAddress = ${staticEmailValue1});
+
+		LocalFile.JSONUser.assignUserToSupportRole(
+			roleName = "Customer - DXP",
+			userEmailAddress = ${staticEmailValue1});
+
+		LocalFile.JSONUser.assignUserToSupportRole(
+			roleName = "Customer - Liferay Commerce",
+			userEmailAddress = ${staticEmailValue1});
+
+		LocalFile.JSONUser.assignUserToSupportUserGroup(
+			userEmailAddress = ${staticEmailValue1},
+			userGroupName = "customer");
+
+		LocalFile.OSBAdmin.logoutAndLoginToSupport(
+			userEmailAddress = ${staticEmailValue1},
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.SelfProvisioning.gotoSelfProvisioningPage();
+
+		LocalFile.SelfProvisioning.viewSelfProvisioningOptions(table = '''| Project | Sfpzen - ${staticProjectName} |
+	| Product | Commerce Subscription         |
+	| Version | 1                             |''');
+	}
+
+	test ViewcommerceoptionsviacommerceforLXCSMpurchase {
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code   | SFPZENSFPZEN                  | |
+	| Name   | Sfpzen - ${staticProjectName} | |
+	| Region | United States                 | |
+	| Status | Active                        | |
+	| Tier   | T1                            | |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Sfpzen - ${staticProjectName}",
+			contactEmailAddress = ${staticEmailValue1},
+			table = '''| Support Requester |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Sfpzen - ${staticProjectName}",
+			productName = "DXP Production",
+			table = '''| End Date                | ${staticEndDate}         |   |
+	| Original End Date       | ${staticOriginalEndDate} |   |
+	| Perpetual               | false                    |   |
+	| Product Field and Value | sizing                   | 1 |
+	| Product Field and Value | licenses                 | 1 |
+	| Product Field and Value | version                  | 7 |
+	| Quantity                | 1                        |   |
+	| Start Date              | ${staticStartDate}       |   |
+	| Status                  | Approved                 |   |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Sfpzen - ${staticProjectName}",
+			productName = "Commerce for LXC SM Production",
+			table = '''| End Date                | ${staticEndDate}         |   |
+	| Original End Date       | ${staticOriginalEndDate} |   |
+	| Perpetual               | false                    |   |
+	| Product Field and Value | sizing                   | 1 |
+	| Product Field and Value | licenses                 | 1 |
+	| Product Field and Value | version                  | 0 |
+	| Quantity                | 1                        |   |
+	| Start Date              | ${staticStartDate}       |   |
+	| Status                  | Approved                 |   |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Sfpzen - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - DXP");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - Commerce");
+
+		LocalFile.JSONUser.viewSupportUserSync(userEmailAddress = ${staticEmailValue1});
+
+		LocalFile.JSONUser.updateSupportPassword(
+			userEmailAddress = ${staticEmailValue1},
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.JSONUser.assignUserToSupportGroup(
+			groupName = "Help Center",
+			userEmailAddress = ${staticEmailValue1});
+
+		LocalFile.JSONUser.assignUserToSupportRole(
+			roleName = "Customer - DXP",
+			userEmailAddress = ${staticEmailValue1});
+
+		LocalFile.JSONUser.assignUserToSupportRole(
+			roleName = "Customer - Liferay Commerce",
+			userEmailAddress = ${staticEmailValue1});
+
+		LocalFile.JSONUser.assignUserToSupportUserGroup(
+			userEmailAddress = ${staticEmailValue1},
+			userGroupName = "customer");
+
+		LocalFile.OSBAdmin.logoutAndLoginToSupport(
+			userEmailAddress = ${staticEmailValue1},
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.SelfProvisioning.gotoSelfProvisioningPage();
+
+		LocalFile.SelfProvisioning.viewSelfProvisioningOptions(table = '''| Project | Sfpzen - ${staticProjectName} |
+	| Product | Commerce Subscription         |
+	| Version | 1                             |''');
+	}
+
+	@help.center.acceptance = "true"
+	test Viewdxpoptions {
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code   | SFPZENSFPZEN                  | |
+	| Name   | Sfpzen - ${staticProjectName} | |
+	| Region | United States                 | |
+	| Status | Active                        | |
+	| Tier   | T1                            | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Sfpzen - ${staticProjectName}",
+			productName = "DXP Production",
+			table = '''| End Date                | ${staticEndDate}         |   |
+	| Original End Date       | ${staticOriginalEndDate} |   |
+	| Perpetual               | false                    |   |
+	| Product Field and Value | sizing                   | 1 |
+	| Product Field and Value | licenses                 | 1 |
+	| Product Field and Value | version                  | 7 |
+	| Quantity                | 1                        |   |
+	| Start Date              | ${staticStartDate}       |   |
+	| Status                  | Approved                 |   |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Sfpzen - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Sfpzen - ${staticProjectName}",
+			contactEmailAddress = ${staticEmailValue1},
+			table = '''| Support Requester |''');
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - DXP");
+
+		LocalFile.JSONUser.viewSupportUserSync(userEmailAddress = ${staticEmailValue1});
+
+		LocalFile.JSONUser.updateSupportPassword(
+			userEmailAddress = ${staticEmailValue1},
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.JSONUser.assignUserToSupportGroup(
+			groupName = "Help Center",
+			userEmailAddress = ${staticEmailValue1});
+
+		LocalFile.JSONUser.assignUserToSupportRole(
+			roleName = "Customer - DXP",
+			userEmailAddress = ${staticEmailValue1});
+
+		LocalFile.JSONUser.assignUserToSupportUserGroup(
+			userEmailAddress = ${staticEmailValue1},
+			userGroupName = "customer");
+
+		LocalFile.OSBAdmin.logoutAndLoginToSupport(
+			userEmailAddress = ${staticEmailValue1},
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.SelfProvisioning.gotoSelfProvisioningPage();
+
+		LocalFile.SelfProvisioning.viewSelfProvisioningOptions(table = '''| Project | Sfpzen - ${staticProjectName} |
+	| Product | DXP                           |
+	| Version | 7.4                           |
+	| Version | 7.3                           |
+	| Version | 7.2                           |
+	| Version | 7.1                           |
+	| Version | 7.0                           |''');
+	}
+
+	test Viewemployeeoptions {
+		LocalFile.KoroneikiContactAPI._viewContactSyncViaEmailAddress(contactEmailAddress = ${staticEmailValue2});
+
+		LocalFile.KoroneikiContactAPI._viewAccountSyncViaUuid(
+			accountName = "Liferay, Inc.",
+			contactEmailAddress = ${staticEmailValue2});
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - DXP");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - Portal");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - Commerce");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Liferay Employee");
+
+		LocalFile.JSONUser.viewSupportUserSync(userEmailAddress = ${staticEmailValue2});
+
+		LocalFile.JSONUser.updateSupportPassword(
+			userEmailAddress = ${staticEmailValue2},
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.OSBAdmin.logoutAndLoginToSupport(
+			userEmailAddress = ${staticEmailValue2},
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.SelfProvisioning.gotoSelfProvisioningPage();
+
+		LocalFile.SelfProvisioning.viewSelfProvisioningOptions(table = '''| Project | Liferay, Inc.         |
+	| Product | Commerce Subscription |
+	| Product | DXP                   |
+	| Product | Portal                |''');
+	}
+
+	test Viewportaloptions {
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code   | SFPZENSFPZEN                  | |
+	| Name   | Sfpzen - ${staticProjectName} | |
+	| Region | United States                 | |
+	| Status | Active                        | |
+	| Tier   | T1                            | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Sfpzen - ${staticProjectName}",
+			productName = "Portal Production",
+			table = '''| End Date                | ${staticEndDate}         |   |
+	| Original End Date       | ${staticOriginalEndDate} |   |
+	| Perpetual               | false                    |   |
+	| Product Field and Value | sizing                   | 1 |
+	| Product Field and Value | licenses                 | 1 |
+	| Product Field and Value | version                  | 6 |
+	| Quantity                | 1                        |   |
+	| Start Date              | ${staticStartDate}       |   |
+	| Status                  | Approved                 |   |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Sfpzen - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Sfpzen - ${staticProjectName}",
+			contactEmailAddress = ${staticEmailValue1},
+			table = '''| Support Requester |''');
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - Portal");
+
+		LocalFile.JSONUser.viewSupportUserSync(userEmailAddress = ${staticEmailValue1});
+
+		LocalFile.JSONUser.updateSupportPassword(
+			userEmailAddress = ${staticEmailValue1},
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.JSONUser.assignUserToSupportGroup(
+			groupName = "Help Center",
+			userEmailAddress = ${staticEmailValue1});
+
+		LocalFile.JSONUser.assignUserToSupportRole(
+			roleName = "Customer - Portal",
+			userEmailAddress = ${staticEmailValue1});
+
+		LocalFile.JSONUser.assignUserToSupportUserGroup(
+			userEmailAddress = ${staticEmailValue1},
+			userGroupName = "customer");
+
+		LocalFile.OSBAdmin.logoutAndLoginToSupport(
+			userEmailAddress = ${staticEmailValue1},
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.SelfProvisioning.gotoSelfProvisioningPage();
+
+		LocalFile.SelfProvisioning.viewSelfProvisioningOptions(table = '''| Project | Sfpzen - ${staticProjectName} |
+	| Product | Portal                        |
+	| Version | 6.2                           |
+	| Version | 6.1                           |
+	| Version | 6.0                           |
+	| Version | 5.2                           |
+	| Version | 5.1                           |''');
+	}
+
+}

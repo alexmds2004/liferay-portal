@@ -1,0 +1,859 @@
+definition {
+
+	property testray.main.component.name = "Support QA";
+	property type = "provisioning.integration";
+
+	setUp {
+		LocalFile.Passwords.getPasswords();
+
+		LocalFile.OSBAdminRabbitMQ.generateStaticVariables();
+
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningCompanyName();
+
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | pro.koroneiki1                       |
+	| Email Address | pro.koroneiki1@lrcustomer.com.broken |
+	| First Name    | PRO                                  |
+	| Last Name     | Koroneiki1                           |''');
+
+		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | pro.koroneiki2                       |
+	| Email Address | pro.koroneiki2@lrcustomer.com.broken |
+	| First Name    | PRO                                  |
+	| Last Name     | Koroneiki2                           |''');
+	}
+
+	tearDown {
+		LocalFile.ZendeskUserAPI._getDefaultUserId(organizationName = "Korpro - ${staticProjectName}");
+
+		LocalFile.ZendeskUserAPI._renameFirstDefaultUserIdVariable();
+
+		LocalFile.ZendeskUserAPI._getDefaultUserId(organizationName = "Onepro - ${staticProjectName}");
+
+		LocalFile.ZendeskUserAPI._renameSecondDefaultUserIdVariable();
+
+		LocalFile.ZendeskUserAPI._getDefaultUserId(organizationName = "Prokor - ${staticCompanyName}");
+
+		LocalFile.ZendeskUserAPI._renameThirdDefaultUserIdVariable();
+
+		LocalFile.KoroneikiTeamAPI._tearDownTeams(table = '''| Koroneiki Partner |
+	| Updated Partner   |''');
+
+		LocalFile.OSBAdminProject.tearDownProjects(table = '''| PROKORKORPRO |
+	| PROKOR       |''');
+
+		LocalFile.KoroneikiAccountAPI._tearDownAccounts(table = '''| Korpro - ${staticProjectName} |
+	| Onepro - ${staticProjectName} |
+	| Prokor - ${staticCompanyName} |''');
+
+		LocalFile.KoroneikiAccountAPI._tearDownAccountsViaAccountFieldNameAndValue(
+			fieldName = "Code",
+			table = '''| PROKORKORPRO |
+	| PROKOR       |''');
+
+		LocalFile.JSONUser.tearDownUsers(table = '''| pro.koroneiki1@lrcustomer.com.broken |
+	| pro.koroneiki2@lrcustomer.com.broken |''');
+
+		LocalFile.JSONUser.tearDownUsersViaSupport(table = '''| pro.koroneiki1@lrcustomer.com.broken |
+	| pro.koroneiki2@lrcustomer.com.broken |''');
+
+		LocalFile.JSONUser.tearDownUsersViaKoroneiki(table = '''| pro.koroneiki1@lrcustomer.com.broken |
+	| pro.koroneiki2@lrcustomer.com.broken |''');
+
+		LocalFile.JSONUser.tearDownUsersViaProvisioning(table = '''| pro.koroneiki1@lrcustomer.com.broken |
+	| pro.koroneiki2@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiContactAPI._tearDownContacts(table = '''| pro.koroneiki1@lrcustomer.com.broken |
+	| pro.koroneiki2@lrcustomer.com.broken |''');
+
+		LocalFile.JSONOkta.tearDownUsers(table = '''| pro.koroneiki1@lrcustomer.com.broken |
+	| pro.koroneiki2@lrcustomer.com.broken |''');
+
+		LocalFile.JSONUser.tearDownUsersByScreenNameViaKoroneiki(table = '''| pro.koroneiki1       |
+	| pro.koroneiki2       |
+	| provisionings.worker |''');
+
+		LocalFile.JSONOkta.tearDownUsersByScreenName(table = '''| pro.koroneiki1       |
+	| pro.koroneiki2       |
+	| provisionings.worker |''');
+
+		LocalFile.ZendeskTicketAPI._tearDownTicketsByKeywords(table = '''| New Subscription(s) for Korpro - ${staticProjectName} |
+	| New Subscription(s) for Prokor - ${staticCompanyName} |''');
+
+		LocalFile.ZendeskUserAPI._getMultipleUserIdsByEmailAddress(table = '''| pro.koroneiki1@lrcustomer.com.broken |
+	| pro.koroneiki2@lrcustomer.com.broken |''');
+
+		LocalFile.ZendeskUserAPI._tearDownUsersByIdList(userIds = ${staticUserIdList});
+
+		LocalFile.ZendeskOrganizationAPI._getMultipleOrganizationExternalIdsByOrganizationNameIfStillPresent(table = '''| Korpro - ${staticProjectName} |
+	| Onepro - ${staticProjectName} |
+	| Prokor - ${staticCompanyName} |''');
+
+		LocalFile.ZendeskOrganizationAPI._tearDownOrganizationsByExternalIdList(organizationExternalIds = ${staticOrganizationExternalIdList});
+
+		LocalFile.ZendeskUserAPI._tearDownUserById(userId = ${staticDefaultUserId1});
+
+		LocalFile.ZendeskUserAPI._tearDownUserById(userId = ${staticDefaultUserId2});
+
+		LocalFile.ZendeskUserAPI._tearDownUserById(userId = ${staticDefaultUserId3});
+	}
+
+	test Viewallremovedexternallinks {
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Prokor - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Contact Email Address                  | pro.koroneiki1@lrcustomer.com.broken       |
+	| Contact First Name                     | PRO                                        |
+	| Contact Last Name                      | Koroneiki1                                 |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | pro.koroneiki2@lrcustomer.com.broken       |
+	| Owner First Name                       | PRO                                        |
+	| Owner Last Name                        | Koroneiki2                                 |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Korpro - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.KoroneikiAccountAPI._deleteAccountExternalLinkViaIdAndDomain(
+			accountName = "Korpro - ${staticProjectName}",
+			domain = "salesforce",
+			entityId = ${staticDossieraAccountKey});
+
+		LocalFile.KoroneikiAccountAPI._deleteAccountExternalLinkViaIdAndDomain(
+			accountName = "Korpro - ${staticProjectName}",
+			domain = "dossiera",
+			entityId = ${staticDossieraProjectKey});
+
+		LocalFile.KoroneikiAccountAPI._deleteAccountExternalLink(
+			accountName = "Korpro - ${staticProjectName}",
+			entityId = ${staticSalesforceProjectKey});
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korpro");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korpro - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.expandSidePanel();
+
+		LocalFile.ProvisioningAccount.clickSidePanelTab(tabName = "External Links");
+
+		LocalFile.ProvisioningAccount._viewNoAccountExternalLink(externalLink = "Salesforce Account");
+
+		LocalFile.ProvisioningAccount._viewNoAccountExternalLink(externalLink = "Dossiera Project");
+
+		LocalFile.ProvisioningAccount._viewAccountExternalLink(externalLink = "Zendesk Organization");
+
+		LocalFile.Provisioning.clickTab(tabName = "History");
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeywordAndPosition(
+			fieldName = "entityId",
+			keyword = "Koroneiki QA Service Producer > Deleted External Link",
+			positionValue = 1,
+			table = '''| Update Description          | Koroneiki QA Service Producer > Deleted External Link |
+	| Update Field Name           | entityId                                              |
+	| Update Field Original Value | ${staticDossieraAccountKey}                           |
+	| Update Field New Value      | N/A                                                   |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeywordAndPosition(
+			fieldName = "entityName",
+			keyword = "Koroneiki QA Service Producer > Deleted External Link",
+			positionValue = 1,
+			table = '''| Update Description          | Koroneiki QA Service Producer > Deleted External Link |
+	| Update Field Name           | entityName                                            |
+	| Update Field Original Value | account                                               |
+	| Update Field New Value      | N/A                                                   |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeywordAndPosition(
+			fieldName = "domain",
+			keyword = "Koroneiki QA Service Producer > Deleted External Link",
+			positionValue = 1,
+			table = '''| Update Description          | Koroneiki QA Service Producer > Deleted External Link |
+	| Update Field Name           | domain                                                |
+	| Update Field Original Value | salesforce                                            |
+	| Update Field New Value      | N/A                                                   |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeywordAndPosition(
+			fieldName = "entityId",
+			keyword = "Koroneiki QA Service Producer > Deleted External Link",
+			positionValue = 2,
+			table = '''| Update Description          | Koroneiki QA Service Producer > Deleted External Link |
+	| Update Field Name           | entityId                                              |
+	| Update Field Original Value | ${staticDossieraProjectKey}                           |
+	| Update Field New Value      | N/A                                                   |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeywordAndPosition(
+			fieldName = "entityName",
+			keyword = "Koroneiki QA Service Producer > Deleted External Link",
+			positionValue = 2,
+			table = '''| Update Description          | Koroneiki QA Service Producer > Deleted External Link |
+	| Update Field Name           | entityName                                            |
+	| Update Field Original Value | project                                               |
+	| Update Field New Value      | N/A                                                   |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeywordAndPosition(
+			fieldName = "domain",
+			keyword = "Koroneiki QA Service Producer > Deleted External Link",
+			positionValue = 2,
+			table = '''| Update Description          | Koroneiki QA Service Producer > Deleted External Link |
+	| Update Field Name           | domain                                                |
+	| Update Field Original Value | dossiera                                              |
+	| Update Field New Value      | N/A                                                   |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeywordAndPosition(
+			fieldName = "entityId",
+			keyword = "Koroneiki QA Service Producer > Deleted External Link",
+			positionValue = 3,
+			table = '''| Update Description          | Koroneiki QA Service Producer > Deleted External Link |
+	| Update Field Name           | entityId                                              |
+	| Update Field Original Value | ${staticSalesforceProjectKey}                         |
+	| Update Field New Value      | N/A                                                   |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeywordAndPosition(
+			fieldName = "entityName",
+			keyword = "Koroneiki QA Service Producer > Deleted External Link",
+			positionValue = 3,
+			table = '''| Update Description          | Koroneiki QA Service Producer > Deleted External Link |
+	| Update Field Name           | entityName                                            |
+	| Update Field Original Value | project                                               |
+	| Update Field New Value      | N/A                                                   |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeywordAndPosition(
+			fieldName = "domain",
+			keyword = "Koroneiki QA Service Producer > Deleted External Link",
+			positionValue = 3,
+			table = '''| Update Description          | Koroneiki QA Service Producer > Deleted External Link |
+	| Update Field Name           | domain                                                |
+	| Update Field Original Value | salesforce                                            |
+	| Update Field New Value      | N/A                                                   |''');
+	}
+
+	@help.center.acceptance = "true"
+	test Viewexternallink {
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Prokor - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Contact Email Address                  | pro.koroneiki1@lrcustomer.com.broken       |
+	| Contact First Name                     | PRO                                        |
+	| Contact Last Name                      | Koroneiki1                                 |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | pro.koroneiki2@lrcustomer.com.broken       |
+	| Owner First Name                       | PRO                                        |
+	| Owner Last Name                        | Koroneiki2                                 |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Korpro - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "PROKORKORPRO");
+
+		LocalFile.ZendeskOrganizationAPI._viewOrganizationSyncFromOsb(organizationName = "Korpro - ${staticProjectName}");
+
+		LocalFile.KoroneikiAccountAPI._createAccountExternalLink(
+			accountName = "Korpro - ${staticProjectName}",
+			table = '''| Domain      | koroneikiautomotive |
+	| Entity Id   | 1234                |
+	| Entity Name | KoroneikiAutomotive |''');
+
+		LocalFile.ZendeskOrganizationAPI._getOrganizationIdByOrganizationName(organizationName = "Korpro - ${staticProjectName}");
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korpro");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korpro - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.expandSidePanel();
+
+		LocalFile.ProvisioningAccount.clickSidePanelTab(tabName = "External Links");
+
+		LocalFile.ProvisioningAccount._viewAccountExternalLink(externalLink = "Salesforce Account");
+
+		LocalFile.ProvisioningAccount._viewAccountExternalLink(externalLink = "Dossiera Project");
+
+		LocalFile.ProvisioningAccount._viewAccountExternalLink(externalLink = "Salesforce Project");
+
+		LocalFile.ProvisioningAccount._viewAccountExternalLink(externalLink = "Zendesk Organization");
+
+		LocalFile.ProvisioningAccount._viewAccountExternalLink(externalLink = "koroneikiautomotive-KoroneikiAutomotive");
+
+		LocalFile.Provisioning.clickTab(tabName = "History");
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeywordAndPosition(
+			fieldName = "entityId",
+			keyword = "Auto > Added External Link",
+			positionValue = 1,
+			table = '''| Update Description          | Auto > Added External Link  |
+	| Update Field Name           | entityId                    |
+	| Update Field Original Value | N/A                         |
+	| Update Field New Value      | ${staticDossieraAccountKey} |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeywordAndPosition(
+			fieldName = "entityName",
+			keyword = "Auto > Added External Link",
+			positionValue = 1,
+			table = '''| Update Description          | Auto > Added External Link |
+	| Update Field Name           | entityName                 |
+	| Update Field Original Value | N/A                        |
+	| Update Field New Value      | account                    |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeywordAndPosition(
+			fieldName = "domain",
+			keyword = "Auto > Added External Link",
+			positionValue = 1,
+			table = '''| Update Description          | Auto > Added External Link |
+	| Update Field Name           | domain                     |
+	| Update Field Original Value | N/A                        |
+	| Update Field New Value      | salesforce                 |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeywordAndPosition(
+			fieldName = "entityId",
+			keyword = "Auto > Added External Link",
+			positionValue = 2,
+			table = '''| Update Description          | Auto > Added External Link  |
+	| Update Field Name           | entityId                    |
+	| Update Field Original Value | N/A                         |
+	| Update Field New Value      | ${staticDossieraProjectKey} |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeywordAndPosition(
+			fieldName = "entityName",
+			keyword = "Auto > Added External Link",
+			positionValue = 2,
+			table = '''| Update Description          | Auto > Added External Link |
+	| Update Field Name           | entityName                 |
+	| Update Field Original Value | N/A                        |
+	| Update Field New Value      | project                    |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeywordAndPosition(
+			fieldName = "domain",
+			keyword = "Auto > Added External Link",
+			positionValue = 2,
+			table = '''| Update Description          | Auto > Added External Link |
+	| Update Field Name           | domain                     |
+	| Update Field Original Value | N/A                        |
+	| Update Field New Value      | dossiera                   |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeywordAndPosition(
+			fieldName = "entityId",
+			keyword = "Auto > Added External Link",
+			positionValue = 3,
+			table = '''| Update Description          | Auto > Added External Link    |
+	| Update Field Name           | entityId                      |
+	| Update Field Original Value | N/A                           |
+	| Update Field New Value      | ${staticSalesforceProjectKey} |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeywordAndPosition(
+			fieldName = "entityName",
+			keyword = "Auto > Added External Link",
+			positionValue = 3,
+			table = '''| Update Description          | Auto > Added External Link |
+	| Update Field Name           | entityName                 |
+	| Update Field Original Value | N/A                        |
+	| Update Field New Value      | project                    |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeywordAndPosition(
+			fieldName = "domain",
+			keyword = "Auto > Added External Link",
+			positionValue = 3,
+			table = '''| Update Description          | Auto > Added External Link |
+	| Update Field Name           | domain                     |
+	| Update Field Original Value | N/A                        |
+	| Update Field New Value      | salesforce                 |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeywordAndPosition(
+			fieldName = "entityId",
+			keyword = "Auto > Added External Link",
+			positionValue = 4,
+			table = '''| Update Description          | Auto > Added External Link|
+	| Update Field Name           | entityId                  |
+	| Update Field Original Value | N/A                       |
+	| Update Field New Value      | ${staticOrganizationID}   |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeywordAndPosition(
+			fieldName = "entityName",
+			keyword = "Auto > Added External Link",
+			positionValue = 4,
+			table = '''| Update Description          | Auto > Added External Link |
+	| Update Field Name           | entityName                 |
+	| Update Field Original Value | N/A                        |
+	| Update Field New Value      | organization               |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeywordAndPosition(
+			fieldName = "domain",
+			keyword = "Auto > Added External Link",
+			positionValue = 4,
+			table = '''| Update Description          | Auto > Added External Link |
+	| Update Field Name           | domain                     |
+	| Update Field Original Value | N/A                        |
+	| Update Field New Value      | zendesk                    |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "entityId",
+			keyword = "Koroneiki QA Service Producer > Added External Link",
+			table = '''| Update Description          | Koroneiki QA Service Producer > Added External Link |
+	| Update Field Name           | entityId                                            |
+	| Update Field Original Value | N/A                                                 |
+	| Update Field New Value      | 1234                                                |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "entityName",
+			keyword = "Koroneiki QA Service Producer > Added External Link",
+			table = '''| Update Description          | Koroneiki QA Service Producer > Added External Link |
+	| Update Field Name           | entityName                                          |
+	| Update Field Original Value | N/A                                                 |
+	| Update Field New Value      | KoroneikiAutomotive                                 |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "domain",
+			keyword = "Koroneiki QA Service Producer > Added External Link",
+			table = '''| Update Description          | Koroneiki QA Service Producer > Added External Link |
+	| Update Field Name           | domain                                              |
+	| Update Field Original Value | N/A                                                 |
+	| Update Field New Value      | koroneikiautomotive                                 |''');
+	}
+
+	test ViewexternallinksforAnalyticsCloudproducts {
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Prokor - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Contact Email Address                  | pro.koroneiki1@lrcustomer.com.broken       |
+	| Contact First Name                     | PRO                                        |
+	| Contact Last Name                      | Koroneiki1                                 |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | pro.koroneiki2@lrcustomer.com.broken       |
+	| Owner First Name                       | PRO                                        |
+	| Owner Last Name                        | Koroneiki2                                 |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Analytics Cloud Basic              |
+	| Project Name                           | Korpro - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "PROKORKORPRO");
+
+		LocalFile.KoroneikiAccountAPI._createAccountExternalLink(
+			accountName = "Korpro - ${staticProjectName}",
+			table = '''| Domain      | analytics-cloud |
+	| Entity Id   | 67890           |
+	| Entity Name | group           |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountExternalLink(
+			accountName = "Korpro - ${staticProjectName}",
+			table = '''| Domain      | dxp-cloud          |
+	| Entity Id   | 1z2x3c4v5b6n7m8a9s |
+	| Entity Name | project            |''');
+
+		LocalFile.KoroneikiAccountAPI._viewAccountExternalLinkViaIdAndDomain(
+			accountName = "Korpro - ${staticProjectName}",
+			domain = "analytics-cloud",
+			entityId = 67890,
+			table = '''| Domain      | analytics-cloud |
+	| Entity Id   | 67890           |
+	| Entity Name | group           |''');
+
+		LocalFile.KoroneikiAccountAPI._viewAccountExternalLinkViaIdAndDomain(
+			accountName = "Korpro - ${staticProjectName}",
+			domain = "dxp-cloud",
+			entityId = "1z2x3c4v5b6n7m8a9s",
+			table = '''| Domain      | dxp-cloud          |
+	| Entity Id   | 1z2x3c4v5b6n7m8a9s |
+	| Entity Name | project            |''');
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korpro");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korpro - ${staticProjectName}");
+
+		LocalFile.Provisioning.clickTab(tabName = "Details");
+
+		LocalFile.ProvisioningAccount.clickSidePanelTab(tabName = "External Links");
+
+		LocalFile.ProvisioningAccount._viewAccountExternalLink(externalLink = "Analytics Cloud Group");
+
+		LocalFile.ProvisioningAccount._viewAccountExternalLink(externalLink = "DXP Cloud Project");
+
+		LocalFile.ProvisioningAccount._viewAccountExternalLink(externalLink = "Salesforce Account");
+
+		LocalFile.ProvisioningAccount._viewAccountExternalLink(externalLink = "Dossiera Project");
+
+		LocalFile.ProvisioningAccount._viewAccountExternalLink(externalLink = "Salesforce Project");
+
+		LocalFile.ProvisioningAccount._viewAccountExternalLink(externalLink = "Zendesk Organization");
+	}
+
+	test Viewmappedexternallinks {
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Prokor - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Contact Email Address                  | pro.koroneiki1@lrcustomer.com.broken       |
+	| Contact First Name                     | PRO                                        |
+	| Contact Last Name                      | Koroneiki1                                 |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | pro.koroneiki2@lrcustomer.com.broken       |
+	| Owner First Name                       | PRO                                        |
+	| Owner Last Name                        | Koroneiki2                                 |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Korpro - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "PROKORKORPRO");
+
+		LocalFile.ZendeskOrganizationAPI._viewOrganizationSyncFromOsb(organizationName = "Korpro - ${staticProjectName}");
+
+		LocalFile.ZendeskOrganizationAPI._getOrganizationIdByOrganizationName(organizationName = "Korpro - ${staticProjectName}");
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korpro");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korpro - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.expandSidePanel();
+
+		LocalFile.ProvisioningAccount.clickSidePanelTab(tabName = "External Links");
+
+		LocalFile.ProvisioningAccount._viewAccountExternalLinkClickable(
+			externalLink = "Salesforce Account",
+			href = "https://liferay.lightning.force.com/lightning/r/Account/${staticDossieraAccountKey}/view");
+
+		LocalFile.ProvisioningAccount._viewAccountExternalLinkClickable(
+			externalLink = "Salesforce Project",
+			href = "https://liferay.lightning.force.com/lightning/r/Project__c/${staticSalesforceProjectKey}/view");
+
+		LocalFile.ProvisioningAccount._viewAccountExternalLinkClickable(
+			externalLink = "Zendesk Organization",
+			href = "https://liferaysupport1528999723.zendesk.com/agent/organizations/${staticOrganizationID}/tickets");
+	}
+
+	test Viewremovedexternallink {
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Prokor - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Contact Email Address                  | pro.koroneiki1@lrcustomer.com.broken       |
+	| Contact First Name                     | PRO                                        |
+	| Contact Last Name                      | Koroneiki1                                 |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | pro.koroneiki2@lrcustomer.com.broken       |
+	| Owner First Name                       | PRO                                        |
+	| Owner Last Name                        | Koroneiki2                                 |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Korpro - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountExternalLink(
+			accountName = "Korpro - ${staticProjectName}",
+			table = '''| Domain      | koroneikiautomotive |
+	| Entity Id   | 1234                |
+	| Entity Name | KoroneikiAutomotive |''');
+
+		LocalFile.KoroneikiAccountAPI._deleteAccountExternalLink(
+			accountName = "Korpro - ${staticProjectName}",
+			entityId = 1234);
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korpro");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korpro - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.expandSidePanel();
+
+		LocalFile.ProvisioningAccount.clickSidePanelTab(tabName = "External Links");
+
+		LocalFile.ProvisioningAccount._viewAccountExternalLink(externalLink = "Salesforce Account");
+
+		LocalFile.ProvisioningAccount._viewAccountExternalLink(externalLink = "Dossiera Project");
+
+		LocalFile.ProvisioningAccount._viewAccountExternalLink(externalLink = "Salesforce Project");
+
+		LocalFile.ProvisioningAccount._viewAccountExternalLink(externalLink = "Zendesk Organization");
+
+		LocalFile.ProvisioningAccount._viewNoAccountExternalLink(externalLink = "koroneikiautomotive-KoroneikiAutomotive");
+
+		LocalFile.Provisioning.clickTab(tabName = "History");
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "entityId",
+			keyword = "Koroneiki QA Service Producer > Deleted External Link",
+			table = '''| Update Description          | Koroneiki QA Service Producer > Deleted External Link |
+	| Update Field Name           | entityId                                              |
+	| Update Field Original Value | 1234                                                  |
+	| Update Field New Value      | N/A                                                   |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "entityName",
+			keyword = "Koroneiki QA Service Producer > Deleted External Link",
+			table = '''| Update Description          | Koroneiki QA Service Producer > Deleted External Link |
+	| Update Field Name           | entityName                                            |
+	| Update Field Original Value | KoroneikiAutomotive                                   |
+	| Update Field New Value      | N/A                                                   |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "domain",
+			keyword = "Koroneiki QA Service Producer > Deleted External Link",
+			table = '''| Update Description          | Koroneiki QA Service Producer > Deleted External Link |
+	| Update Field Name           | domain                                                |
+	| Update Field Original Value | koroneikiautomotive                                   |
+	| Update Field New Value      | N/A                                                   |''');
+	}
+
+	test Viewremovedmappedexternallink {
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Prokor - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Contact Email Address                  | pro.koroneiki1@lrcustomer.com.broken       |
+	| Contact First Name                     | PRO                                        |
+	| Contact Last Name                      | Koroneiki1                                 |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | pro.koroneiki2@lrcustomer.com.broken       |
+	| Owner First Name                       | PRO                                        |
+	| Owner Last Name                        | Koroneiki2                                 |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Korpro - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.KoroneikiAccountAPI._deleteAccountExternalLink(
+			accountName = "Korpro - ${staticProjectName}",
+			entityId = ${staticDossieraAccountKey});
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korpro");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korpro - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.expandSidePanel();
+
+		LocalFile.ProvisioningAccount.clickSidePanelTab(tabName = "External Links");
+
+		LocalFile.ProvisioningAccount._viewNoAccountExternalLink(externalLink = "Salesforce Account");
+
+		LocalFile.ProvisioningAccount._viewAccountExternalLink(externalLink = "Dossiera Project");
+
+		LocalFile.ProvisioningAccount._viewAccountExternalLink(externalLink = "Salesforce Project");
+
+		LocalFile.ProvisioningAccount._viewAccountExternalLink(externalLink = "Zendesk Organization");
+
+		LocalFile.Provisioning.clickTab(tabName = "History");
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "entityId",
+			keyword = "Koroneiki QA Service Producer > Deleted External Link",
+			table = '''| Update Description          | Koroneiki QA Service Producer > Deleted External Link |
+	| Update Field Name           | entityId                                              |
+	| Update Field Original Value | ${staticDossieraAccountKey}                           |
+	| Update Field New Value      | N/A                                                   |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "entityName",
+			keyword = "Koroneiki QA Service Producer > Deleted External Link",
+			table = '''| Update Description          | Koroneiki QA Service Producer > Deleted External Link |
+	| Update Field Name           | entityName                                            |
+	| Update Field Original Value | account                                               |
+	| Update Field New Value      | N/A                                                   |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "domain",
+			keyword = "Koroneiki QA Service Producer > Deleted External Link",
+			table = '''| Update Description          | Koroneiki QA Service Producer > Deleted External Link |
+	| Update Field Name           | domain                                                |
+	| Update Field Original Value | salesforce                                            |
+	| Update Field New Value      | N/A                                                   |''');
+	}
+
+}

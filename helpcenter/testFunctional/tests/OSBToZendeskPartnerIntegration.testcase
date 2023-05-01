@@ -1,0 +1,1664 @@
+definition {
+
+	property testray.main.component.name = "Support QA";
+	property type = "zendesk.integration";
+
+	setUp {
+		LocalFile.Passwords.getPasswords();
+
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | osb.partner1                      |
+	| Email Address | osb.partner1@lrpartner.com.broken |
+	| First Name    | OSB                               |
+	| Last Name     | Partner1                          |''');
+
+		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | osb.partner2                      |
+	| Email Address | osb.partner2@lrpartner.com.broken |
+	| First Name    | OSB                               |
+	| Last Name     | Partner2                          |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Name   | Osbpar - ${staticProjectName} | |
+	| Code   | OSBPAROSBPAR                  | |
+	| Status | Active                        | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Osbpar - ${staticProjectName}",
+			productName = "Service Partnership",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Osbpar - ${staticProjectName}",
+			contactEmailAddress = "osb.partner1@lrpartner.com.broken",
+			table = '''| Partner Member |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Osbpar - ${staticProjectName}",
+			contactEmailAddress = "osb.partner2@lrpartner.com.broken",
+			table = '''| Partner Manager |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Partner");
+
+		LocalFile.KoroneikiAccountAPI._createAssignedTeamNestedField(
+			accountName = "Osbzen - ${staticProjectName}",
+			teamName = "Osbpar - ${staticProjectName}");
+	}
+
+	tearDown {
+		LocalFile.ZendeskUserAPI._getDefaultUserId(organizationName = "Osbzen - ${staticProjectName}");
+
+		LocalFile.ZendeskUserAPI._renameFirstDefaultUserIdVariable();
+
+		LocalFile.ZendeskUserAPI._getDefaultUserId(organizationName = "Osbpar - ${staticProjectName}");
+
+		LocalFile.ZendeskUserAPI._renameSecondDefaultUserIdVariable();
+
+		LocalFile.OSBAdminProject.tearDownProjects(table = '''| OSBPAROSBPAR |
+	| OSBZENOSBZEN |''');
+
+		LocalFile.KoroneikiAccountAPI._tearDownAccounts(table = '''| Osbpar - ${staticProjectName} |
+	| Osbzen - ${staticProjectName} |''');
+
+		LocalFile.KoroneikiAccountAPI._tearDownAccountsViaAccountFieldNameAndValue(
+			fieldName = "Code",
+			table = '''| OSBPAROSBPAR |
+	| OSBZENOSBZEN |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Gold Subscription");
+
+		LocalFile.JSONUser.tearDownUsers(table = '''| osb.partner1@lrpartner.com.broken |
+	| osb.partner2@lrpartner.com.broken |''');
+
+		LocalFile.JSONUser.tearDownUsersViaSupport(table = '''| osb.partner1@lrpartner.com.broken |
+	| osb.partner2@lrpartner.com.broken |''');
+
+		LocalFile.JSONUser.tearDownUsersViaKoroneiki(table = '''| osb.partner1@lrpartner.com.broken |
+	| osb.partner2@lrpartner.com.broken |''');
+
+		LocalFile.KoroneikiContactAPI._tearDownContacts(table = '''| osb.partner1@lrpartner.com.broken |
+	| osb.partner2@lrpartner.com.broken |''');
+
+		LocalFile.JSONOkta.tearDownUsers(table = '''| osb.partner1@lrpartner.com.broken |
+	| osb.partner2@lrpartner.com.broken |''');
+
+		LocalFile.ZendeskUserAPI._getMultipleUserIdsByEmailAddress(table = '''| osb.partner1@lrpartner.com.broken |
+	| osb.partner2@lrpartner.com.broken |''');
+
+		LocalFile.ZendeskUserAPI._tearDownUsersByIdList(userIds = ${staticUserIdList});
+
+		LocalFile.ZendeskOrganizationAPI._getMultipleOrganizationExternalIdsByOrganizationNameIfStillPresent(table = '''| Osbpar - ${staticProjectName} |
+	| Osbzen - ${staticProjectName} |''');
+
+		LocalFile.ZendeskOrganizationAPI._tearDownOrganizationsByExternalIdList(organizationExternalIds = ${staticOrganizationExternalIdList});
+
+		LocalFile.ZendeskUserAPI._tearDownUserById(userId = ${staticDefaultUserId1});
+
+		LocalFile.ZendeskUserAPI._tearDownUserById(userId = ${staticDefaultUserId2});
+	}
+
+	test Viewexpiredprojectpartnerworkerupdates {
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Assigned Team Nested Field | ${staticAssignedTeamNestedField} | |
+	| Code                       | OSBZENOSBZEN                     | |
+	| Language                   | English                          | |
+	| Name                       | Osbzen - ${staticProjectName}    | |
+	| Region                     | United States                    | |
+	| Status                     | Active                           | |
+	| Tier                       | T1                               | |''');
+
+		LocalFile.KoroneikiAccountAPI._assignTeamRolesToTeam(
+			accountName = "Osbzen - ${staticProjectName}",
+			table = '''| Partner |''',
+			teamName = "Osbpar - ${staticProjectName}");
+
+		LocalFile.KoroneikiAccountAPI._assignTeamRolesToTeam(
+			accountName = "Osbzen - ${staticProjectName}",
+			table = '''| First Line Support |''',
+			teamName = "Osbpar - ${staticProjectName}");
+
+		LocalFile.KoroneikiAccountAPI._createAccountPostalAddress(
+			accountName = "Osbzen - ${staticProjectName}",
+			table = '''| Country               | United States   |
+	| Locality              | Diamond Bar     |
+	| Region                | California      |
+	| Type                  | Business        |
+	| Mailing               | True            |
+	| Postal Code           | 91765           |
+	| Primary               | True            |
+	| Street Address Line 1 | 123 Main Street |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Osbzen - ${staticProjectName}",
+			productName = "Portal Production",
+			table = '''| End Date                | ${staticEndDate}         |   |
+	| Original End Date       | ${staticOriginalEndDate} |   |
+	| Perpetual               | false                    |   |
+	| Product Field and Value | sizing                   | 1 |
+	| Product Field and Value | licenses                 | 1 |
+	| Product Field and Value | version                  | 6 |
+	| Quantity                | 1                        |   |
+	| Start Date              | ${staticStartDate}       |   |
+	| Status                  | Approved                 |   |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Osbzen - ${staticProjectName}",
+			productName = "Gold Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Gold Subscription");
+
+		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+
+		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "OSBZENOSBZEN");
+
+		LocalFile.ZendeskOrganizationAPI._viewOrganizationSyncFromOsb(organizationName = "Osbzen - ${staticProjectName}");
+
+		LocalFile.ZendeskUserAPI._viewUserSyncFromOsb(userEmailAddress = "osb.partner1@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserSyncFromOsb(userEmailAddress = "osb.partner2@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserOrganizationIdSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.partner1@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserOrganizationIdSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.partner2@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserNameByEmailAddress(
+			userEmailAddress = "osb.partner1@lrpartner.com.broken",
+			userName = "OSB Partner1 [P]");
+
+		LocalFile.ZendeskUserAPI._viewUserNameByEmailAddress(
+			userEmailAddress = "osb.partner2@lrpartner.com.broken",
+			userName = "OSB Partner2 [P]");
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticPastStartAndEndDate();
+
+		LocalFile.KoroneikiProductPurchaseAPI._updateProductPurchase(
+			accountName = "Osbzen - ${staticProjectName}",
+			productName = "Portal Production",
+			table = '''| End Date                | ${staticPastEndDate}         | |
+	| Original End Date       | ${staticPastOriginalEndDate} | |
+	| Perpetual               | false                        | |
+	| Start Date              | ${staticPastStartDate}       | |
+	| Status                  | Approved                     | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._updateProductPurchase(
+			accountName = "Osbzen - ${staticProjectName}",
+			productName = "Gold Subscription",
+			table = '''| End Date                | ${staticPastEndDate}         | |
+	| Original End Date       | ${staticPastOriginalEndDate} | |
+	| Perpetual               | false                        | |
+	| Start Date              | ${staticPastStartDate}       | |
+	| Status                  | Approved                     | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Gold Subscription");
+
+		LocalFile.ZendeskUserAPI._viewUserOrganizationIdSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.partner1@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserOrganizationIdSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.partner2@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserNameByEmailAddress(
+			userEmailAddress = "osb.partner1@lrpartner.com.broken",
+			userName = "OSB Partner1 [P]");
+
+		LocalFile.ZendeskUserAPI._viewUserNameByEmailAddress(
+			userEmailAddress = "osb.partner2@lrpartner.com.broken",
+			userName = "OSB Partner2 [P]");
+
+		LocalFile.ZendeskUserAPI._viewUserOrganizationSubscriptionSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.partner1@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserOrganizationSubscriptionSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.partner2@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserTagSync(
+			tag = "osb_kb",
+			userEmailAddress = "osb.partner1@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserTagSync(
+			tag = "osb_kb",
+			userEmailAddress = "osb.partner2@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserTagSync(
+			tag = "osb_partner",
+			userEmailAddress = "osb.partner1@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserTagSync(
+			tag = "osb_partner",
+			userEmailAddress = "osb.partner2@lrpartner.com.broken");
+	}
+
+	@help.center.acceptance = "true"
+	test Viewnewpartnerworkers {
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Assigned Team Nested Field | ${staticAssignedTeamNestedField} | |
+	| Code                       | OSBZENOSBZEN                     | |
+	| Language                   | English                          | |
+	| Name                       | Osbzen - ${staticProjectName}    | |
+	| Region                     | United States                    | |
+	| Status                     | Active                           | |
+	| Tier                       | T1                               | |''');
+
+		LocalFile.KoroneikiAccountAPI._assignTeamRolesToTeam(
+			accountName = "Osbzen - ${staticProjectName}",
+			table = '''| Partner |''',
+			teamName = "Osbpar - ${staticProjectName}");
+
+		LocalFile.KoroneikiAccountAPI._assignTeamRolesToTeam(
+			accountName = "Osbzen - ${staticProjectName}",
+			table = '''| First Line Support |''',
+			teamName = "Osbpar - ${staticProjectName}");
+
+		LocalFile.KoroneikiAccountAPI._createAccountPostalAddress(
+			accountName = "Osbzen - ${staticProjectName}",
+			table = '''| Country               | United States   |
+	| Locality              | Diamond Bar     |
+	| Region                | California      |
+	| Type                  | Business        |
+	| Mailing               | True            |
+	| Postal Code           | 91765           |
+	| Primary               | True            |
+	| Street Address Line 1 | 123 Main Street |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Osbzen - ${staticProjectName}",
+			productName = "Portal Production",
+			table = '''| End Date                | ${staticEndDate}         |   |
+	| Original End Date       | ${staticOriginalEndDate} |   |
+	| Perpetual               | false                    |   |
+	| Product Field and Value | sizing                   | 1 |
+	| Product Field and Value | licenses                 | 1 |
+	| Product Field and Value | version                  | 6 |
+	| Quantity                | 1                        |   |
+	| Start Date              | ${staticStartDate}       |   |
+	| Status                  | Approved                 |   |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Osbzen - ${staticProjectName}",
+			productName = "Gold Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Gold Subscription");
+
+		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+
+		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "OSBZENOSBZEN");
+
+		LocalFile.ZendeskOrganizationAPI._viewOrganizationSyncFromOsb(organizationName = "Osbzen - ${staticProjectName}");
+
+		LocalFile.ZendeskUserAPI._viewUserSyncFromOsb(userEmailAddress = "osb.partner1@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserSyncFromOsb(userEmailAddress = "osb.partner2@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserOrganizationIdSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.partner1@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserOrganizationIdSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.partner2@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserNameByEmailAddress(
+			userEmailAddress = "osb.partner1@lrpartner.com.broken",
+			userName = "OSB Partner1 [P]");
+
+		LocalFile.ZendeskUserAPI._viewUserNameByEmailAddress(
+			userEmailAddress = "osb.partner2@lrpartner.com.broken",
+			userName = "OSB Partner2 [P]");
+
+		LocalFile.ZendeskUserAPI._viewUserOrganizationSubscriptionSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.partner1@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserOrganizationSubscriptionSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.partner2@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserTagSync(
+			tag = "osb_kb",
+			userEmailAddress = "osb.partner1@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserTagSync(
+			tag = "osb_kb",
+			userEmailAddress = "osb.partner2@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserTagSync(
+			tag = "osb_partner",
+			userEmailAddress = "osb.partner1@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserTagSync(
+			tag = "osb_partner",
+			userEmailAddress = "osb.partner2@lrpartner.com.broken");
+	}
+
+	test Viewnewpartnerworkersonflsonlyproject {
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Assigned Team Nested Field | ${staticAssignedTeamNestedField} | |
+	| Code                       | OSBZENOSBZEN                     | |
+	| Language                   | English                          | |
+	| Name                       | Osbzen - ${staticProjectName}    | |
+	| Region                     | United States                    | |
+	| Status                     | Active                           | |
+	| Tier                       | T1                               | |''');
+
+		LocalFile.KoroneikiAccountAPI._assignTeamRolesToTeam(
+			accountName = "Osbzen - ${staticProjectName}",
+			table = '''| First Line Support |''',
+			teamName = "Osbpar - ${staticProjectName}");
+
+		LocalFile.KoroneikiAccountAPI._createAccountPostalAddress(
+			accountName = "Osbzen - ${staticProjectName}",
+			table = '''| Country               | United States   |
+	| Locality              | Diamond Bar     |
+	| Region                | California      |
+	| Type                  | Business        |
+	| Mailing               | True            |
+	| Postal Code           | 91765           |
+	| Primary               | True            |
+	| Street Address Line 1 | 123 Main Street |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Osbzen - ${staticProjectName}",
+			productName = "Portal Production",
+			table = '''| End Date                | ${staticEndDate}         |   |
+	| Original End Date       | ${staticOriginalEndDate} |   |
+	| Perpetual               | false                    |   |
+	| Product Field and Value | sizing                   | 1 |
+	| Product Field and Value | licenses                 | 1 |
+	| Product Field and Value | version                  | 6 |
+	| Quantity                | 1                        |   |
+	| Start Date              | ${staticStartDate}       |   |
+	| Status                  | Approved                 |   |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Osbzen - ${staticProjectName}",
+			productName = "Gold Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Gold Subscription");
+
+		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+
+		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "OSBZENOSBZEN");
+
+		LocalFile.ZendeskOrganizationAPI._viewOrganizationSyncFromOsb(organizationName = "Osbzen - ${staticProjectName}");
+
+		LocalFile.ZendeskUserAPI._viewUserSyncFromOsb(userEmailAddress = "osb.partner1@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserSyncFromOsb(userEmailAddress = "osb.partner2@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserOrganizationIdSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.partner1@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserOrganizationIdSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.partner2@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserNameByEmailAddress(
+			userEmailAddress = "osb.partner1@lrpartner.com.broken",
+			userName = "OSB Partner1 [P]");
+
+		LocalFile.ZendeskUserAPI._viewUserNameByEmailAddress(
+			userEmailAddress = "osb.partner2@lrpartner.com.broken",
+			userName = "OSB Partner2 [P]");
+
+		LocalFile.ZendeskUserAPI._viewUserOrganizationSubscriptionSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.partner1@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserOrganizationSubscriptionSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.partner2@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserTagSync(
+			tag = "osb_kb",
+			userEmailAddress = "osb.partner1@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserTagSync(
+			tag = "osb_kb",
+			userEmailAddress = "osb.partner2@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserTagSync(
+			tag = "osb_partner",
+			userEmailAddress = "osb.partner1@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserTagSync(
+			tag = "osb_partner",
+			userEmailAddress = "osb.partner2@lrpartner.com.broken");
+	}
+
+	test Viewnewpartnerworkersonnonflsproject {
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Assigned Team Nested Field | ${staticAssignedTeamNestedField} | |
+	| Code                       | OSBZENOSBZEN                     | |
+	| Language                   | English                          | |
+	| Name                       | Osbzen - ${staticProjectName}    | |
+	| Region                     | United States                    | |
+	| Status                     | Active                           | |
+	| Tier                       | T1                               | |''');
+
+		LocalFile.KoroneikiAccountAPI._assignTeamRolesToTeam(
+			accountName = "Osbzen - ${staticProjectName}",
+			table = '''| Partner |''',
+			teamName = "Osbpar - ${staticProjectName}");
+
+		LocalFile.KoroneikiAccountAPI._createAccountPostalAddress(
+			accountName = "Osbzen - ${staticProjectName}",
+			table = '''| Country               | United States   |
+	| Locality              | Diamond Bar     |
+	| Region                | California      |
+	| Type                  | Business        |
+	| Mailing               | True            |
+	| Postal Code           | 91765           |
+	| Primary               | True            |
+	| Street Address Line 1 | 123 Main Street |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Osbzen - ${staticProjectName}",
+			productName = "Portal Production",
+			table = '''| End Date                | ${staticEndDate}         |   |
+	| Original End Date       | ${staticOriginalEndDate} |   |
+	| Perpetual               | false                    |   |
+	| Product Field and Value | sizing                   | 1 |
+	| Product Field and Value | licenses                 | 1 |
+	| Product Field and Value | version                  | 6 |
+	| Quantity                | 1                        |   |
+	| Start Date              | ${staticStartDate}       |   |
+	| Status                  | Approved                 |   |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Osbzen - ${staticProjectName}",
+			productName = "Gold Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Gold Subscription");
+
+		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+
+		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "OSBZENOSBZEN");
+
+		LocalFile.ZendeskOrganizationAPI._viewOrganizationSyncFromOsb(organizationName = "Osbzen - ${staticProjectName}");
+
+		LocalFile.ZendeskUserAPI._viewUserSyncFromOsb(userEmailAddress = "osb.partner1@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserSyncFromOsb(userEmailAddress = "osb.partner2@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewNoUserOrganizationIdSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.partner1@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewNoUserOrganizationIdSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.partner2@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserNameByEmailAddress(
+			userEmailAddress = "osb.partner1@lrpartner.com.broken",
+			userName = "OSB Partner1 [P]");
+
+		LocalFile.ZendeskUserAPI._viewUserNameByEmailAddress(
+			userEmailAddress = "osb.partner2@lrpartner.com.broken",
+			userName = "OSB Partner2 [P]");
+
+		LocalFile.ZendeskUserAPI._viewNoUserOrganizationSubscriptionSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.partner1@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewNoUserOrganizationSubscriptionSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.partner2@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserTagSync(
+			tag = "osb_kb",
+			userEmailAddress = "osb.partner1@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserTagSync(
+			tag = "osb_kb",
+			userEmailAddress = "osb.partner2@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewNoUserTagSync(
+			tag = "osb_partner",
+			userEmailAddress = "osb.partner1@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewNoUserTagSync(
+			tag = "osb_partner",
+			userEmailAddress = "osb.partner2@lrpartner.com.broken");
+	}
+
+	test Viewnewpartnerworkerswithoutinitialproject {
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code     | OSBZENOSBZEN                  | |
+	| Language | English                       | |
+	| Name     | Osbzen - ${staticProjectName} | |
+	| Region   | United States                 | |
+	| Status   | Active                        | |
+	| Tier     | T1                            | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountPostalAddress(
+			accountName = "Osbzen - ${staticProjectName}",
+			table = '''| Country               | United States   |
+	| Locality              | Diamond Bar     |
+	| Region                | California      |
+	| Type                  | Business        |
+	| Mailing               | True            |
+	| Postal Code           | 91765           |
+	| Primary               | True            |
+	| Street Address Line 1 | 123 Main Street |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Osbzen - ${staticProjectName}",
+			productName = "Portal Production",
+			table = '''| End Date                | ${staticEndDate}         |   |
+	| Original End Date       | ${staticOriginalEndDate} |   |
+	| Perpetual               | false                    |   |
+	| Product Field and Value | sizing                   | 1 |
+	| Product Field and Value | licenses                 | 1 |
+	| Product Field and Value | version                  | 6 |
+	| Quantity                | 1                        |   |
+	| Start Date              | ${staticStartDate}       |   |
+	| Status                  | Approved                 |   |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Osbzen - ${staticProjectName}",
+			productName = "Gold Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Gold Subscription");
+
+		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+
+		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "OSBZENOSBZEN");
+
+		LocalFile.ZendeskOrganizationAPI._viewOrganizationSyncFromOsb(organizationName = "Osbzen - ${staticProjectName}");
+
+		LocalFile.ZendeskUserAPI._viewUserSyncFromOsb(userEmailAddress = "osb.partner1@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserSyncFromOsb(userEmailAddress = "osb.partner2@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewNoUserOrganizationIdSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.partner1@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewNoUserOrganizationIdSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.partner2@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserNameByEmailAddress(
+			userEmailAddress = "osb.partner1@lrpartner.com.broken",
+			userName = "OSB Partner1 [P]");
+
+		LocalFile.ZendeskUserAPI._viewUserNameByEmailAddress(
+			userEmailAddress = "osb.partner2@lrpartner.com.broken",
+			userName = "OSB Partner2 [P]");
+
+		LocalFile.ZendeskUserAPI._viewNoUserOrganizationSubscriptionSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.partner1@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewNoUserOrganizationSubscriptionSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.partner2@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserTagSync(
+			tag = "osb_kb",
+			userEmailAddress = "osb.partner1@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserTagSync(
+			tag = "osb_kb",
+			userEmailAddress = "osb.partner2@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewNoUserTagSync(
+			tag = "osb_partner",
+			userEmailAddress = "osb.partner1@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewNoUserTagSync(
+			tag = "osb_partner",
+			userEmailAddress = "osb.partner2@lrpartner.com.broken");
+	}
+
+	test Viewpartnerfirstlinesupportremovalupdates {
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Assigned Team Nested Field | ${staticAssignedTeamNestedField} | |
+	| Code                       | OSBZENOSBZEN                     | |
+	| Language                   | English                          | |
+	| Name                       | Osbzen - ${staticProjectName}    | |
+	| Region                     | United States                    | |
+	| Status                     | Active                           | |
+	| Tier                       | T1                               | |''');
+
+		LocalFile.KoroneikiAccountAPI._assignTeamRolesToTeam(
+			accountName = "Osbzen - ${staticProjectName}",
+			table = '''| Partner |''',
+			teamName = "Osbpar - ${staticProjectName}");
+
+		LocalFile.KoroneikiAccountAPI._assignTeamRolesToTeam(
+			accountName = "Osbzen - ${staticProjectName}",
+			table = '''| First Line Support |''',
+			teamName = "Osbpar - ${staticProjectName}");
+
+		LocalFile.KoroneikiAccountAPI._createAccountPostalAddress(
+			accountName = "Osbzen - ${staticProjectName}",
+			table = '''| Country               | United States   |
+	| Locality              | Diamond Bar     |
+	| Region                | California      |
+	| Type                  | Business        |
+	| Mailing               | True            |
+	| Postal Code           | 91765           |
+	| Primary               | True            |
+	| Street Address Line 1 | 123 Main Street |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Osbzen - ${staticProjectName}",
+			productName = "Portal Production",
+			table = '''| End Date                | ${staticEndDate}         |   |
+	| Original End Date       | ${staticOriginalEndDate} |   |
+	| Perpetual               | false                    |   |
+	| Product Field and Value | sizing                   | 1 |
+	| Product Field and Value | licenses                 | 1 |
+	| Product Field and Value | version                  | 6 |
+	| Quantity                | 1                        |   |
+	| Start Date              | ${staticStartDate}       |   |
+	| Status                  | Approved                 |   |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Osbzen - ${staticProjectName}",
+			productName = "Gold Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Gold Subscription");
+
+		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+
+		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "OSBZENOSBZEN");
+
+		LocalFile.ZendeskOrganizationAPI._viewOrganizationSyncFromOsb(organizationName = "Osbzen - ${staticProjectName}");
+
+		LocalFile.ZendeskUserAPI._viewUserSyncFromOsb(userEmailAddress = "osb.partner1@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserSyncFromOsb(userEmailAddress = "osb.partner2@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserOrganizationIdSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.partner1@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserOrganizationIdSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.partner2@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserNameByEmailAddress(
+			userEmailAddress = "osb.partner1@lrpartner.com.broken",
+			userName = "OSB Partner1 [P]");
+
+		LocalFile.ZendeskUserAPI._viewUserNameByEmailAddress(
+			userEmailAddress = "osb.partner2@lrpartner.com.broken",
+			userName = "OSB Partner2 [P]");
+
+		LocalFile.KoroneikiAccountAPI._removeTeamRolesFromTeam(
+			accountName = "Osbzen - ${staticProjectName}",
+			table = '''| First Line Support |''',
+			teamName = "Osbpar - ${staticProjectName}");
+
+		LocalFile.ZendeskUserAPI._viewNoUserOrganizationIdSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.partner1@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewNoUserOrganizationIdSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.partner2@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserNameByEmailAddress(
+			userEmailAddress = "osb.partner1@lrpartner.com.broken",
+			userName = "OSB Partner1 [P]");
+
+		LocalFile.ZendeskUserAPI._viewUserNameByEmailAddress(
+			userEmailAddress = "osb.partner2@lrpartner.com.broken",
+			userName = "OSB Partner2 [P]");
+
+		LocalFile.ZendeskUserAPI._viewNoUserOrganizationSubscriptionSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.partner1@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewNoUserOrganizationSubscriptionSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.partner2@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserTagSync(
+			tag = "osb_kb",
+			userEmailAddress = "osb.partner1@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserTagSync(
+			tag = "osb_kb",
+			userEmailAddress = "osb.partner2@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewNoUserTagSync(
+			tag = "osb_partner",
+			userEmailAddress = "osb.partner1@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewNoUserTagSync(
+			tag = "osb_partner",
+			userEmailAddress = "osb.partner2@lrpartner.com.broken");
+	}
+
+	test Viewpartnermemberremovalupdates {
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Assigned Team Nested Field | ${staticAssignedTeamNestedField} | |
+	| Code                       | OSBZENOSBZEN                     | |
+	| Language                   | English                          | |
+	| Name                       | Osbzen - ${staticProjectName}    | |
+	| Region                     | United States                    | |
+	| Status                     | Active                           | |
+	| Tier                       | T1                               | |''');
+
+		LocalFile.KoroneikiAccountAPI._assignTeamRolesToTeam(
+			accountName = "Osbzen - ${staticProjectName}",
+			table = '''| Partner |''',
+			teamName = "Osbpar - ${staticProjectName}");
+
+		LocalFile.KoroneikiAccountAPI._assignTeamRolesToTeam(
+			accountName = "Osbzen - ${staticProjectName}",
+			table = '''| First Line Support |''',
+			teamName = "Osbpar - ${staticProjectName}");
+
+		LocalFile.KoroneikiAccountAPI._createAccountPostalAddress(
+			accountName = "Osbzen - ${staticProjectName}",
+			table = '''| Country               | United States   |
+	| Locality              | Diamond Bar     |
+	| Region                | California      |
+	| Type                  | Business        |
+	| Mailing               | True            |
+	| Postal Code           | 91765           |
+	| Primary               | True            |
+	| Street Address Line 1 | 123 Main Street |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Osbzen - ${staticProjectName}",
+			productName = "Portal Production",
+			table = '''| End Date                | ${staticEndDate}         |   |
+	| Original End Date       | ${staticOriginalEndDate} |   |
+	| Perpetual               | false                    |   |
+	| Product Field and Value | sizing                   | 1 |
+	| Product Field and Value | licenses                 | 1 |
+	| Product Field and Value | version                  | 6 |
+	| Quantity                | 1                        |   |
+	| Start Date              | ${staticStartDate}       |   |
+	| Status                  | Approved                 |   |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Osbzen - ${staticProjectName}",
+			productName = "Gold Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Gold Subscription");
+
+		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+
+		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "OSBZENOSBZEN");
+
+		LocalFile.ZendeskOrganizationAPI._viewOrganizationSyncFromOsb(organizationName = "Osbzen - ${staticProjectName}");
+
+		LocalFile.ZendeskUserAPI._viewUserSyncFromOsb(userEmailAddress = "osb.partner1@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserSyncFromOsb(userEmailAddress = "osb.partner2@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserOrganizationIdSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.partner1@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserOrganizationIdSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.partner2@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserNameByEmailAddress(
+			userEmailAddress = "osb.partner1@lrpartner.com.broken",
+			userName = "OSB Partner1 [P]");
+
+		LocalFile.ZendeskUserAPI._viewUserNameByEmailAddress(
+			userEmailAddress = "osb.partner2@lrpartner.com.broken",
+			userName = "OSB Partner2 [P]");
+
+		LocalFile.KoroneikiAccountAPI._removeCustomerContacts(
+			accountName = "Osbpar - ${staticProjectName}",
+			table = '''| osb.partner2@lrpartner.com.broken |''');
+
+		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+
+		LocalFile.ZendeskUserAPI._viewUserOrganizationIdSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.partner1@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewNoUserOrganizationIdSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.partner2@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserNameByEmailAddress(
+			userEmailAddress = "osb.partner1@lrpartner.com.broken",
+			userName = "OSB Partner1 [P]");
+
+		LocalFile.ZendeskUserAPI._viewUserNameByEmailAddress(
+			userEmailAddress = "osb.partner2@lrpartner.com.broken",
+			userName = "OSB Partner2");
+
+		LocalFile.ZendeskUserAPI._viewUserOrganizationSubscriptionSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.partner1@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewNoUserOrganizationSubscriptionSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.partner2@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserTagSync(
+			tag = "osb_kb",
+			userEmailAddress = "osb.partner1@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewNoUserTagSync(
+			tag = "osb_kb",
+			userEmailAddress = "osb.partner2@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserTagSync(
+			tag = "osb_partner",
+			userEmailAddress = "osb.partner1@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewNoUserTagSync(
+			tag = "osb_partner",
+			userEmailAddress = "osb.partner2@lrpartner.com.broken");
+	}
+
+	test Viewpartnerremovalupdates {
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Assigned Team Nested Field | ${staticAssignedTeamNestedField} | |
+	| Code                       | OSBZENOSBZEN                     | |
+	| Language                   | English                          | |
+	| Name                       | Osbzen - ${staticProjectName}    | |
+	| Region                     | United States                    | |
+	| Status                     | Active                           | |
+	| Tier                       | T1                               | |''');
+
+		LocalFile.KoroneikiAccountAPI._assignTeamRolesToTeam(
+			accountName = "Osbzen - ${staticProjectName}",
+			table = '''| Partner |''',
+			teamName = "Osbpar - ${staticProjectName}");
+
+		LocalFile.KoroneikiAccountAPI._assignTeamRolesToTeam(
+			accountName = "Osbzen - ${staticProjectName}",
+			table = '''| First Line Support |''',
+			teamName = "Osbpar - ${staticProjectName}");
+
+		LocalFile.KoroneikiAccountAPI._createAccountPostalAddress(
+			accountName = "Osbzen - ${staticProjectName}",
+			table = '''| Country               | United States   |
+	| Locality              | Diamond Bar     |
+	| Region                | California      |
+	| Type                  | Business        |
+	| Mailing               | True            |
+	| Postal Code           | 91765           |
+	| Primary               | True            |
+	| Street Address Line 1 | 123 Main Street |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Osbzen - ${staticProjectName}",
+			productName = "Portal Production",
+			table = '''| End Date                | ${staticEndDate}         |   |
+	| Original End Date       | ${staticOriginalEndDate} |   |
+	| Perpetual               | false                    |   |
+	| Product Field and Value | sizing                   | 1 |
+	| Product Field and Value | licenses                 | 1 |
+	| Product Field and Value | version                  | 6 |
+	| Quantity                | 1                        |   |
+	| Start Date              | ${staticStartDate}       |   |
+	| Status                  | Approved                 |   |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Osbzen - ${staticProjectName}",
+			productName = "Gold Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Gold Subscription");
+
+		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+
+		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "OSBZENOSBZEN");
+
+		LocalFile.ZendeskOrganizationAPI._viewOrganizationSyncFromOsb(organizationName = "Osbzen - ${staticProjectName}");
+
+		LocalFile.ZendeskUserAPI._viewUserSyncFromOsb(userEmailAddress = "osb.partner1@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserSyncFromOsb(userEmailAddress = "osb.partner2@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserOrganizationIdSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.partner1@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserOrganizationIdSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.partner2@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserNameByEmailAddress(
+			userEmailAddress = "osb.partner1@lrpartner.com.broken",
+			userName = "OSB Partner1 [P]");
+
+		LocalFile.ZendeskUserAPI._viewUserNameByEmailAddress(
+			userEmailAddress = "osb.partner2@lrpartner.com.broken",
+			userName = "OSB Partner2 [P]");
+
+		LocalFile.KoroneikiAccountAPI._removeTeamRolesFromTeam(
+			accountName = "Osbzen - ${staticProjectName}",
+			table = '''| Partner |''',
+			teamName = "Osbpar - ${staticProjectName}");
+
+		LocalFile.KoroneikiAccountAPI._removeTeamRolesFromTeam(
+			accountName = "Osbzen - ${staticProjectName}",
+			table = '''| First Line Support |''',
+			teamName = "Osbpar - ${staticProjectName}");
+
+		LocalFile.ZendeskUserAPI._viewNoUserOrganizationIdSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.partner1@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewNoUserOrganizationIdSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.partner2@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserNameByEmailAddress(
+			userEmailAddress = "osb.partner1@lrpartner.com.broken",
+			userName = "OSB Partner1 [P]");
+
+		LocalFile.ZendeskUserAPI._viewUserNameByEmailAddress(
+			userEmailAddress = "osb.partner2@lrpartner.com.broken",
+			userName = "OSB Partner2 [P]");
+
+		LocalFile.ZendeskUserAPI._viewNoUserOrganizationSubscriptionSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.partner1@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewNoUserOrganizationSubscriptionSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.partner2@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserTagSync(
+			tag = "osb_kb",
+			userEmailAddress = "osb.partner1@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserTagSync(
+			tag = "osb_kb",
+			userEmailAddress = "osb.partner2@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewNoUserTagSync(
+			tag = "osb_partner",
+			userEmailAddress = "osb.partner1@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewNoUserTagSync(
+			tag = "osb_partner",
+			userEmailAddress = "osb.partner2@lrpartner.com.broken");
+	}
+
+	test Viewrenewedprojectpartnerworkerupdates {
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Assigned Team Nested Field | ${staticAssignedTeamNestedField} | |
+	| Code                       | OSBZENOSBZEN                     | |
+	| Language                   | English                          | |
+	| Name                       | Osbzen - ${staticProjectName}    | |
+	| Region                     | United States                    | |
+	| Status                     | Active                           | |
+	| Tier                       | T1                               | |''');
+
+		LocalFile.KoroneikiAccountAPI._assignTeamRolesToTeam(
+			accountName = "Osbzen - ${staticProjectName}",
+			table = '''| Partner |''',
+			teamName = "Osbpar - ${staticProjectName}");
+
+		LocalFile.KoroneikiAccountAPI._assignTeamRolesToTeam(
+			accountName = "Osbzen - ${staticProjectName}",
+			table = '''| First Line Support |''',
+			teamName = "Osbpar - ${staticProjectName}");
+
+		LocalFile.KoroneikiAccountAPI._createAccountPostalAddress(
+			accountName = "Osbzen - ${staticProjectName}",
+			table = '''| Country               | United States   |
+	| Locality              | Diamond Bar     |
+	| Region                | California      |
+	| Type                  | Business        |
+	| Mailing               | True            |
+	| Postal Code           | 91765           |
+	| Primary               | True            |
+	| Street Address Line 1 | 123 Main Street |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Osbzen - ${staticProjectName}",
+			productName = "Portal Production",
+			table = '''| End Date                | ${staticEndDate}         |   |
+	| Original End Date       | ${staticOriginalEndDate} |   |
+	| Perpetual               | false                    |   |
+	| Product Field and Value | sizing                   | 1 |
+	| Product Field and Value | licenses                 | 1 |
+	| Product Field and Value | version                  | 6 |
+	| Quantity                | 1                        |   |
+	| Start Date              | ${staticStartDate}       |   |
+	| Status                  | Approved                 |   |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Osbzen - ${staticProjectName}",
+			productName = "Gold Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Gold Subscription");
+
+		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+
+		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "OSBZENOSBZEN");
+
+		LocalFile.ZendeskOrganizationAPI._viewOrganizationSyncFromOsb(organizationName = "Osbzen - ${staticProjectName}");
+
+		LocalFile.ZendeskUserAPI._viewUserSyncFromOsb(userEmailAddress = "osb.partner1@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserSyncFromOsb(userEmailAddress = "osb.partner2@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserOrganizationIdSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.partner1@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserOrganizationIdSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.partner2@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserNameByEmailAddress(
+			userEmailAddress = "osb.partner1@lrpartner.com.broken",
+			userName = "OSB Partner1 [P]");
+
+		LocalFile.ZendeskUserAPI._viewUserNameByEmailAddress(
+			userEmailAddress = "osb.partner2@lrpartner.com.broken",
+			userName = "OSB Partner2 [P]");
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticPastStartAndEndDate();
+
+		LocalFile.KoroneikiProductPurchaseAPI._updateProductPurchase(
+			accountName = "Osbzen - ${staticProjectName}",
+			productName = "Portal Production",
+			table = '''| End Date                | ${staticPastEndDate}         | |
+	| Original End Date       | ${staticPastOriginalEndDate} | |
+	| Perpetual               | false                        | |
+	| Start Date              | ${staticPastStartDate}       | |
+	| Status                  | Approved                     | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._updateProductPurchase(
+			accountName = "Osbzen - ${staticProjectName}",
+			productName = "Gold Subscription",
+			table = '''| End Date                | ${staticPastEndDate}         | |
+	| Original End Date       | ${staticPastOriginalEndDate} | |
+	| Perpetual               | false                        | |
+	| Start Date              | ${staticPastStartDate}       | |
+	| Status                  | Approved                     | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Gold Subscription");
+
+		LocalFile.ZendeskHomepage.pause(timeInSeconds = 10);
+
+		LocalFile.KoroneikiProductPurchaseAPI._updateProductPurchase(
+			accountName = "Osbzen - ${staticProjectName}",
+			productName = "Portal Production",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._updateProductPurchase(
+			accountName = "Osbzen - ${staticProjectName}",
+			productName = "Gold Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Gold Subscription");
+
+		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+
+		LocalFile.ZendeskOrganizationAPI._viewOrganizationSyncFromOsb(organizationName = "Osbzen - ${staticProjectName}");
+
+		LocalFile.ZendeskUserAPI._viewUserSyncFromOsb(userEmailAddress = "osb.partner1@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserSyncFromOsb(userEmailAddress = "osb.partner2@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserOrganizationIdSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.partner1@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserOrganizationIdSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.partner2@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserNameByEmailAddress(
+			userEmailAddress = "osb.partner1@lrpartner.com.broken",
+			userName = "OSB Partner1 [P]");
+
+		LocalFile.ZendeskUserAPI._viewUserNameByEmailAddress(
+			userEmailAddress = "osb.partner2@lrpartner.com.broken",
+			userName = "OSB Partner2 [P]");
+
+		LocalFile.ZendeskUserAPI._viewUserOrganizationSubscriptionSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.partner1@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserOrganizationSubscriptionSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.partner2@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserTagSync(
+			tag = "osb_kb",
+			userEmailAddress = "osb.partner1@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserTagSync(
+			tag = "osb_kb",
+			userEmailAddress = "osb.partner2@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserTagSync(
+			tag = "osb_partner",
+			userEmailAddress = "osb.partner1@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserTagSync(
+			tag = "osb_partner",
+			userEmailAddress = "osb.partner2@lrpartner.com.broken");
+	}
+
+	test Viewresyncedpartnerworkers {
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Assigned Team Nested Field | ${staticAssignedTeamNestedField} | |
+	| Code                       | OSBZENOSBZEN                     | |
+	| Language                   | English                          | |
+	| Name                       | Osbzen - ${staticProjectName}    | |
+	| Region                     | United States                    | |
+	| Status                     | Active                           | |
+	| Tier                       | T1                               | |''');
+
+		LocalFile.KoroneikiAccountAPI._assignTeamRolesToTeam(
+			accountName = "Osbzen - ${staticProjectName}",
+			table = '''| Partner |''',
+			teamName = "Osbpar - ${staticProjectName}");
+
+		LocalFile.KoroneikiAccountAPI._assignTeamRolesToTeam(
+			accountName = "Osbzen - ${staticProjectName}",
+			table = '''| First Line Support |''',
+			teamName = "Osbpar - ${staticProjectName}");
+
+		LocalFile.KoroneikiAccountAPI._createAccountPostalAddress(
+			accountName = "Osbzen - ${staticProjectName}",
+			table = '''| Country               | United States   |
+	| Locality              | Diamond Bar     |
+	| Region                | California      |
+	| Type                  | Business        |
+	| Mailing               | True            |
+	| Postal Code           | 91765           |
+	| Primary               | True            |
+	| Street Address Line 1 | 123 Main Street |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Osbzen - ${staticProjectName}",
+			productName = "Portal Production",
+			table = '''| End Date                | ${staticEndDate}         |   |
+	| Original End Date       | ${staticOriginalEndDate} |   |
+	| Perpetual               | false                    |   |
+	| Product Field and Value | sizing                   | 1 |
+	| Product Field and Value | licenses                 | 1 |
+	| Product Field and Value | version                  | 6 |
+	| Quantity                | 1                        |   |
+	| Start Date              | ${staticStartDate}       |   |
+	| Status                  | Approved                 |   |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Osbzen - ${staticProjectName}",
+			productName = "Gold Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Gold Subscription");
+
+		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+
+		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "OSBZENOSBZEN");
+
+		LocalFile.ZendeskOrganizationAPI._viewOrganizationSyncFromOsb(organizationName = "Osbzen - ${staticProjectName}");
+
+		LocalFile.ZendeskUserAPI._viewUserSyncFromOsb(userEmailAddress = "osb.partner1@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserSyncFromOsb(userEmailAddress = "osb.partner2@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserOrganizationIdSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.partner1@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserOrganizationIdSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.partner2@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserNameByEmailAddress(
+			userEmailAddress = "osb.partner1@lrpartner.com.broken",
+			userName = "OSB Partner1 [P]");
+
+		LocalFile.ZendeskUserAPI._viewUserNameByEmailAddress(
+			userEmailAddress = "osb.partner2@lrpartner.com.broken",
+			userName = "OSB Partner2 [P]");
+
+		LocalFile.ZendeskUserAPI._removeUserFromOrganization(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.partner1@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._removeUserFromOrganization(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.partner2@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._removeUserTags(userEmailAddress = "osb.partner1@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._removeUserTags(userEmailAddress = "osb.partner2@lrpartner.com.broken");
+
+		LocalFile.ZendeskHomepage.pause(timeInSeconds = 10);
+
+		LocalFile.Passwords.getPasswords();
+
+		LocalFile.OSBAdmin.loginToSupport(
+			userEmailAddress = ${staticSupportAdminEmailAdress},
+			userPassword = ${staticSupportAdminPassword});
+
+		LocalFile.OSBAdmin.gotoOSBAdmin();
+
+		LocalFile.OSBAdminProject.syncToZendesk(projectCode = "OSBZENOSBZEN");
+
+		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+
+		LocalFile.ZendeskUserAPI._viewUserSyncFromOsb(userEmailAddress = "osb.partner1@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserSyncFromOsb(userEmailAddress = "osb.partner2@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserOrganizationIdSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.partner1@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserOrganizationIdSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.partner2@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserNameByEmailAddress(
+			userEmailAddress = "osb.partner1@lrpartner.com.broken",
+			userName = "OSB Partner1 [P]");
+
+		LocalFile.ZendeskUserAPI._viewUserNameByEmailAddress(
+			userEmailAddress = "osb.partner2@lrpartner.com.broken",
+			userName = "OSB Partner2 [P]");
+
+		LocalFile.ZendeskUserAPI._viewUserOrganizationSubscriptionSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.partner1@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserOrganizationSubscriptionSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.partner2@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserTagSync(
+			tag = "osb_kb",
+			userEmailAddress = "osb.partner1@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserTagSync(
+			tag = "osb_kb",
+			userEmailAddress = "osb.partner2@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserTagSync(
+			tag = "osb_partner",
+			userEmailAddress = "osb.partner1@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserTagSync(
+			tag = "osb_partner",
+			userEmailAddress = "osb.partner2@lrpartner.com.broken");
+	}
+
+	test Viewresyncedpartnerworkersviaprovisioning {
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Assigned Team Nested Field | ${staticAssignedTeamNestedField} | |
+	| Code                       | OSBZENOSBZEN                     | |
+	| Language                   | English                          | |
+	| Name                       | Osbzen - ${staticProjectName}    | |
+	| Region                     | United States                    | |
+	| Status                     | Active                           | |
+	| Tier                       | T1                               | |''');
+
+		LocalFile.KoroneikiAccountAPI._assignTeamRolesToTeam(
+			accountName = "Osbzen - ${staticProjectName}",
+			table = '''| Partner |''',
+			teamName = "Osbpar - ${staticProjectName}");
+
+		LocalFile.KoroneikiAccountAPI._assignTeamRolesToTeam(
+			accountName = "Osbzen - ${staticProjectName}",
+			table = '''| First Line Support |''',
+			teamName = "Osbpar - ${staticProjectName}");
+
+		LocalFile.KoroneikiAccountAPI._createAccountPostalAddress(
+			accountName = "Osbzen - ${staticProjectName}",
+			table = '''| Country               | United States   |
+	| Locality              | Diamond Bar     |
+	| Region                | California      |
+	| Type                  | Business        |
+	| Mailing               | True            |
+	| Postal Code           | 91765           |
+	| Primary               | True            |
+	| Street Address Line 1 | 123 Main Street |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Osbzen - ${staticProjectName}",
+			productName = "Portal Production",
+			table = '''| End Date                | ${staticEndDate}         |   |
+	| Original End Date       | ${staticOriginalEndDate} |   |
+	| Perpetual               | false                    |   |
+	| Product Field and Value | sizing                   | 1 |
+	| Product Field and Value | licenses                 | 1 |
+	| Product Field and Value | version                  | 6 |
+	| Quantity                | 1                        |   |
+	| Start Date              | ${staticStartDate}       |   |
+	| Status                  | Approved                 |   |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Osbzen - ${staticProjectName}",
+			productName = "Gold Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Gold Subscription");
+
+		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+
+		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "OSBZENOSBZEN");
+
+		LocalFile.ZendeskOrganizationAPI._viewOrganizationSyncFromOsb(organizationName = "Osbzen - ${staticProjectName}");
+
+		LocalFile.ZendeskUserAPI._viewUserSyncFromOsb(userEmailAddress = "osb.partner1@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserSyncFromOsb(userEmailAddress = "osb.partner2@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserOrganizationIdSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.partner1@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserOrganizationIdSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.partner2@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserNameByEmailAddress(
+			userEmailAddress = "osb.partner1@lrpartner.com.broken",
+			userName = "OSB Partner1 [P]");
+
+		LocalFile.ZendeskUserAPI._viewUserNameByEmailAddress(
+			userEmailAddress = "osb.partner2@lrpartner.com.broken",
+			userName = "OSB Partner2 [P]");
+
+		LocalFile.ZendeskUserAPI._removeUserFromOrganization(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.partner1@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._removeUserFromOrganization(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.partner2@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._removeUserTags(userEmailAddress = "osb.partner1@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._removeUserTags(userEmailAddress = "osb.partner2@lrpartner.com.broken");
+
+		LocalFile.ZendeskHomepage.pause(timeInSeconds = 10);
+
+		LocalFile.Passwords.getPasswords();
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Osbzen");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Osbzen - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.clickSyncToZendeskButton();
+
+		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+
+		LocalFile.ZendeskUserAPI._viewUserSyncFromOsb(userEmailAddress = "osb.partner1@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserSyncFromOsb(userEmailAddress = "osb.partner2@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserOrganizationIdSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.partner1@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserOrganizationIdSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.partner2@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserNameByEmailAddress(
+			userEmailAddress = "osb.partner1@lrpartner.com.broken",
+			userName = "OSB Partner1 [P]");
+
+		LocalFile.ZendeskUserAPI._viewUserNameByEmailAddress(
+			userEmailAddress = "osb.partner2@lrpartner.com.broken",
+			userName = "OSB Partner2 [P]");
+
+		LocalFile.ZendeskUserAPI._viewUserOrganizationSubscriptionSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.partner1@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserOrganizationSubscriptionSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.partner2@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserTagSync(
+			tag = "osb_kb",
+			userEmailAddress = "osb.partner1@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserTagSync(
+			tag = "osb_kb",
+			userEmailAddress = "osb.partner2@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserTagSync(
+			tag = "osb_partner",
+			userEmailAddress = "osb.partner1@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserTagSync(
+			tag = "osb_partner",
+			userEmailAddress = "osb.partner2@lrpartner.com.broken");
+	}
+
+	test Viewresyncedpartnerworkerswithoutinitialprojectviaprovisioning {
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code     | OSBZENOSBZEN                  | |
+	| Language | English                       | |
+	| Name     | Osbzen - ${staticProjectName} | |
+	| Region   | United States                 | |
+	| Status   | Active                        | |
+	| Tier     | T1                            | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountPostalAddress(
+			accountName = "Osbzen - ${staticProjectName}",
+			table = '''| Country               | United States   |
+	| Locality              | Diamond Bar     |
+	| Region                | California      |
+	| Type                  | Business        |
+	| Mailing               | True            |
+	| Postal Code           | 91765           |
+	| Primary               | True            |
+	| Street Address Line 1 | 123 Main Street |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Osbzen - ${staticProjectName}",
+			productName = "Portal Production",
+			table = '''| End Date                | ${staticEndDate}         |   |
+	| Original End Date       | ${staticOriginalEndDate} |   |
+	| Perpetual               | false                    |   |
+	| Product Field and Value | sizing                   | 1 |
+	| Product Field and Value | licenses                 | 1 |
+	| Product Field and Value | version                  | 6 |
+	| Quantity                | 1                        |   |
+	| Start Date              | ${staticStartDate}       |   |
+	| Status                  | Approved                 |   |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Osbzen - ${staticProjectName}",
+			productName = "Gold Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Gold Subscription");
+
+		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+
+		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "OSBZENOSBZEN");
+
+		LocalFile.ZendeskOrganizationAPI._viewOrganizationSyncFromOsb(organizationName = "Osbzen - ${staticProjectName}");
+
+		LocalFile.ZendeskUserAPI._viewUserSyncFromOsb(userEmailAddress = "osb.partner1@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserSyncFromOsb(userEmailAddress = "osb.partner2@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewNoUserOrganizationIdSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.partner1@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewNoUserOrganizationIdSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.partner2@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserNameByEmailAddress(
+			userEmailAddress = "osb.partner1@lrpartner.com.broken",
+			userName = "OSB Partner1 [P]");
+
+		LocalFile.ZendeskUserAPI._viewUserNameByEmailAddress(
+			userEmailAddress = "osb.partner2@lrpartner.com.broken",
+			userName = "OSB Partner2 [P]");
+
+		LocalFile.ZendeskUserAPI._updateUserNameByEmailAddress(
+			userEmailAddress = "osb.partner1@lrpartner.com.broken",
+			userName = "OSB Partner1");
+
+		LocalFile.ZendeskUserAPI._updateUserNameByEmailAddress(
+			userEmailAddress = "osb.partner2@lrpartner.com.broken",
+			userName = "OSB Partner2");
+
+		LocalFile.ZendeskUserAPI._removeUserTags(userEmailAddress = "osb.partner1@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._removeUserTags(userEmailAddress = "osb.partner2@lrpartner.com.broken");
+
+		LocalFile.ZendeskHomepage.pause(timeInSeconds = 10);
+
+		LocalFile.Passwords.getPasswords();
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Osbpar");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Osbpar - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.clickSyncToZendeskButton();
+
+		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+
+		LocalFile.ZendeskUserAPI._viewUserNameByEmailAddress(
+			userEmailAddress = "osb.partner1@lrpartner.com.broken",
+			userName = "OSB Partner1 [P]");
+
+		LocalFile.ZendeskUserAPI._viewUserNameByEmailAddress(
+			userEmailAddress = "osb.partner2@lrpartner.com.broken",
+			userName = "OSB Partner2 [P]");
+
+		LocalFile.ZendeskUserAPI._viewNoUserOrganizationIdSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.partner1@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewNoUserOrganizationIdSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.partner2@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewNoUserOrganizationSubscriptionSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.partner1@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewNoUserOrganizationSubscriptionSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.partner2@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserTagSync(
+			tag = "osb_kb",
+			userEmailAddress = "osb.partner1@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserTagSync(
+			tag = "osb_kb",
+			userEmailAddress = "osb.partner2@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewNoUserTagSync(
+			tag = "osb_partner",
+			userEmailAddress = "osb.partner1@lrpartner.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewNoUserTagSync(
+			tag = "osb_partner",
+			userEmailAddress = "osb.partner2@lrpartner.com.broken");
+	}
+
+}

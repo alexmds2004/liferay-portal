@@ -1,0 +1,304 @@
+definition {
+
+	property testray.main.component.name = "Support QA";
+	property type = "provisioning.security";
+
+	setUp {
+		LocalFile.Passwords.getPasswords();
+
+		LocalFile.OSBAdminRabbitMQ.generateStaticVariables();
+
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningCompanyName();
+
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		LocalFile.JSONUser.createViaProvisioning(table = '''| Screen Name   | provisioning.contact.worker                    |
+	| Email Address | provisioning.contact.worker@liferay.com.broken |
+	| First Name    | Provisioning                                   |
+	| Last Name     | Contact Worker                                 |''');
+
+		LocalFile.JSONUser.assignUserToProvisioningRole(
+			roleName = "Provisioning Contact Worker",
+			userEmailAddress = "provisioning.contact.worker@liferay.com.broken");
+
+		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | prm.koroneiki1                       |
+	| Email Address | prm.koroneiki1@lrcustomer.com.broken |
+	| First Name    | PRM                                  |
+	| Last Name     | Koroneiki1                           |''');
+
+		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | prm.koroneiki2                       |
+	| Email Address | prm.koroneiki2@lrcustomer.com.broken |
+	| First Name    | PRM                                  |
+	| Last Name     | Koroneiki2                           |''');
+	}
+
+	tearDown {
+		LocalFile.ZendeskUserAPI._getDefaultUserId(organizationName = "Permis - ${staticProjectName}");
+
+		LocalFile.ZendeskUserAPI._renameFirstDefaultUserIdVariable();
+
+		LocalFile.ZendeskUserAPI._getDefaultUserId(organizationName = "Misper - ${staticCompanyName}");
+
+		LocalFile.ZendeskUserAPI._renameSecondDefaultUserIdVariable();
+
+		LocalFile.KoroneikiTeamAPI._tearDownTeams(table = '''| Permission Partner |''');
+
+		LocalFile.OSBAdminProject.tearDownProjects(table = '''| MISPERPERMIS |
+	| MISPER       |''');
+
+		LocalFile.KoroneikiAccountAPI._tearDownAccounts(table = '''| Permis - ${staticProjectName} |
+	| Misper - ${staticCompanyName} |''');
+
+		LocalFile.KoroneikiAccountAPI._tearDownAccountsViaAccountFieldNameAndValue(
+			fieldName = "Code",
+			table = '''| MISPERPERMIS |
+	| MISPER       |''');
+
+		LocalFile.JSONUser.tearDownUsers(table = '''| prm.koroneiki1@lrcustomer.com.broken |
+	| prm.koroneiki2@lrcustomer.com.broken |''');
+
+		LocalFile.JSONUser.tearDownUsersViaSupport(table = '''| prm.koroneiki1@lrcustomer.com.broken |
+	| prm.koroneiki2@lrcustomer.com.broken |''');
+
+		LocalFile.JSONUser.tearDownUsersViaKoroneiki(table = '''| prm.koroneiki1@lrcustomer.com.broken |
+	| prm.koroneiki2@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiContactAPI._tearDownContacts(table = '''| prm.koroneiki1@lrcustomer.com.broken |
+	| prm.koroneiki2@lrcustomer.com.broken |''');
+
+		LocalFile.JSONOkta.tearDownUsers(table = '''| prm.koroneiki1@lrcustomer.com.broken |
+	| prm.koroneiki2@lrcustomer.com.broken |''');
+
+		LocalFile.ZendeskTicketAPI._tearDownTicketsByKeywords(table = '''| New Subscription(s) for Permis - ${staticProjectName} |
+	| New Subscription(s) for Misper - ${staticCompanyName} |''');
+
+		LocalFile.ZendeskUserAPI._getMultipleUserIdsByEmailAddress(table = '''| prm.koroneiki1@lrcustomer.com.broken |
+	| prm.koroneiki2@lrcustomer.com.broken |''');
+
+		LocalFile.ZendeskUserAPI._tearDownUsersByIdList(userIds = ${staticUserIdList});
+
+		LocalFile.ZendeskOrganizationAPI._getMultipleOrganizationExternalIdsByOrganizationNameIfStillPresent(table = '''| Permis - ${staticProjectName} |
+	| Misper - ${staticCompanyName} |''');
+
+		LocalFile.ZendeskOrganizationAPI._tearDownOrganizationsByExternalIdList(organizationExternalIds = ${staticOrganizationExternalIdList});
+
+		LocalFile.ZendeskUserAPI._tearDownUserById(userId = ${staticDefaultUserId1});
+
+		LocalFile.ZendeskUserAPI._tearDownUserById(userId = ${staticDefaultUserId2});
+
+		LocalFile.JSONUser.tearDownUsersViaProvisioning(table = '''| provisioning.contact.worker@liferay.com.broken |''');
+	}
+
+	test Viewnonewteambutton {
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Misper - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Contact Email Address                  | prm.koroneiki1@lrcustomer.com.broken       |
+	| Contact First Name                     | PRM                                        |
+	| Contact Last Name                      | Koroneiki1                                 |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | prm.koroneiki2@lrcustomer.com.broken       |
+	| Owner First Name                       | PRM                                        |
+	| Owner Last Name                        | Koroneiki2                                 |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Permis - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountTeam(
+			accountName = "Permis - ${staticProjectName}",
+			teamName = "Permission Partner");
+
+		LocalFile.KoroneikiAccountAPI._assignTeamRolesToTeam(
+			accountName = "Permis - ${staticProjectName}",
+			table = '''| Partner |''',
+			teamName = "Permission Partner");
+
+		LocalFile.KoroneikiTeamAPI._assignContacts(
+			table = '''| prm.koroneiki1@lrcustomer.com.broken |''',
+			teamName = "Permission Partner");
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = "provisioning.contact.worker@liferay.com.broken",
+			userPassword = ${staticProvisioningQaUserPassword});
+
+		LocalFile.UserAccount.updatePasswordUponLogin(userPassword = "test");
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Permis");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Permis - ${staticProjectName}");
+
+		LocalFile.Provisioning.clickTab(tabName = "Teams");
+
+		LocalFile.ProvisioningAccount.viewNoNewTeamButton();
+	}
+
+	test Viewteam {
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Misper - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Contact Email Address                  | prm.koroneiki1@lrcustomer.com.broken       |
+	| Contact First Name                     | PRM                                        |
+	| Contact Last Name                      | Koroneiki1                                 |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | prm.koroneiki2@lrcustomer.com.broken       |
+	| Owner First Name                       | PRM                                        |
+	| Owner Last Name                        | Koroneiki2                                 |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Permis - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountTeam(
+			accountName = "Permis - ${staticProjectName}",
+			teamName = "Permission Partner");
+
+		LocalFile.KoroneikiAccountAPI._assignTeamRolesToTeam(
+			accountName = "Permis - ${staticProjectName}",
+			table = '''| Partner |''',
+			teamName = "Permission Partner");
+
+		LocalFile.KoroneikiTeamAPI._assignContacts(
+			table = '''| prm.koroneiki1@lrcustomer.com.broken |''',
+			teamName = "Permission Partner");
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = "provisioning.contact.worker@liferay.com.broken",
+			userPassword = ${staticProvisioningQaUserPassword});
+
+		LocalFile.UserAccount.updatePasswordUponLogin(userPassword = "test");
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Permis");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Permis - ${staticProjectName}");
+
+		LocalFile.Provisioning.clickTab(tabName = "Teams");
+
+		LocalFile.ProvisioningAccount.search(keyword = "Permis");
+
+		LocalFile.ProvisioningAccount._viewAccountTeam(
+			table = '''| Name   | Permis - ${staticProjectName} |
+	| Member | PRM Koroneiki1                |''',
+			teamName = "Permis - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.viewNoTeamDeleteButton(teamName = "Permis - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.clickTeamLink(teamName = "Permis - ${staticProjectName}");
+
+		LocalFile.ProvisioningTeam._viewTeamDetails(table = '''| Name | Permis - ${staticProjectName} |''');
+
+		LocalFile.ProvisioningTeam.viewNoDeleteButton();
+
+		LocalFile.ProvisioningTeam.viewNoEditButton();
+
+		LocalFile.ProvisioningTeam.search(keyword = "prm.koroneiki1@lrcustomer.com.broken");
+
+		LocalFile.ProvisioningTeam._viewTeamMember(
+			memberEmailAddress = "prm.koroneiki1@lrcustomer.com.broken",
+			table = '''| Name          | PRM Koroneiki1                       |
+	| Email Address | prm.koroneiki1@lrcustomer.com.broken |
+	| Status        | VERIFIED                             |''');
+
+		LocalFile.ProvisioningTeam.viewNoAssignMembersButton();
+
+		LocalFile.ProvisioningTeam._viewNoTeamMemberUnassignLink(memberEmailAddress = "prm.koroneiki1@lrcustomer.com.broken");
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Permis");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Permis - ${staticProjectName}");
+
+		LocalFile.Provisioning.clickTab(tabName = "Teams");
+
+		LocalFile.ProvisioningAccount.search(keyword = "Permission");
+
+		LocalFile.ProvisioningAccount._viewAccountTeam(
+			table = '''| Name   | Permission Partner |
+	| Member | PRM Koroneiki1     |''',
+			teamName = "Permission Partner");
+
+		LocalFile.ProvisioningAccount.viewNoTeamDeleteButton(teamName = "Permission Partner");
+
+		LocalFile.ProvisioningAccount.clickTeamLink(teamName = "Permission Partner");
+
+		LocalFile.ProvisioningTeam._viewTeamDetails(table = '''| Name | Permission Partner |''');
+
+		LocalFile.ProvisioningTeam.viewNoDeleteButton();
+
+		LocalFile.ProvisioningTeam.viewNoEditButton();
+
+		LocalFile.ProvisioningTeam.search(keyword = "prm.koroneiki1@lrcustomer.com.broken");
+
+		LocalFile.ProvisioningTeam._viewTeamMember(
+			memberEmailAddress = "prm.koroneiki1@lrcustomer.com.broken",
+			table = '''| Name          | PRM Koroneiki1                       |
+	| Email Address | prm.koroneiki1@lrcustomer.com.broken |
+	| Status        | VERIFIED                             |''');
+
+		LocalFile.ProvisioningTeam.viewNoAssignMembersButton();
+
+		LocalFile.ProvisioningTeam._viewNoTeamMemberUnassignLink(memberEmailAddress = "prm.koroneiki1@lrcustomer.com.broken");
+	}
+
+}

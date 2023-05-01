@@ -1,0 +1,2310 @@
+definition {
+
+	property testray.main.component.name = "Support QA";
+	property type = "provisioning.license.integration";
+
+	setUp {
+		LocalFile.Passwords.getPasswords();
+	}
+
+	tearDown {
+		LocalFile.ZendeskUserAPI._getDefaultUserId(organizationName = "Korlic - ${staticProjectName}");
+
+		LocalFile.KoroneikiProductConsumptionAPI._tearDownProductConsumptionList(
+			accountName = "Korlic - ${staticProjectName}",
+			table = '''| DXP Production                   |
+	| DXP Non-Production               |
+	| Portal Production                |
+	| DXP Development                  |
+	| Commerce Subscription Production |''');
+
+		LocalFile.KoroneikiProductConsumptionAPI._tearDownProductConsumptions(
+			accountName = "Korlic - ${staticProjectName}",
+			table = '''| DXP OEM                                         |
+	| DXP Limited                                     |
+	| DXP Non-Production                              |
+	| Portal Per User                                 |
+	| Commerce Subscription Development               |
+	| Commerce Subscription Non-Production            |
+	| Commerce Subscription Backup                    |
+	| Commerce Subscription Unlimited Enterprise-Wide |
+	| Portal Production                               |''');
+
+		LocalFile.OSBAdminProject.tearDownProjects(table = '''| KORLICKORLIC |''');
+
+		LocalFile.KoroneikiAccountAPI._tearDownAccounts(table = '''| Korlic - ${staticProjectName} |''');
+
+		LocalFile.KoroneikiAccountAPI._tearDownAccountsViaAccountFieldNameAndValue(
+			fieldName = "Code",
+			table = '''| KORLICKORLIC |''');
+
+		LocalFile.ZendeskOrganizationAPI._getMultipleOrganizationExternalIdsByOrganizationNameIfStillPresent(table = '''| Korlic - ${staticProjectName} |''');
+
+		LocalFile.ZendeskOrganizationAPI._tearDownOrganizationsByExternalIdList(organizationExternalIds = ${staticOrganizationExternalIdList});
+
+		LocalFile.ZendeskUserAPI._tearDownUserById(userId = ${staticDefaultUserId});
+	}
+
+	test AttempttodownloadDXPaggregatelicenseswithonedeactivated70andoneactive70cantaggregateerror {
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | KORLICKORLIC                         | |
+	| Contact Email Address | lic.koroneiki1@lrcustomer.com.broken | |
+	| Description           | Test osb account on koroneiki        | |
+	| Fax Number            | 555-555-1234                         | |
+	| Name                  | Korlic - ${staticProjectName}        | |
+	| Phone Number          | 555-555-5678                         | |
+	| Profile Email Address | lic.koroneiki1@lrcustomer.com.broken | |
+	| Region                | United States                        | |
+	| Status                | Active                               | |
+	| Tier                  | T4                                   | |
+	| Website               | www.koroneikicorporation.com         | |''');
+
+		LocalFile.KoroneikiAccountAPI._generateAccountKey(accountName = "Korlic - ${staticProjectName}");
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFullStartAndEndDate();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFutureStartAndEndDate();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFullFutureStartAndEndDate();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticYyyyMmDdStartAndEndDate();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticYyyyMmDdPastStartAndEndDate();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticYyyyMmDdFutureStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korlic - ${staticProjectName}",
+			productName = "DXP Production",
+			table = '''| End Date                | ${staticEndDate}         |   |
+	| Original End Date       | ${staticOriginalEndDate} |   |
+	| Perpetual               | false                    |   |
+	| Product Field and Value | sizing                   | 2 |
+	| Product Field and Value | licenses                 | 2 |
+	| Product Field and Value | version                  | 7 |
+	| Quantity                | 2                        |   |
+	| Start Date              | ${staticStartDate}       |   |
+	| Status                  | Approved                 |   |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._generateProductPurchaseId(
+			accountName = "Korlic - ${staticProjectName}",
+			productName = "DXP Production");
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korlic - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoLicenses();
+
+		LocalFile.Provisioning.clickGenerateLicenseButton();
+
+		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Account         | Select Entity | Korlic - ${staticProjectName}        | |
+	| Product         | Select        | DXP Production                       | |
+	| Version         | Select        | 7.0                                  | |
+	| Type            | Select        | DXP Production                       | |
+	| Start Date      | Input         | ${staticYyyyMmDdPastStartDate}       | |
+	| Expiration Date | Input         | ${staticYyyyMmDdPastOriginalEndDate} | |''');
+
+		LocalFile.ProvisioningLicense.clickChooseProductPurchaseButton(positionValue = 1);
+
+		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Name          | Input    | Korlic - ${staticProjectName} License1 Name        | |
+	| Description   | Input    | Korlic - ${staticProjectName} License1 Description | |
+	| Host Name     | Input    | localhost                                          | |
+	| IP Addresses  | Textarea | 123.45.67.89                                       | |
+	| MAC Addresses | Textarea | 0A-1B-2C-3D-4E-5F                                  | |''');
+
+		LocalFile.ProvisioningLicense.clickGenerateLicenseButton();
+
+		LocalFile.ProvisioningLicense.viewLicense(table = '''| Header  | Korlic - ${staticProjectName} | |
+	| Product | DXP Production                | |''');
+
+		LocalFile.ProvisioningLicense.getLicenseKeyIdViaLicenseDetails();
+
+		LocalFile.ProvisioningLicense._renameFirstLicenseKeyIdVariable();
+
+		LocalFile.ProvisioningLicense.clickDeactivateLicenseButton(positionValue = 1);
+
+		LocalFile.ProvisioningLicense.viewLicense(table = '''| Header  | Korlic - ${staticProjectName} | |
+	| Product | DXP Production                | |
+	| Status  | DEACTIVATED                   | |''');
+
+		LocalFile.Provisioning.gotoLicenses();
+
+		LocalFile.Provisioning.searchLicenses(keyword = ${staticAccountKey});
+
+		LocalFile.Provisioning.clickGenerateLicenseButton();
+
+		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Account         | Select Entity | Korlic - ${staticProjectName}        | |
+	| Product         | Select        | DXP Production                       | |
+	| Version         | Select        | 7.0                                  | |
+	| Type            | Select        | DXP Production                       | |''');
+
+		LocalFile.ProvisioningLicense.clickChooseProductPurchaseButton(positionValue = 1);
+
+		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Name          | Input    | Korlic - ${staticProjectName} License2 Name        | |
+	| Description   | Input    | Korlic - ${staticProjectName} License2 Description | |
+	| Host Name     | Input    | localhost                                          | |
+	| IP Addresses  | Textarea | 123.45.67.89                                       | |
+	| MAC Addresses | Textarea | 0A-1B-2C-3D-4E-5F                                  | |''');
+
+		LocalFile.ProvisioningLicense.clickGenerateLicenseButton();
+
+		LocalFile.ProvisioningLicense.viewLicense(table = '''| Header  | Korlic - ${staticProjectName} | |
+	| Product | DXP Production                | |''');
+
+		LocalFile.ProvisioningLicense.getLicenseKeyIdViaLicenseDetails();
+
+		LocalFile.ProvisioningLicense._renameSecondLicenseKeyIdVariable();
+
+		LocalFile.ProvisioningLicenseAPI._viewLicenseAggregateErrorMessage(
+			accountName = "Korlic - ${staticProjectName}",
+			table = '''| ${staticLicenseKeyId2} |
+	| ${staticLicenseKeyId1} |''');
+	}
+
+	test AttempttodownloadDXPaggregatelicenseswithoneexpired70andoneexpired71cantaggregateerror {
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | KORLICKORLIC                         | |
+	| Contact Email Address | lic.koroneiki1@lrcustomer.com.broken | |
+	| Description           | Test osb account on koroneiki        | |
+	| Fax Number            | 555-555-1234                         | |
+	| Name                  | Korlic - ${staticProjectName}        | |
+	| Phone Number          | 555-555-5678                         | |
+	| Profile Email Address | lic.koroneiki1@lrcustomer.com.broken | |
+	| Region                | United States                        | |
+	| Status                | Active                               | |
+	| Tier                  | T4                                   | |
+	| Website               | www.koroneikicorporation.com         | |''');
+
+		LocalFile.KoroneikiAccountAPI._generateAccountKey(accountName = "Korlic - ${staticProjectName}");
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFullStartAndEndDate();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFutureStartAndEndDate();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFullFutureStartAndEndDate();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticYyyyMmDdStartAndEndDate();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticYyyyMmDdPastStartAndEndDate();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticYyyyMmDdFutureStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korlic - ${staticProjectName}",
+			productName = "DXP Production",
+			table = '''| End Date                | ${staticEndDate}         |   |
+	| Original End Date       | ${staticOriginalEndDate} |   |
+	| Perpetual               | false                    |   |
+	| Product Field and Value | sizing                   | 2 |
+	| Product Field and Value | licenses                 | 2 |
+	| Product Field and Value | version                  | 7 |
+	| Quantity                | 2                        |   |
+	| Start Date              | ${staticStartDate}       |   |
+	| Status                  | Approved                 |   |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._generateProductPurchaseId(
+			accountName = "Korlic - ${staticProjectName}",
+			productName = "DXP Production");
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korlic - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoLicenses();
+
+		LocalFile.Provisioning.clickGenerateLicenseButton();
+
+		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Account         | Select Entity | Korlic - ${staticProjectName}        | |
+	| Product         | Select        | DXP Production                       | |
+	| Version         | Select        | 7.0                                  | |
+	| Type            | Select        | DXP Production                       | |
+	| Start Date      | Input         | ${staticYyyyMmDdPastStartDate}       | |
+	| Expiration Date | Input         | ${staticYyyyMmDdPastOriginalEndDate} | |''');
+
+		LocalFile.ProvisioningLicense.clickChooseProductPurchaseButton(positionValue = 1);
+
+		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Name          | Input    | Korlic - ${staticProjectName} License1 Name        | |
+	| Description   | Input    | Korlic - ${staticProjectName} License1 Description | |
+	| Host Name     | Input    | localhost                                          | |
+	| IP Addresses  | Textarea | 123.45.67.89                                       | |
+	| MAC Addresses | Textarea | 0A-1B-2C-3D-4E-5F                                  | |''');
+
+		LocalFile.ProvisioningLicense.clickGenerateLicenseButton();
+
+		LocalFile.ProvisioningLicense.viewLicense(table = '''| Header  | Korlic - ${staticProjectName} | |
+	| Product | DXP Production                | |''');
+
+		LocalFile.ProvisioningLicense.getLicenseKeyIdViaLicenseDetails();
+
+		LocalFile.ProvisioningLicense._renameFirstLicenseKeyIdVariable();
+
+		LocalFile.Provisioning.gotoLicenses();
+
+		LocalFile.Provisioning.searchLicenses(keyword = ${staticAccountKey});
+
+		LocalFile.Provisioning.clickGenerateLicenseButton();
+
+		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Account         | Select Entity | Korlic - ${staticProjectName}        | |
+	| Product         | Select        | DXP Production                       | |
+	| Version         | Select        | 7.1                                  | |
+	| Type            | Select        | DXP Production                       | |
+	| Start Date      | Input         | ${staticYyyyMmDdPastStartDate}       | |
+	| Expiration Date | Input         | ${staticYyyyMmDdPastOriginalEndDate} | |''');
+
+		LocalFile.ProvisioningLicense.clickChooseProductPurchaseButton(positionValue = 1);
+
+		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Name          | Input    | Korlic - ${staticProjectName} License2 Name        | |
+	| Description   | Input    | Korlic - ${staticProjectName} License2 Description | |
+	| Host Name     | Input    | localhost                                          | |
+	| IP Addresses  | Textarea | 123.45.67.89                                       | |
+	| MAC Addresses | Textarea | 0A-1B-2C-3D-4E-5F                                  | |''');
+
+		LocalFile.ProvisioningLicense.clickGenerateLicenseButton();
+
+		LocalFile.ProvisioningLicense.viewLicense(table = '''| Header  | Korlic - ${staticProjectName} | |
+	| Product | DXP Production                | |''');
+
+		LocalFile.ProvisioningLicense.getLicenseKeyIdViaLicenseDetails();
+
+		LocalFile.ProvisioningLicense._renameSecondLicenseKeyIdVariable();
+
+		LocalFile.ProvisioningLicenseAPI._viewLicenseAggregateErrorMessage(
+			accountName = "Korlic - ${staticProjectName}",
+			table = '''| ${staticLicenseKeyId2} |
+	| ${staticLicenseKeyId1} |''');
+	}
+
+	test AttempttodownloadDXPaggregatelicenseswithtwo70andone71versionscantaggregateerror {
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | KORLICKORLIC                         | |
+	| Contact Email Address | lic.koroneiki1@lrcustomer.com.broken | |
+	| Description           | Test osb account on koroneiki        | |
+	| Fax Number            | 555-555-1234                         | |
+	| Name                  | Korlic - ${staticProjectName}        | |
+	| Phone Number          | 555-555-5678                         | |
+	| Profile Email Address | lic.koroneiki1@lrcustomer.com.broken | |
+	| Region                | United States                        | |
+	| Status                | Active                               | |
+	| Tier                  | T4                                   | |
+	| Website               | www.koroneikicorporation.com         | |''');
+
+		LocalFile.KoroneikiAccountAPI._generateAccountKey(accountName = "Korlic - ${staticProjectName}");
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFullStartAndEndDate();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFutureStartAndEndDate();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFullFutureStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korlic - ${staticProjectName}",
+			productName = "DXP Production",
+			table = '''| End Date                | ${staticEndDate}         |   |
+	| Original End Date       | ${staticOriginalEndDate} |   |
+	| Perpetual               | false                    |   |
+	| Product Field and Value | sizing                   | 2 |
+	| Product Field and Value | licenses                 | 2 |
+	| Product Field and Value | version                  | 7 |
+	| Quantity                | 5                        |   |
+	| Start Date              | ${staticStartDate}       |   |
+	| Status                  | Approved                 |   |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._generateProductPurchaseId(
+			accountName = "Korlic - ${staticProjectName}",
+			productName = "DXP Production");
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korlic - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 5                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoLicenses();
+
+		LocalFile.Provisioning.clickGenerateLicenseButton();
+
+		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Account | Select Entity | Korlic - ${staticProjectName} | |
+	| Product | Select        | DXP Production                | |
+	| Version | Select        | 7.0                           | |
+	| Type    | Select        | DXP Production                | |''');
+
+		LocalFile.ProvisioningLicense.clickChooseProductPurchaseButton(positionValue = 1);
+
+		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Name          | Input    | Korlic - ${staticProjectName} License1 Name        | |
+	| Description   | Input    | Korlic - ${staticProjectName} License1 Description | |
+	| Host Name     | Input    | localhost                                          | |
+	| IP Addresses  | Textarea | 123.45.67.89                                       | |
+	| MAC Addresses | Textarea | 0A-1B-2C-3D-4E-5F                                  | |''');
+
+		LocalFile.ProvisioningLicense.clickGenerateLicenseButton();
+
+		LocalFile.ProvisioningLicense.viewLicense(table = '''| Header  | Korlic - ${staticProjectName} | |
+	| Product | DXP Production                | |''');
+
+		LocalFile.ProvisioningLicense.getLicenseKeyIdViaLicenseDetails();
+
+		LocalFile.ProvisioningLicense._renameFirstLicenseKeyIdVariable();
+
+		LocalFile.Provisioning.gotoLicenses();
+
+		LocalFile.Provisioning.searchLicenses(keyword = ${staticAccountKey});
+
+		LocalFile.Provisioning.clickGenerateLicenseButton();
+
+		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Account | Select Entity | Korlic - ${staticProjectName} | |
+	| Product | Select        | DXP Production                | |
+	| Version | Select        | 7.0                           | |
+	| Type    | Select        | DXP Production                | |''');
+
+		LocalFile.ProvisioningLicense.clickChooseProductPurchaseButton(positionValue = 1);
+
+		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Name          | Input    | Korlic - ${staticProjectName} License2 Name        | |
+	| Description   | Input    | Korlic - ${staticProjectName} License2 Description | |
+	| Host Name     | Input    | localhost                                          | |
+	| IP Addresses  | Textarea | 123.45.67.89                                       | |
+	| MAC Addresses | Textarea | 0A-1B-2C-3D-4E-5F                                  | |''');
+
+		LocalFile.ProvisioningLicense.clickGenerateLicenseButton();
+
+		LocalFile.ProvisioningLicense.viewLicense(table = '''| Header  | Korlic - ${staticProjectName} | |
+	| Product | DXP Production                | |''');
+
+		LocalFile.ProvisioningLicense.getLicenseKeyIdViaLicenseDetails();
+
+		LocalFile.ProvisioningLicense._renameSecondLicenseKeyIdVariable();
+
+		LocalFile.Provisioning.gotoLicenses();
+
+		LocalFile.Provisioning.clickGenerateLicenseButton();
+
+		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Account | Select Entity | Korlic - ${staticProjectName} | |
+	| Product | Select        | DXP Production                | |
+	| Version | Select        | 7.1                           | |
+	| Type    | Select        | DXP Production                | |''');
+
+		LocalFile.ProvisioningLicense.clickChooseProductPurchaseButton(positionValue = 1);
+
+		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Name          | Input    | Korlic - ${staticProjectName} License3 Name        | |
+	| Description   | Input    | Korlic - ${staticProjectName} License3 Description | |
+	| Host Name     | Input    | localhost                                          | |
+	| IP Addresses  | Textarea | 123.45.67.89                                       | |
+	| MAC Addresses | Textarea | 0A-1B-2C-3D-4E-5F                                  | |''');
+
+		LocalFile.ProvisioningLicense.clickGenerateLicenseButton();
+
+		LocalFile.ProvisioningLicense.viewLicense(table = '''| Header  | Korlic - ${staticProjectName} | |
+	| Product | DXP Production                | |''');
+
+		LocalFile.ProvisioningLicense.getLicenseKeyIdViaLicenseDetails();
+
+		LocalFile.ProvisioningLicense._renameThirdLicenseKeyIdVariable();
+
+		LocalFile.ProvisioningLicenseAPI._viewLicenseAggregateErrorMessage(
+			accountName = "Korlic - ${staticProjectName}",
+			table = '''| ${staticLicenseKeyId3} |
+	| ${staticLicenseKeyId2} |
+	| ${staticLicenseKeyId1} |''');
+	}
+
+	test AttempttodownloadDXPaggregatelicenseswithtwoactive70andoneactivecommerceproductionkeyscantaggregateerror {
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | KORLICKORLIC                         | |
+	| Contact Email Address | lic.koroneiki1@lrcustomer.com.broken | |
+	| Description           | Test osb account on koroneiki        | |
+	| Fax Number            | 555-555-1234                         | |
+	| Name                  | Korlic - ${staticProjectName}        | |
+	| Phone Number          | 555-555-5678                         | |
+	| Profile Email Address | lic.koroneiki1@lrcustomer.com.broken | |
+	| Region                | United States                        | |
+	| Status                | Active                               | |
+	| Tier                  | T4                                   | |
+	| Website               | www.koroneikicorporation.com         | |''');
+
+		LocalFile.KoroneikiAccountAPI._generateAccountKey(accountName = "Korlic - ${staticProjectName}");
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFullStartAndEndDate();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFutureStartAndEndDate();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFullFutureStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korlic - ${staticProjectName}",
+			productName = "DXP Production",
+			table = '''| End Date                | ${staticEndDate}         |   |
+	| Original End Date       | ${staticOriginalEndDate} |   |
+	| Perpetual               | false                    |   |
+	| Product Field and Value | sizing                   | 2 |
+	| Product Field and Value | licenses                 | 2 |
+	| Product Field and Value | version                  | 7 |
+	| Quantity                | 5                        |   |
+	| Start Date              | ${staticStartDate}       |   |
+	| Status                  | Approved                 |   |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._generateProductPurchaseId(
+			accountName = "Korlic - ${staticProjectName}",
+			productName = "DXP Production");
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korlic - ${staticProjectName}",
+			productName = "Commerce Subscription Production",
+			table = '''| End Date                | ${staticEndDate}         |   |
+	| Original End Date       | ${staticOriginalEndDate} |   |
+	| Perpetual               | false                    |   |
+	| Product Field and Value | sizing                   | 1 |
+	| Product Field and Value | licenses                 | 1 |
+	| Product Field and Value | version                  | 0 |
+	| Quantity                | 1                        |   |
+	| Start Date              | ${staticStartDate}       |   |
+	| Status                  | Approved                 |   |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._generateProductPurchaseId(
+			accountName = "Korlic - ${staticProjectName}",
+			productName = "Commerce Subscription Production");
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korlic - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoLicenses();
+
+		LocalFile.Provisioning.clickGenerateLicenseButton();
+
+		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Account         | Select Entity | Korlic - ${staticProjectName}        | |
+	| Product         | Select        | DXP Production                       | |
+	| Version         | Select        | 7.0                                  | |
+	| Type            | Select        | DXP Production                       | |''');
+
+		LocalFile.ProvisioningLicense.clickChooseProductPurchaseButton(positionValue = 1);
+
+		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Name          | Input    | Korlic - ${staticProjectName} License1 Name        | |
+	| Description   | Input    | Korlic - ${staticProjectName} License1 Description | |
+	| Host Name     | Input    | localhost                                          | |
+	| IP Addresses  | Textarea | 123.45.67.89                                       | |
+	| MAC Addresses | Textarea | 0A-1B-2C-3D-4E-5F                                  | |''');
+
+		LocalFile.ProvisioningLicense.clickGenerateLicenseButton();
+
+		LocalFile.ProvisioningLicense.viewLicense(table = '''| Header  | Korlic - ${staticProjectName} | |
+	| Product | DXP Production                | |''');
+
+		LocalFile.ProvisioningLicense.getLicenseKeyIdViaLicenseDetails();
+
+		LocalFile.ProvisioningLicense._renameFirstLicenseKeyIdVariable();
+
+		LocalFile.Provisioning.gotoLicenses();
+
+		LocalFile.Provisioning.searchLicenses(keyword = ${staticAccountKey});
+
+		LocalFile.Provisioning.clickGenerateLicenseButton();
+
+		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Account         | Select Entity | Korlic - ${staticProjectName}        | |
+	| Product         | Select        | DXP Production                       | |
+	| Version         | Select        | 7.0                                  | |
+	| Type            | Select        | DXP Production                       | |''');
+
+		LocalFile.ProvisioningLicense.clickChooseProductPurchaseButton(positionValue = 1);
+
+		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Name          | Input    | Korlic - ${staticProjectName} License2 Name        | |
+	| Description   | Input    | Korlic - ${staticProjectName} License2 Description | |
+	| Host Name     | Input    | localhost                                          | |
+	| IP Addresses  | Textarea | 123.45.67.89                                       | |
+	| MAC Addresses | Textarea | 0A-1B-2C-3D-4E-5F                                  | |''');
+
+		LocalFile.ProvisioningLicense.clickGenerateLicenseButton();
+
+		LocalFile.ProvisioningLicense.viewLicense(table = '''| Header  | Korlic - ${staticProjectName} | |
+	| Product | DXP Production                | |''');
+
+		LocalFile.ProvisioningLicense.getLicenseKeyIdViaLicenseDetails();
+
+		LocalFile.ProvisioningLicense._renameSecondLicenseKeyIdVariable();
+
+		LocalFile.Provisioning.gotoLicenses();
+
+		LocalFile.Provisioning.searchLicenses(keyword = ${staticAccountKey});
+
+		LocalFile.Provisioning.clickGenerateLicenseButton();
+
+		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Account | Select Entity | Korlic - ${staticProjectName}    | |
+	| Product | Select        | Commerce Subscription Production | |
+	| Version | Select        | 1                                | |
+	| Type    | Select        | Commerce Subscription Production | |''');
+
+		LocalFile.ProvisioningLicense.clickChooseProductPurchaseButton(positionValue = 1);
+
+		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Name          | Input    | Korlic - ${staticProjectName} License3 Name        | |
+	| Description   | Input    | Korlic - ${staticProjectName} License3 Description | |
+	| Host Name     | Input    | localhost                                          | |
+	| IP Addresses  | Textarea | 123.45.67.89                                       | |
+	| MAC Addresses | Textarea | 0A-1B-2C-3D-4E-5F                                  | |''');
+
+		LocalFile.ProvisioningLicense.clickGenerateLicenseButton();
+
+		LocalFile.ProvisioningLicense.viewLicense(table = '''| Header  | Korlic - ${staticProjectName}    | |
+	| Product | Commerce Subscription Production | |''');
+
+		LocalFile.ProvisioningLicense.getLicenseKeyIdViaLicenseDetails();
+
+		LocalFile.ProvisioningLicense._renameThirdLicenseKeyIdVariable();
+
+		LocalFile.ProvisioningLicenseAPI._viewLicenseAggregateErrorMessage(
+			accountName = "Korlic - ${staticProjectName}",
+			table = '''| ${staticLicenseKeyId3} |
+	| ${staticLicenseKeyId2} |
+	| ${staticLicenseKeyId1} |''');
+	}
+
+	test DownloadDXPaggregatelicenseswithdifferentMacandIpaddressesviaoldaggregateXMLfile {
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | KORLICKORLIC                         | |
+	| Contact Email Address | lic.koroneiki1@lrcustomer.com.broken | |
+	| Description           | Test osb account on koroneiki        | |
+	| Fax Number            | 555-555-1234                         | |
+	| Name                  | Korlic - ${staticProjectName}        | |
+	| Phone Number          | 555-555-5678                         | |
+	| Profile Email Address | lic.koroneiki1@lrcustomer.com.broken | |
+	| Region                | United States                        | |
+	| Status                | Active                               | |
+	| Tier                  | T4                                   | |
+	| Website               | www.koroneikicorporation.com         | |''');
+
+		LocalFile.KoroneikiAccountAPI._generateAccountKey(accountName = "Korlic - ${staticProjectName}");
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFullStartAndEndDate();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFutureStartAndEndDate();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFullFutureStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korlic - ${staticProjectName}",
+			productName = "DXP Production",
+			table = '''| End Date                | ${staticEndDate}         |   |
+	| Original End Date       | ${staticOriginalEndDate} |   |
+	| Perpetual               | false                    |   |
+	| Product Field and Value | sizing                   | 2 |
+	| Product Field and Value | licenses                 | 2 |
+	| Product Field and Value | version                  | 7 |
+	| Quantity                | 2                        |   |
+	| Start Date              | ${staticStartDate}       |   |
+	| Status                  | Approved                 |   |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._generateProductPurchaseId(
+			accountName = "Korlic - ${staticProjectName}",
+			productName = "DXP Production");
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korlic - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoLicenses();
+
+		LocalFile.Provisioning.clickGenerateLicenseButton();
+
+		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Account | Select Entity | Korlic - ${staticProjectName} | |
+	| Product | Select        | DXP Production                | |
+	| Version | Select        | 7.0                           | |
+	| Type    | Select        | DXP Production                | |''');
+
+		LocalFile.ProvisioningLicense.clickChooseProductPurchaseButton(positionValue = 1);
+
+		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Name          | Input    | Korlic - ${staticProjectName} License1 Name        | |
+	| Description   | Input    | Korlic - ${staticProjectName} License1 Description | |
+	| Host Name     | Input    | localhost                                          | |
+	| IP Addresses  | Textarea | 123.45.67.87                                       | |
+	| MAC Addresses | Textarea | 0A-1B-2C-3D-4E-5F                                  | |''');
+
+		LocalFile.ProvisioningLicense.clickGenerateLicenseButton();
+
+		LocalFile.ProvisioningLicense.viewLicense(table = '''| Header  | Korlic - ${staticProjectName} | |
+	| Product | DXP Production                | |''');
+
+		LocalFile.ProvisioningLicense.getLicenseKeyIdViaLicenseDetails();
+
+		LocalFile.ProvisioningLicense._renameFirstLicenseKeyIdVariable();
+
+		LocalFile.Provisioning.gotoLicenses();
+
+		LocalFile.Provisioning.searchLicenses(keyword = ${staticAccountKey});
+
+		LocalFile.Provisioning.clickGenerateLicenseButton();
+
+		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Account | Select Entity | Korlic - ${staticProjectName} | |
+	| Product | Select        | DXP Production                | |
+	| Version | Select        | 7.0                           | |
+	| Type    | Select        | DXP Production                | |''');
+
+		LocalFile.ProvisioningLicense.clickChooseProductPurchaseButton(positionValue = 1);
+
+		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Name          | Input    | Korlic - ${staticProjectName} License2 Name        | |
+	| Description   | Input    | Korlic - ${staticProjectName} License2 Description | |
+	| Host Name     | Input    | localhost                                          | |
+	| IP Addresses  | Textarea | 123.45.67.89                                       | |
+	| MAC Addresses | Textarea | 0A-1B-2C-3D-4E-5F                                  | |''');
+
+		LocalFile.ProvisioningLicense.clickGenerateLicenseButton();
+
+		LocalFile.ProvisioningLicense.viewLicense(table = '''| Header  | Korlic - ${staticProjectName} | |
+	| Product | DXP Production                | |''');
+
+		LocalFile.ProvisioningLicense.getLicenseKeyIdViaLicenseDetails();
+
+		LocalFile.ProvisioningLicense._renameSecondLicenseKeyIdVariable();
+
+		LocalFile.ProvisioningLicenseAPI._downloadLicenseAggregate(
+			accountName = "Korlic - ${staticProjectName}",
+			aggregatedFilePattern = "old",
+			table = '''| ${staticLicenseKeyId2} |
+	| ${staticLicenseKeyId1} |''');
+	}
+
+	test DownloadDXPaggregatelicenseswithoneactive71oneactive72andoneactivecommerceproductionkeyswithanewaggregateXMLfile {
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | KORLICKORLIC                         | |
+	| Contact Email Address | lic.koroneiki1@lrcustomer.com.broken | |
+	| Description           | Test osb account on koroneiki        | |
+	| Fax Number            | 555-555-1234                         | |
+	| Name                  | Korlic - ${staticProjectName}        | |
+	| Phone Number          | 555-555-5678                         | |
+	| Profile Email Address | lic.koroneiki1@lrcustomer.com.broken | |
+	| Region                | United States                        | |
+	| Status                | Active                               | |
+	| Tier                  | T4                                   | |
+	| Website               | www.koroneikicorporation.com         | |''');
+
+		LocalFile.KoroneikiAccountAPI._generateAccountKey(accountName = "Korlic - ${staticProjectName}");
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFullStartAndEndDate();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFutureStartAndEndDate();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFullFutureStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korlic - ${staticProjectName}",
+			productName = "DXP Production",
+			table = '''| End Date                | ${staticEndDate}         |   |
+	| Original End Date       | ${staticOriginalEndDate} |   |
+	| Perpetual               | false                    |   |
+	| Product Field and Value | sizing                   | 2 |
+	| Product Field and Value | licenses                 | 2 |
+	| Product Field and Value | version                  | 7 |
+	| Quantity                | 2                        |   |
+	| Start Date              | ${staticStartDate}       |   |
+	| Status                  | Approved                 |   |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._generateProductPurchaseId(
+			accountName = "Korlic - ${staticProjectName}",
+			productName = "DXP Production");
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korlic - ${staticProjectName}",
+			productName = "Commerce Subscription Production",
+			table = '''| End Date                | ${staticEndDate}         |   |
+	| Original End Date       | ${staticOriginalEndDate} |   |
+	| Perpetual               | false                    |   |
+	| Product Field and Value | sizing                   | 1 |
+	| Product Field and Value | licenses                 | 1 |
+	| Product Field and Value | version                  | 0 |
+	| Quantity                | 1                        |   |
+	| Start Date              | ${staticStartDate}       |   |
+	| Status                  | Approved                 |   |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._generateProductPurchaseId(
+			accountName = "Korlic - ${staticProjectName}",
+			productName = "Commerce Subscription Production");
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korlic - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoLicenses();
+
+		LocalFile.Provisioning.clickGenerateLicenseButton();
+
+		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Account         | Select Entity | Korlic - ${staticProjectName}        | |
+	| Product         | Select        | DXP Production                       | |
+	| Version         | Select        | 7.1                                  | |
+	| Type            | Select        | DXP Production                       | |''');
+
+		LocalFile.ProvisioningLicense.clickChooseProductPurchaseButton(positionValue = 1);
+
+		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Name          | Input    | Korlic - ${staticProjectName} License1 Name        | |
+	| Description   | Input    | Korlic - ${staticProjectName} License1 Description | |
+	| Host Name     | Input    | localhost                                          | |
+	| IP Addresses  | Textarea | 123.45.67.89                                       | |
+	| MAC Addresses | Textarea | 0A-1B-2C-3D-4E-5F                                  | |''');
+
+		LocalFile.ProvisioningLicense.clickGenerateLicenseButton();
+
+		LocalFile.ProvisioningLicense.viewLicense(table = '''| Header  | Korlic - ${staticProjectName} | |
+	| Product | DXP Production                | |''');
+
+		LocalFile.ProvisioningLicense.getLicenseKeyIdViaLicenseDetails();
+
+		LocalFile.ProvisioningLicense._renameFirstLicenseKeyIdVariable();
+
+		LocalFile.Provisioning.gotoLicenses();
+
+		LocalFile.Provisioning.searchLicenses(keyword = ${staticAccountKey});
+
+		LocalFile.Provisioning.clickGenerateLicenseButton();
+
+		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Account         | Select Entity | Korlic - ${staticProjectName}        | |
+	| Product         | Select        | DXP Production                       | |
+	| Version         | Select        | 7.2                                  | |
+	| Type            | Select        | DXP Production                       | |''');
+
+		LocalFile.ProvisioningLicense.clickChooseProductPurchaseButton(positionValue = 1);
+
+		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Name          | Input    | Korlic - ${staticProjectName} License2 Name        | |
+	| Description   | Input    | Korlic - ${staticProjectName} License2 Description | |
+	| Host Name     | Input    | localhost                                          | |
+	| IP Addresses  | Textarea | 123.45.67.89                                       | |
+	| MAC Addresses | Textarea | 0A-1B-2C-3D-4E-5F                                  | |''');
+
+		LocalFile.ProvisioningLicense.clickGenerateLicenseButton();
+
+		LocalFile.ProvisioningLicense.viewLicense(table = '''| Header  | Korlic - ${staticProjectName} | |
+	| Product | DXP Production                | |''');
+
+		LocalFile.ProvisioningLicense.getLicenseKeyIdViaLicenseDetails();
+
+		LocalFile.ProvisioningLicense._renameSecondLicenseKeyIdVariable();
+
+		LocalFile.Provisioning.gotoLicenses();
+
+		LocalFile.Provisioning.searchLicenses(keyword = ${staticAccountKey});
+
+		LocalFile.Provisioning.clickGenerateLicenseButton();
+
+		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Account | Select Entity | Korlic - ${staticProjectName}    | |
+	| Product | Select        | Commerce Subscription Production | |
+	| Version | Select        | 1                                | |
+	| Type    | Select        | Commerce Subscription Production | |''');
+
+		LocalFile.ProvisioningLicense.clickChooseProductPurchaseButton(positionValue = 1);
+
+		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Name          | Input    | Korlic - ${staticProjectName} License3 Name        | |
+	| Description   | Input    | Korlic - ${staticProjectName} License3 Description | |
+	| Host Name     | Input    | localhost                                          | |
+	| IP Addresses  | Textarea | 123.45.67.89                                       | |
+	| MAC Addresses | Textarea | 0A-1B-2C-3D-4E-5F                                  | |''');
+
+		LocalFile.ProvisioningLicense.clickGenerateLicenseButton();
+
+		LocalFile.ProvisioningLicense.viewLicense(table = '''| Header  | Korlic - ${staticProjectName}    | |
+	| Product | Commerce Subscription Production | |''');
+
+		LocalFile.ProvisioningLicense.getLicenseKeyIdViaLicenseDetails();
+
+		LocalFile.ProvisioningLicense._renameThirdLicenseKeyIdVariable();
+
+		LocalFile.ProvisioningLicenseAPI._downloadLicenseAggregate(
+			accountName = "Korlic - ${staticProjectName}",
+			aggregatedFilePattern = "new",
+			table = '''| ${staticLicenseKeyId3} |
+	| ${staticLicenseKeyId2} |
+	| ${staticLicenseKeyId1} |''');
+	}
+
+	test DownloadDXPaggregatelicenseswithonedeactivated70andtwoactive70withanoldaggregateXMLfile {
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | KORLICKORLIC                         | |
+	| Contact Email Address | lic.koroneiki1@lrcustomer.com.broken | |
+	| Description           | Test osb account on koroneiki        | |
+	| Fax Number            | 555-555-1234                         | |
+	| Name                  | Korlic - ${staticProjectName}        | |
+	| Phone Number          | 555-555-5678                         | |
+	| Profile Email Address | lic.koroneiki1@lrcustomer.com.broken | |
+	| Region                | United States                        | |
+	| Status                | Active                               | |
+	| Tier                  | T4                                   | |
+	| Website               | www.koroneikicorporation.com         | |''');
+
+		LocalFile.KoroneikiAccountAPI._generateAccountKey(accountName = "Korlic - ${staticProjectName}");
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFullStartAndEndDate();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFutureStartAndEndDate();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFullFutureStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korlic - ${staticProjectName}",
+			productName = "DXP Production",
+			table = '''| End Date                | ${staticEndDate}         |   |
+	| Original End Date       | ${staticOriginalEndDate} |   |
+	| Perpetual               | false                    |   |
+	| Product Field and Value | sizing                   | 2 |
+	| Product Field and Value | licenses                 | 2 |
+	| Product Field and Value | version                  | 7 |
+	| Quantity                | 2                        |   |
+	| Start Date              | ${staticStartDate}       |   |
+	| Status                  | Approved                 |   |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._generateProductPurchaseId(
+			accountName = "Korlic - ${staticProjectName}",
+			productName = "DXP Production");
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korlic - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoLicenses();
+
+		LocalFile.Provisioning.clickGenerateLicenseButton();
+
+		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Account         | Select Entity | Korlic - ${staticProjectName}        | |
+	| Product         | Select        | DXP Production                       | |
+	| Version         | Select        | 7.0                                  | |
+	| Type            | Select        | DXP Production                       | |''');
+
+		LocalFile.ProvisioningLicense.clickChooseProductPurchaseButton(positionValue = 1);
+
+		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Name          | Input    | Korlic - ${staticProjectName} License1 Name        | |
+	| Description   | Input    | Korlic - ${staticProjectName} License1 Description | |
+	| Host Name     | Input    | localhost                                          | |
+	| IP Addresses  | Textarea | 123.45.67.89                                       | |
+	| MAC Addresses | Textarea | 0A-1B-2C-3D-4E-5F                                  | |''');
+
+		LocalFile.ProvisioningLicense.clickGenerateLicenseButton();
+
+		LocalFile.ProvisioningLicense.viewLicense(table = '''| Header  | Korlic - ${staticProjectName} | |
+	| Product | DXP Production                | |''');
+
+		LocalFile.ProvisioningLicense.getLicenseKeyIdViaLicenseDetails();
+
+		LocalFile.ProvisioningLicense._renameFirstLicenseKeyIdVariable();
+
+		LocalFile.ProvisioningLicense.clickDeactivateLicenseButton(positionValue = 1);
+
+		LocalFile.ProvisioningLicense.viewLicense(table = '''| Header  | Korlic - ${staticProjectName} | |
+	| Product | DXP Production                | |
+	| Status  | DEACTIVATED                   | |''');
+
+		LocalFile.Provisioning.gotoLicenses();
+
+		LocalFile.Provisioning.searchLicenses(keyword = ${staticAccountKey});
+
+		LocalFile.Provisioning.clickGenerateLicenseButton();
+
+		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Account         | Select Entity | Korlic - ${staticProjectName}        | |
+	| Product         | Select        | DXP Production                       | |
+	| Version         | Select        | 7.0                                  | |
+	| Type            | Select        | DXP Production                       | |''');
+
+		LocalFile.ProvisioningLicense.clickChooseProductPurchaseButton(positionValue = 1);
+
+		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Name          | Input    | Korlic - ${staticProjectName} License2 Name        | |
+	| Description   | Input    | Korlic - ${staticProjectName} License2 Description | |
+	| Host Name     | Input    | localhost                                          | |
+	| IP Addresses  | Textarea | 123.45.67.89                                       | |
+	| MAC Addresses | Textarea | 0A-1B-2C-3D-4E-5F                                  | |''');
+
+		LocalFile.ProvisioningLicense.clickGenerateLicenseButton();
+
+		LocalFile.ProvisioningLicense.viewLicense(table = '''| Header  | Korlic - ${staticProjectName} | |
+	| Product | DXP Production                | |''');
+
+		LocalFile.ProvisioningLicense.getLicenseKeyIdViaLicenseDetails();
+
+		LocalFile.ProvisioningLicense._renameSecondLicenseKeyIdVariable();
+
+		LocalFile.Provisioning.gotoLicenses();
+
+		LocalFile.Provisioning.searchLicenses(keyword = ${staticAccountKey});
+
+		LocalFile.Provisioning.clickGenerateLicenseButton();
+
+		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Account         | Select Entity | Korlic - ${staticProjectName}        | |
+	| Product         | Select        | DXP Production                       | |
+	| Version         | Select        | 7.0                                  | |
+	| Type            | Select        | DXP Production                       | |''');
+
+		LocalFile.ProvisioningLicense.clickChooseProductPurchaseButton(positionValue = 1);
+
+		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Name          | Input    | Korlic - ${staticProjectName} License3 Name        | |
+	| Description   | Input    | Korlic - ${staticProjectName} License3 Description | |
+	| Host Name     | Input    | localhost                                          | |
+	| IP Addresses  | Textarea | 123.45.67.89                                       | |
+	| MAC Addresses | Textarea | 0A-1B-2C-3D-4E-5F                                  | |''');
+
+		LocalFile.ProvisioningLicense.clickGenerateLicenseButton();
+
+		LocalFile.ProvisioningLicense.viewLicense(table = '''| Header  | Korlic - ${staticProjectName} | |
+	| Product | DXP Production                | |''');
+
+		LocalFile.ProvisioningLicense.getLicenseKeyIdViaLicenseDetails();
+
+		LocalFile.ProvisioningLicense._renameThirdLicenseKeyIdVariable();
+
+		LocalFile.ProvisioningLicenseAPI._downloadLicenseAggregate(
+			accountName = "Korlic - ${staticProjectName}",
+			aggregatedFilePattern = "old",
+			table = '''| ${staticLicenseKeyId3} |
+	| ${staticLicenseKeyId2} |
+	| ${staticLicenseKeyId1} |''');
+	}
+
+	test DownloadDXPaggregatelicenseswithoneexpired71andoneexpired72withanewaggregateXMLfile {
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | KORLICKORLIC                         | |
+	| Contact Email Address | lic.koroneiki1@lrcustomer.com.broken | |
+	| Description           | Test osb account on koroneiki        | |
+	| Fax Number            | 555-555-1234                         | |
+	| Name                  | Korlic - ${staticProjectName}        | |
+	| Phone Number          | 555-555-5678                         | |
+	| Profile Email Address | lic.koroneiki1@lrcustomer.com.broken | |
+	| Region                | United States                        | |
+	| Status                | Active                               | |
+	| Tier                  | T4                                   | |
+	| Website               | www.koroneikicorporation.com         | |''');
+
+		LocalFile.KoroneikiAccountAPI._generateAccountKey(accountName = "Korlic - ${staticProjectName}");
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFullStartAndEndDate();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFutureStartAndEndDate();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFullFutureStartAndEndDate();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticYyyyMmDdStartAndEndDate();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticYyyyMmDdPastStartAndEndDate();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticYyyyMmDdFutureStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korlic - ${staticProjectName}",
+			productName = "DXP Production",
+			table = '''| End Date                | ${staticEndDate}         |   |
+	| Original End Date       | ${staticOriginalEndDate} |   |
+	| Perpetual               | false                    |   |
+	| Product Field and Value | sizing                   | 2 |
+	| Product Field and Value | licenses                 | 2 |
+	| Product Field and Value | version                  | 7 |
+	| Quantity                | 2                        |   |
+	| Start Date              | ${staticStartDate}       |   |
+	| Status                  | Approved                 |   |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._generateProductPurchaseId(
+			accountName = "Korlic - ${staticProjectName}",
+			productName = "DXP Production");
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korlic - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoLicenses();
+
+		LocalFile.Provisioning.clickGenerateLicenseButton();
+
+		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Account         | Select Entity | Korlic - ${staticProjectName}        | |
+	| Product         | Select        | DXP Production                       | |
+	| Version         | Select        | 7.1                                  | |
+	| Type            | Select        | DXP Production                       | |
+	| Start Date      | Input         | ${staticYyyyMmDdPastStartDate}       | |
+	| Expiration Date | Input         | ${staticYyyyMmDdPastOriginalEndDate} | |''');
+
+		LocalFile.ProvisioningLicense.clickChooseProductPurchaseButton(positionValue = 1);
+
+		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Name          | Input    | Korlic - ${staticProjectName} License1 Name        | |
+	| Description   | Input    | Korlic - ${staticProjectName} License1 Description | |
+	| Host Name     | Input    | localhost                                          | |
+	| IP Addresses  | Textarea | 123.45.67.89                                       | |
+	| MAC Addresses | Textarea | 0A-1B-2C-3D-4E-5F                                  | |''');
+
+		LocalFile.ProvisioningLicense.clickGenerateLicenseButton();
+
+		LocalFile.ProvisioningLicense.viewLicense(table = '''| Header  | Korlic - ${staticProjectName} | |
+	| Product | DXP Production                | |''');
+
+		LocalFile.ProvisioningLicense.getLicenseKeyIdViaLicenseDetails();
+
+		LocalFile.ProvisioningLicense._renameFirstLicenseKeyIdVariable();
+
+		LocalFile.Provisioning.gotoLicenses();
+
+		LocalFile.Provisioning.searchLicenses(keyword = ${staticAccountKey});
+
+		LocalFile.Provisioning.clickGenerateLicenseButton();
+
+		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Account         | Select Entity | Korlic - ${staticProjectName}        | |
+	| Product         | Select        | DXP Production                       | |
+	| Version         | Select        | 7.2                                  | |
+	| Type            | Select        | DXP Production                       | |
+	| Start Date      | Input         | ${staticYyyyMmDdPastStartDate}       | |
+	| Expiration Date | Input         | ${staticYyyyMmDdPastOriginalEndDate} | |''');
+
+		LocalFile.ProvisioningLicense.clickChooseProductPurchaseButton(positionValue = 1);
+
+		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Name          | Input    | Korlic - ${staticProjectName} License2 Name        | |
+	| Description   | Input    | Korlic - ${staticProjectName} License2 Description | |
+	| Host Name     | Input    | localhost                                          | |
+	| IP Addresses  | Textarea | 123.45.67.89                                       | |
+	| MAC Addresses | Textarea | 0A-1B-2C-3D-4E-5F                                  | |''');
+
+		LocalFile.ProvisioningLicense.clickGenerateLicenseButton();
+
+		LocalFile.ProvisioningLicense.viewLicense(table = '''| Header  | Korlic - ${staticProjectName} | |
+	| Product | DXP Production                | |''');
+
+		LocalFile.ProvisioningLicense.getLicenseKeyIdViaLicenseDetails();
+
+		LocalFile.ProvisioningLicense._renameSecondLicenseKeyIdVariable();
+
+		LocalFile.ProvisioningLicenseAPI._downloadLicenseAggregate(
+			accountName = "Korlic - ${staticProjectName}",
+			aggregatedFilePattern = "new",
+			table = '''| ${staticLicenseKeyId2} |
+	| ${staticLicenseKeyId1} |''');
+	}
+
+	test DownloadDXPaggregatelicenseswiththree70versionwithanoldaggregateXMLfile {
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | KORLICKORLIC                         | |
+	| Contact Email Address | lic.koroneiki1@lrcustomer.com.broken | |
+	| Description           | Test osb account on koroneiki        | |
+	| Fax Number            | 555-555-1234                         | |
+	| Name                  | Korlic - ${staticProjectName}        | |
+	| Phone Number          | 555-555-5678                         | |
+	| Profile Email Address | lic.koroneiki1@lrcustomer.com.broken | |
+	| Region                | United States                        | |
+	| Status                | Active                               | |
+	| Tier                  | T4                                   | |
+	| Website               | www.koroneikicorporation.com         | |''');
+
+		LocalFile.KoroneikiAccountAPI._generateAccountKey(accountName = "Korlic - ${staticProjectName}");
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFullStartAndEndDate();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFutureStartAndEndDate();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFullFutureStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korlic - ${staticProjectName}",
+			productName = "DXP Production",
+			table = '''| End Date                | ${staticEndDate}         |   |
+	| Original End Date       | ${staticOriginalEndDate} |   |
+	| Perpetual               | false                    |   |
+	| Product Field and Value | sizing                   | 2 |
+	| Product Field and Value | licenses                 | 2 |
+	| Product Field and Value | version                  | 7 |
+	| Quantity                | 5                        |   |
+	| Start Date              | ${staticStartDate}       |   |
+	| Status                  | Approved                 |   |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._generateProductPurchaseId(
+			accountName = "Korlic - ${staticProjectName}",
+			productName = "DXP Production");
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korlic - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 5                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoLicenses();
+
+		LocalFile.Provisioning.clickGenerateLicenseButton();
+
+		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Account | Select Entity | Korlic - ${staticProjectName} | |
+	| Product | Select        | DXP Production                | |
+	| Version | Select        | 7.0                           | |
+	| Type    | Select        | DXP Production                | |''');
+
+		LocalFile.ProvisioningLicense.clickChooseProductPurchaseButton(positionValue = 1);
+
+		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Name          | Input    | Korlic - ${staticProjectName} License1 Name        | |
+	| Description   | Input    | Korlic - ${staticProjectName} License1 Description | |
+	| Host Name     | Input    | localhost                                          | |
+	| IP Addresses  | Textarea | 123.45.67.89                                       | |
+	| MAC Addresses | Textarea | 0A-1B-2C-3D-4E-5F                                  | |''');
+
+		LocalFile.ProvisioningLicense.clickGenerateLicenseButton();
+
+		LocalFile.ProvisioningLicense.viewLicense(table = '''| Header  | Korlic - ${staticProjectName} | |
+	| Product | DXP Production                | |''');
+
+		LocalFile.ProvisioningLicense.getLicenseKeyIdViaLicenseDetails();
+
+		LocalFile.ProvisioningLicense._renameFirstLicenseKeyIdVariable();
+
+		LocalFile.Provisioning.gotoLicenses();
+
+		LocalFile.Provisioning.searchLicenses(keyword = ${staticAccountKey});
+
+		LocalFile.Provisioning.clickGenerateLicenseButton();
+
+		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Account | Select Entity | Korlic - ${staticProjectName} | |
+	| Product | Select        | DXP Production                | |
+	| Version | Select        | 7.0                           | |
+	| Type    | Select        | DXP Production                | |''');
+
+		LocalFile.ProvisioningLicense.clickChooseProductPurchaseButton(positionValue = 1);
+
+		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Name          | Input    | Korlic - ${staticProjectName} License2 Name        | |
+	| Description   | Input    | Korlic - ${staticProjectName} License2 Description | |
+	| Host Name     | Input    | localhost                                          | |
+	| IP Addresses  | Textarea | 123.45.67.89                                       | |
+	| MAC Addresses | Textarea | 0A-1B-2C-3D-4E-5F                                  | |''');
+
+		LocalFile.ProvisioningLicense.clickGenerateLicenseButton();
+
+		LocalFile.ProvisioningLicense.viewLicense(table = '''| Header  | Korlic - ${staticProjectName} | |
+	| Product | DXP Production                | |''');
+
+		LocalFile.ProvisioningLicense.getLicenseKeyIdViaLicenseDetails();
+
+		LocalFile.ProvisioningLicense._renameSecondLicenseKeyIdVariable();
+
+		LocalFile.Provisioning.gotoLicenses();
+
+		LocalFile.Provisioning.clickGenerateLicenseButton();
+
+		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Account | Select Entity | Korlic - ${staticProjectName} | |
+	| Product | Select        | DXP Production                | |
+	| Version | Select        | 7.0                           | |
+	| Type    | Select        | DXP Production                | |''');
+
+		LocalFile.ProvisioningLicense.clickChooseProductPurchaseButton(positionValue = 1);
+
+		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Name          | Input    | Korlic - ${staticProjectName} License3 Name        | |
+	| Description   | Input    | Korlic - ${staticProjectName} License3 Description | |
+	| Host Name     | Input    | localhost                                          | |
+	| IP Addresses  | Textarea | 123.45.67.89                                       | |
+	| MAC Addresses | Textarea | 0A-1B-2C-3D-4E-5F                                  | |''');
+
+		LocalFile.ProvisioningLicense.clickGenerateLicenseButton();
+
+		LocalFile.ProvisioningLicense.viewLicense(table = '''| Header  | Korlic - ${staticProjectName} | |
+	| Product | DXP Production                | |''');
+
+		LocalFile.ProvisioningLicense.getLicenseKeyIdViaLicenseDetails();
+
+		LocalFile.ProvisioningLicense._renameThirdLicenseKeyIdVariable();
+
+		LocalFile.ProvisioningLicenseAPI._downloadLicenseAggregate(
+			accountName = "Korlic - ${staticProjectName}",
+			aggregatedFilePattern = "old",
+			table = '''| ${staticLicenseKeyId3} |
+	| ${staticLicenseKeyId2} |
+	| ${staticLicenseKeyId1} |''');
+	}
+
+	test DownloadDXPaggregatelicenseswiththree71versionwithanoldaggregateXMLfile {
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | KORLICKORLIC                         | |
+	| Contact Email Address | lic.koroneiki1@lrcustomer.com.broken | |
+	| Description           | Test osb account on koroneiki        | |
+	| Fax Number            | 555-555-1234                         | |
+	| Name                  | Korlic - ${staticProjectName}        | |
+	| Phone Number          | 555-555-5678                         | |
+	| Profile Email Address | lic.koroneiki1@lrcustomer.com.broken | |
+	| Region                | United States                        | |
+	| Status                | Active                               | |
+	| Tier                  | T4                                   | |
+	| Website               | www.koroneikicorporation.com         | |''');
+
+		LocalFile.KoroneikiAccountAPI._generateAccountKey(accountName = "Korlic - ${staticProjectName}");
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFullStartAndEndDate();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFutureStartAndEndDate();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFullFutureStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korlic - ${staticProjectName}",
+			productName = "DXP Production",
+			table = '''| End Date                | ${staticEndDate}         |   |
+	| Original End Date       | ${staticOriginalEndDate} |   |
+	| Perpetual               | false                    |   |
+	| Product Field and Value | sizing                   | 2 |
+	| Product Field and Value | licenses                 | 2 |
+	| Product Field and Value | version                  | 7 |
+	| Quantity                | 5                        |   |
+	| Start Date              | ${staticStartDate}       |   |
+	| Status                  | Approved                 |   |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._generateProductPurchaseId(
+			accountName = "Korlic - ${staticProjectName}",
+			productName = "DXP Production");
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korlic - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoLicenses();
+
+		LocalFile.Provisioning.clickGenerateLicenseButton();
+
+		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Account | Select Entity | Korlic - ${staticProjectName} | |
+	| Product | Select        | DXP Production                | |
+	| Version | Select        | 7.1                           | |
+	| Type    | Select        | DXP Production                | |''');
+
+		LocalFile.ProvisioningLicense.clickChooseProductPurchaseButton(positionValue = 1);
+
+		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Name          | Input    | Korlic - ${staticProjectName} License1 Name        | |
+	| Description   | Input    | Korlic - ${staticProjectName} License1 Description | |
+	| Host Name     | Input    | localhost                                          | |
+	| IP Addresses  | Textarea | 123.45.67.89                                       | |
+	| MAC Addresses | Textarea | 0A-1B-2C-3D-4E-5F                                  | |''');
+
+		LocalFile.ProvisioningLicense.clickGenerateLicenseButton();
+
+		LocalFile.ProvisioningLicense.viewLicense(table = '''| Header  | Korlic - ${staticProjectName} | |
+	| Product | DXP Production                | |''');
+
+		LocalFile.ProvisioningLicense.getLicenseKeyIdViaLicenseDetails();
+
+		LocalFile.ProvisioningLicense._renameFirstLicenseKeyIdVariable();
+
+		LocalFile.Provisioning.gotoLicenses();
+
+		LocalFile.Provisioning.searchLicenses(keyword = ${staticAccountKey});
+
+		LocalFile.Provisioning.clickGenerateLicenseButton();
+
+		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Account | Select Entity | Korlic - ${staticProjectName} | |
+	| Product | Select        | DXP Production                | |
+	| Version | Select        | 7.1                           | |
+	| Type    | Select        | DXP Production                | |''');
+
+		LocalFile.ProvisioningLicense.clickChooseProductPurchaseButton(positionValue = 1);
+
+		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Name          | Input    | Korlic - ${staticProjectName} License2 Name        | |
+	| Description   | Input    | Korlic - ${staticProjectName} License2 Description | |
+	| Host Name     | Input    | localhost                                          | |
+	| IP Addresses  | Textarea | 123.45.67.89                                       | |
+	| MAC Addresses | Textarea | 0A-1B-2C-3D-4E-5F                                  | |''');
+
+		LocalFile.ProvisioningLicense.clickGenerateLicenseButton();
+
+		LocalFile.ProvisioningLicense.viewLicense(table = '''| Header  | Korlic - ${staticProjectName} | |
+	| Product | DXP Production                | |''');
+
+		LocalFile.ProvisioningLicense.getLicenseKeyIdViaLicenseDetails();
+
+		LocalFile.ProvisioningLicense._renameSecondLicenseKeyIdVariable();
+
+		LocalFile.Provisioning.gotoLicenses();
+
+		LocalFile.Provisioning.clickGenerateLicenseButton();
+
+		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Account | Select Entity | Korlic - ${staticProjectName} | |
+	| Product | Select        | DXP Production                | |
+	| Version | Select        | 7.1                           | |
+	| Type    | Select        | DXP Production                | |''');
+
+		LocalFile.ProvisioningLicense.clickChooseProductPurchaseButton(positionValue = 1);
+
+		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Name          | Input    | Korlic - ${staticProjectName} License3 Name        | |
+	| Description   | Input    | Korlic - ${staticProjectName} License3 Description | |
+	| Host Name     | Input    | localhost                                          | |
+	| IP Addresses  | Textarea | 123.45.67.89                                       | |
+	| MAC Addresses | Textarea | 0A-1B-2C-3D-4E-5F                                  | |''');
+
+		LocalFile.ProvisioningLicense.clickGenerateLicenseButton();
+
+		LocalFile.ProvisioningLicense.viewLicense(table = '''| Header  | Korlic - ${staticProjectName} | |
+	| Product | DXP Production                | |''');
+
+		LocalFile.ProvisioningLicense.getLicenseKeyIdViaLicenseDetails();
+
+		LocalFile.ProvisioningLicense._renameThirdLicenseKeyIdVariable();
+
+		LocalFile.ProvisioningLicenseAPI._downloadLicenseAggregate(
+			accountName = "Korlic - ${staticProjectName}",
+			aggregatedFilePattern = "old",
+			table = '''| ${staticLicenseKeyId3} |
+	| ${staticLicenseKeyId2} |
+	| ${staticLicenseKeyId1} |''');
+	}
+
+	test DownloadDXPaggregatelicenseswiththreeactivecommerceproductionkeyswithanewaggregateXMLfile {
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | KORLICKORLIC                         | |
+	| Contact Email Address | lic.koroneiki1@lrcustomer.com.broken | |
+	| Description           | Test osb account on koroneiki        | |
+	| Fax Number            | 555-555-1234                         | |
+	| Name                  | Korlic - ${staticProjectName}        | |
+	| Phone Number          | 555-555-5678                         | |
+	| Profile Email Address | lic.koroneiki1@lrcustomer.com.broken | |
+	| Region                | United States                        | |
+	| Status                | Active                               | |
+	| Tier                  | T4                                   | |
+	| Website               | www.koroneikicorporation.com         | |''');
+
+		LocalFile.KoroneikiAccountAPI._generateAccountKey(accountName = "Korlic - ${staticProjectName}");
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFullStartAndEndDate();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFutureStartAndEndDate();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFullFutureStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korlic - ${staticProjectName}",
+			productName = "Commerce Subscription Production",
+			table = '''| End Date                | ${staticEndDate}         |   |
+	| Original End Date       | ${staticOriginalEndDate} |   |
+	| Perpetual               | false                    |   |
+	| Product Field and Value | sizing                   | 1 |
+	| Product Field and Value | licenses                 | 1 |
+	| Product Field and Value | version                  | 0 |
+	| Quantity                | 5                        |   |
+	| Start Date              | ${staticStartDate}       |   |
+	| Status                  | Approved                 |   |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._generateProductPurchaseId(
+			accountName = "Korlic - ${staticProjectName}",
+			productName = "Commerce Subscription Production");
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korlic - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 5                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoLicenses();
+
+		LocalFile.Provisioning.searchLicenses(keyword = ${staticAccountKey});
+
+		LocalFile.Provisioning.clickGenerateLicenseButton();
+
+		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Account | Select Entity | Korlic - ${staticProjectName}    | |
+	| Product | Select        | Commerce Subscription Production | |
+	| Version | Select        | 1                                | |
+	| Type    | Select        | Commerce Subscription Production | |''');
+
+		LocalFile.ProvisioningLicense.clickChooseProductPurchaseButton(positionValue = 1);
+
+		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Name          | Input    | Korlic - ${staticProjectName} License1 Name        | |
+	| Description   | Input    | Korlic - ${staticProjectName} License1 Description | |
+	| Host Name     | Input    | localhost                                          | |
+	| IP Addresses  | Textarea | 123.45.67.89                                       | |
+	| MAC Addresses | Textarea | 0A-1B-2C-3D-4E-5F                                  | |''');
+
+		LocalFile.ProvisioningLicense.clickGenerateLicenseButton();
+
+		LocalFile.ProvisioningLicense.viewLicense(table = '''| Header  | Korlic - ${staticProjectName}    | |
+	| Product | Commerce Subscription Production | |''');
+
+		LocalFile.ProvisioningLicense.getLicenseKeyIdViaLicenseDetails();
+
+		LocalFile.ProvisioningLicense._renameFirstLicenseKeyIdVariable();
+
+		LocalFile.Provisioning.gotoLicenses();
+
+		LocalFile.Provisioning.searchLicenses(keyword = ${staticAccountKey});
+
+		LocalFile.Provisioning.clickGenerateLicenseButton();
+
+		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Account | Select Entity | Korlic - ${staticProjectName}    | |
+	| Product | Select        | Commerce Subscription Production | |
+	| Version | Select        | 1                                | |
+	| Type    | Select        | Commerce Subscription Production | |''');
+
+		LocalFile.ProvisioningLicense.clickChooseProductPurchaseButton(positionValue = 1);
+
+		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Name          | Input    | Korlic - ${staticProjectName} License2 Name        | |
+	| Description   | Input    | Korlic - ${staticProjectName} License2 Description | |
+	| Host Name     | Input    | localhost                                          | |
+	| IP Addresses  | Textarea | 123.45.67.89                                       | |
+	| MAC Addresses | Textarea | 0A-1B-2C-3D-4E-5F                                  | |''');
+
+		LocalFile.ProvisioningLicense.clickGenerateLicenseButton();
+
+		LocalFile.ProvisioningLicense.viewLicense(table = '''| Header  | Korlic - ${staticProjectName}    | |
+	| Product | Commerce Subscription Production | |''');
+
+		LocalFile.ProvisioningLicense.getLicenseKeyIdViaLicenseDetails();
+
+		LocalFile.ProvisioningLicense._renameSecondLicenseKeyIdVariable();
+
+		LocalFile.Provisioning.gotoLicenses();
+
+		LocalFile.Provisioning.searchLicenses(keyword = ${staticAccountKey});
+
+		LocalFile.Provisioning.clickGenerateLicenseButton();
+
+		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Account | Select Entity | Korlic - ${staticProjectName}    | |
+	| Product | Select        | Commerce Subscription Production | |
+	| Version | Select        | 1                                | |
+	| Type    | Select        | Commerce Subscription Production | |''');
+
+		LocalFile.ProvisioningLicense.clickChooseProductPurchaseButton(positionValue = 1);
+
+		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Name          | Input    | Korlic - ${staticProjectName} License3 Name        | |
+	| Description   | Input    | Korlic - ${staticProjectName} License3 Description | |
+	| Host Name     | Input    | localhost                                          | |
+	| IP Addresses  | Textarea | 123.45.67.89                                       | |
+	| MAC Addresses | Textarea | 0A-1B-2C-3D-4E-5F                                  | |''');
+
+		LocalFile.ProvisioningLicense.clickGenerateLicenseButton();
+
+		LocalFile.ProvisioningLicense.viewLicense(table = '''| Header  | Korlic - ${staticProjectName}    | |
+	| Product | Commerce Subscription Production | |''');
+
+		LocalFile.ProvisioningLicense.getLicenseKeyIdViaLicenseDetails();
+
+		LocalFile.ProvisioningLicense._renameThirdLicenseKeyIdVariable();
+
+		LocalFile.ProvisioningLicenseAPI._downloadLicenseAggregate(
+			accountName = "Korlic - ${staticProjectName}",
+			aggregatedFilePattern = "new",
+			table = '''| ${staticLicenseKeyId3} |
+	| ${staticLicenseKeyId2} |
+	| ${staticLicenseKeyId1} |''');
+	}
+
+	test DownloadDXPaggregatelicenseswithtwo71andone72versionswithanewaggregateXMLfile {
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | KORLICKORLIC                         | |
+	| Contact Email Address | lic.koroneiki1@lrcustomer.com.broken | |
+	| Description           | Test osb account on koroneiki        | |
+	| Fax Number            | 555-555-1234                         | |
+	| Name                  | Korlic - ${staticProjectName}        | |
+	| Phone Number          | 555-555-5678                         | |
+	| Profile Email Address | lic.koroneiki1@lrcustomer.com.broken | |
+	| Region                | United States                        | |
+	| Status                | Active                               | |
+	| Tier                  | T4                                   | |
+	| Website               | www.koroneikicorporation.com         | |''');
+
+		LocalFile.KoroneikiAccountAPI._generateAccountKey(accountName = "Korlic - ${staticProjectName}");
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFullStartAndEndDate();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFutureStartAndEndDate();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFullFutureStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korlic - ${staticProjectName}",
+			productName = "DXP Production",
+			table = '''| End Date                | ${staticEndDate}         |   |
+	| Original End Date       | ${staticOriginalEndDate} |   |
+	| Perpetual               | false                    |   |
+	| Product Field and Value | sizing                   | 2 |
+	| Product Field and Value | licenses                 | 2 |
+	| Product Field and Value | version                  | 7 |
+	| Quantity                | 5                        |   |
+	| Start Date              | ${staticStartDate}       |   |
+	| Status                  | Approved                 |   |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._generateProductPurchaseId(
+			accountName = "Korlic - ${staticProjectName}",
+			productName = "DXP Production");
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korlic - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoLicenses();
+
+		LocalFile.Provisioning.clickGenerateLicenseButton();
+
+		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Account | Select Entity | Korlic - ${staticProjectName} | |
+	| Product | Select        | DXP Production                | |
+	| Version | Select        | 7.1                           | |
+	| Type    | Select        | DXP Production                | |''');
+
+		LocalFile.ProvisioningLicense.clickChooseProductPurchaseButton(positionValue = 1);
+
+		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Name          | Input    | Korlic - ${staticProjectName} License1 Name        | |
+	| Description   | Input    | Korlic - ${staticProjectName} License1 Description | |
+	| Host Name     | Input    | localhost                                          | |
+	| IP Addresses  | Textarea | 123.45.67.89                                       | |
+	| MAC Addresses | Textarea | 0A-1B-2C-3D-4E-5F                                  | |''');
+
+		LocalFile.ProvisioningLicense.clickGenerateLicenseButton();
+
+		LocalFile.ProvisioningLicense.viewLicense(table = '''| Header  | Korlic - ${staticProjectName} | |
+	| Product | DXP Production                | |''');
+
+		LocalFile.ProvisioningLicense.getLicenseKeyIdViaLicenseDetails();
+
+		LocalFile.ProvisioningLicense._renameFirstLicenseKeyIdVariable();
+
+		LocalFile.Provisioning.gotoLicenses();
+
+		LocalFile.Provisioning.searchLicenses(keyword = ${staticAccountKey});
+
+		LocalFile.Provisioning.clickGenerateLicenseButton();
+
+		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Account | Select Entity | Korlic - ${staticProjectName} | |
+	| Product | Select        | DXP Production                | |
+	| Version | Select        | 7.1                           | |
+	| Type    | Select        | DXP Production                | |''');
+
+		LocalFile.ProvisioningLicense.clickChooseProductPurchaseButton(positionValue = 1);
+
+		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Name          | Input    | Korlic - ${staticProjectName} License2 Name        | |
+	| Description   | Input    | Korlic - ${staticProjectName} License2 Description | |
+	| Host Name     | Input    | localhost                                          | |
+	| IP Addresses  | Textarea | 123.45.67.89                                       | |
+	| MAC Addresses | Textarea | 0A-1B-2C-3D-4E-5F                                  | |''');
+
+		LocalFile.ProvisioningLicense.clickGenerateLicenseButton();
+
+		LocalFile.ProvisioningLicense.viewLicense(table = '''| Header  | Korlic - ${staticProjectName} | |
+	| Product | DXP Production                | |''');
+
+		LocalFile.ProvisioningLicense.getLicenseKeyIdViaLicenseDetails();
+
+		LocalFile.ProvisioningLicense._renameSecondLicenseKeyIdVariable();
+
+		LocalFile.Provisioning.gotoLicenses();
+
+		LocalFile.Provisioning.clickGenerateLicenseButton();
+
+		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Account | Select Entity | Korlic - ${staticProjectName} | |
+	| Product | Select        | DXP Production                | |
+	| Version | Select        | 7.2                           | |
+	| Type    | Select        | DXP Production                | |''');
+
+		LocalFile.ProvisioningLicense.clickChooseProductPurchaseButton(positionValue = 1);
+
+		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Name          | Input    | Korlic - ${staticProjectName} License3 Name        | |
+	| Description   | Input    | Korlic - ${staticProjectName} License3 Description | |
+	| Host Name     | Input    | localhost                                          | |
+	| IP Addresses  | Textarea | 123.45.67.89                                       | |
+	| MAC Addresses | Textarea | 0A-1B-2C-3D-4E-5F                                  | |''');
+
+		LocalFile.ProvisioningLicense.clickGenerateLicenseButton();
+
+		LocalFile.ProvisioningLicense.viewLicense(table = '''| Header  | Korlic - ${staticProjectName} | |
+	| Product | DXP Production                | |''');
+
+		LocalFile.ProvisioningLicense.getLicenseKeyIdViaLicenseDetails();
+
+		LocalFile.ProvisioningLicense._renameThirdLicenseKeyIdVariable();
+
+		LocalFile.ProvisioningLicenseAPI._downloadLicenseAggregate(
+			accountName = "Korlic - ${staticProjectName}",
+			aggregatedFilePattern = "new",
+			table = '''| ${staticLicenseKeyId3} |
+	| ${staticLicenseKeyId2} |
+	| ${staticLicenseKeyId1} |''');
+	}
+
+	test DownloadDXPaggregatelicenseswithtwoactive71andoneactivecommerceproductionkeyswithanewaggregateXMLfile {
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | KORLICKORLIC                         | |
+	| Contact Email Address | lic.koroneiki1@lrcustomer.com.broken | |
+	| Description           | Test osb account on koroneiki        | |
+	| Fax Number            | 555-555-1234                         | |
+	| Name                  | Korlic - ${staticProjectName}        | |
+	| Phone Number          | 555-555-5678                         | |
+	| Profile Email Address | lic.koroneiki1@lrcustomer.com.broken | |
+	| Region                | United States                        | |
+	| Status                | Active                               | |
+	| Tier                  | T4                                   | |
+	| Website               | www.koroneikicorporation.com         | |''');
+
+		LocalFile.KoroneikiAccountAPI._generateAccountKey(accountName = "Korlic - ${staticProjectName}");
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFullStartAndEndDate();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFutureStartAndEndDate();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFullFutureStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korlic - ${staticProjectName}",
+			productName = "DXP Production",
+			table = '''| End Date                | ${staticEndDate}         |   |
+	| Original End Date       | ${staticOriginalEndDate} |   |
+	| Perpetual               | false                    |   |
+	| Product Field and Value | sizing                   | 2 |
+	| Product Field and Value | licenses                 | 2 |
+	| Product Field and Value | version                  | 7 |
+	| Quantity                | 2                        |   |
+	| Start Date              | ${staticStartDate}       |   |
+	| Status                  | Approved                 |   |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._generateProductPurchaseId(
+			accountName = "Korlic - ${staticProjectName}",
+			productName = "DXP Production");
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korlic - ${staticProjectName}",
+			productName = "Commerce Subscription Production",
+			table = '''| End Date                | ${staticEndDate}         |   |
+	| Original End Date       | ${staticOriginalEndDate} |   |
+	| Perpetual               | false                    |   |
+	| Product Field and Value | sizing                   | 1 |
+	| Product Field and Value | licenses                 | 1 |
+	| Product Field and Value | version                  | 0 |
+	| Quantity                | 1                        |   |
+	| Start Date              | ${staticStartDate}       |   |
+	| Status                  | Approved                 |   |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._generateProductPurchaseId(
+			accountName = "Korlic - ${staticProjectName}",
+			productName = "Commerce Subscription Production");
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korlic - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoLicenses();
+
+		LocalFile.Provisioning.clickGenerateLicenseButton();
+
+		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Account         | Select Entity | Korlic - ${staticProjectName}        | |
+	| Product         | Select        | DXP Production                       | |
+	| Version         | Select        | 7.1                                  | |
+	| Type            | Select        | DXP Production                       | |''');
+
+		LocalFile.ProvisioningLicense.clickChooseProductPurchaseButton(positionValue = 1);
+
+		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Name          | Input    | Korlic - ${staticProjectName} License1 Name        | |
+	| Description   | Input    | Korlic - ${staticProjectName} License1 Description | |
+	| Host Name     | Input    | localhost                                          | |
+	| IP Addresses  | Textarea | 123.45.67.89                                       | |
+	| MAC Addresses | Textarea | 0A-1B-2C-3D-4E-5F                                  | |''');
+
+		LocalFile.ProvisioningLicense.clickGenerateLicenseButton();
+
+		LocalFile.ProvisioningLicense.viewLicense(table = '''| Header  | Korlic - ${staticProjectName} | |
+	| Product | DXP Production                | |''');
+
+		LocalFile.ProvisioningLicense.getLicenseKeyIdViaLicenseDetails();
+
+		LocalFile.ProvisioningLicense._renameFirstLicenseKeyIdVariable();
+
+		LocalFile.Provisioning.gotoLicenses();
+
+		LocalFile.Provisioning.searchLicenses(keyword = ${staticAccountKey});
+
+		LocalFile.Provisioning.clickGenerateLicenseButton();
+
+		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Account         | Select Entity | Korlic - ${staticProjectName}        | |
+	| Product         | Select        | DXP Production                       | |
+	| Version         | Select        | 7.1                                  | |
+	| Type            | Select        | DXP Production                       | |''');
+
+		LocalFile.ProvisioningLicense.clickChooseProductPurchaseButton(positionValue = 1);
+
+		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Name          | Input    | Korlic - ${staticProjectName} License2 Name        | |
+	| Description   | Input    | Korlic - ${staticProjectName} License2 Description | |
+	| Host Name     | Input    | localhost                                          | |
+	| IP Addresses  | Textarea | 123.45.67.89                                       | |
+	| MAC Addresses | Textarea | 0A-1B-2C-3D-4E-5F                                  | |''');
+
+		LocalFile.ProvisioningLicense.clickGenerateLicenseButton();
+
+		LocalFile.ProvisioningLicense.viewLicense(table = '''| Header  | Korlic - ${staticProjectName} | |
+	| Product | DXP Production                | |''');
+
+		LocalFile.ProvisioningLicense.getLicenseKeyIdViaLicenseDetails();
+
+		LocalFile.ProvisioningLicense._renameSecondLicenseKeyIdVariable();
+
+		LocalFile.Provisioning.gotoLicenses();
+
+		LocalFile.Provisioning.searchLicenses(keyword = ${staticAccountKey});
+
+		LocalFile.Provisioning.clickGenerateLicenseButton();
+
+		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Account | Select Entity | Korlic - ${staticProjectName}    | |
+	| Product | Select        | Commerce Subscription Production | |
+	| Version | Select        | 1                                | |
+	| Type    | Select        | Commerce Subscription Production | |''');
+
+		LocalFile.ProvisioningLicense.clickChooseProductPurchaseButton(positionValue = 1);
+
+		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Name          | Input    | Korlic - ${staticProjectName} License3 Name        | |
+	| Description   | Input    | Korlic - ${staticProjectName} License3 Description | |
+	| Host Name     | Input    | localhost                                          | |
+	| IP Addresses  | Textarea | 123.45.67.89                                       | |
+	| MAC Addresses | Textarea | 0A-1B-2C-3D-4E-5F                                  | |''');
+
+		LocalFile.ProvisioningLicense.clickGenerateLicenseButton();
+
+		LocalFile.ProvisioningLicense.viewLicense(table = '''| Header  | Korlic - ${staticProjectName}    | |
+	| Product | Commerce Subscription Production | |''');
+
+		LocalFile.ProvisioningLicense.getLicenseKeyIdViaLicenseDetails();
+
+		LocalFile.ProvisioningLicense._renameThirdLicenseKeyIdVariable();
+
+		LocalFile.ProvisioningLicenseAPI._downloadLicenseAggregate(
+			accountName = "Korlic - ${staticProjectName}",
+			aggregatedFilePattern = "new",
+			table = '''| ${staticLicenseKeyId3} |
+	| ${staticLicenseKeyId2} |
+	| ${staticLicenseKeyId1} |''');
+	}
+
+	test DownloadDXPaggregatelicenseswithtwoactive71withdifferentdateswithanewaggregateXMLfile {
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | KORLICKORLIC                         | |
+	| Contact Email Address | lic.koroneiki1@lrcustomer.com.broken | |
+	| Description           | Test osb account on koroneiki        | |
+	| Fax Number            | 555-555-1234                         | |
+	| Name                  | Korlic - ${staticProjectName}        | |
+	| Phone Number          | 555-555-5678                         | |
+	| Profile Email Address | lic.koroneiki1@lrcustomer.com.broken | |
+	| Region                | United States                        | |
+	| Status                | Active                               | |
+	| Tier                  | T4                                   | |
+	| Website               | www.koroneikicorporation.com         | |''');
+
+		LocalFile.KoroneikiAccountAPI._generateAccountKey(accountName = "Korlic - ${staticProjectName}");
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFullStartAndEndDate();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFutureStartAndEndDate();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFullFutureStartAndEndDate();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticYyyyMmDdStartAndEndDate();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticYyyyMmDdPastStartAndEndDate();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticYyyyMmDdFutureStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korlic - ${staticProjectName}",
+			productName = "DXP Production",
+			table = '''| End Date                | ${staticEndDate}         |   |
+	| Original End Date       | ${staticOriginalEndDate} |   |
+	| Perpetual               | false                    |   |
+	| Product Field and Value | sizing                   | 2 |
+	| Product Field and Value | licenses                 | 2 |
+	| Product Field and Value | version                  | 7 |
+	| Quantity                | 2                        |   |
+	| Start Date              | ${staticStartDate}       |   |
+	| Status                  | Approved                 |   |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._generateProductPurchaseId(
+			accountName = "Korlic - ${staticProjectName}",
+			productName = "DXP Production");
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korlic - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoLicenses();
+
+		LocalFile.Provisioning.clickGenerateLicenseButton();
+
+		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Account         | Select Entity | Korlic - ${staticProjectName}        | |
+	| Product         | Select        | DXP Production                       | |
+	| Version         | Select        | 7.1                                  | |
+	| Type            | Select        | DXP Production                       | |
+	| Start Date      | Input         | ${staticYyyyMmDdStartDate}           | |
+	| Expiration Date | Input         | ${staticYyyyMmDdOriginalEndDate}     | |''');
+
+		LocalFile.ProvisioningLicense.clickChooseProductPurchaseButton(positionValue = 1);
+
+		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Name          | Input    | Korlic - ${staticProjectName} License1 Name        | |
+	| Description   | Input    | Korlic - ${staticProjectName} License1 Description | |
+	| Host Name     | Input    | localhost                                          | |
+	| IP Addresses  | Textarea | 123.45.67.89                                       | |
+	| MAC Addresses | Textarea | 0A-1B-2C-3D-4E-5F                                  | |''');
+
+		LocalFile.ProvisioningLicense.clickGenerateLicenseButton();
+
+		LocalFile.ProvisioningLicense.viewLicense(table = '''| Header  | Korlic - ${staticProjectName} | |
+	| Product | DXP Production                | |''');
+
+		LocalFile.ProvisioningLicense.getLicenseKeyIdViaLicenseDetails();
+
+		LocalFile.ProvisioningLicense._renameFirstLicenseKeyIdVariable();
+
+		LocalFile.Provisioning.gotoLicenses();
+
+		LocalFile.Provisioning.searchLicenses(keyword = ${staticAccountKey});
+
+		LocalFile.Provisioning.clickGenerateLicenseButton();
+
+		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Account         | Select Entity | Korlic - ${staticProjectName}          | |
+	| Product         | Select        | DXP Production                         | |
+	| Version         | Select        | 7.1                                    | |
+	| Type            | Select        | DXP Production                         | |''');
+
+		LocalFile.ProvisioningLicense.clickChooseProductPurchaseButton(positionValue = 1);
+
+		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Name          | Input    | Korlic - ${staticProjectName} License2 Name        | |
+	| Description   | Input    | Korlic - ${staticProjectName} License2 Description | |
+	| Host Name     | Input    | localhost                                          | |
+	| IP Addresses  | Textarea | 123.45.67.89                                       | |
+	| MAC Addresses | Textarea | 0A-1B-2C-3D-4E-5F                                  | |''');
+
+		LocalFile.ProvisioningLicense.clickGenerateLicenseButton();
+
+		LocalFile.ProvisioningLicense.viewLicense(table = '''| Header  | Korlic - ${staticProjectName} | |
+	| Product | DXP Production                | |''');
+
+		LocalFile.ProvisioningLicense.getLicenseKeyIdViaLicenseDetails();
+
+		LocalFile.ProvisioningLicense._renameSecondLicenseKeyIdVariable();
+
+		LocalFile.ProvisioningLicenseAPI._downloadLicenseAggregate(
+			accountName = "Korlic - ${staticProjectName}",
+			aggregatedFilePattern = "new",
+			table = '''| ${staticLicenseKeyId2} |
+	| ${staticLicenseKeyId1} |''');
+	}
+
+	test DownloadDXPaggregatelicenseswithtwoexpired71versionswithanoldaggregateXMLfile {
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | KORLICKORLIC                         | |
+	| Contact Email Address | lic.koroneiki1@lrcustomer.com.broken | |
+	| Description           | Test osb account on koroneiki        | |
+	| Fax Number            | 555-555-1234                         | |
+	| Name                  | Korlic - ${staticProjectName}        | |
+	| Phone Number          | 555-555-5678                         | |
+	| Profile Email Address | lic.koroneiki1@lrcustomer.com.broken | |
+	| Region                | United States                        | |
+	| Status                | Active                               | |
+	| Tier                  | T4                                   | |
+	| Website               | www.koroneikicorporation.com         | |''');
+
+		LocalFile.KoroneikiAccountAPI._generateAccountKey(accountName = "Korlic - ${staticProjectName}");
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFullStartAndEndDate();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFutureStartAndEndDate();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFullFutureStartAndEndDate();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticYyyyMmDdStartAndEndDate();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticYyyyMmDdPastStartAndEndDate();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticYyyyMmDdFutureStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korlic - ${staticProjectName}",
+			productName = "DXP Production",
+			table = '''| End Date                | ${staticEndDate}         |   |
+	| Original End Date       | ${staticOriginalEndDate} |   |
+	| Perpetual               | false                    |   |
+	| Product Field and Value | sizing                   | 2 |
+	| Product Field and Value | licenses                 | 2 |
+	| Product Field and Value | version                  | 7 |
+	| Quantity                | 2                        |   |
+	| Start Date              | ${staticStartDate}       |   |
+	| Status                  | Approved                 |   |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._generateProductPurchaseId(
+			accountName = "Korlic - ${staticProjectName}",
+			productName = "DXP Production");
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korlic - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoLicenses();
+
+		LocalFile.Provisioning.clickGenerateLicenseButton();
+
+		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Account         | Select Entity | Korlic - ${staticProjectName}        | |
+	| Product         | Select        | DXP Production                       | |
+	| Version         | Select        | 7.1                                  | |
+	| Type            | Select        | DXP Production                       | |
+	| Start Date      | Input         | ${staticYyyyMmDdPastStartDate}       | |
+	| Expiration Date | Input         | ${staticYyyyMmDdPastOriginalEndDate} | |''');
+
+		LocalFile.ProvisioningLicense.clickChooseProductPurchaseButton(positionValue = 1);
+
+		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Name          | Input    | Korlic - ${staticProjectName} License1 Name        | |
+	| Description   | Input    | Korlic - ${staticProjectName} License1 Description | |
+	| Host Name     | Input    | localhost                                          | |
+	| IP Addresses  | Textarea | 123.45.67.89                                       | |
+	| MAC Addresses | Textarea | 0A-1B-2C-3D-4E-5F                                  | |''');
+
+		LocalFile.ProvisioningLicense.clickGenerateLicenseButton();
+
+		LocalFile.ProvisioningLicense.viewLicense(table = '''| Header  | Korlic - ${staticProjectName} | |
+	| Product | DXP Production                | |''');
+
+		LocalFile.ProvisioningLicense.getLicenseKeyIdViaLicenseDetails();
+
+		LocalFile.ProvisioningLicense._renameFirstLicenseKeyIdVariable();
+
+		LocalFile.Provisioning.gotoLicenses();
+
+		LocalFile.Provisioning.searchLicenses(keyword = ${staticAccountKey});
+
+		LocalFile.Provisioning.clickGenerateLicenseButton();
+
+		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Account         | Select Entity | Korlic - ${staticProjectName}        | |
+	| Product         | Select        | DXP Production                       | |
+	| Version         | Select        | 7.1                                  | |
+	| Type            | Select        | DXP Production                       | |
+	| Start Date      | Input         | ${staticYyyyMmDdPastStartDate}       | |
+	| Expiration Date | Input         | ${staticYyyyMmDdPastOriginalEndDate} | |''');
+
+		LocalFile.ProvisioningLicense.clickChooseProductPurchaseButton(positionValue = 1);
+
+		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Name          | Input    | Korlic - ${staticProjectName} License2 Name        | |
+	| Description   | Input    | Korlic - ${staticProjectName} License2 Description | |
+	| Host Name     | Input    | localhost                                          | |
+	| IP Addresses  | Textarea | 123.45.67.89                                       | |
+	| MAC Addresses | Textarea | 0A-1B-2C-3D-4E-5F                                  | |''');
+
+		LocalFile.ProvisioningLicense.clickGenerateLicenseButton();
+
+		LocalFile.ProvisioningLicense.viewLicense(table = '''| Header  | Korlic - ${staticProjectName} | |
+	| Product | DXP Production                | |''');
+
+		LocalFile.ProvisioningLicense.getLicenseKeyIdViaLicenseDetails();
+
+		LocalFile.ProvisioningLicense._renameSecondLicenseKeyIdVariable();
+
+		LocalFile.ProvisioningLicenseAPI._downloadLicenseAggregate(
+			accountName = "Korlic - ${staticProjectName}",
+			aggregatedFilePattern = "old",
+			table = '''| ${staticLicenseKeyId2} |
+	| ${staticLicenseKeyId1} |''');
+	}
+
+	test DownloadnewPortallicensesaggregateandcombinedaggregatelicensesviaoldaggregateXMLfile {
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | KORLICKORLIC                         | |
+	| Contact Email Address | lic.koroneiki1@lrcustomer.com.broken | |
+	| Description           | Test osb account on koroneiki        | |
+	| Fax Number            | 555-555-1234                         | |
+	| Name                  | Korlic - ${staticProjectName}        | |
+	| Phone Number          | 555-555-5678                         | |
+	| Profile Email Address | lic.koroneiki1@lrcustomer.com.broken | |
+	| Region                | United States                        | |
+	| Status                | Active                               | |
+	| Tier                  | T4                                   | |
+	| Website               | www.koroneikicorporation.com         | |''');
+
+		LocalFile.KoroneikiAccountAPI._generateAccountKey(accountName = "Korlic - ${staticProjectName}");
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFullStartAndEndDate();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFutureStartAndEndDate();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFullFutureStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korlic - ${staticProjectName}",
+			productName = "Portal Production",
+			table = '''| End Date                | ${staticEndDate}         |   |
+	| Original End Date       | ${staticOriginalEndDate} |   |
+	| Perpetual               | false                    |   |
+	| Product Field and Value | sizing                   | 1 |
+	| Product Field and Value | licenses                 | 1 |
+	| Product Field and Value | version                  | 6 |
+	| Quantity                | 5                        |   |
+	| Start Date              | ${staticStartDate}       |   |
+	| Status                  | Approved                 |   |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._generateProductPurchaseId(
+			accountName = "Korlic - ${staticProjectName}",
+			productName = "Portal Production");
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korlic - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 5                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoLicenses();
+
+		LocalFile.Provisioning.clickGenerateLicenseButton();
+
+		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Account | Select Entity | Korlic - ${staticProjectName} | |
+	| Product | Select        | Portal Production             | |
+	| Version | Select        | 6.2 EE                        | |
+	| Type    | Select        | Portal Production             | |''');
+
+		LocalFile.ProvisioningLicense.clickChooseProductPurchaseButton(positionValue = 1);
+
+		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Name          | Input    | Korlic - ${staticProjectName} License1 Name        | |
+	| Description   | Input    | Korlic - ${staticProjectName} License1 Description | |
+	| Host Name     | Input    | localhost                                          | |
+	| IP Addresses  | Textarea | 123.45.67.89                                       | |
+	| MAC Addresses | Textarea | 0A-1B-2C-3D-4E-5F                                  | |''');
+
+		LocalFile.ProvisioningLicense.clickGenerateLicenseButton();
+
+		LocalFile.ProvisioningLicense.viewLicense(table = '''| Header  | Korlic - ${staticProjectName} | |
+	| Product | Portal Production             | |''');
+
+		LocalFile.ProvisioningLicense.getLicenseKeyIdViaLicenseDetails();
+
+		LocalFile.ProvisioningLicense._renameFirstLicenseKeyIdVariable();
+
+		LocalFile.Provisioning.gotoLicenses();
+
+		LocalFile.Provisioning.clickGenerateLicenseButton();
+
+		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Account | Select Entity | Korlic - ${staticProjectName} | |
+	| Product | Select        | Portal Production             | |
+	| Version | Select        | 6.2 EE                        | |
+	| Type    | Select        | Portal Production             | |''');
+
+		LocalFile.ProvisioningLicense.clickChooseProductPurchaseButton(positionValue = 1);
+
+		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Name          | Input    | Korlic - ${staticProjectName} License2 Name        | |
+	| Description   | Input    | Korlic - ${staticProjectName} License2 Description | |
+	| Host Name     | Input    | localhost                                          | |
+	| IP Addresses  | Textarea | 123.45.67.89                                       | |
+	| MAC Addresses | Textarea | 0A-1B-2C-3D-4E-5F                                  | |''');
+
+		LocalFile.ProvisioningLicense.clickGenerateLicenseButton();
+
+		LocalFile.ProvisioningLicense.viewLicense(table = '''| Header  | Korlic - ${staticProjectName}    | |
+	| Product | Portal Production                | |''');
+
+		LocalFile.ProvisioningLicense.getLicenseKeyIdViaLicenseDetails();
+
+		LocalFile.ProvisioningLicense._renameSecondLicenseKeyIdVariable();
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korlic");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korlic - ${staticProjectName}");
+
+		LocalFile.Provisioning.clickTab(tabName = "Licenses");
+
+		LocalFile.ProvisioningAccount.selectLicensesViaLicensesTab(table = '''| Korlic - ${staticProjectName} License1 Name |
+	| Korlic - ${staticProjectName} License2 Name |''');
+
+		LocalFile.ProvisioningAccount.clickLicensesActionDropdownButton(action = "Download");
+
+		LocalFile.ProvisioningLicense._viewLicenseViaDownloadLicensePage(
+			licenseKeyword = "Korlic - ${staticProjectName} License1 Name",
+			table = '''| Name        | Korlic - ${staticProjectName} License1 Name        |
+	| Description | Korlic - ${staticProjectName} License1 Description |
+	| Version     | 6.2 EE                                             |
+	| Product     | Portal Production                                  |
+	| Type        | Portal Production                                  |
+	| Status      | ACTIVE                                             |''');
+
+		LocalFile.ProvisioningLicense._viewLicenseViaDownloadLicensePage(
+			licenseKeyword = "Korlic - ${staticProjectName} License2 Name",
+			table = '''| Name        | Korlic - ${staticProjectName} License2 Name        |
+	| Description | Korlic - ${staticProjectName} License2 Description |
+	| Version     | 6.2 EE                                             |
+	| Product     | Portal Production                                  |
+	| Type        | Portal Production                                  |
+	| Status      | ACTIVE                                             |''');
+
+		LocalFile.ProvisioningLicenseAPI._downloadLicenseAggregate(
+			accountName = "Korlic - ${staticProjectName}",
+			aggregatedFilePattern = "old",
+			table = '''| ${staticLicenseKeyId3} |
+	| ${staticLicenseKeyId2} |
+	| ${staticLicenseKeyId1} |''');
+	}
+
+}

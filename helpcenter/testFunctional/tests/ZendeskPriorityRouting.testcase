@@ -1,0 +1,372 @@
+definition {
+
+	property testray.main.component.name = "Support QA";
+	property type = "zendesk.api";
+
+	setUp {
+		LocalFile.Passwords.getPasswords();
+	}
+
+	tearDown {
+		LocalFile.ZendeskTicketAPI._tearDownTicketByIds(ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskUserAPI._tearDownUsersByExternalIdTable(table = '''| User1 |''');
+
+		LocalFile.ZendeskOrganizationAPI._tearDownOrganizationsByExternalIdTable(table = '''| 12345678 |''');
+
+		LocalFile.ZendeskHomepage.pause(timeInSeconds = 3);
+	}
+
+	test HighPriorityRoutingDXP {
+		LocalFile.ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved            |
+	| Name             | Organization Name 1 |
+	| Tags             | liferay_dxp         |
+	| Shared Tickets   | true                |
+	| Shared Comments  | true                |
+	| SLA              | Gold                |
+	| Tier             | T4                  |
+	| Support Region   | US                  |
+	| Support Language | English             | 
+	| External ID      | 12345678            |''');
+
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
+	| Tags             | osb_customer,osb_kb              |
+	| Password         | ${staticZendeskAdminPassword}    |
+	| Role             | End-user                         |
+	| Access           | Organization                     |
+	| Email            | zendesk.user1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                |
+	| Organization     | Organization Name 1              |
+	| Language         | Portuguese                       |
+	| Time Zone        | Brasilia                         | 
+	| External ID      | User1                            |''');
+
+		LocalFile.ZendeskRequestAPI._createMultipleRequestsWithProductAndComponentAndSystemStatusValues(
+			requesterEmail = "zendesk.user1@zendesk.com.broken",
+			table = '''| prd_liferay_dxp_7_4 | authentication     | production_completely_shutdown          |
+	| prd_liferay_dxp_7_3 | caching_clustering | production_severely_impacted_inoperable |
+	| prd_liferay_dxp_7_2 | calendar           | production_completely_shutdown          |
+	| prd_liferay_dxp_7_1 | collaboration      | production_severely_impacted_inoperable |
+	| prd_liferay_dxp_7_0 | content_management | production_completely_shutdown          |''');
+
+		LocalFile.ZendeskTicketAPI._viewMultipleTicketPriorities(
+			priority = "high",
+			ticketIdList = ${staticRequestIdList});
+	}
+
+	@help.center.acceptance = "true"
+	test HighPriorityRoutingLXC {
+		LocalFile.ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved            |
+	| Name             | Organization Name 1 |
+	| Tags             | lxc_sm              |
+	| Shared Tickets   | true                |
+	| Shared Comments  | true                |
+	| SLA              | Gold                |
+	| Tier             | T4                  |
+	| Support Region   | US                  |
+	| Support Language | English             | 
+	| External ID      | 12345678            |''');
+
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
+	| Tags             | osb_customer,osb_kb              |
+	| Password         | ${staticZendeskAdminPassword}    |
+	| Role             | End-user                         |
+	| Access           | Organization                     |
+	| Email            | zendesk.user1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                |
+	| Organization     | Organization Name 1              |
+	| Language         | Portuguese                       |
+	| Time Zone        | Brasilia                         | 
+	| External ID      | User1                            |''');
+
+		LocalFile.ZendeskRequestAPI._createMultipleRequestsWithProductAndComponentAndSystemStatusValues(
+			requesterEmail = "zendesk.user1@zendesk.com.broken",
+			table = '''| prd_lxc_engage   | | production_completely_shutdown          |
+	| prd_lxc_transact | | production_completely_shutdown          |
+	| prd_lxc_support  | | production_completely_shutdown          |
+	| prd_lxc_engage   | | production_severely_impacted_inoperable |
+	| prd_lxc_transact | | production_severely_impacted_inoperable |
+	| prd_lxc_support  | | production_severely_impacted_inoperable |''');
+
+		LocalFile.ZendeskTicketAPI._viewMultipleTicketPriorities(
+			priority = "high",
+			ticketIdList = ${staticRequestIdList});
+	}
+
+	@help.center.acceptance = "true"
+	test HighPriorityRoutingLXCSM {
+		LocalFile.ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved            |
+	| Name             | Organization Name 1 |
+	| Tags             | lxc_sm              |
+	| Shared Tickets   | true                |
+	| Shared Comments  | true                |
+	| SLA              | Gold                |
+	| Tier             | T4                  |
+	| Support Region   | US                  |
+	| Support Language | English             | 
+	| External ID      | 12345678            |''');
+
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
+	| Tags             | osb_customer,osb_kb              |
+	| Password         | ${staticZendeskAdminPassword}    |
+	| Role             | End-user                         |
+	| Access           | Organization                     |
+	| Email            | zendesk.user1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                |
+	| Organization     | Organization Name 1              |
+	| Language         | Portuguese                       |
+	| Time Zone        | Brasilia                         | 
+	| External ID      | User1                            |''');
+
+		LocalFile.ZendeskRequestAPI._createMultipleRequestsWithProductAndComponentAndSystemStatusValues(
+			requesterEmail = "zendesk.user1@zendesk.com.broken",
+			table = '''| prd_lxc_sm | backup_recovery     | production_severely_impacted_inoperable |
+	| prd_lxc_sm | connectivity        | production_severely_impacted_inoperable |
+	| prd_lxc_sm | networking          | production_severely_impacted_inoperable |
+	| prd_lxc_sm | system_availability | production_severely_impacted_inoperable |
+	| prd_lxc_sm | vpn                 | production_severely_impacted_inoperable |''');
+
+		LocalFile.ZendeskTicketAPI._viewMultipleTicketPriorities(
+			priority = "high",
+			ticketIdList = ${staticRequestIdList});
+	}
+
+	test LowPriorityRouting {
+		LocalFile.ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved            |
+	| Name             | Organization Name 1 |
+	| Shared Tickets   | true                |
+	| Shared Comments  | true                |
+	| SLA              | Gold                |
+	| Tier             | T4                  |
+	| Support Region   | US                  |
+	| Support Language | English             | 
+	| External ID      | 12345678            |''');
+
+		LocalFile.ZendeskOrganizationAPI._assignTagsToOrganizationViaOrganizationExternalID(
+			organizationExternalId = 12345678,
+			table = '''| developer_tools         |
+	| enterprise_search       |
+	| liferay_commerce        |
+	| liferay_dxp             |
+	| lxc_sm                  |
+	| liferay_portal          |
+	| management_tools_lcs    |
+	| mobile_device_detection |
+	| mobile_experience       |
+	| productivity_tools_sync |
+	| social_office           |''');
+
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
+	| Tags             | osb_customer,osb_kb              |
+	| Password         | ${staticZendeskAdminPassword}    |
+	| Role             | End-user                         |
+	| Access           | Organization                     |
+	| Email            | zendesk.user1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                |
+	| Organization     | Organization Name 1              |
+	| Language         | Portuguese                       |
+	| Time Zone        | Brasilia                         | 
+	| External ID      | User1                            |''');
+
+		LocalFile.ZendeskRequestAPI._createMultipleRequestsWithProductAndComponentAndSystemStatusValues(
+			requesterEmail = "zendesk.user1@zendesk.com.broken",
+			table = '''| prd_developer_tools         |                                        | general_question                                     |
+	| prd_enterprise_search       | monitoring                             | non-production_fully_functional_with_observed_errors |
+	| prd_liferay_commerce_4_0    | apis_integrations_and_extension_points | general_question                                     |
+	| prd_liferay_dxp_7_4         | authentication                         | non-production_fully_functional_with_observed_errors |
+	| prd_liferay_dxp_7_3         | caching_clustering                     | general_question                                     |
+	| prd_lxc_sm                  | backup_recovery                        | non-production_fully_functional_with_observed_errors |
+	| prd_liferay_portal_6_2      | caching_clustering                     | general_question                                     |
+	| prd_liferay_portal_6_1      | calendar                               | non-production_fully_functional_with_observed_errors |
+	| prd_liferay_portal_6_0      | collaboration_suite                    | general_question                                     |
+	| prd_liferay_portal_5_2      | deployment_environments                | non-production_fully_functional_with_observed_errors |
+	| prd_management_tools_lcs    |                                        | general_question                                     |
+	| prd_mobile_device_detection |                                        | non-production_fully_functional_with_observed_errors |
+	| prd_mobile_experience       |                                        | general_question                                     |
+	| prd_productivity_tools_sync |                                        | non-production_fully_functional_with_observed_errors |
+	| prd_social_office           |                                        | general_question                                     |''');
+
+		LocalFile.ZendeskTicketAPI._viewMultipleTicketPriorities(
+			priority = "low",
+			ticketIdList = ${staticRequestIdList});
+	}
+
+	test LowPriorityRoutingLXC {
+		LocalFile.ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved            |
+	| Name             | Organization Name 1 |
+	| Tags             | lxc_sm              |
+	| Shared Tickets   | true                |
+	| Shared Comments  | true                |
+	| SLA              | Gold                |
+	| Tier             | T4                  |
+	| Support Region   | US                  |
+	| Support Language | English             | 
+	| External ID      | 12345678            |''');
+
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
+	| Tags             | osb_customer,osb_kb              |
+	| Password         | ${staticZendeskAdminPassword}    |
+	| Role             | End-user                         |
+	| Access           | Organization                     |
+	| Email            | zendesk.user1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                |
+	| Organization     | Organization Name 1              |
+	| Language         | Portuguese                       |
+	| Time Zone        | Brasilia                         | 
+	| External ID      | User1                            |''');
+
+		LocalFile.ZendeskRequestAPI._createMultipleRequestsWithProductAndComponentAndSystemStatusValues(
+			requesterEmail = "zendesk.user1@zendesk.com.broken",
+			table = '''| prd_lxc_engage   | | non-production_fully_functional_with_observed_errors |
+	| prd_lxc_transact | | non-production_fully_functional_with_observed_errors |
+	| prd_lxc_support  | | non-production_fully_functional_with_observed_errors |
+	| prd_lxc_engage   | | general_question                                     |
+	| prd_lxc_transact | | general_question                                     |
+	| prd_lxc_support  | | general_question                                     |''');
+
+		LocalFile.ZendeskTicketAPI._viewMultipleTicketPriorities(
+			priority = "low",
+			ticketIdList = ${staticRequestIdList});
+	}
+
+	@help.center.acceptance = "true"
+	test NormalPriorityRouting {
+		LocalFile.ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved            |
+	| Name             | Organization Name 1 |
+	| Shared Tickets   | true                |
+	| Shared Comments  | true                |
+	| SLA              | Gold                |
+	| Tier             | T4                  |
+	| Support Region   | US                  |
+	| Support Language | English             | 
+	| External ID      | 12345678            |''');
+
+		LocalFile.ZendeskOrganizationAPI._assignTagsToOrganizationViaOrganizationExternalID(
+			organizationExternalId = 12345678,
+			table = '''| developer_tools         |
+	| enterprise_search       |
+	| liferay_commerce        |
+	| liferay_dxp             |
+	| lxc_sm                  |
+	| liferay_portal          |
+	| management_tools_lcs    |
+	| mobile_device_detection |
+	| mobile_experience       |
+	| productivity_tools_sync |
+	| social_office           |''');
+
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
+	| Tags             | osb_customer,osb_kb              |
+	| Password         | ${staticZendeskAdminPassword}    |
+	| Role             | End-user                         |
+	| Access           | Organization                     |
+	| Email            | zendesk.user1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                |
+	| Organization     | Organization Name 1              |
+	| Language         | Portuguese                       |
+	| Time Zone        | Brasilia                         | 
+	| External ID      | User1                            |''');
+
+		LocalFile.ZendeskRequestAPI._createMultipleRequestsWithProductAndComponentAndSystemStatusValues(
+			requesterEmail = "zendesk.user1@zendesk.com.broken",
+			table = '''| prd_developer_tools         |                                        | production_unstable_with_periodic_interruptions      |
+	| prd_enterprise_search       | monitoring                             | production_functioning_with_limited_capabilities     |
+	| prd_liferay_commerce_4_0    | apis_integrations_and_extension_points | production_fully_functional_with_observed_errors     |
+	| prd_liferay_dxp_7_4         | authentication                         | non-production_completely_shutdown                   |
+	| prd_liferay_dxp_7_3         | caching_clustering                     | non-production_severely_impacted_inoperable          |
+	| prd_lxc_sm                  | backup_recovery                        | non-production_unstable_with_periodic_interruptions  |
+	| prd_liferay_portal_6_2      | caching_clustering                     | non-production_functioning_with_limited_capabilities |
+	| prd_liferay_portal_6_1      | calendar                               | production_unstable_with_periodic_interruptions      |
+	| prd_liferay_portal_6_0      | collaboration_suite                    | production_functioning_with_limited_capabilities     |
+	| prd_liferay_portal_5_2      | deployment_environments                | production_fully_functional_with_observed_errors     |
+	| prd_management_tools_lcs    |                                        | non-production_completely_shutdown                   |
+	| prd_mobile_device_detection |                                        | non-production_severely_impacted_inoperable          |
+	| prd_mobile_experience       |                                        | non-production_unstable_with_periodic_interruptions  |
+	| prd_productivity_tools_sync |                                        | non-production_functioning_with_limited_capabilities |
+	| prd_social_office           |                                        | production_unstable_with_periodic_interruptions      |''');
+
+		LocalFile.ZendeskTicketAPI._viewMultipleTicketPriorities(
+			priority = "normal",
+			ticketIdList = ${staticRequestIdList});
+	}
+
+	test NormalPriorityRoutingLXC {
+		LocalFile.ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved            |
+	| Name             | Organization Name 1 |
+	| Tags             | lxc_sm              |
+	| Shared Tickets   | true                |
+	| Shared Comments  | true                |
+	| SLA              | Gold                |
+	| Tier             | T4                  |
+	| Support Region   | US                  |
+	| Support Language | English             | 
+	| External ID      | 12345678            |''');
+
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
+	| Tags             | osb_customer,osb_kb              |
+	| Password         | ${staticZendeskAdminPassword}    |
+	| Role             | End-user                         |
+	| Access           | Organization                     |
+	| Email            | zendesk.user1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                |
+	| Organization     | Organization Name 1              |
+	| Language         | Portuguese                       |
+	| Time Zone        | Brasilia                         | 
+	| External ID      | User1                            |''');
+
+		LocalFile.ZendeskRequestAPI._createMultipleRequestsWithProductAndComponentAndSystemStatusValues(
+			requesterEmail = "zendesk.user1@zendesk.com.broken",
+			table = '''| prd_lxc_engage   | | non-production_completely_shutdown                   |
+	| prd_lxc_transact | | non-production_completely_shutdown                   |
+	| prd_lxc_support  | | non-production_completely_shutdown                   |
+	| prd_lxc_engage   | | non-production_severely_impacted_inoperable          |
+	| prd_lxc_transact | | non-production_severely_impacted_inoperable          |
+	| prd_lxc_support  | | non-production_severely_impacted_inoperable          |
+	| prd_lxc_engage   | | non-production_unstable_with_periodic_interruptions  |
+	| prd_lxc_transact | | non-production_unstable_with_periodic_interruptions  |
+	| prd_lxc_support  | | non-production_unstable_with_periodic_interruptions  |
+	| prd_lxc_engage   | | non-production_functioning_with_limited_capabilities |
+	| prd_lxc_transact | | non-production_functioning_with_limited_capabilities |
+	| prd_lxc_support  | | non-production_functioning_with_limited_capabilities |
+	| prd_lxc_engage   | | production_unstable_with_periodic_interruptions      |
+	| prd_lxc_transact | | production_unstable_with_periodic_interruptions      |
+	| prd_lxc_support  | | production_unstable_with_periodic_interruptions      |
+	| prd_lxc_engage   | | production_functioning_with_limited_capabilities     |
+	| prd_lxc_transact | | production_functioning_with_limited_capabilities     |
+	| prd_lxc_support  | | production_functioning_with_limited_capabilities     |
+	| prd_lxc_engage   | | production_fully_functional_with_observed_errors     |
+	| prd_lxc_transact | | production_fully_functional_with_observed_errors     |
+	| prd_lxc_support  | | production_fully_functional_with_observed_errors     |''');
+
+		LocalFile.ZendeskTicketAPI._viewMultipleTicketPriorities(
+			priority = "normal",
+			ticketIdList = ${staticRequestIdList});
+	}
+
+	test UrgentPriorityRouting {
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
+	| Tags             | osb_customer,osb_kb              |
+	| Password         | ${staticZendeskAdminPassword}    |
+	| Role             | End-user                         |
+	| Access           | Organization                     |
+	| Email            | zendesk.user1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                |
+	| Organization     | Vodafone UK Customer Portal      |
+	| Language         | Portuguese                       |
+	| Time Zone        | Brasilia                         | 
+	| External ID      | User1                            |''');
+
+		LocalFile.ZendeskRequestAPI._createMultipleRequestsWithProductAndComponentAndSystemStatusValues(
+			requesterEmail = "zendesk.user1@zendesk.com.broken",
+			table = '''| prd_lxc_sm | backup_recovery     | production_completely_shutdown |
+	| prd_lxc_sm | connectivity        | production_completely_shutdown |
+	| prd_lxc_sm | networking          | production_completely_shutdown |
+	| prd_lxc_sm | system_availability | production_completely_shutdown |
+	| prd_lxc_sm | vpn                 | production_completely_shutdown |''');
+
+		LocalFile.ZendeskTicketAPI._viewMultipleTicketPriorities(
+			priority = "urgent",
+			ticketIdList = ${staticRequestIdList});
+	}
+
+}

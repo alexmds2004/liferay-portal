@@ -1,0 +1,1856 @@
+definition {
+
+	property testray.main.component.name = "Support QA";
+	property type = "provisioning.user.integration";
+
+	setUp {
+		LocalFile.Passwords.getPasswords();
+
+		LocalFile.OSBAdminRabbitMQ.generateStaticVariables();
+
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningCompanyName();
+
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningContactLastName();
+
+		LocalFile.OSBAdminRabbitMQ._renameFirstUserLastNameVariable();
+
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningContactLastName();
+
+		LocalFile.OSBAdminRabbitMQ._renameSecondUserLastNameVariable();
+
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningContactLastName();
+
+		LocalFile.OSBAdminRabbitMQ._renameThirdUserLastNameVariable();
+	}
+
+	tearDown {
+		LocalFile.ZendeskUserAPI._getDefaultUserId(organizationName = "Krmail - ${staticProjectName}");
+
+		LocalFile.ZendeskUserAPI._renameFirstDefaultUserIdVariable();
+
+		LocalFile.ZendeskUserAPI._getDefaultUserId(organizationName = "Mailkr - ${staticProjectName}");
+
+		LocalFile.ZendeskUserAPI._renameSecondDefaultUserIdVariable();
+
+		LocalFile.ZendeskUserAPI._getDefaultUserId(organizationName = "Prmail - ${staticCompanyName}");
+
+		LocalFile.ZendeskUserAPI._renameSecondDefaultUserIdVariable();
+
+		LocalFile.OSBAdminProject.tearDownProjects(table = '''| MAILKRKRMAIL |
+	| PRMAIL       |
+	| MAILKR       |''');
+
+		LocalFile.KoroneikiAccountAPI._tearDownAccounts(table = '''| Krmail - ${staticProjectName} |
+	| Mailkr - ${staticCompanyName} |
+	| Prmail - ${staticCompanyName} |''');
+
+		LocalFile.KoroneikiAccountAPI._tearDownAccountsViaAccountFieldNameAndValue(
+			fieldName = "Code",
+			table = '''| MAILKRKRMAIL |
+	| PRMAIL       |
+	| MAILKR       |''');
+
+		LocalFile.JSONUser.tearDownUsers(table = '''| pro.user1@lrcustomer.com.broken |
+	| pro.user2@lrcustomer.com.broken |
+	| pro.user3@lrpartner.com.broken  |''');
+
+		LocalFile.JSONUser.tearDownUsersViaSupport(table = '''| pro.user1@lrcustomer.com.broken |
+	| pro.user2@lrcustomer.com.broken |
+	| pro.user3@lrpartner.com.broken  |''');
+
+		LocalFile.JSONUser.tearDownUsersViaKoroneiki(table = '''| pro.user1@lrcustomer.com.broken |
+	| pro.user2@lrcustomer.com.broken |
+	| pro.user3@lrpartner.com.broken  |''');
+
+		LocalFile.KoroneikiContactAPI._tearDownContacts(table = '''| pro.user1@lrcustomer.com.broken |
+	| pro.user2@lrcustomer.com.broken |
+	| pro.user3@lrpartner.com.broken  |''');
+
+		LocalFile.JSONOkta.tearDownUsers(table = '''| pro.user1@lrcustomer.com.broken |
+	| pro.user2@lrcustomer.com.broken |
+	| pro.user3@lrpartner.com.broken  |''');
+
+		LocalFile.ZendeskTicketAPI._tearDownTicketsByKeywords(table = '''| New Subscription(s) for Krmail - ${staticProjectName} |
+	| New Subscription(s) for Mailkr - ${staticCompanyName} |
+	| New Subscription(s) for Prmail - ${staticCompanyName} |''');
+
+		LocalFile.ZendeskUserAPI._getMultipleUserIdsByEmailAddress(table = '''| pro.user1@lrcustomer.com.broken |
+	| pro.user2@lrcustomer.com.broken |
+	| pro.user3@lrpartner.com.broken  |''');
+
+		LocalFile.ZendeskUserAPI._tearDownUsersByIdList(userIds = ${staticUserIdList});
+
+		LocalFile.ZendeskOrganizationAPI._getMultipleOrganizationExternalIdsByOrganizationNameIfStillPresent(table = '''| Krmail - ${staticProjectName} |
+	| Mailkr - ${staticCompanyName} |
+	| Prmail - ${staticCompanyName} |''');
+
+		LocalFile.ZendeskOrganizationAPI._tearDownOrganizationsByExternalIdList(organizationExternalIds = ${staticOrganizationExternalIdList});
+
+		LocalFile.ZendeskUserAPI._tearDownUserById(userId = ${staticDefaultUserId1});
+
+		LocalFile.ZendeskUserAPI._tearDownUserById(userId = ${staticDefaultUserId2});
+
+		LocalFile.MockMock.tearDownMailMessage(
+			mockMockAsset = "New Liferay Project Invitation - Krmail - ${staticProjectName}",
+			mockMockRecipient = "PRO ${staticContactLastName1}",
+			mockMockSender = "Liferay Provisioning",
+			recipientEmailAddress = "pro.user1@lrcustomer.com.broken");
+
+		LocalFile.MockMock.tearDownMailMessage(
+			mockMockAsset = "New Liferay Project Invitation - Krmail - ${staticProjectName}",
+			mockMockRecipient = "PRO ${staticContactLastName2}",
+			mockMockSender = "Liferay Provisioning",
+			recipientEmailAddress = "pro.user2@lrcustomer.com.broken");
+
+		LocalFile.MockMock.tearDownMailMessage(
+			mockMockAsset = "New Liferay Project Invitation - Prmail - ${staticCompanyName}",
+			mockMockRecipient = "PRO ${staticContactLastName3}",
+			mockMockSender = "Liferay Provisioning",
+			recipientEmailAddress = "pro.user3@lrpartner.com.broken");
+
+		LocalFile.MockMock.tearDownMailMessage(
+			mockMockAsset = "Convite para novo projeto Liferay - Krmail - ${staticProjectName}",
+			mockMockRecipient = "PRO ${staticContactLastName1}",
+			mockMockSender = "Liferay Provisioning",
+			recipientEmailAddress = "pro.user1@lrcustomer.com.broken");
+
+		LocalFile.MockMock.tearDownMailMessage(
+			mockMockAsset = "Convite para novo projeto Liferay - Krmail - ${staticProjectName}",
+			mockMockRecipient = "PRO ${staticContactLastName2}",
+			mockMockSender = "Liferay Provisioning",
+			recipientEmailAddress = "pro.user2@lrcustomer.com.broken");
+
+		LocalFile.MockMock.tearDownMailMessage(
+			mockMockAsset = "Convite para novo projeto Liferay - Prmail - ${staticCompanyName}",
+			mockMockRecipient = "PRO ${staticContactLastName3}",
+			mockMockSender = "Liferay Provisioning",
+			recipientEmailAddress = "pro.user3@lrpartner.com.broken");
+
+		LocalFile.MockMock.tearDownMailMessage(
+			mockMockAsset = "Invitación al nuevo proyecto de Liferay - Krmail - ${staticProjectName}",
+			mockMockRecipient = "PRO ${staticContactLastName1}",
+			mockMockSender = "Liferay Provisioning",
+			recipientEmailAddress = "pro.user1@lrcustomer.com.broken");
+
+		LocalFile.MockMock.tearDownMailMessage(
+			mockMockAsset = "Invitación al nuevo proyecto de Liferay - Krmail - ${staticProjectName}",
+			mockMockRecipient = "PRO ${staticContactLastName2}",
+			mockMockSender = "Liferay Provisioning",
+			recipientEmailAddress = "pro.user2@lrcustomer.com.broken");
+
+		LocalFile.MockMock.tearDownMailMessage(
+			mockMockAsset = "Invitación al nuevo proyecto de Liferay - Prmail - ${staticCompanyName}",
+			mockMockRecipient = "PRO ${staticContactLastName3}",
+			mockMockSender = "Liferay Provisioning",
+			recipientEmailAddress = "pro.user3@lrpartner.com.broken");
+
+		LocalFile.MockMock.tearDownMailMessage(
+			mockMockAsset = "新しいLiferayプロジェクトの招待状 - Krmail - ${staticProjectName}",
+			mockMockRecipient = "PRO ${staticContactLastName1}",
+			mockMockSender = "Liferay Provisioning",
+			recipientEmailAddress = "pro.user1@lrcustomer.com.broken");
+
+		LocalFile.MockMock.tearDownMailMessage(
+			mockMockAsset = "新しいLiferayプロジェクトの招待状 - Krmail - ${staticProjectName}",
+			mockMockRecipient = "PRO ${staticContactLastName2}",
+			mockMockSender = "Liferay Provisioning",
+			recipientEmailAddress = "pro.user2@lrcustomer.com.broken");
+
+		LocalFile.MockMock.tearDownMailMessage(
+			mockMockAsset = "新しいLiferayプロジェクトの招待状 - Prmail - ${staticCompanyName}",
+			mockMockRecipient = "PRO ${staticContactLastName3}",
+			mockMockSender = "Liferay Provisioning",
+			recipientEmailAddress = "pro.user3@lrpartner.com.broken");
+	}
+
+	test ViewnewcontactemailsfornonoktausercontactsinBRESregion {
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Mailkr - ${staticCompanyName}              |
+	| Address City                           | Tijuana                                    |
+	| Address Country                        | Mexico                                     |
+	| Address Postal Code                    | 20631                                      |
+	| Address Region                         | Baja California                            |
+	| Address Street                         | Avenida Agua 120                           |
+	| Contact Email Address                  | pro.user1@lrcustomer.com.broken            |
+	| Contact First Name                     | PRO                                        |
+	| Contact Last Name                      | ${staticContactLastName1}                  |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | pro.user2@lrcustomer.com.broken            |
+	| Owner First Name                       | PRO                                        |
+	| Owner Last Name                        | ${staticContactLastName2}                  |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Krmail - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay Brazil                             |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | Mexico                                     |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.JSONOkta.updateOktaUser(
+			table = '''| Screen Name   | pro.user1                 |
+	| First Name    | PRO                       |
+	| Last Name     | ${staticContactLastName1} |''',
+			userOriginalEmailAddress = "pro.user1@lrcustomer.com.broken");
+
+		LocalFile.JSONOkta.updateOktaUser(
+			table = '''| Screen Name   | pro.user2                 |
+	| First Name    | PRO                       |
+	| Last Name     | ${staticContactLastName2} |''',
+			userOriginalEmailAddress = "pro.user2@lrcustomer.com.broken");
+
+		LocalFile.ZendeskHomepage.pause(timeInSeconds = 10);
+
+		LocalFile.MockMock.gotoSupportMailMessage(
+			mockMockAsset = "New Liferay Project Invitation - Krmail - ${staticProjectName}",
+			mockMockRecipient = "PRO ${staticContactLastName1}",
+			mockMockSender = "Liferay Provisioning",
+			recipientEmailAddress = "pro.user1@lrcustomer.com.broken");
+
+		LocalFile.MockMock.viewMailMessage(table = '''| You have been invited to the Liferay project   |
+	| Krmail - ${staticProjectName}                  |
+	| Login or create a Liferay.com account to       |
+	| View your project's subscriptions              |
+	| Manage team members & roles                    |
+	| Activate your Liferay products                 |
+	| Learn how to succeed with each of our products |
+	| Search our extensive Knowledge Base            |
+	| Request help from our Support team             |
+	| support.liferay.com                            |''');
+	}
+
+	test ViewnewcontactemailsfornonoktausercontactsinBRPTregion {
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Mailkr - ${staticCompanyName}              |
+	| Address City                           | Sao Paulo                                  |
+	| Address Country                        | Brazil                                     |
+	| Address Postal Code                    | 04642-000                                  |
+	| Address Region                         | São Paulo                                  |
+	| Address Street                         | Rua Visconde de Porto Seguro 1238          |
+	| Contact Email Address                  | pro.user1@lrcustomer.com.broken            |
+	| Contact First Name                     | PRO                                        |
+	| Contact Last Name                      | ${staticContactLastName1}                  |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | pro.user2@lrcustomer.com.broken            |
+	| Owner First Name                       | PRO                                        |
+	| Owner Last Name                        | ${staticContactLastName2}                  |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Krmail - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay Brazil                             |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | Brazil                                     |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.JSONOkta.updateOktaUser(
+			table = '''| Screen Name | pro.user1                 |
+	| First Name  | PRO                       |
+	| Last Name   | ${staticContactLastName1} |''',
+			userOriginalEmailAddress = "pro.user1@lrcustomer.com.broken");
+
+		LocalFile.JSONOkta.updateOktaUser(
+			table = '''| Screen Name | pro.user2                 |
+	| First Name  | PRO                       |
+	| Last Name   | ${staticContactLastName2} |''',
+			userOriginalEmailAddress = "pro.user2@lrcustomer.com.broken");
+
+		LocalFile.ZendeskHomepage.pause(timeInSeconds = 10);
+
+		LocalFile.MockMock.gotoSupportMailMessage(
+			mockMockAsset = "New Liferay Project Invitation - Krmail - ${staticProjectName}",
+			mockMockRecipient = "PRO ${staticContactLastName1}",
+			mockMockSender = "Liferay Provisioning",
+			recipientEmailAddress = "pro.user1@lrcustomer.com.broken");
+
+		LocalFile.MockMock.viewMailMessage(table = '''| You have been invited to the Liferay project   |
+	| Krmail - ${staticProjectName}                  |
+	| Login or create a Liferay.com account to       |
+	| View your project's subscriptions              |
+	| Manage team members & roles                    |
+	| Activate your Liferay products                 |
+	| Learn how to succeed with each of our products |
+	| Search our extensive Knowledge Base            |
+	| Request help from our Support team             |
+	| support.liferay.com                            |''');
+	}
+
+	test ViewnewcontactemailsfornonoktausercontactsinJPregion {
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Mailkr - ${staticCompanyName}              |
+	| Address City                           | Akasaka, Minato-ku                         |
+	| Address Country                        | Japan                                      |
+	| Address Postal Code                    | 107-0052                                   |
+	| Address Street                         | 2 Chome-13-3                               |
+	| Contact Email Address                  | pro.user1@lrcustomer.com.broken            |
+	| Contact First Name                     | PRO                                        |
+	| Contact Last Name                      | ${staticContactLastName1}                  |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | pro.user2@lrcustomer.com.broken            |
+	| Owner First Name                       | PRO                                        |
+	| Owner Last Name                        | ${staticContactLastName2}                  |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Krmail - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay Japan                              |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | Japan                                      |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.JSONOkta.updateOktaUser(
+			table = '''| Screen Name   | pro.user1                 |
+	| First Name    | PRO                       |
+	| Last Name     | ${staticContactLastName1} |''',
+			userOriginalEmailAddress = "pro.user1@lrcustomer.com.broken");
+
+		LocalFile.JSONOkta.updateOktaUser(
+			table = '''| Screen Name   | pro.user2                 |
+	| First Name    | PRO                       |
+	| Last Name     | ${staticContactLastName2} |''',
+			userOriginalEmailAddress = "pro.user2@lrcustomer.com.broken");
+
+		LocalFile.ZendeskHomepage.pause(timeInSeconds = 10);
+
+		LocalFile.MockMock.gotoSupportMailMessage(
+			mockMockAsset = "New Liferay Project Invitation - Krmail - ${staticProjectName}",
+			mockMockRecipient = "PRO ${staticContactLastName1}",
+			mockMockSender = "Liferay Provisioning",
+			recipientEmailAddress = "pro.user1@lrcustomer.com.broken");
+
+		LocalFile.MockMock.viewMailMessage(table = '''| You have been invited to the Liferay project    |
+	| Krmail - ${staticProjectName}                   |
+	| Login or create a Liferay.com account to        |
+	| View your project's subscriptions               |
+	| Manage team members & roles                     |
+	| Activate your Liferay products                  |
+	| Learn how to succeed with each of our products  |
+	| Search our extensive Knowledge Base             |
+	| Request help from our Support team              |
+	| support.liferay.com                             |''');
+	}
+
+	test ViewnewcontactemailsforoktausercontactsinBRESregion {
+		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | pro.user1                       |
+	| Email Address | pro.user1@lrcustomer.com.broken |
+	| First Name    | PRO                             |
+	| Last Name     | ${staticContactLastName1}       |''');
+
+		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | pro.user2                       |
+	| Email Address | pro.user2@lrcustomer.com.broken |
+	| First Name    | PRO                             |
+	| Last Name     | ${staticContactLastName2}       |''');
+
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Mailkr - ${staticCompanyName}              |
+	| Address City                           | Tijuana                                    |
+	| Address Country                        | Mexico                                     |
+	| Address Postal Code                    | 20631                                      |
+	| Address Region                         | Baja California                            |
+	| Address Street                         | Avenida Agua 120                           |
+	| Contact Email Address                  | pro.user1@lrcustomer.com.broken            |
+	| Contact First Name                     | PRO                                        |
+	| Contact Last Name                      | ${staticContactLastName1}                  |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | pro.user2@lrcustomer.com.broken            |
+	| Owner First Name                       | PRO                                        |
+	| Owner Last Name                        | ${staticContactLastName2}                  |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Krmail - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay Brazil                             |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | Mexico                                     |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.ZendeskHomepage.pause(timeInSeconds = 10);
+
+		LocalFile.MockMock.gotoSupportMailMessage(
+			mockMockAsset = "New Liferay Project Invitation - Krmail - ${staticProjectName}",
+			mockMockRecipient = "PRO ${staticContactLastName1}",
+			mockMockSender = "Liferay Provisioning",
+			recipientEmailAddress = "pro.user1@lrcustomer.com.broken");
+
+		LocalFile.MockMock.viewMailMessage(table = '''| You have been invited to the Liferay project   |
+	| Krmail - ${staticProjectName}                  |
+	| Login or create a Liferay.com account to       |
+	| View your project's subscriptions              |
+	| Manage team members & roles                    |
+	| Activate your Liferay products                 |
+	| Learn how to succeed with each of our products |
+	| Search our extensive Knowledge Base            |
+	| Request help from our Support team             |
+	| support.liferay.com                            |''');
+	}
+
+	test ViewnewcontactemailsforoktausercontactsinBRPTregion {
+		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | pro.user1                       |
+	| Email Address | pro.user1@lrcustomer.com.broken |
+	| First Name    | PRO                             |
+	| Last Name     | ${staticContactLastName1}       |''');
+
+		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | pro.user2                       |
+	| Email Address | pro.user2@lrcustomer.com.broken |
+	| First Name    | PRO                             |
+	| Last Name     | ${staticContactLastName2}       |''');
+
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Mailkr - ${staticCompanyName}              |
+	| Address City                           | Sao Paulo                                  |
+	| Address Country                        | Brazil                                     |
+	| Address Postal Code                    | 04642-000                                  |
+	| Address Region                         | São Paulo                                  |
+	| Address Street                         | Rua Visconde de Porto Seguro 1238          |
+	| Contact Email Address                  | pro.user1@lrcustomer.com.broken            |
+	| Contact First Name                     | PRO                                        |
+	| Contact Last Name                      | ${staticContactLastName1}                  |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | pro.user2@lrcustomer.com.broken            |
+	| Owner First Name                       | PRO                                        |
+	| Owner Last Name                        | ${staticContactLastName2}                  |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Krmail - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay Brazil                             |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | Brazil                                     |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.ZendeskHomepage.pause(timeInSeconds = 30);
+
+		LocalFile.MockMock.gotoSupportMailMessage(
+			mockMockAsset = "New Liferay Project Invitation - Krmail - ${staticProjectName}",
+			mockMockRecipient = "PRO ${staticContactLastName1}",
+			mockMockSender = "Liferay Provisioning",
+			recipientEmailAddress = "pro.user1@lrcustomer.com.broken");
+
+		LocalFile.MockMock.viewMailMessage(table = '''| You have been invited to the Liferay project   |
+	| Krmail - ${staticProjectName}.                 |
+	| Login or create a Liferay.com account to       |
+	| View your project's subscriptions              |
+	| Manage team members & roles                    |
+	| Activate your Liferay products                 |
+	| Learn how to succeed with each of our products |
+	| Search our extensive Knowledge Base            |
+	| Request help from our Support team             |
+	| support.liferay.com                            |''');
+	}
+
+	test ViewnewcontactemailsforoktausercontactsinJPregion {
+		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | pro.user1                       |
+	| Email Address | pro.user1@lrcustomer.com.broken |
+	| First Name    | PRO                             |
+	| Last Name     | ${staticContactLastName1}       |''');
+
+		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | pro.user2                       |
+	| Email Address | pro.user2@lrcustomer.com.broken |
+	| First Name    | PRO                             |
+	| Last Name     | ${staticContactLastName2}       |''');
+
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Mailkr - ${staticCompanyName}              |
+	| Address City                           | Akasaka, Minato-ku                         |
+	| Address Country                        | Japan                                      |
+	| Address Postal Code                    | 107-0052                                   |
+	| Address Street                         | 2 Chome-13-3                               |
+	| Contact Email Address                  | pro.user1@lrcustomer.com.broken            |
+	| Contact First Name                     | PRO                                        |
+	| Contact Last Name                      | ${staticContactLastName1}                  |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | pro.user2@lrcustomer.com.broken            |
+	| Owner First Name                       | PRO                                        |
+	| Owner Last Name                        | ${staticContactLastName2}                  |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Krmail - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay Japan                              |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | Japan                                      |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.ZendeskHomepage.pause(timeInSeconds = 10);
+
+		LocalFile.MockMock.gotoSupportMailMessage(
+			mockMockAsset = "New Liferay Project Invitation - Krmail - ${staticProjectName}",
+			mockMockRecipient = "PRO ${staticContactLastName1}",
+			mockMockSender = "Liferay Provisioning",
+			recipientEmailAddress = "pro.user1@lrcustomer.com.broken");
+
+		LocalFile.MockMock.viewMailMessage(table = '''| You have been invited to the Liferay project   |
+	| Krmail - ${staticProjectName}                  |
+	| Login or create a Liferay.com account to       |
+	| View your project's subscriptions              |
+	| Manage team members & roles                    |
+	| Activate your Liferay products                 |
+	| Learn how to succeed with each of our products |
+	| Search our extensive Knowledge Base            |
+	| Request help from our Support team             |
+	| support.liferay.com                            |''');
+	}
+
+	test Viewnewpartnermanageremails {
+		LocalFile.OSBAdminRabbitMQ.publishCreatePartnerAccountMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Prmail - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Professional Services (Technical/Web/IT)   |
+	| Owner Email Address                    | pro.user3@lrpartner.com.broken             |
+	| Owner First Name                       | PRO                                        |
+	| Owner Last Name                        | ${staticContactLastName3}                  |
+	| Partner First Line Support             | false                                      |
+	| Product Name                           | Service Partnership                        |
+	| Product Type                           | New                                        |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |''');
+
+		LocalFile.JSONOkta.updateOktaUser(
+			table = '''| Screen Name   | pro.user3                 |
+	| First Name    | PRO                       |
+	| Last Name     | ${staticContactLastName3} |''',
+			userOriginalEmailAddress = "pro.user3@lrpartner.com.broken");
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Prmail - ${staticCompanyName}",
+			contactEmailAddress = "pro.user3@lrpartner.com.broken",
+			table = '''| Partner Manager |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Partner");
+
+		LocalFile.ZendeskHomepage.pause(timeInSeconds = 10);
+
+		LocalFile.MockMock.gotoSupportMailMessage(
+			mockMockAsset = "New Liferay Project Invitation - Prmail - ${staticCompanyName}",
+			mockMockRecipient = "PRO ${staticContactLastName3}",
+			mockMockSender = "Liferay Provisioning",
+			recipientEmailAddress = "pro.user3@lrpartner.com.broken");
+
+		LocalFile.MockMock.viewMailMessage(table = '''| You have been invited to the Liferay project    |
+	| Prmail - ${staticCompanyName}                   |
+	| Login or create a Liferay.com account to        |
+	| View your project's subscriptions               |
+	| Manage team members & roles                     |
+	| Learn how to succeed with each of our products  |
+	| Search our extensive Knowledge Base             |
+	| support.liferay.com                             |''');
+	}
+
+	test Viewnewpartnermanageremailsforcontactaddedviaprovisioning {
+		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | pro.user3                      |
+	| Email Address | pro.user3@lrpartner.com.broken |
+	| First Name    | PRO                            |
+	| Last Name     | ${staticContactLastName3}      |''');
+
+		LocalFile.OSBAdminRabbitMQ.publishCreatePartnerAccountMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Prmail - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Professional Services (Technical/Web/IT)   |
+	| Owner Email Address                    | pro.user3@lrpartner.com.broken             |
+	| Owner First Name                       | PRO                                        |
+	| Owner Last Name                        | ${staticContactLastName3}                  |
+	| Partner First Line Support             | false                                      |
+	| Product Name                           | Service Partnership                        |
+	| Product Type                           | New                                        |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Partner");
+
+		LocalFile.ZendeskHomepage.pause(timeInSeconds = 10);
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Prmail");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Prmail - ${staticCompanyName}");
+
+		LocalFile.Provisioning.clickTab(tabName = "Contacts");
+
+		LocalFile.ProvisioningAccount.clickAssignContactButton();
+
+		LocalFile.ProvisioningAccount.populateAssignContactFormAndSave(table = '''| Email Address | pro.user3@lrpartner.com.broken |
+	| Assign Role   | Partner Manager                |''');
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Partner");
+
+		LocalFile.MockMock.gotoSupportMailMessage(
+			mockMockAsset = "New Liferay Project Invitation - Prmail - ${staticCompanyName}",
+			mockMockRecipient = "PRO ${staticContactLastName3}",
+			mockMockSender = "Liferay Provisioning",
+			recipientEmailAddress = "pro.user3@lrpartner.com.broken");
+
+		LocalFile.MockMock.viewMailMessage(table = '''| You have been invited to the Liferay project   |
+	| Prmail - ${staticCompanyName}                  |
+	| Login or create a Liferay.com account to       |
+	| View your project's subscriptions              | 
+    | Manage team members & roles                    |
+    | Learn how to succeed with each of our products | 
+    | Search our extensive Knowledge Base            |
+	| support.liferay.com                            |''');
+	}
+
+	test Viewnewpartnermemberemails {
+		LocalFile.OSBAdminRabbitMQ.publishCreatePartnerAccountMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Prmail - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Professional Services (Technical/Web/IT)   |
+	| Owner Email Address                    | pro.user3@lrpartner.com.broken             |
+	| Owner First Name                       | PRO                                        |
+	| Owner Last Name                        | ${staticContactLastName3}                  |
+	| Partner First Line Support             | false                                      |
+	| Product Name                           | Service Partnership                        |
+	| Product Type                           | New                                        |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |''');
+
+		LocalFile.JSONOkta.updateOktaUser(
+			table = '''| Screen Name   | pro.user3                 |
+	| First Name    | PRO                       |
+	| Last Name     | ${staticContactLastName3} |''',
+			userOriginalEmailAddress = "pro.user3@lrpartner.com.broken");
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Prmail - ${staticCompanyName}",
+			contactEmailAddress = "pro.user3@lrpartner.com.broken",
+			table = '''| Partner Member |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Partner");
+
+		LocalFile.ZendeskHomepage.pause(timeInSeconds = 10);
+
+		LocalFile.MockMock.gotoSupportMailMessage(
+			mockMockAsset = "New Liferay Project Invitation - Prmail - ${staticCompanyName}",
+			mockMockRecipient = "PRO ${staticContactLastName3}",
+			mockMockSender = "Liferay Provisioning",
+			recipientEmailAddress = "pro.user3@lrpartner.com.broken");
+
+		LocalFile.MockMock.viewMailMessage(table = '''| You have been invited to the Liferay project        |
+	| Prmail - ${staticCompanyName}                       |
+	| Login or create a Liferay.com account to            |
+	| View your project's subscriptions                   |
+    | View the activation status of your Liferay products |
+    | Learn how to succeed with each of our products      |
+    | Search our extensive Knowledge Base                 |
+	| support.liferay.com                                 |''');
+	}
+
+	test Viewnewpartnermemberemailsforcontactaddedviaprovisioning {
+		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | pro.user3                      |
+	| Email Address | pro.user3@lrpartner.com.broken |
+	| First Name    | PRO                            |
+	| Last Name     | ${staticContactLastName3}      |''');
+
+		LocalFile.OSBAdminRabbitMQ.publishCreatePartnerAccountMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Prmail - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Professional Services (Technical/Web/IT)   |
+	| Owner Email Address                    | pro.user3@lrpartner.com.broken             |
+	| Owner First Name                       | PRO                                        |
+	| Owner Last Name                        | ${staticContactLastName3}                  |
+	| Partner First Line Support             | false                                      |
+	| Product Name                           | Service Partnership                        |
+	| Product Type                           | New                                        |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Partner");
+
+		LocalFile.ZendeskHomepage.pause(timeInSeconds = 10);
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Prmail");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Prmail - ${staticCompanyName}");
+
+		LocalFile.Provisioning.clickTab(tabName = "Contacts");
+
+		LocalFile.ProvisioningAccount.clickAssignContactButton();
+
+		LocalFile.ProvisioningAccount.populateAssignContactFormAndSave(table = '''| Email Address | pro.user3@lrpartner.com.broken |
+	| Assign Role   | Partner Member                 |''');
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Partner");
+
+		LocalFile.MockMock.gotoSupportMailMessage(
+			mockMockAsset = "New Liferay Project Invitation - Prmail - ${staticCompanyName}",
+			mockMockRecipient = "PRO ${staticContactLastName3}",
+			mockMockSender = "Liferay Provisioning",
+			recipientEmailAddress = "pro.user3@lrpartner.com.broken");
+
+		LocalFile.MockMock.viewMailMessage(table = '''| You have been invited to the Liferay project        |
+	| Prmail - ${staticCompanyName}                       |
+	| Login or create a Liferay.com account to            |
+	| View your project's subscriptions                   |
+    | View the activation status of your Liferay products |
+    | Learn how to succeed with each of our products      |
+    | Search our extensive Knowledge Base                 |
+	| support.liferay.com                                 |''');
+	}
+
+	test Viewnewsupportadministratorcontactemails {
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Mailkr - ${staticCompanyName}              |
+	| Address City                           | Sao Paulo                                  |
+	| Address Country                        | Brazil                                     |
+	| Address Postal Code                    | 04642-000                                  |
+	| Address Region                         | São Paulo                                  |
+	| Address Street                         | Rua Visconde de Porto Seguro 1238          |
+	| Contact Email Address                  | pro.user1@lrcustomer.com.broken            |
+	| Contact First Name                     | PRO                                        |
+	| Contact Last Name                      | ${staticContactLastName1}                  |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | pro.user2@lrcustomer.com.broken            |
+	| Owner First Name                       | PRO                                        |
+	| Owner Last Name                        | ${staticContactLastName2}                  |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Krmail - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay Brazil                             |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | Brazil                                     |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.JSONOkta.updateOktaUser(
+			table = '''| Screen Name   | pro.user1                 |
+	| First Name    | PRO                       |
+	| Last Name     | ${staticContactLastName1} |''',
+			userOriginalEmailAddress = "pro.user1@lrcustomer.com.broken");
+
+		LocalFile.JSONOkta.updateOktaUser(
+			table = '''| Screen Name   | pro.user2                 |
+	| First Name    | PRO                       |
+	| Last Name     | ${staticContactLastName2} |''',
+			userOriginalEmailAddress = "pro.user2@lrcustomer.com.broken");
+
+		LocalFile.ZendeskHomepage.pause(timeInSeconds = 10);
+
+		LocalFile.KoroneikiContactAPI._viewAccountCustomerContactRoleViaUuid(
+			accountName = "Krmail - ${staticProjectName}",
+			contactEmailAddress = "pro.user1@lrcustomer.com.broken",
+			contactRoleName = "Support Administrator");
+
+		LocalFile.MockMock.gotoSupportMailMessage(
+			mockMockAsset = "New Liferay Project Invitation - Krmail - ${staticProjectName}",
+			mockMockRecipient = "PRO ${staticContactLastName1}",
+			mockMockSender = "Liferay Provisioning",
+			recipientEmailAddress = "pro.user1@lrcustomer.com.broken");
+
+		LocalFile.MockMock.viewMailMessage(table = '''| Login or create a Liferay.com account to       |
+	| View your project's subscriptions              |
+    | Manage team members & roles                    |
+    | Activate your Liferay products                 |
+    | Learn how to succeed with each of our products |
+    | Search our extensive Knowledge Base            |
+    | Request help from our Support team             |''');
+	}
+
+	test Viewnewsupportadministratorcontactemailsforcontactaddedviaprovisioning {
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Mailkr - ${staticCompanyName}              |
+	| Address City                           | Sao Paulo                                  |
+	| Address Country                        | Brazil                                     |
+	| Address Postal Code                    | 04642-000                                  |
+	| Address Region                         | São Paulo                                  |
+	| Address Street                         | Rua Visconde de Porto Seguro 1238          |
+	| Contact Email Address                  | pro.user1@lrcustomer.com.broken            |
+	| Contact First Name                     | PRO                                        |
+	| Contact Last Name                      | ${staticContactLastName1}                  |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | pro.user2@lrcustomer.com.broken            |
+	| Owner First Name                       | PRO                                        |
+	| Owner Last Name                        | ${staticContactLastName2}                  |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Krmail - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay Brazil                             |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | Brazil                                     |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.JSONOkta.updateOktaUser(
+			table = '''| Screen Name   | pro.user1                 |
+	| First Name    | PRO                       |
+	| Last Name     | ${staticContactLastName1} |''',
+			userOriginalEmailAddress = "pro.user1@lrcustomer.com.broken");
+
+		LocalFile.JSONOkta.updateOktaUser(
+			table = '''| Screen Name   | pro.user2                 |
+	| First Name    | PRO                       |
+	| Last Name     | ${staticContactLastName2} |''',
+			userOriginalEmailAddress = "pro.user2@lrcustomer.com.broken");
+
+		LocalFile.ZendeskHomepage.pause(timeInSeconds = 10);
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Krmail");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Krmail - ${staticProjectName}");
+
+		LocalFile.Provisioning.clickTab(tabName = "Contacts");
+
+		LocalFile.ProvisioningAccount.clickAssignContactButton();
+
+		LocalFile.ProvisioningAccount.populateAssignContactFormAndSave(table = '''| Email Address | pro.user2@lrcustomer.com.broken |
+	| Assign Role   | Support Administrator           |''');
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer");
+
+		LocalFile.MockMock.gotoSupportMailMessage(
+			mockMockAsset = "New Liferay Project Invitation - Krmail - ${staticProjectName}",
+			mockMockRecipient = "PRO ${staticContactLastName2}",
+			mockMockSender = "Liferay Provisioning",
+			recipientEmailAddress = "pro.user2@lrcustomer.com.broken");
+
+		LocalFile.MockMock.viewMailMessage(table = '''| You have been invited to the Liferay project   |
+	| Krmail - ${staticProjectName}                  |
+	| Login or create a Liferay.com account to       |
+	| View your project's subscriptions              |
+	| Manage team members & roles                    |
+	| Activate your Liferay products                 |
+	| Learn how to succeed with each of our products |
+	| Search our extensive Knowledge Base            |
+	| Request help from our Support team             |''');
+	}
+
+	test Viewnewsupportadministratorcontactemailsforunverifiedcontactaddedviaprovisioningcontactform {
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Mailkr - ${staticCompanyName}              |
+	| Address City                           | Sao Paulo                                  |
+	| Address Country                        | Brazil                                     |
+	| Address Postal Code                    | 04642-000                                  |
+	| Address Region                         | São Paulo                                  |
+	| Address Street                         | Rua Visconde de Porto Seguro 1238          |
+	| Contact Email Address                  | pro.user1@lrcustomer.com.broken            |
+	| Contact First Name                     | PRO                                        |
+	| Contact Last Name                      | ${staticContactLastName1}                  |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | pro.user2@lrcustomer.com.broken            |
+	| Owner First Name                       | PRO                                        |
+	| Owner Last Name                        | ${staticContactLastName2}                  |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Krmail - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay Brazil                             |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | Brazil                                     |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.JSONOkta.updateOktaUser(
+			table = '''| Screen Name   | pro.user1                 |
+	| First Name    | PRO                       |
+	| Last Name     | ${staticContactLastName1} |''',
+			userOriginalEmailAddress = "pro.user1@lrcustomer.com.broken");
+
+		LocalFile.JSONOkta.updateOktaUser(
+			table = '''| Screen Name   | pro.user2                 |
+	| First Name    | PRO                       |
+	| Last Name     | ${staticContactLastName2} |''',
+			userOriginalEmailAddress = "pro.user2@lrcustomer.com.broken");
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Krmail");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Krmail - ${staticProjectName}");
+
+		LocalFile.Provisioning.clickTab(tabName = "Contacts");
+
+		LocalFile.ProvisioningAccount.clickAssignContactButton();
+
+		LocalFile.ProvisioningAccount.populateAssignContactFormAndSave(table = '''| Email Address | pro.user3@lrpartner.com.broken |
+	| Assign Role   | Support Administrator          |''');
+
+		LocalFile.ProvisioningAccount.viewInfoMessageForNonCreatedUserOnOktaViaActiveAccount();
+
+		LocalFile.ProvisioningAccount.populateAssignContactOktaFormAndSave(table = '''| First Name | PRO                            |
+	| Last Name  | ${staticContactLastName3}      |
+	| Email      | pro.user3@lrpartner.com.broken |
+	| Roles      | Support Administrator          |''');
+
+		LocalFile.ZendeskHomepage.pause(timeInSeconds = 10);
+
+		LocalFile.MockMock.viewNoSupportMailMessage(
+			mockMockAsset = "New Liferay Project Invitation - Krmail - ${staticProjectName}",
+			mockMockRecipient = "PRO ${staticContactLastName3}",
+			mockMockSender = "Liferay Provisioning",
+			recipientEmailAddress = "pro.user3@lrpartner.com.broken");
+
+		LocalFile.JSONOkta.updateOktaUser(
+			table = '''| Screen Name  | pro.user3 |
+	| Email Status | VERIFIED  |''',
+			userOriginalEmailAddress = "pro.user3@lrpartner.com.broken");
+
+		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 5);
+
+		LocalFile.KoroneikiContactAPI._viewContactViaEmailAddress(
+			contactEmailAddress = "pro.user3@lrpartner.com.broken",
+			table = '''| Email Address Verified | true |''');
+
+		LocalFile.MockMock.gotoSupportMailMessage(
+			mockMockAsset = "New Liferay Project Invitation - Krmail - ${staticProjectName}",
+			mockMockRecipient = "PRO ${staticContactLastName3}",
+			mockMockSender = "Liferay Provisioning",
+			recipientEmailAddress = "pro.user3@lrpartner.com.broken");
+
+		LocalFile.MockMock.viewMailMessage(table = '''| You have been invited to the Liferay project    |
+	| Krmail - ${staticProjectName}                   |
+	| Login or create a Liferay.com account to        |
+	| View your project's subscriptions               |
+	| Manage team members & roles                     |
+	| Activate your Liferay products                  |
+	| Learn how to succeed with each of our products  |
+	| Search our extensive Knowledge Base             |
+	| Request help from our Support team              |
+	| support.liferay.com                             |''');
+	}
+
+	test Viewnewsupportrequestercontactemails {
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Mailkr - ${staticCompanyName}              |
+	| Address City                           | Sao Paulo                                  |
+	| Address Country                        | Brazil                                     |
+	| Address Postal Code                    | 04642-000                                  |
+	| Address Region                         | São Paulo                                  |
+	| Address Street                         | Rua Visconde de Porto Seguro 1238          |
+	| Contact Email Address                  | pro.user1@lrcustomer.com.broken            |
+	| Contact First Name                     | PRO                                        |
+	| Contact Last Name                      | ${staticContactLastName1}                  |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | pro.user2@lrcustomer.com.broken            |
+	| Owner First Name                       | PRO                                        |
+	| Owner Last Name                        | ${staticContactLastName2}                  |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Krmail - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay Brazil                             |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | Brazil                                     |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.JSONOkta.updateOktaUser(
+			table = '''| Screen Name   | pro.user1                 |
+	| First Name    | PRO                       |
+	| Last Name     | ${staticContactLastName1} |''',
+			userOriginalEmailAddress = "pro.user1@lrcustomer.com.broken");
+
+		LocalFile.JSONOkta.updateOktaUser(
+			table = '''| Screen Name   | pro.user2                 |
+	| First Name    | PRO                       |
+	| Last Name     | ${staticContactLastName2} |''',
+			userOriginalEmailAddress = "pro.user2@lrcustomer.com.broken");
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Krmail - ${staticProjectName}",
+			contactEmailAddress = "pro.user2@lrcustomer.com.broken",
+			table = '''| Support Requester |''');
+
+		LocalFile.ZendeskHomepage.pause(timeInSeconds = 10);
+
+		LocalFile.MockMock.gotoSupportMailMessage(
+			mockMockAsset = "New Liferay Project Invitation - Krmail - ${staticProjectName}",
+			mockMockRecipient = "PRO ${staticContactLastName2}",
+			mockMockSender = "Liferay Provisioning",
+			recipientEmailAddress = "pro.user2@lrcustomer.com.broken");
+
+		LocalFile.MockMock.viewMailMessage(table = '''| Login or create a Liferay.com account to            |
+	| View your project's subscriptions                   |
+    | View the activation status of your Liferay products |
+    | Learn how to succeed with each of our products      |
+    | Search our extensive Knowledge Base                 |
+    | Request help from our Support team                  |''');
+	}
+
+	test Viewnewsupportrequestercontactemailsforcontactaddedviaprovisioning {
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Mailkr - ${staticCompanyName}              |
+	| Address City                           | Sao Paulo                                  |
+	| Address Country                        | Brazil                                     |
+	| Address Postal Code                    | 04642-000                                  |
+	| Address Region                         | São Paulo                                  |
+	| Address Street                         | Rua Visconde de Porto Seguro 1238          |
+	| Contact Email Address                  | pro.user1@lrcustomer.com.broken            |
+	| Contact First Name                     | PRO                                        |
+	| Contact Last Name                      | ${staticContactLastName1}                  |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | pro.user2@lrcustomer.com.broken            |
+	| Owner First Name                       | PRO                                        |
+	| Owner Last Name                        | ${staticContactLastName2}                  |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Krmail - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay Brazil                             |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | Brazil                                     |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.JSONOkta.updateOktaUser(
+			table = '''| Screen Name   | pro.user1                 |
+	| First Name    | PRO                       |
+	| Last Name     | ${staticContactLastName1} |''',
+			userOriginalEmailAddress = "pro.user1@lrcustomer.com.broken");
+
+		LocalFile.JSONOkta.updateOktaUser(
+			table = '''| Screen Name   | pro.user2                 |
+	| First Name    | PRO                       |
+	| Last Name     | ${staticContactLastName2} |''',
+			userOriginalEmailAddress = "pro.user2@lrcustomer.com.broken");
+
+		LocalFile.ZendeskHomepage.pause(timeInSeconds = 10);
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Krmail");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Krmail - ${staticProjectName}");
+
+		LocalFile.Provisioning.clickTab(tabName = "Contacts");
+
+		LocalFile.ProvisioningAccount.clickAssignContactButton();
+
+		LocalFile.ProvisioningAccount.populateAssignContactFormAndSave(table = '''| Email Address | pro.user2@lrcustomer.com.broken |
+	| Assign Role   | Support Requester               |''');
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer");
+
+		LocalFile.MockMock.gotoSupportMailMessage(
+			mockMockAsset = "New Liferay Project Invitation - Krmail - ${staticProjectName}",
+			mockMockRecipient = "PRO ${staticContactLastName2}",
+			mockMockSender = "Liferay Provisioning",
+			recipientEmailAddress = "pro.user2@lrcustomer.com.broken");
+
+		LocalFile.MockMock.viewMailMessage(table = '''| You have been invited to the Liferay project        |
+	| Krmail - ${staticProjectName}                       |
+	| Login or create a Liferay.com account to            |
+	| View your project's subscriptions                   |
+    | View the activation status of your Liferay products |
+    | Learn how to succeed with each of our products      |
+    | Search our extensive Knowledge Base                 |
+    | Request help from our Support team                  |
+	| support.liferay.com                                 |''');
+	}
+
+	test Viewnewsupportusercontactemails {
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Mailkr - ${staticCompanyName}              |
+	| Address City                           | Sao Paulo                                  |
+	| Address Country                        | Brazil                                     |
+	| Address Postal Code                    | 04642-000                                  |
+	| Address Region                         | São Paulo                                  |
+	| Address Street                         | Rua Visconde de Porto Seguro 1238          |
+	| Contact Email Address                  | pro.user1@lrcustomer.com.broken            |
+	| Contact First Name                     | PRO                                        |
+	| Contact Last Name                      | ${staticContactLastName1}                  |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | pro.user2@lrcustomer.com.broken            |
+	| Owner First Name                       | PRO                                        |
+	| Owner Last Name                        | ${staticContactLastName2}                  |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Krmail - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay Brazil                             |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | Brazil                                     |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.JSONOkta.updateOktaUser(
+			table = '''| Screen Name   | pro.user1                 |
+	| First Name    | PRO                       |
+	| Last Name     | ${staticContactLastName1} |''',
+			userOriginalEmailAddress = "pro.user1@lrcustomer.com.broken");
+
+		LocalFile.JSONOkta.updateOktaUser(
+			table = '''| Screen Name   | pro.user2                 |
+	| First Name    | PRO                       |
+	| Last Name     | ${staticContactLastName2} |''',
+			userOriginalEmailAddress = "pro.user2@lrcustomer.com.broken");
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Krmail - ${staticProjectName}",
+			contactEmailAddress = "pro.user2@lrcustomer.com.broken",
+			table = '''| Support User |''');
+
+		LocalFile.ZendeskHomepage.pause(timeInSeconds = 10);
+
+		LocalFile.MockMock.gotoSupportMailMessage(
+			mockMockAsset = "New Liferay Project Invitation - Krmail - ${staticProjectName}",
+			mockMockRecipient = "PRO ${staticContactLastName2}",
+			mockMockSender = "Liferay Provisioning",
+			recipientEmailAddress = "pro.user2@lrcustomer.com.broken");
+
+		LocalFile.MockMock.viewMailMessage(table = '''| Login or create a Liferay.com account to            |
+	| View your project's subscriptions                   |
+	| View the activation status of your Liferay products | 
+    | Learn how to succeed with each of our products      |
+	| Search our extensive Knowledge Base                 |''');
+	}
+
+	test Viewnewsupportusercontactemailsforcontactaddedviaprovisioning {
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Mailkr - ${staticCompanyName}              |
+	| Address City                           | Sao Paulo                                  |
+	| Address Country                        | Brazil                                     |
+	| Address Postal Code                    | 04642-000                                  |
+	| Address Region                         | São Paulo                                  |
+	| Address Street                         | Rua Visconde de Porto Seguro 1238          |
+	| Contact Email Address                  | pro.user1@lrcustomer.com.broken            |
+	| Contact First Name                     | PRO                                        |
+	| Contact Last Name                      | ${staticContactLastName1}                  |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | pro.user2@lrcustomer.com.broken            |
+	| Owner First Name                       | PRO                                        |
+	| Owner Last Name                        | ${staticContactLastName2}                  |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Krmail - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay Brazil                             |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | Brazil                                     |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.JSONOkta.updateOktaUser(
+			table = '''| Screen Name   | pro.user1                 |
+	| First Name    | PRO                       |
+	| Last Name     | ${staticContactLastName1} |''',
+			userOriginalEmailAddress = "pro.user1@lrcustomer.com.broken");
+
+		LocalFile.JSONOkta.updateOktaUser(
+			table = '''| Screen Name   | pro.user2                 |
+	| First Name    | PRO                       |
+	| Last Name     | ${staticContactLastName2} |''',
+			userOriginalEmailAddress = "pro.user2@lrcustomer.com.broken");
+
+		LocalFile.ZendeskHomepage.pause(timeInSeconds = 10);
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Krmail");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Krmail - ${staticProjectName}");
+
+		LocalFile.Provisioning.clickTab(tabName = "Contacts");
+
+		LocalFile.ProvisioningAccount.clickAssignContactButton();
+
+		LocalFile.ProvisioningAccount.populateAssignContactFormAndSave(table = '''| Email Address | pro.user2@lrcustomer.com.broken |
+	| Assign Role   | Support User                    |''');
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer");
+
+		LocalFile.MockMock.gotoSupportMailMessage(
+			mockMockAsset = "New Liferay Project Invitation - Krmail - ${staticProjectName}",
+			mockMockRecipient = "PRO ${staticContactLastName2}",
+			mockMockSender = "Liferay Provisioning",
+			recipientEmailAddress = "pro.user2@lrcustomer.com.broken");
+
+		LocalFile.MockMock.viewMailMessage(table = '''| You have been invited to the Liferay project         |
+	| Krmail - ${staticProjectName}                        |
+	| Login or create a Liferay.com account to             |
+	| View your project's subscriptions             	   |
+    | View the activation status of your Liferay products  |
+    | Learn how to succeed with each of our products       |
+    | Search our extensive Knowledge Base                  |
+	| support.liferay.com                                  |''');
+	}
+
+	test ViewnewtranslatedcontactemailsfornonoktausercontactsinBRPTregion {
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Mailkr - ${staticCompanyName}              |
+	| Address City                           | Sao Paulo                                  |
+	| Address Country                        | Brazil                                     |
+	| Address Postal Code                    | 04642-000                                  |
+	| Address Region                         | São Paulo                                  |
+	| Address Street                         | Rua Visconde de Porto Seguro 1238          |
+	| Contact Email Address                  | pro.user1@lrcustomer.com.broken            |
+	| Contact First Name                     | PRO                                        |
+	| Contact Last Name                      | ${staticContactLastName1}                  |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | pro.user2@lrcustomer.com.broken            |
+	| Owner First Name                       | PRO                                        |
+	| Owner Last Name                        | ${staticContactLastName2}                  |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Krmail - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay Brazil                             |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | Brazil                                     |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.KoroneikiContactAPI._updateContactViaEmailAddress(
+			contactEmailAddress = "pro.user1@lrcustomer.com.broken",
+			table = '''| Language | pt_BR |''');
+
+		LocalFile.KoroneikiContactAPI._updateContactViaEmailAddress(
+			contactEmailAddress = "pro.user2@lrcustomer.com.broken",
+			table = '''| Language | pt_BR |''');
+
+		LocalFile.JSONOkta.updateOktaUser(
+			table = '''| Screen Name | pro.user1                 |
+	| First Name  | PRO                       |
+	| Last Name   | ${staticContactLastName1} |''',
+			userOriginalEmailAddress = "pro.user1@lrcustomer.com.broken");
+
+		LocalFile.JSONOkta.updateOktaUser(
+			table = '''| Screen Name | pro.user2                 |
+	| First Name  | PRO                       |
+	| Last Name   | ${staticContactLastName2} |''',
+			userOriginalEmailAddress = "pro.user2@lrcustomer.com.broken");
+
+		LocalFile.ZendeskHomepage.pause(timeInSeconds = 10);
+
+		LocalFile.MockMock.gotoSupportMailMessage(
+			mockMockAsset = "Convite para novo projeto Liferay - Krmail - ${staticProjectName}",
+			mockMockRecipient = "PRO ${staticContactLastName1}",
+			mockMockSender = "Liferay Provisioning",
+			recipientEmailAddress = "pro.user1@lrcustomer.com.broken");
+
+		LocalFile.MockMock.viewMailMessage(table = '''| Você foi convidado para o projeto Liferay                |
+	| Krmail - ${staticProjectName}                            |
+	| Ver inscrições do seu projeto                            |
+	| Gerenciar membros e funções da equipe                    |
+	| Ativar seus produtos Liferay                             |
+	| Aprender como ter sucesso com cada um de nossos produtos |
+	| Pesquisar em nossa extensa Base de Conhecimento          |
+	| Solicitar ajuda da nossa equipe de Suporte               |
+	| support.liferay.com                                      |''');
+	}
+
+	test ViewnewtranslatedcontactemailsfornonoktausercontactsinESregion {
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Mailkr - ${staticCompanyName}              |
+	| Address City                           | Madrid                                     |
+	| Address Region                         | Madrid                                     |
+	| Address Country                        | Spain                                      |
+	| Address Postal Code                    | 28070                                      |
+	| Address Street                         | Calle Aduana, 29                           |
+	| Contact Email Address                  | pro.user1@lrcustomer.com.broken            |
+	| Contact First Name                     | PRO                                        |
+	| Contact Last Name                      | ${staticContactLastName1}                  |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | pro.user2@lrcustomer.com.broken            |
+	| Owner First Name                       | PRO                                        |
+	| Owner Last Name                        | ${staticContactLastName2}                  |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Krmail - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay Spain                              |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | Spain                                      |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.KoroneikiContactAPI._updateContactViaEmailAddress(
+			contactEmailAddress = "pro.user1@lrcustomer.com.broken",
+			table = '''| Language | es_ES |''');
+
+		LocalFile.KoroneikiContactAPI._updateContactViaEmailAddress(
+			contactEmailAddress = "pro.user2@lrcustomer.com.broken",
+			table = '''| Language | es_ES |''');
+
+		LocalFile.JSONOkta.updateOktaUser(
+			table = '''| Screen Name | pro.user1                 |
+	| First Name  | PRO                       |
+	| Last Name   | ${staticContactLastName1} |''',
+			userOriginalEmailAddress = "pro.user1@lrcustomer.com.broken");
+
+		LocalFile.JSONOkta.updateOktaUser(
+			table = '''| Screen Name | pro.user2                 |
+	| First Name  | PRO                       |
+	| Last Name   | ${staticContactLastName2} |''',
+			userOriginalEmailAddress = "pro.user2@lrcustomer.com.broken");
+
+		LocalFile.ZendeskHomepage.pause(timeInSeconds = 10);
+
+		LocalFile.MockMock.gotoSupportMailMessage(
+			mockMockAsset = "Invitación al nuevo proyecto de Liferay - Krmail - ${staticProjectName}",
+			mockMockRecipient = "PRO ${staticContactLastName1}",
+			mockMockSender = "Liferay Provisioning",
+			recipientEmailAddress = "pro.user1@lrcustomer.com.broken");
+
+		LocalFile.MockMock.viewMailMessage(table = '''| Te hemos invitado al proyecto de Liferay                |
+	| Krmail - ${staticProjectName}                           |
+	| Lógate o crea una cuenta en Liferay.com para			  |
+	| Ver las suscripciones de tu proyecto                    |
+  	| Gestionar los miembros del equipo y los roles           |
+	| Activar tus productos de Liferay                        |
+	| Conocer cómo sacar partido a cada uno de tus productos  |
+	| Buscar en nuestra amplia Biblioteca técnica             |
+	| Solicita ayuda de nuestro equipo de Soporte             |
+	| support.liferay.com                                     |''');
+	}
+
+	test ViewnewtranslatedcontactemailsfornonoktausercontactsinJPregion {
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Mailkr - ${staticCompanyName}              |
+	| Address City                           | Akasaka, Minato-ku                         |
+	| Address Country                        | Japan                                      |
+	| Address Postal Code                    | 107-0052                                   |
+	| Address Street                         | 2 Chome-13-3                               |
+	| Contact Email Address                  | pro.user1@lrcustomer.com.broken            |
+	| Contact First Name                     | PRO                                        |
+	| Contact Last Name                      | ${staticContactLastName1}                  |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | pro.user2@lrcustomer.com.broken            |
+	| Owner First Name                       | PRO                                        |
+	| Owner Last Name                        | ${staticContactLastName2}                  |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Krmail - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay Japan                              |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | Japan                                      |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.KoroneikiContactAPI._updateContactViaEmailAddress(
+			contactEmailAddress = "pro.user1@lrcustomer.com.broken",
+			table = '''| Language | ja_JP |''');
+
+		LocalFile.KoroneikiContactAPI._updateContactViaEmailAddress(
+			contactEmailAddress = "pro.user2@lrcustomer.com.broken",
+			table = '''| Language | ja_JP |''');
+
+		LocalFile.JSONOkta.updateOktaUser(
+			table = '''| Screen Name   | pro.user1                 |
+	| First Name    | PRO                       |
+	| Last Name     | ${staticContactLastName1} |''',
+			userOriginalEmailAddress = "pro.user1@lrcustomer.com.broken");
+
+		LocalFile.JSONOkta.updateOktaUser(
+			table = '''| Screen Name   | pro.user2                 |
+	| First Name    | PRO                       |
+	| Last Name     | ${staticContactLastName2} |''',
+			userOriginalEmailAddress = "pro.user2@lrcustomer.com.broken");
+
+		LocalFile.ZendeskHomepage.pause(timeInSeconds = 10);
+
+		LocalFile.MockMock.gotoSupportMailMessage(
+			mockMockAsset = "新しいLiferayプロジェクトの招待状 - Krmail - ${staticProjectName}",
+			mockMockRecipient = "PRO ${staticContactLastName1}",
+			mockMockSender = "Liferay Provisioning",
+			recipientEmailAddress = "pro.user1@lrcustomer.com.broken");
+
+		LocalFile.MockMock.viewMailMessage(table = '''| Liferayのプロジェクト                               |
+	| に招待されました                                    |
+	| Krmail - ${staticProjectName}                     |
+	| Liferay.comのアカウントでログインしたり、新規作成します |
+	| プロジェクトのサブスクリプションを表示する              |
+	| チームメンバーおよびロールの管理                      |
+	| Liferay製品のアクティベートする                      |
+	| 各製品の活用方法を学ぶ                               |
+	| 豊富なナレッジベースを検索する                        |
+	| サポートチームにお問い合わせする                      |
+	| support.liferay.com                              |''');
+	}
+
+	test Viewnonewsupportadministratorcontactemailsforcontactverifiedviaprovisioning {
+		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | pro.user1                       |
+	| Email Address | pro.user1@lrcustomer.com.broken |
+	| First Name    | PRO                             |
+	| Last Name     | ${staticContactLastName1}       |
+	| Email Status  | UNVERIFIED                      |
+	| Active        | true                            |''');
+
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | MAILKRKRMAIL                    | |
+	| Contact Email Address | pro.user1@lrcustomer.com.broken | |
+	| Description           | Test okt account on koroneiki   | |
+	| Fax Number            | 555-555-1234                    | |
+	| Name                  | Krmail - ${staticProjectName}   | |
+	| Phone Number          | 555-555-5678                    | |
+	| Profile Email Address | pro.user1@lrcustomer.com.broken | |
+	| Region                | United States                   | |
+	| Status                | Active                          | |
+	| Tier                  | T4                              | |
+	| Website               | www.koroneikicorporation.com    | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Krmail - ${staticProjectName}",
+			productName = "DXP Production",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | true                     | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Krmail - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | true                     | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Krmail - ${staticProjectName}",
+			contactEmailAddress = "pro.user1@lrcustomer.com.broken",
+			table = '''| Support Administrator |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer");
+
+		LocalFile.KoroneikiContactAPI._updateContactViaEmailAddress(
+			contactEmailAddress = "pro.user1@lrcustomer.com.broken",
+			table = '''| Email Address Verified | false |''');
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoUsers();
+
+		LocalFile.Provisioning.searchUsers(keyword = "pro.user1");
+
+		LocalFile.Provisioning.clickUser(userName = "PRO ${staticContactLastName1}");
+
+		LocalFile.ProvisioningUser.clickSyncWithOktaButton();
+
+		LocalFile.ZendeskHomepage.pause(timeInSeconds = 10);
+
+		LocalFile.MockMock.viewNoSupportMailMessage(
+			mockMockAsset = "New Liferay Project Invitation - Krmail - ${staticProjectName}",
+			mockMockRecipient = "PRO ${staticContactLastName1}",
+			mockMockSender = "Liferay Provisioning",
+			recipientEmailAddress = "pro.user1@lrcustomer.com.broken");
+	}
+
+}

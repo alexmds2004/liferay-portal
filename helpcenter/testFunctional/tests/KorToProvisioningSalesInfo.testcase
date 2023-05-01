@@ -1,0 +1,3308 @@
+definition {
+
+	property testray.main.component.name = "Support QA";
+	property type = "provisioning.integration";
+
+	setUp {
+		LocalFile.Passwords.getPasswords();
+
+		LocalFile.OSBAdminRabbitMQ.generateStaticVariables();
+
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningCompanyName();
+
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | pro.koroneiki1                       |
+	| Email Address | pro.koroneiki1@lrcustomer.com.broken |
+	| First Name    | PRO                                  |
+	| Last Name     | Koroneiki1                           |''');
+
+		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | pro.koroneiki2                       |
+	| Email Address | pro.koroneiki2@lrcustomer.com.broken |
+	| First Name    | PRO                                  |
+	| Last Name     | Koroneiki2                           |''');
+	}
+
+	tearDown {
+		LocalFile.ZendeskUserAPI._getDefaultUserId(organizationName = "Korpro - ${staticProjectName}");
+
+		LocalFile.ZendeskUserAPI._renameFirstDefaultUserIdVariable();
+
+		LocalFile.ZendeskUserAPI._getDefaultUserId(organizationName = "Onepro - ${staticProjectName}");
+
+		LocalFile.ZendeskUserAPI._renameSecondDefaultUserIdVariable();
+
+		LocalFile.ZendeskUserAPI._getDefaultUserId(organizationName = "Prokor - ${staticCompanyName}");
+
+		LocalFile.ZendeskUserAPI._renameThirdDefaultUserIdVariable();
+
+		LocalFile.KoroneikiTeamAPI._tearDownTeams(table = '''| Koroneiki Partner |
+	| Updated Partner   |''');
+
+		LocalFile.OSBAdminProject.tearDownProjects(table = '''| PROKORKORPRO |
+	| ONEPROONEPRO |
+	| PROKOR       |''');
+
+		LocalFile.KoroneikiAccountAPI._tearDownAccounts(table = '''| Korpro - ${staticProjectName} |
+	| Onepro - ${staticProjectName} |
+	| Prokor - ${staticCompanyName} |''');
+
+		LocalFile.KoroneikiAccountAPI._tearDownAccountsViaAccountFieldNameAndValue(
+			fieldName = "Code",
+			table = '''| PROKORKORPRO |
+	| ONEPROONEPRO |
+	| PROKOR       |''');
+
+		LocalFile.JSONUser.tearDownUsers(table = '''| pro.koroneiki1@lrcustomer.com.broken |
+	| pro.koroneiki2@lrcustomer.com.broken |''');
+
+		LocalFile.JSONUser.tearDownUsersViaSupport(table = '''| pro.koroneiki1@lrcustomer.com.broken |
+	| pro.koroneiki2@lrcustomer.com.broken |''');
+
+		LocalFile.JSONUser.tearDownUsersViaKoroneiki(table = '''| pro.koroneiki1@lrcustomer.com.broken |
+	| pro.koroneiki2@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiContactAPI._tearDownContacts(table = '''| pro.koroneiki1@lrcustomer.com.broken |
+	| pro.koroneiki2@lrcustomer.com.broken |''');
+
+		LocalFile.JSONOkta.tearDownUsers(table = '''| pro.koroneiki1@lrcustomer.com.broken |
+	| pro.koroneiki2@lrcustomer.com.broken |''');
+
+		LocalFile.ZendeskTicketAPI._tearDownTicketsByKeywords(table = '''| New Subscription(s) for Korpro - ${staticProjectName} |
+	| New Subscription(s) for Prokor - ${staticCompanyName} |''');
+
+		LocalFile.ZendeskUserAPI._getMultipleUserIdsByEmailAddress(table = '''| pro.koroneiki1@lrcustomer.com.broken |
+	| pro.koroneiki2@lrcustomer.com.broken |''');
+
+		LocalFile.ZendeskUserAPI._tearDownUsersByIdList(userIds = ${staticUserIdList});
+
+		LocalFile.ZendeskOrganizationAPI._getMultipleOrganizationExternalIdsByOrganizationNameIfStillPresent(table = '''| Korpro - ${staticProjectName} |
+	| Onepro - ${staticProjectName} |
+	| Prokor - ${staticCompanyName} |''');
+
+		LocalFile.ZendeskOrganizationAPI._tearDownOrganizationsByExternalIdList(organizationExternalIds = ${staticOrganizationExternalIdList});
+
+		LocalFile.ZendeskUserAPI._tearDownUserById(userId = ${staticDefaultUserId1});
+
+		LocalFile.ZendeskUserAPI._tearDownUserById(userId = ${staticDefaultUserId2});
+
+		LocalFile.ZendeskUserAPI._tearDownUserById(userId = ${staticDefaultUserId3});
+	}
+
+	test Archivecreatedsalesinfonote {
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Prokor - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Contact Email Address                  | pro.koroneiki1@lrcustomer.com.broken       |
+	| Contact First Name                     | PRO                                        |
+	| Contact Last Name                      | Koroneiki1                                 |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | pro.koroneiki2@lrcustomer.com.broken       |
+	| Owner First Name                       | PRO                                        |
+	| Owner Last Name                        | Koroneiki2                                 |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Korpro - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korpro");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korpro - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.expandSidePanel();
+
+		LocalFile.ProvisioningAccount.clickSidePanelTab(tabName = "Sales Info");
+
+		LocalFile.ProvisioningAccount.createSalesInfo(content = "Account Sales Info Content");
+
+		LocalFile.ProvisioningAccount.clickSalesInfoActionDropdownButton(
+			action = "Archive",
+			salesInfoContent = "Account Sales Info Content");
+
+		LocalFile.ProvisioningAccount._viewNoAccountSalesInfo(salesInfoContent = "Account Sales Info Content");
+
+		LocalFile.ProvisioningAccount._viewNoAccountSalesInfoViaArchive(salesInfoContent = "Account Sales Info Content");
+
+		LocalFile.ProvisioningAccount.clickViewArchivedSalesInfoLink();
+
+		LocalFile.ProvisioningAccount._viewAccountSalesInfoViaArchive(
+			salesInfoContent = "Account Sales Info Content",
+			table = '''| Author  | Test Test                  |
+	| Content | Account Sales Info Content |''');
+
+		LocalFile.Provisioning.clickTab(tabName = "History");
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "status",
+			keyword = "Test Test > Updated Note",
+			table = '''| Update Description          | Test Test > Updated Note |
+	| Update Field Name           | status                   |
+	| Update Field Original Value | Approved                 |
+	| Update Field New Value      | Archived                 |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "content",
+			keyword = "Test Test > Updated Note",
+			table = '''| Update Description          | Test Test > Updated Note   |
+	| Update Field Name           | content                    |
+	| Update Field Original Value | Account Sales Info Content |
+	| Update Field New Value      | Account Sales Info Content |''');
+	}
+
+	@help.center.acceptance = "true"
+	test Archivesalesinfonote {
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Prokor - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Contact Email Address                  | pro.koroneiki1@lrcustomer.com.broken       |
+	| Contact First Name                     | PRO                                        |
+	| Contact Last Name                      | Koroneiki1                                 |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | pro.koroneiki2@lrcustomer.com.broken       |
+	| Owner First Name                       | PRO                                        |
+	| Owner Last Name                        | Koroneiki2                                 |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Korpro - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountNote(
+			accountName = "Korpro - ${staticProjectName}",
+			table = '''| Agent Name | Koroneiki User             |
+	| Content    | Account Sales Info Content |
+	| Format     | Plain                      |
+	| Priority   | 1                          |
+	| Status     | Approved                   |
+	| Type       | Sales                      |''');
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korpro");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korpro - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.expandSidePanel();
+
+		LocalFile.ProvisioningAccount.clickSidePanelTab(tabName = "Sales Info");
+
+		LocalFile.ProvisioningAccount.clickSalesInfoActionDropdownButton(
+			action = "Archive",
+			salesInfoContent = "Account Sales Info Content");
+
+		LocalFile.ProvisioningAccount._viewNoAccountSalesInfo(salesInfoContent = "Account Sales Info Content");
+
+		LocalFile.ProvisioningAccount._viewNoAccountSalesInfoViaArchive(salesInfoContent = "Account Sales Info Content");
+
+		LocalFile.ProvisioningAccount.clickViewArchivedSalesInfoLink();
+
+		LocalFile.ProvisioningAccount._viewAccountSalesInfoViaArchive(
+			salesInfoContent = "Account Sales Info Content",
+			table = '''| Author  | Koroneiki User             |
+	| Content | Account Sales Info Content |''');
+
+		LocalFile.Provisioning.clickTab(tabName = "History");
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "status",
+			keyword = "Test Test > Updated Note",
+			table = '''| Update Description          | Test Test > Updated Note |
+	| Update Field Name           | status                   |
+	| Update Field Original Value | Approved                 |
+	| Update Field New Value      | Archived                 |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "content",
+			keyword = "Test Test > Updated Note",
+			table = '''| Update Description          | Test Test > Updated Note   |
+	| Update Field Name           | content                    |
+	| Update Field Original Value | Account Sales Info Content |
+	| Update Field New Value      | Account Sales Info Content |''');
+	}
+
+	test Cancelnotecreate {
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Prokor - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Contact Email Address                  | pro.koroneiki1@lrcustomer.com.broken       |
+	| Contact First Name                     | PRO                                        |
+	| Contact Last Name                      | Koroneiki1                                 |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | pro.koroneiki2@lrcustomer.com.broken       |
+	| Owner First Name                       | PRO                                        |
+	| Owner Last Name                        | Koroneiki2                                 |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Korpro - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korpro");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korpro - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.expandSidePanel();
+
+		LocalFile.ProvisioningAccount.clickSidePanelTab(tabName = "Sales Info");
+
+		LocalFile.ProvisioningAccount.cancelSalesInfoNote(content = "Account Sales Info Content");
+
+		LocalFile.ProvisioningAccount._viewNoAccountSalesInfo(salesInfoContent = "Account Sales Info Content");
+
+		LocalFile.ProvisioningAccount.viewNoArchivedSalesInfoLink();
+
+		LocalFile.Provisioning.clickTab(tabName = "History");
+
+		LocalFile.ProvisioningAccount.viewNoAccountHistoryEntryByKeyword(keyword = "Test Test > Added Note");
+	}
+
+	test Cancelsalesinfonoteupdate {
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Prokor - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Contact Email Address                  | pro.koroneiki1@lrcustomer.com.broken       |
+	| Contact First Name                     | PRO                                        |
+	| Contact Last Name                      | Koroneiki1                                 |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | pro.koroneiki2@lrcustomer.com.broken       |
+	| Owner First Name                       | PRO                                        |
+	| Owner Last Name                        | Koroneiki2                                 |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Korpro - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountNote(
+			accountName = "Korpro - ${staticProjectName}",
+			table = '''| Agent Name | Koroneiki User             |
+	| Content    | Account Sales Info Content |
+	| Format     | Plain                      |
+	| Priority   | 2                          |
+	| Status     | Approved                   |
+	| Type       | Sales                      |''');
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korpro");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korpro - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.expandSidePanel();
+
+		LocalFile.ProvisioningAccount.clickSidePanelTab(tabName = "Sales Info");
+
+		LocalFile.ProvisioningAccount.clickSalesInfoActionButton(
+			action = "Edit",
+			salesInfoContent = "Account Sales Info Content");
+
+		LocalFile.ProvisioningAccount.cancelSalesInfoNoteEdit(
+			contentEdit = "Account Sales Info Edited Content",
+			salesInfoContent = "Account Sales Info Content");
+
+		LocalFile.ProvisioningAccount._viewAccountSalesInfo(
+			salesInfoContent = "Account Sales Info Content",
+			table = '''| Author  | Koroneiki User             |
+	| Content | Account Sales Info Content |''');
+
+		LocalFile.ProvisioningAccount._viewNoAccountSalesInfo(salesInfoContent = "Account Sales Info Edited Content");
+
+		LocalFile.ProvisioningAccount.viewNoArchivedSalesInfoLink();
+
+		LocalFile.Provisioning.clickTab(tabName = "History");
+
+		LocalFile.ProvisioningAccount.viewNoAccountHistoryEntryByKeyword(keyword = "Test Test > Updated Note");
+	}
+
+	@help.center.acceptance = "true"
+	test Createsalesinfonote {
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Prokor - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Contact Email Address                  | pro.koroneiki1@lrcustomer.com.broken       |
+	| Contact First Name                     | PRO                                        |
+	| Contact Last Name                      | Koroneiki1                                 |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | pro.koroneiki2@lrcustomer.com.broken       |
+	| Owner First Name                       | PRO                                        |
+	| Owner Last Name                        | Koroneiki2                                 |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Korpro - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korpro");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korpro - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.expandSidePanel();
+
+		LocalFile.ProvisioningAccount.clickSidePanelTab(tabName = "Sales Info");
+
+		LocalFile.ProvisioningAccount.createSalesInfo(content = "Account Sales Info Content");
+
+		LocalFile.ProvisioningAccount._viewAccountSalesInfo(
+			salesInfoContent = "Account Sales Info Content",
+			table = '''| Author  | Test Test                  |
+	| Content | Account Sales Info Content |''');
+
+		LocalFile.ProvisioningAccount.viewNoArchivedSalesInfoLink();
+
+		LocalFile.Provisioning.clickTab(tabName = "History");
+
+		LocalFile.KoroneikiAccountAPI._generateAccountId(accountName = "Korpro - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "creatorName",
+			keyword = "Test Test > Added Note",
+			table = '''| Update Description          | Test Test > Added Note |
+	| Update Field Name           | creatorName            |
+	| Update Field Original Value | N/A                    |
+	| Update Field New Value      | Test Test              |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "format",
+			keyword = "Test Test > Added Note",
+			table = '''| Update Description          | Test Test > Added Note |
+	| Update Field Name           | format                 |
+	| Update Field Original Value | N/A                    |
+	| Update Field New Value      | Plain                  |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "type",
+			keyword = "Test Test > Added Note",
+			table = '''| Update Description          | Test Test > Added Note |
+	| Update Field Name           | type                   |
+	| Update Field Original Value | N/A                    |
+	| Update Field New Value      | Sales                  |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "priority",
+			keyword = "Test Test > Added Note",
+			table = '''| Update Description          | Test Test > Added Note |
+	| Update Field Name           | priority               |
+	| Update Field Original Value | N/A                    |
+	| Update Field New Value      | 2                      |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "content",
+			keyword = "Test Test > Added Note",
+			table = '''| Update Description          | Test Test > Added Note     |
+	| Update Field Name           | content                    |
+	| Update Field Original Value | N/A                        |
+	| Update Field New Value      | Account Sales Info Content |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "accountId",
+			keyword = "Test Test > Added Note",
+			table = '''| Update Description          | Test Test > Added Note |
+	| Update Field Name           | accountId              |
+	| Update Field Original Value | N/A                    |
+	| Update Field New Value      | ${staticAccountId}     |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "status",
+			keyword = "Test Test > Added Note",
+			table = '''| Update Description          | Test Test > Added Note |
+	| Update Field Name           | status                 |
+	| Update Field Original Value | N/A                    |
+	| Update Field New Value      | Approved               |''');
+	}
+
+	test Createsalesinfonoteonaccountwithexistingsalesinfonotes {
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Prokor - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Contact Email Address                  | pro.koroneiki1@lrcustomer.com.broken       |
+	| Contact First Name                     | PRO                                        |
+	| Contact Last Name                      | Koroneiki1                                 |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | pro.koroneiki2@lrcustomer.com.broken       |
+	| Owner First Name                       | PRO                                        |
+	| Owner Last Name                        | Koroneiki2                                 |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Korpro - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountNote(
+			accountName = "Korpro - ${staticProjectName}",
+			table = '''| Agent Name | Koroneiki User              |
+	| Content    | Account Sales Info1 Content |
+	| Format     | Plain                       |
+	| Priority   | 1                           |
+	| Status     | Approved                    |
+	| Type       | Sales                       |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountNote(
+			accountName = "Korpro - ${staticProjectName}",
+			table = '''| Agent Name | Koroneiki User              |
+	| Content    | Account Sales Info2 Content |
+	| Format     | Plain                       |
+	| Priority   | 3                           |
+	| Status     | Archived                    |
+	| Type       | Sales                       |''');
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korpro");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korpro - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.expandSidePanel();
+
+		LocalFile.ProvisioningAccount.clickSidePanelTab(tabName = "Sales Info");
+
+		LocalFile.ProvisioningAccount.createSalesInfo(content = "Account Sales Info3 Content");
+
+		LocalFile.ProvisioningAccount._viewAccountSalesInfo(
+			salesInfoContent = "Account Sales Info1 Content",
+			table = '''| Author  | Koroneiki User              |
+	| Content | Account Sales Info1 Content |''');
+
+		LocalFile.ProvisioningAccount._viewAccountSalesInfo(
+			salesInfoContent = "Account Sales Info3 Content",
+			table = '''| Author  | Test Test                   |
+	| Content | Account Sales Info3 Content |''');
+
+		LocalFile.ProvisioningAccount._viewNoAccountSalesInfo(salesInfoContent = "Account Sales Info2 Content");
+
+		LocalFile.ProvisioningAccount._viewNoAccountSalesInfoViaArchive(salesInfoContent = "Account Sales Info2 Content");
+
+		LocalFile.ProvisioningAccount.clickViewArchivedSalesInfoLink();
+
+		LocalFile.ProvisioningAccount._viewAccountSalesInfoViaArchive(
+			salesInfoContent = "Account Sales Info2 Content",
+			table = '''| Author  | Koroneiki User              |
+	| Content | Account Sales Info2 Content |''');
+
+		LocalFile.ProvisioningAccount._viewNoAccountSalesInfo(salesInfoContent = "Account Sales Info1 Content");
+
+		LocalFile.ProvisioningAccount._viewNoAccountSalesInfo(salesInfoContent = "Account Sales Info3 Content");
+
+		LocalFile.ProvisioningAccount._viewNoAccountSalesInfoViaArchive(salesInfoContent = "Account Sales Info1 Content");
+
+		LocalFile.ProvisioningAccount._viewNoAccountSalesInfoViaArchive(salesInfoContent = "Account Sales Info3 Content");
+
+		LocalFile.ProvisioningAccount.clickBackButtonViaArchivedSalesInfo();
+
+		LocalFile.ProvisioningAccount._viewAccountSalesInfo(
+			salesInfoContent = "Account Sales Info1 Content",
+			table = '''| Author  | Koroneiki User              |
+	| Content | Account Sales Info1 Content |''');
+
+		LocalFile.ProvisioningAccount._viewAccountSalesInfo(
+			salesInfoContent = "Account Sales Info3 Content",
+			table = '''| Author  | Test Test                   |
+	| Content | Account Sales Info3 Content |''');
+
+		LocalFile.ProvisioningAccount._viewNoAccountSalesInfo(salesInfoContent = "Account Sales Info2 Content");
+
+		LocalFile.ProvisioningAccount._viewNoAccountSalesInfoViaArchive(salesInfoContent = "Account Sales Info2 Content");
+
+		LocalFile.Provisioning.clickTab(tabName = "History");
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeywordAndPosition(
+			fieldName = "format",
+			keyword = "Koroneiki User > Added Note",
+			positionValue = 1,
+			table = '''| Update Description          | Koroneiki User > Added Note |
+	| Update Field Name           | format                      |
+	| Update Field Original Value | N/A                         |
+	| Update Field New Value      | Plain                       |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeywordAndPosition(
+			fieldName = "priority",
+			keyword = "Koroneiki User > Added Note",
+			positionValue = 1,
+			table = '''| Update Description          | Koroneiki User > Added Note |
+	| Update Field Name           | priority                    |
+	| Update Field Original Value | N/A                         |
+	| Update Field New Value      | 1                           |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeywordAndPosition(
+			fieldName = "content",
+			keyword = "Koroneiki User > Added Note",
+			positionValue = 1,
+			table = '''| Update Description          | Koroneiki User > Added Note |
+	| Update Field Name           | content                     |
+	| Update Field Original Value | N/A                         |
+	| Update Field New Value      | Account Sales Info1 Content |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeywordAndPosition(
+			fieldName = "status",
+			keyword = "Koroneiki User > Added Note",
+			positionValue = 1,
+			table = '''| Update Description          | Koroneiki User > Added Note |
+	| Update Field Name           | status                      |
+	| Update Field Original Value | N/A                         |
+	| Update Field New Value      | Approved                    |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeywordAndPosition(
+			fieldName = "format",
+			keyword = "Koroneiki User > Added Note",
+			positionValue = 2,
+			table = '''| Update Description          | Koroneiki User > Added Note |
+	| Update Field Name           | format                      |
+	| Update Field Original Value | N/A                         |
+	| Update Field New Value      | Plain                       |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeywordAndPosition(
+			fieldName = "priority",
+			keyword = "Koroneiki User > Added Note",
+			positionValue = 2,
+			table = '''| Update Description          | Koroneiki User > Added Note |
+	| Update Field Name           | priority                    |
+	| Update Field Original Value | N/A                         |
+	| Update Field New Value      | 3                           |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeywordAndPosition(
+			fieldName = "content",
+			keyword = "Koroneiki User > Added Note",
+			positionValue = 2,
+			table = '''| Update Description          | Koroneiki User > Added Note |
+	| Update Field Name           | content                     |
+	| Update Field Original Value | N/A                         |
+	| Update Field New Value      | Account Sales Info2 Content |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeywordAndPosition(
+			fieldName = "status",
+			keyword = "Koroneiki User > Added Note",
+			positionValue = 2,
+			table = '''| Update Description          | Koroneiki User > Added Note |
+	| Update Field Name           | status                      |
+	| Update Field Original Value | N/A                         |
+	| Update Field New Value      | Archived                    |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "format",
+			keyword = "Test Test > Added Note",
+			table = '''| Update Description          | Test Test > Added Note |
+	| Update Field Name           | format                 |
+	| Update Field Original Value | N/A                    |
+	| Update Field New Value      | Plain                  |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "priority",
+			keyword = "Test Test > Added Note",
+			table = '''| Update Description          | Test Test > Added Note |
+	| Update Field Name           | priority               |
+	| Update Field Original Value | N/A                    |
+	| Update Field New Value      | 2                      |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "content",
+			keyword = "Test Test > Added Note",
+			table = '''| Update Description          | Test Test > Added Note      |
+	| Update Field Name           | content                     |
+	| Update Field Original Value | N/A                         |
+	| Update Field New Value      | Account Sales Info3 Content |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "status",
+			keyword = "Test Test > Added Note",
+			table = '''| Update Description          | Test Test > Added Note |
+	| Update Field Name           | status                 |
+	| Update Field Original Value | N/A                    |
+	| Update Field New Value      | Approved               |''');
+	}
+
+	test Createsalesinfonotewithspecialcharacters {
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Prokor - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Contact Email Address                  | pro.koroneiki1@lrcustomer.com.broken       |
+	| Contact First Name                     | PRO                                        |
+	| Contact Last Name                      | Koroneiki1                                 |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | pro.koroneiki2@lrcustomer.com.broken       |
+	| Owner First Name                       | PRO                                        |
+	| Owner Last Name                        | Koroneiki2                                 |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Korpro - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korpro");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korpro - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.expandSidePanel();
+
+		LocalFile.ProvisioningAccount.clickSidePanelTab(tabName = "Sales Info");
+
+		LocalFile.ProvisioningAccount.createSalesInfoWithMultipleTextLines(table = '''| 1 <br> 2 <br/> 3 <br /> 4     |
+	| &amp; &lt; &gt; &quot; &apos; |
+	| & < >                         |
+	| U+0041                        |''');
+
+		LocalFile.ProvisioningAccount._viewAccountSalesInfoWithPartialContent(
+			salesInfoContent = "1 <br> 2 <br/> 3 <br /> 4",
+			table = '''| Author  | Test Test                     |
+	| Content | 1 <br> 2 <br/> 3 <br /> 4     |
+	| Content | &amp; &lt; &gt; &quot; &apos; |
+	| Content | & < >                         |
+	| Content | U+0041                        |''');
+
+		LocalFile.ProvisioningAccount.viewNoArchivedSalesInfoLink();
+
+		LocalFile.Provisioning.clickTab(tabName = "History");
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "type",
+			keyword = "Test Test > Added Note",
+			table = '''| Update Description          | Test Test > Added Note |
+	| Update Field Name           | type                   |
+	| Update Field Original Value | N/A                    |
+	| Update Field New Value      | Sales                  |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "content",
+			keyword = "Test Test > Added Note",
+			table = '''| Update Description          | Test Test > Added Note        |
+	| Update Field Name           | content                       |
+	| Update Field Original Value | N/A                           |
+	| Update Field New Value      | 1 <br> 2 <br/> 3 <br /> 4     |
+	| Update Field New Value      | &amp; &lt; &gt; &quot; &apos; |
+	| Update Field New Value      | & < >                         |
+	| Update Field New Value      | U+0041                        |''');
+	}
+
+	test Unarchivecreatedsalesinfonote {
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Prokor - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Contact Email Address                  | pro.koroneiki1@lrcustomer.com.broken       |
+	| Contact First Name                     | PRO                                        |
+	| Contact Last Name                      | Koroneiki1                                 |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | pro.koroneiki2@lrcustomer.com.broken       |
+	| Owner First Name                       | PRO                                        |
+	| Owner Last Name                        | Koroneiki2                                 |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Korpro - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korpro");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korpro - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.expandSidePanel();
+
+		LocalFile.ProvisioningAccount.clickSidePanelTab(tabName = "Sales Info");
+
+		LocalFile.ProvisioningAccount.createSalesInfo(content = "Account Sales Info Content");
+
+		LocalFile.ProvisioningAccount.clickSalesInfoActionDropdownButton(
+			action = "Archive",
+			salesInfoContent = "Account Sales Info Content");
+
+		LocalFile.ProvisioningAccount.clickViewArchivedSalesInfoLink();
+
+		LocalFile.ProvisioningAccount.clickArchivedSalesInfoActionDropdownButton(
+			action = "Unarchive",
+			salesInfoContent = "Account Sales Info Content");
+
+		LocalFile.ZendeskHomepage.pause(timeInSeconds = 3);
+
+		LocalFile.ProvisioningAccount._viewNoAccountSalesInfoViaArchive(salesInfoContent = "Account Sales Info Content");
+
+		LocalFile.ProvisioningAccount._viewNoAccountSalesInfo(salesInfoContent = "Account Sales Info Content");
+
+		LocalFile.ProvisioningAccount.clickBackButtonViaArchivedSalesInfo();
+
+		LocalFile.ProvisioningAccount._viewAccountSalesInfo(
+			salesInfoContent = "Account Sales Info Content",
+			table = '''| Author  | Test Test                  |
+	| Content | Account Sales Info Content |''');
+
+		LocalFile.ProvisioningAccount._viewNoAccountSalesInfoViaArchive(salesInfoContent = "Account Sales Info Content");
+
+		LocalFile.ProvisioningAccount.viewNoArchivedSalesInfoLink();
+
+		LocalFile.Provisioning.clickTab(tabName = "History");
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeywordAndPosition(
+			fieldName = "status",
+			keyword = "Test Test > Updated Note",
+			positionValue = 2,
+			table = '''| Update Description          | Test Test > Updated Note |
+	| Update Field Name           | status                   |
+	| Update Field Original Value | Archived                 |
+	| Update Field New Value      | Approved                 |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeywordAndPosition(
+			fieldName = "content",
+			keyword = "Test Test > Updated Note",
+			positionValue = 2,
+			table = '''| Update Description          | Test Test > Updated Note   |
+	| Update Field Name           | content                    |
+	| Update Field Original Value | Account Sales Info Content |
+	| Update Field New Value      | Account Sales Info Content |''');
+	}
+
+	test Unarchivesalesinfonote {
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Prokor - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Contact Email Address                  | pro.koroneiki1@lrcustomer.com.broken       |
+	| Contact First Name                     | PRO                                        |
+	| Contact Last Name                      | Koroneiki1                                 |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | pro.koroneiki2@lrcustomer.com.broken       |
+	| Owner First Name                       | PRO                                        |
+	| Owner Last Name                        | Koroneiki2                                 |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Korpro - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountNote(
+			accountName = "Korpro - ${staticProjectName}",
+			table = '''| Agent Name | Koroneiki User             |
+	| Content    | Account Sales Info Content |
+	| Format     | Plain                      |
+	| Priority   | 1                          |
+	| Status     | Archived                   |
+	| Type       | Sales                      |''');
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korpro");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korpro - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.expandSidePanel();
+
+		LocalFile.ProvisioningAccount.clickSidePanelTab(tabName = "Sales Info");
+
+		LocalFile.ProvisioningAccount.clickViewArchivedSalesInfoLink();
+
+		LocalFile.ProvisioningAccount.clickSalesInfoActionDropdownButton(
+			action = "Unarchive",
+			salesInfoContent = "Account Sales Info Content");
+
+		LocalFile.ZendeskHomepage.pause(timeInSeconds = 3);
+
+		LocalFile.ProvisioningAccount._viewNoAccountSalesInfo(salesInfoContent = "Account Sales Info Content");
+
+		LocalFile.ProvisioningAccount._viewNoAccountSalesInfoViaArchive(salesInfoContent = "Account Sales Info Content");
+
+		LocalFile.ProvisioningAccount.clickBackButtonViaArchivedSalesInfo();
+
+		LocalFile.ProvisioningAccount._viewAccountSalesInfo(
+			salesInfoContent = "Account Sales Info Content",
+			table = '''| Author  | Koroneiki User             |
+	| Content | Account Sales Info Content |''');
+
+		LocalFile.ProvisioningAccount._viewNoAccountSalesInfoViaArchive(salesInfoContent = "Account Sales Info Content");
+
+		LocalFile.ProvisioningAccount.viewNoArchivedSalesInfoLink();
+
+		LocalFile.Provisioning.clickTab(tabName = "History");
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "status",
+			keyword = "Test Test > Updated Note",
+			table = '''| Update Description          | Test Test > Updated Note |
+	| Update Field Name           | status                   |
+	| Update Field Original Value | Archived                 |
+	| Update Field New Value      | Approved                 |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "content",
+			keyword = "Test Test > Updated Note",
+			table = '''| Update Description          | Test Test > Updated Note   |
+	| Update Field Name           | content                    |
+	| Update Field Original Value | Account Sales Info Content |
+	| Update Field New Value      | Account Sales Info Content |''');
+	}
+
+	@help.center.acceptance = "true"
+	test Updatesalesinfonote {
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Prokor - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Contact Email Address                  | pro.koroneiki1@lrcustomer.com.broken       |
+	| Contact First Name                     | PRO                                        |
+	| Contact Last Name                      | Koroneiki1                                 |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | pro.koroneiki2@lrcustomer.com.broken       |
+	| Owner First Name                       | PRO                                        |
+	| Owner Last Name                        | Koroneiki2                                 |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Korpro - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountNote(
+			accountName = "Korpro - ${staticProjectName}",
+			table = '''| Agent Name | Koroneiki User             |
+	| Content    | Account Sales Info Content |
+	| Format     | Plain                      |
+	| Priority   | 2                          |
+	| Status     | Approved                   |
+	| Type       | Sales                      |''');
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korpro");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korpro - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.expandSidePanel();
+
+		LocalFile.ProvisioningAccount.clickSidePanelTab(tabName = "Sales Info");
+
+		LocalFile.ProvisioningAccount.clickSalesInfoActionButton(
+			action = "Edit",
+			salesInfoContent = "Account Sales Info Content");
+
+		LocalFile.ProvisioningAccount.editSalesInfo(
+			contentEdit = "Account Sales Info Edited Content",
+			salesInfoContent = "Account Sales Info Content");
+
+		LocalFile.ProvisioningAccount._viewAccountSalesInfo(
+			salesInfoContent = "Account Sales Info Edited Content",
+			table = '''| Author      | Koroneiki User                    |
+	| Create Date | Edited                            |
+	| Content     | Account Sales Info Edited Content |''');
+
+		LocalFile.ProvisioningAccount._viewNoAccountSalesInfo(salesInfoContent = "Account Sales Info Content");
+
+		LocalFile.ProvisioningAccount.viewNoArchivedSalesInfoLink();
+
+		LocalFile.Provisioning.clickTab(tabName = "History");
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "content",
+			keyword = "Test Test > Updated Note",
+			table = '''| Update Description          | Test Test > Updated Note          |
+	| Update Field Name           | content                           |
+	| Update Field Original Value | Account Sales Info Content        |
+	| Update Field New Value      | Account Sales Info Edited Content |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "modifierName",
+			keyword = "Test Test > Updated Note",
+			table = '''| Update Description          | Test Test > Updated Note |
+	| Update Field Name           | modifierName             |
+	| Update Field Original Value | N/A                      |
+	| Update Field New Value      | Test Test                |''');
+	}
+
+	test Updatesalesinfonotecreatedonprovisioning {
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Prokor - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Contact Email Address                  | pro.koroneiki1@lrcustomer.com.broken       |
+	| Contact First Name                     | PRO                                        |
+	| Contact Last Name                      | Koroneiki1                                 |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | pro.koroneiki2@lrcustomer.com.broken       |
+	| Owner First Name                       | PRO                                        |
+	| Owner Last Name                        | Koroneiki2                                 |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Korpro - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korpro");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korpro - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.expandSidePanel();
+
+		LocalFile.ProvisioningAccount.clickSidePanelTab(tabName = "Sales Info");
+
+		LocalFile.ProvisioningAccount.createSalesInfo(content = "Account Sales Info Content");
+
+		LocalFile.ProvisioningAccount.clickSalesInfoActionButton(
+			action = "Edit",
+			salesInfoContent = "Account Sales Info Content");
+
+		LocalFile.ProvisioningAccount.editSalesInfo(
+			contentEdit = "Account Sales Info Edited Content",
+			salesInfoContent = "Account Sales Info Content");
+
+		LocalFile.ProvisioningAccount._viewAccountSalesInfo(
+			salesInfoContent = "Account Sales Info Edited Content",
+			table = '''| Author      | Test Test                         |
+	| Create Date | Edited                            |
+	| Content     | Account Sales Info Edited Content |''');
+
+		LocalFile.ProvisioningAccount._viewNoAccountSalesInfo(salesInfoContent = "Account Sales Info Content");
+
+		LocalFile.ProvisioningAccount.viewNoArchivedSalesInfoLink();
+
+		LocalFile.Provisioning.clickTab(tabName = "History");
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "content",
+			keyword = "Test Test > Updated Note",
+			table = '''| Update Description          | Test Test > Updated Note          |
+	| Update Field Name           | content                           |
+	| Update Field Original Value | Account Sales Info Content        |
+	| Update Field New Value      | Account Sales Info Edited Content |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "modifierName",
+			keyword = "Test Test > Updated Note",
+			table = '''| Update Description          | Test Test > Updated Note |
+	| Update Field Name           | modifierName             |
+	| Update Field Original Value | N/A                      |
+	| Update Field New Value      | Test Test                |''');
+	}
+
+	test Updatesalesinfonoteonaccountwithexistingsalesinfonotes {
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Prokor - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Contact Email Address                  | pro.koroneiki1@lrcustomer.com.broken       |
+	| Contact First Name                     | PRO                                        |
+	| Contact Last Name                      | Koroneiki1                                 |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | pro.koroneiki2@lrcustomer.com.broken       |
+	| Owner First Name                       | PRO                                        |
+	| Owner Last Name                        | Koroneiki2                                 |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Korpro - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountNote(
+			accountName = "Korpro - ${staticProjectName}",
+			table = '''| Agent Name | Koroneiki User              |
+	| Content    | Account Sales Info1 Content |
+	| Format     | Plain                       |
+	| Priority   | 1                           |
+	| Status     | Approved                    |
+	| Type       | Sales                       |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountNote(
+			accountName = "Korpro - ${staticProjectName}",
+			table = '''| Agent Name | Koroneiki User              |
+	| Content    | Account Sales Info2 Content |
+	| Format     | Plain                       |
+	| Priority   | 3                           |
+	| Status     | Archived                    |
+	| Type       | Sales                       |''');
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korpro");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korpro - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.expandSidePanel();
+
+		LocalFile.ProvisioningAccount.clickSidePanelTab(tabName = "Sales Info");
+
+		LocalFile.ProvisioningAccount.createSalesInfo(content = "Account Sales Info3 Content");
+
+		LocalFile.ProvisioningAccount.clickSalesInfoActionButton(
+			action = "Edit",
+			salesInfoContent = "Account Sales Info3 Content");
+
+		LocalFile.ProvisioningAccount.editSalesInfo(
+			contentEdit = "Account Sales Info3 Edited Content",
+			salesInfoContent = "Account Sales Info3 Content");
+
+		LocalFile.ProvisioningAccount._viewAccountSalesInfo(
+			salesInfoContent = "Account Sales Info1 Content",
+			table = '''| Author  | Koroneiki User              |
+	| Content | Account Sales Info1 Content |''');
+
+		LocalFile.ProvisioningAccount._viewAccountSalesInfo(
+			salesInfoContent = "Account Sales Info3 Edited Content",
+			table = '''| Author  | Test Test                          |
+	| Content | Account Sales Info3 Edited Content |''');
+
+		LocalFile.ProvisioningAccount._viewNoAccountSalesInfo(salesInfoContent = "Account Sales Info2 Content");
+
+		LocalFile.ProvisioningAccount._viewNoAccountSalesInfoViaArchive(salesInfoContent = "Account Sales Info2 Content");
+
+		LocalFile.ProvisioningAccount._viewNoAccountSalesInfo(salesInfoContent = "Account Sales Info3 Content");
+
+		LocalFile.ProvisioningAccount.clickViewArchivedSalesInfoLink();
+
+		LocalFile.ProvisioningAccount._viewAccountSalesInfoViaArchive(
+			salesInfoContent = "Account Sales Info2 Content",
+			table = '''| Author  | Koroneiki User              |
+	| Content | Account Sales Info2 Content |''');
+
+		LocalFile.ProvisioningAccount._viewNoAccountSalesInfo(salesInfoContent = "Account Sales Info1 Content");
+
+		LocalFile.ProvisioningAccount._viewNoAccountSalesInfo(salesInfoContent = "Account Sales Info3 Edited Content");
+
+		LocalFile.ProvisioningAccount._viewNoAccountSalesInfoViaArchive(salesInfoContent = "Account Sales Info1 Content");
+
+		LocalFile.ProvisioningAccount._viewNoAccountSalesInfoViaArchive(salesInfoContent = "Account Sales Info3 Edited Content");
+
+		LocalFile.ProvisioningAccount.clickBackButtonViaArchivedSalesInfo();
+
+		LocalFile.ProvisioningAccount._viewAccountSalesInfo(
+			salesInfoContent = "Account Sales Info1 Content",
+			table = '''| Author  | Koroneiki User              |
+	| Content | Account Sales Info1 Content |''');
+
+		LocalFile.ProvisioningAccount._viewAccountSalesInfo(
+			salesInfoContent = "Account Sales Info3 Edited Content",
+			table = '''| Author  | Test Test                          |
+	| Content | Account Sales Info3 Edited Content |''');
+
+		LocalFile.ProvisioningAccount._viewNoAccountSalesInfo(salesInfoContent = "Account Sales Info2 Content");
+
+		LocalFile.ProvisioningAccount._viewNoAccountSalesInfoViaArchive(salesInfoContent = "Account Sales Info2 Content");
+
+		LocalFile.ProvisioningAccount._viewNoAccountSalesInfo(salesInfoContent = "Account Sales Info3 Content");
+	}
+
+	test Updatesalesinfonoteviadropdown {
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Prokor - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Contact Email Address                  | pro.koroneiki1@lrcustomer.com.broken       |
+	| Contact First Name                     | PRO                                        |
+	| Contact Last Name                      | Koroneiki1                                 |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | pro.koroneiki2@lrcustomer.com.broken       |
+	| Owner First Name                       | PRO                                        |
+	| Owner Last Name                        | Koroneiki2                                 |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Korpro - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountNote(
+			accountName = "Korpro - ${staticProjectName}",
+			table = '''| Agent Name | Koroneiki User             |
+	| Content    | Account Sales Info Content |
+	| Format     | Plain                      |
+	| Priority   | 2                          |
+	| Status     | Approved                   |
+	| Type       | Sales                      |''');
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korpro");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korpro - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.expandSidePanel();
+
+		LocalFile.ProvisioningAccount.clickSidePanelTab(tabName = "Sales Info");
+
+		LocalFile.ProvisioningAccount.clickSalesInfoActionDropdownButton(
+			action = "Edit",
+			salesInfoContent = "Account Sales Info Content");
+
+		LocalFile.ProvisioningAccount.editSalesInfo(
+			contentEdit = "Account Sales Info Edited Content",
+			salesInfoContent = "Account Sales Info Content");
+
+		LocalFile.ProvisioningAccount._viewAccountSalesInfo(
+			salesInfoContent = "Account Sales Info Edited Content",
+			table = '''| Author      | Koroneiki User                    |
+	| Create Date | Edited                            |
+	| Content     | Account Sales Info Edited Content |''');
+
+		LocalFile.ProvisioningAccount._viewNoAccountSalesInfo(salesInfoContent = "Account Sales Info Content");
+
+		LocalFile.ProvisioningAccount.viewNoArchivedSalesInfoLink();
+
+		LocalFile.Provisioning.clickTab(tabName = "History");
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "content",
+			keyword = "Test Test > Updated Note",
+			table = '''| Update Description          | Test Test > Updated Note          |
+	| Update Field Name           | content                           |
+	| Update Field Original Value | Account Sales Info Content        |
+	| Update Field New Value      | Account Sales Info Edited Content |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "modifierName",
+			keyword = "Test Test > Updated Note",
+			table = '''| Update Description          | Test Test > Updated Note |
+	| Update Field Name           | modifierName             |
+	| Update Field Original Value | N/A                      |
+	| Update Field New Value      | Test Test                |''');
+	}
+
+	test Updatesalesinfonotewithoutcontentchanges {
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Prokor - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Contact Email Address                  | pro.koroneiki1@lrcustomer.com.broken       |
+	| Contact First Name                     | PRO                                        |
+	| Contact Last Name                      | Koroneiki1                                 |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | pro.koroneiki2@lrcustomer.com.broken       |
+	| Owner First Name                       | PRO                                        |
+	| Owner Last Name                        | Koroneiki2                                 |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Korpro - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountNote(
+			accountName = "Korpro - ${staticProjectName}",
+			table = '''| Agent Name | Koroneiki User             |
+	| Content    | Account Sales Info Content |
+	| Format     | Plain                      |
+	| Priority   | 2                          |
+	| Status     | Approved                   |
+	| Type       | Sales                      |''');
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korpro");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korpro - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.expandSidePanel();
+
+		LocalFile.ProvisioningAccount.clickSidePanelTab(tabName = "Sales Info");
+
+		LocalFile.ProvisioningAccount.clickSalesInfoActionButton(
+			action = "Edit",
+			salesInfoContent = "Account Sales Info Content");
+
+		LocalFile.ProvisioningAccount.editSalesInfo(
+			contentEdit = "Account Sales Info Content",
+			salesInfoContent = "Account Sales Info Content");
+
+		LocalFile.ProvisioningAccount._viewAccountSalesInfo(
+			salesInfoContent = "Account Sales Info Content",
+			table = '''| Author      | Koroneiki User             |
+	| Content     | Account Sales Info Content |''');
+
+		LocalFile.ProvisioningAccount._viewNoAccountSalesInfoEditMark(salesInfoContent = "Account Sales Info Content");
+
+		LocalFile.ProvisioningAccount.viewNoArchivedSalesInfoLink();
+
+		LocalFile.Provisioning.clickTab(tabName = "History");
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "content",
+			keyword = "Test Test > Updated Note",
+			table = '''| Update Description          | Test Test > Updated Note   |
+	| Update Field Name           | content                    |
+	| Update Field Original Value | Account Sales Info Content |
+	| Update Field Original Value | Account Sales Info Content |''');
+	}
+
+	test Viewapprovedandarchivedsalesinfonotes {
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Prokor - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Contact Email Address                  | pro.koroneiki1@lrcustomer.com.broken       |
+	| Contact First Name                     | PRO                                        |
+	| Contact Last Name                      | Koroneiki1                                 |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | pro.koroneiki2@lrcustomer.com.broken       |
+	| Owner First Name                       | PRO                                        |
+	| Owner Last Name                        | Koroneiki2                                 |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Korpro - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountNote(
+			accountName = "Korpro - ${staticProjectName}",
+			table = '''| Agent Name | Koroneiki User              |
+	| Content    | Account Sales Info1 Content |
+	| Format     | Plain                       |
+	| Priority   | 1                           |
+	| Status     | Approved                    |
+	| Type       | Sales                       |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountNote(
+			accountName = "Korpro - ${staticProjectName}",
+			table = '''| Agent Name | Koroneiki User              |
+	| Content    | Account Sales Info2 Content |
+	| Format     | Plain                       |
+	| Priority   | 3                           |
+	| Status     | Archived                    |
+	| Type       | Sales                       |''');
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korpro");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korpro - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.expandSidePanel();
+
+		LocalFile.ProvisioningAccount.clickSidePanelTab(tabName = "Sales Info");
+
+		LocalFile.ProvisioningAccount._viewAccountSalesInfo(
+			salesInfoContent = "Account Sales Info1 Content",
+			table = '''| Author  | Koroneiki User              |
+	| Content | Account Sales Info1 Content |''');
+
+		LocalFile.ProvisioningAccount._viewNoAccountSalesInfo(salesInfoContent = "Account Sales Info2 Content");
+
+		LocalFile.ProvisioningAccount._viewNoAccountSalesInfoViaArchive(salesInfoContent = "Account Sales Info2 Content");
+
+		LocalFile.ProvisioningAccount.clickViewArchivedSalesInfoLink();
+
+		LocalFile.ProvisioningAccount._viewAccountSalesInfo(
+			salesInfoContent = "Account Sales Info2 Content",
+			table = '''| Author  | Koroneiki User              |
+	| Content | Account Sales Info2 Content |''');
+
+		LocalFile.ProvisioningAccount._viewNoAccountSalesInfo(salesInfoContent = "Account Sales Info1 Content");
+
+		LocalFile.ProvisioningAccount._viewNoAccountSalesInfoViaArchive(salesInfoContent = "Account Sales Info1 Content");
+
+		LocalFile.ProvisioningAccount.clickBackButtonViaArchivedSalesInfo();
+
+		LocalFile.ProvisioningAccount._viewAccountSalesInfo(
+			salesInfoContent = "Account Sales Info1 Content",
+			table = '''| Author  | Koroneiki User              |
+	| Content | Account Sales Info1 Content |''');
+
+		LocalFile.ProvisioningAccount._viewNoAccountSalesInfo(salesInfoContent = "Account Sales Info2 Content");
+
+		LocalFile.ProvisioningAccount._viewNoAccountSalesInfoViaArchive(salesInfoContent = "Account Sales Info2 Content");
+
+		LocalFile.Provisioning.clickTab(tabName = "History");
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeywordAndPosition(
+			fieldName = "format",
+			keyword = "Koroneiki User > Added Note",
+			positionValue = 1,
+			table = '''| Update Description          | Koroneiki User > Added Note |
+	| Update Field Name           | format                      |
+	| Update Field Original Value | N/A                         |
+	| Update Field New Value      | Plain                       |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeywordAndPosition(
+			fieldName = "priority",
+			keyword = "Koroneiki User > Added Note",
+			positionValue = 1,
+			table = '''| Update Description          | Koroneiki User > Added Note |
+	| Update Field Name           | priority                    |
+	| Update Field Original Value | N/A                         |
+	| Update Field New Value      | 1                           |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeywordAndPosition(
+			fieldName = "content",
+			keyword = "Koroneiki User > Added Note",
+			positionValue = 1,
+			table = '''| Update Description          | Koroneiki User > Added Note |
+	| Update Field Name           | content                     |
+	| Update Field Original Value | N/A                         |
+	| Update Field New Value      | Account Sales Info1 Content |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeywordAndPosition(
+			fieldName = "status",
+			keyword = "Koroneiki User > Added Note",
+			positionValue = 1,
+			table = '''| Update Description          | Koroneiki User > Added Note |
+	| Update Field Name           | status                      |
+	| Update Field Original Value | N/A                         |
+	| Update Field New Value      | Approved                    |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeywordAndPosition(
+			fieldName = "format",
+			keyword = "Koroneiki User > Added Note",
+			positionValue = 2,
+			table = '''| Update Description          | Koroneiki User > Added Note |
+	| Update Field Name           | format                      |
+	| Update Field Original Value | N/A                         |
+	| Update Field New Value      | Plain                       |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeywordAndPosition(
+			fieldName = "priority",
+			keyword = "Koroneiki User > Added Note",
+			positionValue = 2,
+			table = '''| Update Description          | Koroneiki User > Added Note |
+	| Update Field Name           | priority                    |
+	| Update Field Original Value | N/A                         |
+	| Update Field New Value      | 3                           |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeywordAndPosition(
+			fieldName = "content",
+			keyword = "Koroneiki User > Added Note",
+			positionValue = 2,
+			table = '''| Update Description          | Koroneiki User > Added Note |
+	| Update Field Name           | content                     |
+	| Update Field Original Value | N/A                         |
+	| Update Field New Value      | Account Sales Info2 Content |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeywordAndPosition(
+			fieldName = "status",
+			keyword = "Koroneiki User > Added Note",
+			positionValue = 2,
+			table = '''| Update Description          | Koroneiki User > Added Note |
+	| Update Field Name           | status                      |
+	| Update Field Original Value | N/A                         |
+	| Update Field New Value      | Archived                    |''');
+	}
+
+	test Viewarchivedsalesinfonote {
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Prokor - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Contact Email Address                  | pro.koroneiki1@lrcustomer.com.broken       |
+	| Contact First Name                     | PRO                                        |
+	| Contact Last Name                      | Koroneiki1                                 |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | pro.koroneiki2@lrcustomer.com.broken       |
+	| Owner First Name                       | PRO                                        |
+	| Owner Last Name                        | Koroneiki2                                 |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Korpro - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountNote(
+			accountName = "Korpro - ${staticProjectName}",
+			table = '''| Agent Name | Koroneiki User             |
+	| Content    | Account Sales Info Content |
+	| Format     | Plain                      |
+	| Priority   | 1                          |
+	| Status     | Archived                   |
+	| Type       | Sales                      |''');
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korpro");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korpro - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.expandSidePanel();
+
+		LocalFile.ProvisioningAccount.clickSidePanelTab(tabName = "Sales Info");
+
+		LocalFile.ProvisioningAccount._viewNoAccountSalesInfo(salesInfoContent = "Account Sales Info Content");
+
+		LocalFile.ProvisioningAccount._viewNoAccountSalesInfoViaArchive(salesInfoContent = "Account Sales Info Content");
+
+		LocalFile.ProvisioningAccount.clickViewArchivedSalesInfoLink();
+
+		LocalFile.ProvisioningAccount._viewAccountSalesInfoViaArchive(
+			salesInfoContent = "Account Sales Info Content",
+			table = '''| Author  | Koroneiki User             |
+	| Content | Account Sales Info Content |''');
+
+		LocalFile.Provisioning.clickTab(tabName = "History");
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "priority",
+			keyword = "Koroneiki User > Added Note",
+			table = '''| Update Description          | Koroneiki User > Added Note |
+	| Update Field Name           | priority                    |
+	| Update Field Original Value | N/A                         |
+	| Update Field New Value      | 1                           |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "status",
+			keyword = "Koroneiki User > Added Note",
+			table = '''| Update Description          | Koroneiki User > Added Note |
+	| Update Field Name           | status                      |
+	| Update Field Original Value | N/A                         |
+	| Update Field New Value      | Archived                    |''');
+	}
+
+	@help.center.acceptance = "true"
+	test Viewdefaultsalesinfonote {
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Prokor - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Contact Email Address                  | pro.koroneiki1@lrcustomer.com.broken       |
+	| Contact First Name                     | PRO                                        |
+	| Contact Last Name                      | Koroneiki1                                 |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | pro.koroneiki2@lrcustomer.com.broken       |
+	| Owner First Name                       | PRO                                        |
+	| Owner Last Name                        | Koroneiki2                                 |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Korpro - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korpro");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korpro - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.expandSidePanel();
+
+		LocalFile.ProvisioningAccount.clickSidePanelTab(tabName = "Sales Info");
+
+		LocalFile.ProvisioningAccount._viewAccountSalesInfoWithPartialContent(
+			salesInfoContent = "Subscriptions",
+			table = '''| Content | Subscriptions:                     |
+	| Content | DXP Production                     |
+	| Content | Platinum Subscription              |
+	| Content | Owner: PRO Koroneiki2              |
+	| Content | SFDC: https://login.salesforce.com |
+	| Content | ${staticSalesforceOpportunityKey}  |''');
+	}
+
+	test Viewdefaultsalesinfonoteforsubsequentpurchase {
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Prokor - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Contact Email Address                  | pro.koroneiki1@lrcustomer.com.broken       |
+	| Contact First Name                     | PRO                                        |
+	| Contact Last Name                      | Koroneiki1                                 |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | pro.koroneiki2@lrcustomer.com.broken       |
+	| Owner First Name                       | PRO                                        |
+	| Owner Last Name                        | Koroneiki2                                 |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Korpro - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Gold                                       |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.ZendeskHomepage.pause(timeInSeconds = 10);
+
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Prokor - ${staticCompanyName}              |
+	| Address City                           | Los Angeles                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 90011                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 123 Main Street                            |
+	| Contact Email Address                  | pro.koroneiki1@lrcustomer.com.broken       |
+	| Contact First Name                     | PRO                                        |
+	| Contact Last Name                      | Koroneiki1                                 |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Engineering                                |
+	| Owner Email Address                    | pro.koroneiki2@lrcustomer.com.broken       |
+	| Owner First Name                       | PRO                                        |
+	| Owner Last Name                        | Koroneiki2                                 |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Subscription Portal EE - (Production)      |
+	| Project Name                           | Korpro - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | a1b2c3d4e5f6g7h8i9j0                       |
+	| Salesforce Opportunity Line Item Key 1 | 6g7h8i9j0a1b2c3d4e5f                       |
+	| Salesforce Opportunity Line Item Key 2 | 0j9i8h7g6f5e4d3c2d1a                       |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | Existing Business                          |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 6.2                                        |''');
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korpro");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korpro - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.expandSidePanel();
+
+		LocalFile.ProvisioningAccount.clickSidePanelTab(tabName = "Sales Info");
+
+		LocalFile.ProvisioningAccount._viewAccountSalesInfoWithPartialContent(
+			salesInfoContent = ${staticSalesforceOpportunityKey},
+			table = '''| Content | Subscriptions:                     |
+	| Content | DXP Production                     |
+	| Content | Gold Subscription                  |
+	| Content | Owner: PRO Koroneiki2              |
+	| Content | SFDC: https://login.salesforce.com |
+	| Content | ${staticSalesforceOpportunityKey}  |''');
+
+		LocalFile.ProvisioningAccount._viewAccountSalesInfoWithPartialContent(
+			salesInfoContent = "a1b2c3d4e5f6g7h8i9j0",
+			table = '''| Content | Subscriptions:                     |
+	| Content | Portal Production                  |
+	| Content | Platinum Subscription              |
+	| Content | Owner: PRO Koroneiki2              |
+	| Content | SFDC: https://login.salesforce.com |
+	| Content | a1b2c3d4e5f6g7h8i9j0               |''');
+	}
+
+	test Viewdeletedsalesinfonote {
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Prokor - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Contact Email Address                  | pro.koroneiki1@lrcustomer.com.broken       |
+	| Contact First Name                     | PRO                                        |
+	| Contact Last Name                      | Koroneiki1                                 |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | pro.koroneiki2@lrcustomer.com.broken       |
+	| Owner First Name                       | PRO                                        |
+	| Owner Last Name                        | Koroneiki2                                 |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Korpro - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountNote(
+			accountName = "Korpro - ${staticProjectName}",
+			table = '''| Agent Name | Koroneiki User             |
+	| Content    | Account Sales Info Content |
+	| Format     | Plain                      |
+	| Priority   | 2                          |
+	| Status     | Approved                   |
+	| Type       | Sales                      |''');
+
+		LocalFile.KoroneikiNoteAPI._deleteNoteExecutedByAgent(
+			accountName = "Korpro - ${staticProjectName}",
+			agentName = "Koroneiki User",
+			content = "Account Sales Info Content");
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korpro");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korpro - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.expandSidePanel();
+
+		LocalFile.ProvisioningAccount.clickSidePanelTab(tabName = "Sales Info");
+
+		LocalFile.ProvisioningAccount._viewNoAccountSalesInfo(salesInfoContent = "Account Sales Info Content");
+
+		LocalFile.ProvisioningAccount.viewNoArchivedSalesInfoLink();
+
+		LocalFile.Provisioning.clickTab(tabName = "History");
+
+		LocalFile.KoroneikiAccountAPI._generateAccountId(accountName = "Korpro - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "creatorName",
+			keyword = "Koroneiki User > Deleted Note",
+			table = '''| Update Description          | Koroneiki User > Deleted Note |
+	| Update Field Name           | creatorName                   |
+	| Update Field Original Value | Koroneiki User                |
+	| Update Field New Value      | N/A                           |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "format",
+			keyword = "Koroneiki User > Deleted Note",
+			table = '''| Update Description          | Koroneiki User > Deleted Note |
+	| Update Field Name           | format                        |
+	| Update Field Original Value | Plain                         |
+	| Update Field New Value      | N/A                           |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "type",
+			keyword = "Koroneiki User > Deleted Note",
+			table = '''| Update Description          | Koroneiki User > Deleted Note |
+	| Update Field Name           | type                          |
+	| Update Field Original Value | Sales                         |
+	| Update Field New Value      | N/A                           |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "priority",
+			keyword = "Koroneiki User > Deleted Note",
+			table = '''| Update Description          | Koroneiki User > Deleted Note |
+	| Update Field Name           | priority                      |
+	| Update Field Original Value | 2                             |
+	| Update Field New Value      | N/A                           |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "content",
+			keyword = "Koroneiki User > Deleted Note",
+			table = '''| Update Description          | Koroneiki User > Deleted Note |
+	| Update Field Name           | content                       |
+	| Update Field Original Value | Account Sales Info Content    |
+	| Update Field New Value      | N/A                           |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "accountId",
+			keyword = "Koroneiki User > Deleted Note",
+			table = '''| Update Description          | Koroneiki User > Deleted Note |
+	| Update Field Name           | accountId                     |
+	| Update Field Original Value | ${staticAccountId}            |
+	| Update Field New Value      | N/A                           |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "creatorUID",
+			keyword = "Koroneiki User > Deleted Note",
+			table = '''| Update Description          | Koroneiki User > Deleted Note        |
+	| Update Field Name           | creatorUID                           |
+	| Update Field Original Value | a1b2c3d4-e5f6-g7h8-i9j1-0k11l12m13n1 |
+	| Update Field New Value      | N/A                                  |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "status",
+			keyword = "Koroneiki User > Deleted Note",
+			table = '''| Update Description          | Koroneiki User > Deleted Note |
+	| Update Field Name           | status                        |
+	| Update Field Original Value | Approved                      |
+	| Update Field New Value      | N/A                           |''');
+	}
+
+	test Viewhtmlsalesinfonote {
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Prokor - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Contact Email Address                  | pro.koroneiki1@lrcustomer.com.broken       |
+	| Contact First Name                     | PRO                                        |
+	| Contact Last Name                      | Koroneiki1                                 |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | pro.koroneiki2@lrcustomer.com.broken       |
+	| Owner First Name                       | PRO                                        |
+	| Owner Last Name                        | Koroneiki2                                 |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Korpro - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountNote(
+			accountName = "Korpro - ${staticProjectName}",
+			table = '''| Agent Name | Koroneiki User             |
+	| Content    | Account Sales Info Content |
+	| Format     | HTML                       |
+	| Priority   | 1                          |
+	| Status     | Approved                   |
+	| Type       | Sales                      |''');
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korpro");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korpro - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.expandSidePanel();
+
+		LocalFile.ProvisioningAccount.clickSidePanelTab(tabName = "Sales Info");
+
+		LocalFile.ProvisioningAccount._viewAccountSalesInfo(
+			salesInfoContent = "Account Sales Info Content",
+			table = '''| Author  | Koroneiki User             |
+	| Content | Account Sales Info Content |''');
+
+		LocalFile.ProvisioningAccount.viewNoArchivedSalesInfoLink();
+
+		LocalFile.Provisioning.clickTab(tabName = "History");
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "format",
+			keyword = "Koroneiki User > Added Note",
+			table = '''| Update Description          | Koroneiki User > Added Note |
+	| Update Field Name           | format                      |
+	| Update Field Original Value | N/A                         |
+	| Update Field New Value      | HTML                        |''');
+	}
+
+	test Viewmultiplearchivedandunarchivedsalesinfonotes {
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Prokor - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Contact Email Address                  | pro.koroneiki1@lrcustomer.com.broken       |
+	| Contact First Name                     | PRO                                        |
+	| Contact Last Name                      | Koroneiki1                                 |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | pro.koroneiki2@lrcustomer.com.broken       |
+	| Owner First Name                       | PRO                                        |
+	| Owner Last Name                        | Koroneiki2                                 |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Korpro - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountNote(
+			accountName = "Korpro - ${staticProjectName}",
+			table = '''| Agent Name | Koroneiki User              |
+	| Content    | Account Sales Info1 Content |
+	| Format     | Plain                       |
+	| Priority   | 1                           |
+	| Status     | Approved                    |
+	| Type       | Sales                       |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountNote(
+			accountName = "Korpro - ${staticProjectName}",
+			table = '''| Agent Name | Koroneiki User              |
+	| Content    | Account Sales Info2 Content |
+	| Format     | Plain                       |
+	| Priority   | 2                           |
+	| Status     | Approved                    |
+	| Type       | Sales                       |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountNote(
+			accountName = "Korpro - ${staticProjectName}",
+			table = '''| Agent Name | Koroneiki User              |
+	| Content    | Account Sales Info3 Content |
+	| Format     | Plain                       |
+	| Priority   | 3                           |
+	| Status     | Approved                    |
+	| Type       | Sales                       |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountNote(
+			accountName = "Korpro - ${staticProjectName}",
+			table = '''| Agent Name | Koroneiki User              |
+	| Content    | Account Sales Info4 Content |
+	| Format     | Plain                       |
+	| Priority   | 4                           |
+	| Status     | Archived                    |
+	| Type       | Sales                       |''');
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korpro");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korpro - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.expandSidePanel();
+
+		LocalFile.ProvisioningAccount.clickSidePanelTab(tabName = "Sales Info");
+
+		LocalFile.ProvisioningAccount.createSalesInfo(content = "Account Sales Info5 Content");
+
+		LocalFile.ProvisioningAccount.createSalesInfo(content = "Account Sales Info6 Content");
+
+		LocalFile.ProvisioningAccount.clickSalesInfoActionDropdownButton(
+			action = "Archive",
+			salesInfoContent = "Account Sales Info6 Content");
+
+		LocalFile.ProvisioningAccount._viewAccountSalesInfo(
+			salesInfoContent = "Account Sales Info1 Content",
+			table = '''| Author  | Koroneiki User              |
+	| Content | Account Sales Info1 Content |''');
+
+		LocalFile.ProvisioningAccount._viewAccountSalesInfo(
+			salesInfoContent = "Account Sales Info2 Content",
+			table = '''| Author  | Koroneiki User              |
+	| Content | Account Sales Info2 Content |''');
+
+		LocalFile.ProvisioningAccount._viewAccountSalesInfo(
+			salesInfoContent = "Account Sales Info3 Content",
+			table = '''| Author  | Koroneiki User              |
+	| Content | Account Sales Info3 Content |''');
+
+		LocalFile.ProvisioningAccount._viewAccountSalesInfo(
+			salesInfoContent = "Account Sales Info5 Content",
+			table = '''| Author  | Test Test                   |
+	| Content | Account Sales Info5 Content |''');
+
+		LocalFile.ProvisioningAccount._viewNoAccountSalesInfo(salesInfoContent = "Account Sales Info4 Content");
+
+		LocalFile.ProvisioningAccount._viewNoAccountSalesInfo(salesInfoContent = "Account Sales Info6 Content");
+
+		LocalFile.ProvisioningAccount.clickViewArchivedSalesInfoLink();
+
+		LocalFile.ProvisioningAccount._viewAccountSalesInfoViaArchive(
+			salesInfoContent = "Account Sales Info4 Content",
+			table = '''| Author  | Koroneiki User              |
+	| Content | Account Sales Info4 Content |''');
+
+		LocalFile.ProvisioningAccount._viewAccountSalesInfoViaArchive(
+			salesInfoContent = "Account Sales Info6 Content",
+			table = '''| Author  | Test Test                   |
+	| Content | Account Sales Info6 Content |''');
+
+		LocalFile.ProvisioningAccount._viewNoAccountSalesInfoViaArchive(salesInfoContent = "Account Sales Info1 Content");
+
+		LocalFile.ProvisioningAccount._viewNoAccountSalesInfoViaArchive(salesInfoContent = "Account Sales Info2 Content");
+
+		LocalFile.ProvisioningAccount._viewNoAccountSalesInfoViaArchive(salesInfoContent = "Account Sales Info3 Content");
+
+		LocalFile.ProvisioningAccount._viewNoAccountSalesInfoViaArchive(salesInfoContent = "Account Sales Info5 Content");
+	}
+
+	@help.center.acceptance = "true"
+	test Viewplainsalesinfonote {
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Prokor - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Contact Email Address                  | pro.koroneiki1@lrcustomer.com.broken       |
+	| Contact First Name                     | PRO                                        |
+	| Contact Last Name                      | Koroneiki1                                 |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | pro.koroneiki2@lrcustomer.com.broken       |
+	| Owner First Name                       | PRO                                        |
+	| Owner Last Name                        | Koroneiki2                                 |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Korpro - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountNote(
+			accountName = "Korpro - ${staticProjectName}",
+			table = '''| Agent Name | Koroneiki User             |
+	| Content    | Account Sales Info Content |
+	| Format     | Plain                      |
+	| Priority   | 2                          |
+	| Status     | Approved                   |
+	| Type       | Sales                      |''');
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korpro");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korpro - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.expandSidePanel();
+
+		LocalFile.ProvisioningAccount.clickSidePanelTab(tabName = "Sales Info");
+
+		LocalFile.ProvisioningAccount._viewAccountSalesInfo(
+			salesInfoContent = "Account Sales Info Content",
+			table = '''| Author  | Koroneiki User             |
+	| Content | Account Sales Info Content |''');
+
+		LocalFile.ProvisioningAccount.viewNoArchivedSalesInfoLink();
+
+		LocalFile.Provisioning.clickTab(tabName = "History");
+
+		LocalFile.KoroneikiAccountAPI._generateAccountId(accountName = "Korpro - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "creatorName",
+			keyword = "Koroneiki User > Added Note",
+			table = '''| Update Description          | Koroneiki User > Added Note |
+	| Update Field Name           | creatorName                 |
+	| Update Field Original Value | N/A                         |
+	| Update Field New Value      | Koroneiki User              |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "format",
+			keyword = "Koroneiki User > Added Note",
+			table = '''| Update Description          | Koroneiki User > Added Note |
+	| Update Field Name           | format                      |
+	| Update Field Original Value | N/A                         |
+	| Update Field New Value      | Plain                       |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "type",
+			keyword = "Koroneiki User > Added Note",
+			table = '''| Update Description          | Koroneiki User > Added Note |
+	| Update Field Name           | type                        |
+	| Update Field Original Value | N/A                         |
+	| Update Field New Value      | Sales                       |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "priority",
+			keyword = "Koroneiki User > Added Note",
+			table = '''| Update Description          | Koroneiki User > Added Note |
+	| Update Field Name           | priority                    |
+	| Update Field Original Value | N/A                         |
+	| Update Field New Value      | 2                           |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "content",
+			keyword = "Koroneiki User > Added Note",
+			table = '''| Update Description          | Koroneiki User > Added Note |
+	| Update Field Name           | content                     |
+	| Update Field Original Value | N/A                         |
+	| Update Field New Value      | Account Sales Info Content  |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "accountId",
+			keyword = "Koroneiki User > Added Note",
+			table = '''| Update Description          | Koroneiki User > Added Note |
+	| Update Field Name           | accountId                   |
+	| Update Field Original Value | N/A                         |
+	| Update Field New Value      | ${staticAccountId}          |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "creatorUID",
+			keyword = "Koroneiki User > Added Note",
+			table = '''| Update Description          | Koroneiki User > Added Note          |
+	| Update Field Name           | creatorUID                           |
+	| Update Field Original Value | N/A                                  |
+	| Update Field New Value      | a1b2c3d4-e5f6-g7h8-i9j1-0k11l12m13n1 |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "status",
+			keyword = "Koroneiki User > Added Note",
+			table = '''| Update Description          | Koroneiki User > Added Note |
+	| Update Field Name           | status                      |
+	| Update Field Original Value | N/A                         |
+	| Update Field New Value      | Approved                    |''');
+	}
+
+	test Viewsalesinfonoteonupdatedaccount {
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Prokor - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Contact Email Address                  | pro.koroneiki1@lrcustomer.com.broken       |
+	| Contact First Name                     | PRO                                        |
+	| Contact Last Name                      | Koroneiki1                                 |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | pro.koroneiki2@lrcustomer.com.broken       |
+	| Owner First Name                       | PRO                                        |
+	| Owner Last Name                        | Koroneiki2                                 |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Korpro - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountNote(
+			accountName = "Korpro - ${staticProjectName}",
+			table = '''| Agent Name | Koroneiki User             |
+	| Content    | Account Sales Info Content |
+	| Format     | Plain                      |
+	| Priority   | 2                          |
+	| Status     | Approved                   |
+	| Type       | Sales                      |''');
+
+		LocalFile.KoroneikiAccountAPI._updateAccount(
+			accountName = "Korpro - ${staticProjectName}",
+			table = '''| Code         | ONEPROONEPRO                             | |
+	| Description  | Test update account on koroneiki         | |
+	| Fax Number   | 555-555-4321                             | |
+	| Name         | Onepro - ${staticProjectName}            | |
+	| Phone Number | 555-555-8765                             | |
+	| Region       | Japan                                    | |
+	| Status       | Active                                   | |
+	| Tier         | T1                                       | |
+	| Website      | www.koroneikiupdate.com                  | |''');
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Onepro");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Onepro - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.expandSidePanel();
+
+		LocalFile.ProvisioningAccount.clickSidePanelTab(tabName = "Sales Info");
+
+		LocalFile.ProvisioningAccount._viewAccountSalesInfo(
+			salesInfoContent = "Account Sales Info Content",
+			table = '''| Author  | Koroneiki User             |
+	| Content | Account Sales Info Content |''');
+
+		LocalFile.ProvisioningAccount.viewNoArchivedSalesInfoLink();
+
+		LocalFile.Provisioning.clickTab(tabName = "History");
+
+		LocalFile.KoroneikiAccountAPI._generateAccountId(accountName = "Onepro - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "creatorName",
+			keyword = "Koroneiki User > Added Note",
+			table = '''| Update Description          | Koroneiki User > Added Note |
+	| Update Field Name           | creatorName                 |
+	| Update Field Original Value | N/A                         |
+	| Update Field New Value      | Koroneiki User              |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "format",
+			keyword = "Koroneiki User > Added Note",
+			table = '''| Update Description          | Koroneiki User > Added Note |
+	| Update Field Name           | format                      |
+	| Update Field Original Value | N/A                         |
+	| Update Field New Value      | Plain                       |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "type",
+			keyword = "Koroneiki User > Added Note",
+			table = '''| Update Description          | Koroneiki User > Added Note |
+	| Update Field Name           | type                        |
+	| Update Field Original Value | N/A                         |
+	| Update Field New Value      | Sales                       |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "priority",
+			keyword = "Koroneiki User > Added Note",
+			table = '''| Update Description          | Koroneiki User > Added Note |
+	| Update Field Name           | priority                    |
+	| Update Field Original Value | N/A                         |
+	| Update Field New Value      | 2                           |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "content",
+			keyword = "Koroneiki User > Added Note",
+			table = '''| Update Description          | Koroneiki User > Added Note |
+	| Update Field Name           | content                     |
+	| Update Field Original Value | N/A                         |
+	| Update Field New Value      | Account Sales Info Content  |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "accountId",
+			keyword = "Koroneiki User > Added Note",
+			table = '''| Update Description          | Koroneiki User > Added Note |
+	| Update Field Name           | accountId                   |
+	| Update Field Original Value | N/A                         |
+	| Update Field New Value      | ${staticAccountId}          |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "creatorUID",
+			keyword = "Koroneiki User > Added Note",
+			table = '''| Update Description          | Koroneiki User > Added Note          |
+	| Update Field Name           | creatorUID                           |
+	| Update Field Original Value | N/A                                  |
+	| Update Field New Value      | a1b2c3d4-e5f6-g7h8-i9j1-0k11l12m13n1 |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "status",
+			keyword = "Koroneiki User > Added Note",
+			table = '''| Update Description          | Koroneiki User > Added Note |
+	| Update Field Name           | status                      |
+	| Update Field Original Value | N/A                         |
+	| Update Field New Value      | Approved                    |''');
+	}
+
+	test Viewsalesinfonoteupdatedtoarchive {
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Prokor - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Contact Email Address                  | pro.koroneiki1@lrcustomer.com.broken       |
+	| Contact First Name                     | PRO                                        |
+	| Contact Last Name                      | Koroneiki1                                 |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | pro.koroneiki2@lrcustomer.com.broken       |
+	| Owner First Name                       | PRO                                        |
+	| Owner Last Name                        | Koroneiki2                                 |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Korpro - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountNote(
+			accountName = "Korpro - ${staticProjectName}",
+			table = '''| Agent Name | Koroneiki User              |
+	| Content    | Account Sales Info1 Content |
+	| Format     | Plain                       |
+	| Priority   | 2                           |
+	| Status     | Approved                    |
+	| Type       | Sales                       |''');
+
+		LocalFile.KoroneikiNoteAPI._updateNote(
+			accountName = "Korpro - ${staticProjectName}",
+			content = "Account Sales Info1 Content",
+			table = '''| Agent Name | Koroneiki User              |
+	| Content    | Account Sales Info2 Content |
+	| Format     | HTML                        |
+	| Priority   | 1                           |
+	| Status     | Archived                    |''');
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korpro");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korpro - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.expandSidePanel();
+
+		LocalFile.ProvisioningAccount.clickSidePanelTab(tabName = "Sales Info");
+
+		LocalFile.ProvisioningAccount._viewNoAccountSalesInfo(salesInfoContent = "Account Sales Info1 Content");
+
+		LocalFile.ProvisioningAccount._viewNoAccountSalesInfo(salesInfoContent = "Account Sales Info2 Content");
+
+		LocalFile.ProvisioningAccount._viewNoAccountSalesInfoViaArchive(salesInfoContent = "Account Sales Info1 Content");
+
+		LocalFile.ProvisioningAccount._viewNoAccountSalesInfoViaArchive(salesInfoContent = "Account Sales Info2 Content");
+
+		LocalFile.ProvisioningAccount.clickViewArchivedSalesInfoLink();
+
+		LocalFile.ProvisioningAccount._viewAccountSalesInfoViaArchive(
+			salesInfoContent = "Account Sales Info2 Content",
+			table = '''| Author      | Koroneiki User              |
+	| Create Date | Edited                      |
+	| Content     | Account Sales Info2 Content |''');
+
+		LocalFile.ProvisioningAccount._viewNoAccountSalesInfoViaArchive(salesInfoContent = "Account Sales Info1 Content");
+
+		LocalFile.Provisioning.clickTab(tabName = "History");
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "format",
+			keyword = "Koroneiki User > Updated Note",
+			table = '''| Update Description          | Koroneiki User > Updated Note |
+	| Update Field Name           | format                        |
+	| Update Field Original Value | Plain                         |
+	| Update Field New Value      | HTML                          |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "priority",
+			keyword = "Koroneiki User > Updated Note",
+			table = '''| Update Description          | Koroneiki User > Updated Note |
+	| Update Field Name           | priority                      |
+	| Update Field Original Value | 2                             |
+	| Update Field New Value      | 1                             |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "content",
+			keyword = "Koroneiki User > Updated Note",
+			table = '''| Update Description          | Koroneiki User > Updated Note |
+	| Update Field Name           | content                       |
+	| Update Field Original Value | Account Sales Info1 Content   |
+	| Update Field New Value      | Account Sales Info2 Content   |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "modifierUID",
+			keyword = "Koroneiki User > Updated Note",
+			table = '''| Update Description          | Koroneiki User > Updated Note        |
+	| Update Field Name           | modifierUID                          |
+	| Update Field Original Value | N/A                                  |
+	| Update Field New Value      | a1b2c3d4-e5f6-g7h8-i9j1-0k11l12m13n1 |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "modifierName",
+			keyword = "Koroneiki User > Updated Note",
+			table = '''| Update Description          | Koroneiki User > Updated Note |
+	| Update Field Name           | modifierName                  |
+	| Update Field Original Value | N/A                           |
+	| Update Field New Value      | Koroneiki User                |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "status",
+			keyword = "Koroneiki User > Updated Note",
+			table = '''| Update Description          | Koroneiki User > Updated Note |
+	| Update Field Name           | status                        |
+	| Update Field Original Value | Approved                      |
+	| Update Field New Value      | Archived                      |''');
+	}
+
+	test Viewsalesinfonoteupdatedtoarchivewithoutcontentchanges {
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Prokor - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Contact Email Address                  | pro.koroneiki1@lrcustomer.com.broken       |
+	| Contact First Name                     | PRO                                        |
+	| Contact Last Name                      | Koroneiki1                                 |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | pro.koroneiki2@lrcustomer.com.broken       |
+	| Owner First Name                       | PRO                                        |
+	| Owner Last Name                        | Koroneiki2                                 |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Korpro - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountNote(
+			accountName = "Korpro - ${staticProjectName}",
+			table = '''| Agent Name | Koroneiki User              |
+	| Content    | Account Sales Info1 Content |
+	| Format     | Plain                       |
+	| Priority   | 2                           |
+	| Status     | Approved                    |
+	| Type       | Sales                       |''');
+
+		LocalFile.KoroneikiNoteAPI._updateNote(
+			accountName = "Korpro - ${staticProjectName}",
+			content = "Account Sales Info1 Content",
+			table = '''| Agent Name | Koroneiki User              |
+	| Content    | Account Sales Info1 Content |
+	| Format     | HTML                        |
+	| Priority   | 1                           |
+	| Status     | Archived                    |''');
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korpro");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korpro - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.expandSidePanel();
+
+		LocalFile.ProvisioningAccount.clickSidePanelTab(tabName = "Sales Info");
+
+		LocalFile.ProvisioningAccount._viewNoAccountSalesInfo(salesInfoContent = "Account Sales Info1 Content");
+
+		LocalFile.ProvisioningAccount.clickViewArchivedSalesInfoLink();
+
+		LocalFile.ProvisioningAccount._viewAccountSalesInfoViaArchive(
+			salesInfoContent = "Account Sales Info1 Content",
+			table = '''| Author      | Koroneiki User              |
+	| Content     | Account Sales Info1 Content |''');
+
+		LocalFile.ProvisioningAccount._viewNoAccountSalesInfoEditMarkViaArchive(salesInfoContent = "Account Sales Info1 Content");
+
+		LocalFile.Provisioning.clickTab(tabName = "History");
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "format",
+			keyword = "Koroneiki User > Updated Note",
+			table = '''| Update Description          | Koroneiki User > Updated Note |
+	| Update Field Name           | format                        |
+	| Update Field Original Value | Plain                         |
+	| Update Field New Value      | HTML                          |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "priority",
+			keyword = "Koroneiki User > Updated Note",
+			table = '''| Update Description          | Koroneiki User > Updated Note |
+	| Update Field Name           | priority                      |
+	| Update Field Original Value | 2                             |
+	| Update Field New Value      | 1                             |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "content",
+			keyword = "Koroneiki User > Updated Note",
+			table = '''| Update Description          | Koroneiki User > Updated Note |
+	| Update Field Name           | content                       |
+	| Update Field Original Value | Account Sales Info1 Content   |
+	| Update Field New Value      | Account Sales Info1 Content   |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "status",
+			keyword = "Koroneiki User > Updated Note",
+			table = '''| Update Description          | Koroneiki User > Updated Note |
+	| Update Field Name           | status                        |
+	| Update Field Original Value | Approved                      |
+	| Update Field New Value      | Archived                      |''');
+	}
+
+	test Viewupdatedsalesinfonote {
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Prokor - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Contact Email Address                  | pro.koroneiki1@lrcustomer.com.broken       |
+	| Contact First Name                     | PRO                                        |
+	| Contact Last Name                      | Koroneiki1                                 |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | pro.koroneiki2@lrcustomer.com.broken       |
+	| Owner First Name                       | PRO                                        |
+	| Owner Last Name                        | Koroneiki2                                 |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Korpro - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountNote(
+			accountName = "Korpro - ${staticProjectName}",
+			table = '''| Agent Name | Koroneiki User              |
+	| Content    | Account Sales Info1 Content |
+	| Format     | Plain                       |
+	| Priority   | 2                           |
+	| Status     | Approved                    |
+	| Type       | Sales                       |''');
+
+		LocalFile.KoroneikiNoteAPI._updateNote(
+			accountName = "Korpro - ${staticProjectName}",
+			content = "Account Sales Info1 Content",
+			table = '''| Agent Name | Koroneiki User              |
+	| Content    | Account Sales Info2 Content |
+	| Format     | HTML                        |
+	| Priority   | 1                           |
+	| Status     | Approved                    |''');
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korpro");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korpro - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.expandSidePanel();
+
+		LocalFile.ProvisioningAccount.clickSidePanelTab(tabName = "Sales Info");
+
+		LocalFile.ProvisioningAccount._viewAccountSalesInfo(
+			salesInfoContent = "Account Sales Info2 Content",
+			table = '''| Author      | Koroneiki User              |
+	| Create Date | Edited                      |
+	| Content     | Account Sales Info2 Content |''');
+
+		LocalFile.ProvisioningAccount._viewNoAccountSalesInfo(salesInfoContent = "Account Sales Info1 Content");
+
+		LocalFile.ProvisioningAccount.viewNoArchivedSalesInfoLink();
+
+		LocalFile.Provisioning.clickTab(tabName = "History");
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "format",
+			keyword = "Koroneiki User > Updated Note",
+			table = '''| Update Description          | Koroneiki User > Updated Note |
+	| Update Field Name           | format                        |
+	| Update Field Original Value | Plain                         |
+	| Update Field New Value      | HTML                          |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "priority",
+			keyword = "Koroneiki User > Updated Note",
+			table = '''| Update Description          | Koroneiki User > Updated Note |
+	| Update Field Name           | priority                      |
+	| Update Field Original Value | 2                             |
+	| Update Field New Value      | 1                             |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "content",
+			keyword = "Koroneiki User > Updated Note",
+			table = '''| Update Description          | Koroneiki User > Updated Note |
+	| Update Field Name           | content                       |
+	| Update Field Original Value | Account Sales Info1 Content   |
+	| Update Field New Value      | Account Sales Info2 Content   |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "modifierUID",
+			keyword = "Koroneiki User > Updated Note",
+			table = '''| Update Description          | Koroneiki User > Updated Note        |
+	| Update Field Name           | modifierUID                          |
+	| Update Field Original Value | N/A                                  |
+	| Update Field New Value      | a1b2c3d4-e5f6-g7h8-i9j1-0k11l12m13n1 |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "modifierName",
+			keyword = "Koroneiki User > Updated Note",
+			table = '''| Update Description          | Koroneiki User > Updated Note |
+	| Update Field Name           | modifierName                  |
+	| Update Field Original Value | N/A                           |
+	| Update Field New Value      | Koroneiki User                |''');
+	}
+
+	test Viewupdatedsalesinfonotewithoutcontentchanges {
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Prokor - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Contact Email Address                  | pro.koroneiki1@lrcustomer.com.broken       |
+	| Contact First Name                     | PRO                                        |
+	| Contact Last Name                      | Koroneiki1                                 |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | pro.koroneiki2@lrcustomer.com.broken       |
+	| Owner First Name                       | PRO                                        |
+	| Owner Last Name                        | Koroneiki2                                 |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Korpro - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountNote(
+			accountName = "Korpro - ${staticProjectName}",
+			table = '''| Agent Name | Koroneiki User              |
+	| Content    | Account Sales Info1 Content |
+	| Format     | Plain                       |
+	| Priority   | 2                           |
+	| Status     | Approved                    |
+	| Type       | Sales                       |''');
+
+		LocalFile.KoroneikiNoteAPI._updateNote(
+			accountName = "Korpro - ${staticProjectName}",
+			content = "Account Sales Info1 Content",
+			table = '''| Agent Name | Koroneiki User              |
+	| Content    | Account Sales Info1 Content |
+	| Format     | HTML                        |
+	| Priority   | 1                           |
+	| Status     | Approved                    |''');
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korpro");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korpro - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.expandSidePanel();
+
+		LocalFile.ProvisioningAccount.clickSidePanelTab(tabName = "Sales Info");
+
+		LocalFile.ProvisioningAccount._viewAccountSalesInfo(
+			salesInfoContent = "Account Sales Info1 Content",
+			table = '''| Author      | Koroneiki User              |
+	| Content     | Account Sales Info1 Content |''');
+
+		LocalFile.ProvisioningAccount._viewNoAccountSalesInfoEditMark(salesInfoContent = "Account Sales Info1 Content");
+
+		LocalFile.ProvisioningAccount.viewNoArchivedSalesInfoLink();
+
+		LocalFile.Provisioning.clickTab(tabName = "History");
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "format",
+			keyword = "Koroneiki User > Updated Note",
+			table = '''| Update Description          | Koroneiki User > Updated Note |
+	| Update Field Name           | format                        |
+	| Update Field Original Value | Plain                         |
+	| Update Field New Value      | HTML                          |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "content",
+			keyword = "Koroneiki User > Updated Note",
+			table = '''| Update Description          | Koroneiki User > Updated Note |
+	| Update Field Name           | content                       |
+	| Update Field Original Value | Account Sales Info1 Content   |
+	| Update Field New Value      | Account Sales Info1 Content   |''');
+
+		LocalFile.ProvisioningAccount.viewAccountHistoryEntryByKeyword(
+			fieldName = "priority",
+			keyword = "Koroneiki User > Updated Note",
+			table = '''| Update Description          | Koroneiki User > Updated Note |
+	| Update Field Name           | priority                      |
+	| Update Field Original Value | 2                             |
+	| Update Field New Value      | 1                             |''');
+	}
+
+}

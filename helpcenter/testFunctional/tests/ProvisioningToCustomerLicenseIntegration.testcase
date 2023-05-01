@@ -1,0 +1,509 @@
+definition {
+
+	property testray.main.component.name = "Support QA";
+	property type = "customer.integration";
+
+	setUp {
+		LocalFile.Passwords.getPasswords();
+
+		LocalFile.Sites.getLinks();
+
+		LocalFile.OSBAdminRabbitMQ.generateStaticVariables();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFullFutureStartAndEndDate();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFutureStartAndEndDate();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFullStartAndEndDate();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFullNonAbbreviatedStartAndEndDate();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFullNonAbbreviatedFutureStartAndEndDate();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticEndDates();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartDates();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticYyyyMmDdFutureStartAndEndDate();
+
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningCompanyName();
+
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		LocalFile.Data.generateSupportUser();
+
+		LocalFile.Data._renameFirstSupportUserVariables();
+
+		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | ${staticScreenNameValue1}       |
+	| Email Address | ${staticEmailValue1}            |
+	| First Name    | ${staticContactFirstNameValue1} |
+	| Last Name     | ${staticContactLastNameValue1}  |''');
+
+		LocalFile.Data.generateSupportUser();
+
+		LocalFile.Data._renameSecondSupportUserVariables();
+
+		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | ${staticScreenNameValue2}       |
+	| Email Address | ${staticEmailValue2}            |
+	| First Name    | ${staticContactFirstNameValue2} |
+	| Last Name     | ${staticContactLastNameValue2}  |''');
+	}
+
+	tearDown {
+		LocalFile.ZendeskUserAPI._getDefaultUserId(organizationName = "Procst - ${staticProjectName}");
+
+		LocalFile.ZendeskUserAPI._renameFirstDefaultUserIdVariable();
+
+		LocalFile.ZendeskUserAPI._getDefaultUserId(organizationName = "Cstpro - ${staticCompanyName}");
+
+		LocalFile.ZendeskUserAPI._renameSecondDefaultUserIdVariable();
+
+		LocalFile.KoroneikiProductConsumptionAPI._tearDownProductConsumptionList(
+			accountName = "Procst - ${staticProjectName}",
+			table = '''| DXP Production                    |
+	| Portal Production                 |
+	| Commerce Subscription Development |
+	| Platinum Subscription             |''');
+
+		LocalFile.KoroneikiProductConsumptionAPI._tearDownProductConsumptions(
+			accountName = "Procst - ${staticProjectName}",
+			table = '''| DXP Production                    |
+	| Portal Production                 |
+	| Commerce Subscription Development |
+	| Platinum Subscription             |''');
+
+		LocalFile.ZendeskUserAPI._getDefaultUserId(organizationName = "Procst - ${staticProjectName}");
+
+		LocalFile.KoroneikiProductConsumptionAPI._tearDownProductConsumptionList(
+			accountName = "Procst - ${staticProjectName}",
+			table = '''| DXP Production                    |
+	| Portal Production                 |
+	| Commerce Subscription Development |
+	| Platinum Subscription             |''');
+
+		LocalFile.OSBAdminProject.tearDownProjects(table = '''| CSTPROPROCST |
+	| CSTPRO       |''');
+
+		LocalFile.KoroneikiAccountAPI._tearDownAccounts(table = '''| Procst - ${staticProjectName} |
+	| Cstpro - ${staticCompanyName} |''');
+
+		LocalFile.KoroneikiAccountAPI._tearDownAccountsViaAccountFieldNameAndValue(
+			fieldName = "Code",
+			table = '''| CSTPROPROCST |
+	| CSTPRO       |''');
+
+		LocalFile.JSONUser.tearDownUsers(table = '''| ${staticEmailValue1} |
+	| ${staticEmailValue2} |''');
+
+		LocalFile.JSONUser.tearDownUsersViaSupport(table = '''| ${staticEmailValue1} |
+	| ${staticEmailValue2} |''');
+
+		LocalFile.JSONUser.tearDownUsersViaKoroneiki(table = '''| ${staticEmailValue1} |
+	| ${staticEmailValue2} |''');
+
+		LocalFile.KoroneikiContactAPI._tearDownContacts(table = '''| ${staticEmailValue1} |
+	| ${staticEmailValue2} |''');
+
+		LocalFile.JSONOkta.tearDownUsers(table = '''| ${staticEmailValue1} |
+	| ${staticEmailValue2} |''');
+
+		LocalFile.ZendeskTicketAPI._tearDownTicketsByKeywords(table = '''| New Subscription(s) for Procst - ${staticProjectName} |
+	| New Subscription(s) for Cstpro - ${staticCompanyName} |''');
+
+		LocalFile.ZendeskUserAPI._getMultipleUserIdsByEmailAddress(table = '''| ${staticEmailValue1} |
+	| ${staticEmailValue2} |''');
+
+		LocalFile.ZendeskUserAPI._tearDownUsersByIdList(userIds = ${staticUserIdList});
+
+		LocalFile.ZendeskOrganizationAPI._getMultipleOrganizationExternalIdsByOrganizationNameIfStillPresent(table = '''| Procst - ${staticProjectName} |
+	| Cstpro - ${staticCompanyName} |''');
+
+		LocalFile.ZendeskOrganizationAPI._tearDownOrganizationsByExternalIdList(organizationExternalIds = ${staticOrganizationExternalIdList});
+
+		LocalFile.ZendeskUserAPI._tearDownUserById(userId = ${staticDefaultUserId1});
+
+		LocalFile.ZendeskUserAPI._tearDownUserById(userId = ${staticDefaultUserId2});
+	}
+
+	test DownloadCommerceactivationkeyoncustomer {
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Account Field and Value | liferayVersion                       | DXP 7.2 |
+	| Code                    | CSTPROPROCST                         |         |
+	| Contact Email Address   | lic.koroneiki1@lrcustomer.com.broken |         |
+	| Description             | Test osb account on koroneiki        |         |
+	| Fax Number              | 555-555-1234                         |         |
+	| Name                    | Procst - ${staticProjectName}        |         |
+	| Phone Number            | 555-555-5678                         |         |
+	| Profile Email Address   | lic.koroneiki1@lrcustomer.com.broken |         |
+	| Region                  | United States                        |         |
+	| Status                  | Active                               |         |
+	| Tier                    | T4                                   |         |
+	| Website                 | www.koroneikicorporation.com         |         |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Procst - ${staticProjectName}",
+			contactEmailAddress = ${staticEmailValue1},
+			table = '''| Support Administrator |''');
+
+		LocalFile.Okta._loginToDevDomain(
+			userEmailAddress = ${staticEmailValue1},
+			userPassword = ${staticOktaUserPassword});
+
+		LocalFile.Okta._getOktaSessionIdDevPage();
+
+		LocalFile.KoroneikiAccountAPI._generateAccountKey(accountName = "Procst - ${staticProjectName}");
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Procst - ${staticProjectName}",
+			productName = "Commerce Subscription Development",
+			table = '''| End Date                | ${staticEndDate}         |   |
+	| Original End Date       | ${staticOriginalEndDate} |   |
+	| Perpetual               | false                    |   |
+	| Product Field and Value | sizing                   | 1 |
+	| Product Field and Value | licenses                 | 1 |
+	| Product Field and Value | version                  | 7 |
+	| Quantity                | 1                        |   |
+	| Start Date              | ${staticStartDate}       |   |
+	| Status                  | Approved                 |   |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Procst - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._generateProductPurchaseId(
+			accountName = "Procst - ${staticProjectName}",
+			productName = "Commerce Subscription Development");
+
+		LocalFile.KoroneikiProductPurchaseAPI._generateProductPurchaseKey(
+			accountName = "Procst - ${staticProjectName}",
+			productName = "Commerce Subscription Development");
+
+		LocalFile.ProvisioningLicenseAPI.createLicenseViaSessionId(
+			accountName = "Procst - ${staticProjectName}",
+			productName = "Commerce Subscription Development",
+			table = '''| Name               | Procst - ${staticProjectName} License1 Name        |
+	| Description        | Procst - ${staticProjectName} License1 Description |
+	| Active             | true                                               |
+	| Expiration Date    | ${staticEndDate}                                   |
+	| License Entry Type | developer                                          |
+	| Max Cluster Nodes  | 0                                                  |
+	| Product Version    | 7.2                                                |
+	| Start Date         | ${staticStartDate}                                 |''');
+
+		LocalFile.ProvisioningLicenseAPI._viewLicense(
+			accountName = "Procst - ${staticProjectName}",
+			licenseName = "Procst - ${staticProjectName} License1 Name",
+			table = '''| Name                  | Procst - ${staticProjectName} License1 Name        |
+	| Complimentary         | false                                              |
+	| Description           | Procst - ${staticProjectName} License1 Description |
+	| Host Name             | localhost                                          |
+	| IP Addresses          | 123.45.67.89                                       |
+	| MAC Addresses         | 0A-1B-2C-3D-4E-5F                                  |
+	| Instance Size         | 1                                                  |
+	| Maximum Cluster Nodes | 0                                                  |
+	| Product Name          | Commerce Subscription Development                  |''');
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer");
+
+		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+
+		LocalFile.JSONOkta.viewOktaUserGroupMembership(
+			groupName = "Customer",
+			userEmailAddress = ${staticEmailValue1});
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Procst - ${staticProjectName}");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Procst - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.clickSyncToCustomerPortalButton();
+
+		LocalFile.Okta.logoutOfDevDomain();
+
+		LocalFile.CustomerLogin.loginToCustomer(
+			userEmailAddress = ${staticEmailValue1},
+			userPassword = ${staticOktaUserPassword});
+
+		LocalFile.CustomerProjects.clickCustomerProject(projectName = "Procst - ${staticProjectName}");
+
+		LocalFile.CustomerProjects._clickStartProjectSetup();
+
+		LocalFile.CustomerProjects._clickSkipInviteTeamMember();
+
+		LocalFile.CustomerProjectNavigation.chooseSubscriptionAtActivationTab(subscription = "Commerce");
+
+		LocalFile.CustomerProjectActivationKeys.populateActivationKeyDownloadDropdown(table = '''| Subscription      | Development                             |
+	| Subscription Term | staticFullStartDate - staticFullEndDate |''');
+	}
+
+	test ViewDXPProductionlicenseoncustomer {
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Account Field and Value | liferayVersion                       | DXP 7.4 |
+	| Code                    | CSTPROPROCST                         |         |
+	| Contact Email Address   | lic.koroneiki1@lrcustomer.com.broken |         |
+	| Description             | Test osb account on koroneiki        |         |
+	| Fax Number              | 555-555-1234                         |         |
+	| Name                    | Procst - ${staticProjectName}        |         |
+	| Phone Number            | 555-555-5678                         |         |
+	| Profile Email Address   | lic.koroneiki1@lrcustomer.com.broken |         |
+	| Region                  | United States                        |         |
+	| Status                  | Active                               |         |
+	| Tier                    | T4                                   |         |
+	| Website                 | www.koroneikicorporation.com         |         |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Procst - ${staticProjectName}",
+			contactEmailAddress = ${staticEmailValue1},
+			table = '''| Support Administrator |''');
+
+		LocalFile.Okta._loginToDevDomain(
+			userEmailAddress = ${staticEmailValue1},
+			userPassword = ${staticOktaUserPassword});
+
+		LocalFile.Okta._getOktaSessionIdDevPage();
+
+		LocalFile.KoroneikiAccountAPI._generateAccountKey(accountName = "Procst - ${staticProjectName}");
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Procst - ${staticProjectName}",
+			productName = "DXP Production",
+			table = '''| End Date                | ${staticEndDate}         |   |
+	| Original End Date       | ${staticOriginalEndDate} |   |
+	| Perpetual               | false                    |   |
+	| Product Field and Value | sizing                   | 1 |
+	| Product Field and Value | licenses                 | 1 |
+	| Product Field and Value | version                  | 7 |
+	| Quantity                | 1                        |   |
+	| Start Date              | ${staticStartDate}       |   |
+	| Status                  | Approved                 |   |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Procst - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._generateProductPurchaseId(
+			accountName = "Procst - ${staticProjectName}",
+			productName = "DXP Production");
+
+		LocalFile.KoroneikiProductPurchaseAPI._generateProductPurchaseKey(
+			accountName = "Procst - ${staticProjectName}",
+			productName = "DXP Production");
+
+		LocalFile.ProvisioningLicenseAPI.createLicenseViaSessionId(
+			accountName = "Procst - ${staticProjectName}",
+			productName = "DXP Production",
+			table = '''| Name               | Procst - ${staticProjectName} License1 Name        |
+	| Description        | Procst - ${staticProjectName} License1 Description |
+	| Active             | true                                               |
+	| Expiration Date    | ${staticEndDate}                                   |
+	| License Entry Type | production                                         |
+	| Max Cluster Nodes  | 0                                                  |
+	| Product Version    | 7.4                                                |
+	| Start Date         | ${staticStartDate}                                 |''');
+
+		LocalFile.ProvisioningLicenseAPI._viewLicense(
+			accountName = "Procst - ${staticProjectName}",
+			licenseName = "Procst - ${staticProjectName} License1 Name",
+			table = '''| Name                  | Procst - ${staticProjectName} License1 Name        |
+	| Complimentary         | false                                              |
+	| Description           | Procst - ${staticProjectName} License1 Description |
+	| Host Name             | localhost                                          |
+	| IP Addresses          | 123.45.67.89                                       |
+	| MAC Addresses         | 0A-1B-2C-3D-4E-5F                                  |
+	| Instance Size         | 1                                                  |
+	| Maximum Cluster Nodes | 0                                                  |
+	| Product Name          | DXP Production                                     |''');
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer");
+
+		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+
+		LocalFile.JSONOkta.viewOktaUserGroupMembership(
+			groupName = "Customer",
+			userEmailAddress = ${staticEmailValue1});
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Procst - ${staticProjectName}");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Procst - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.clickSyncToCustomerPortalButton();
+
+		LocalFile.Okta.logoutOfDevDomain();
+
+		LocalFile.CustomerLogin.loginToCustomer(
+			userEmailAddress = ${staticEmailValue1},
+			userPassword = ${staticOktaUserPassword});
+
+		LocalFile.CustomerProjects.clickCustomerProject(projectName = "Procst - ${staticProjectName}");
+
+		LocalFile.CustomerProjects._clickStartProjectSetup();
+
+		LocalFile.CustomerProjects._clickSkipInviteTeamMember();
+
+		LocalFile.CustomerProjectNavigation.chooseSubscriptionAtActivationTab(subscription = "DXP");
+
+		LocalFile.CustomerProjectActivationKeys.seachActivationKey(keyword = "Procst - ${staticProjectName}");
+
+		LocalFile.CustomerProjectActivationKeys.viewActivatonKey(
+			key_licenseKeyword = "Procst - ${staticProjectName} License1 Name",
+			table = '''| Environment Name         | Procst - ${staticProjectName} License1 Name        |
+	| Description              | Procst - ${staticProjectName} License1 Description |
+	| Key Type                 | On-Premise                                         |
+	| Host Name / Cluster Size | localhost                                          |
+	| Environment Type         | DXP Production                                     |
+	| Status                   | Activated                                          |''');
+	}
+
+	test ViewPortalProductionlicenseoncustomer {
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Account Field and Value | liferayVersion                       | DXP 7.4 |
+	| Code                    | CSTPROPROCST                         |         |
+	| Contact Email Address   | lic.koroneiki1@lrcustomer.com.broken |         |
+	| Description             | Test osb account on koroneiki        |         |
+	| Fax Number              | 555-555-1234                         |         |
+	| Name                    | Procst - ${staticProjectName}        |         |
+	| Phone Number            | 555-555-5678                         |         |
+	| Profile Email Address   | lic.koroneiki1@lrcustomer.com.broken |         |
+	| Region                  | United States                        |         |
+	| Status                  | Active                               |         |
+	| Tier                    | T4                                   |         |
+	| Website                 | www.koroneikicorporation.com         |         |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Procst - ${staticProjectName}",
+			contactEmailAddress = ${staticEmailValue1},
+			table = '''| Support Administrator |''');
+
+		LocalFile.Okta._loginToDevDomain(
+			userEmailAddress = ${staticEmailValue1},
+			userPassword = ${staticOktaUserPassword});
+
+		LocalFile.Okta._getOktaSessionIdDevPage();
+
+		LocalFile.KoroneikiAccountAPI._generateAccountKey(accountName = "Procst - ${staticProjectName}");
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Procst - ${staticProjectName}",
+			productName = "Portal Production",
+			table = '''| End Date                | ${staticEndDate}         |   |
+	| Original End Date       | ${staticOriginalEndDate} |   |
+	| Perpetual               | false                    |   |
+	| Product Field and Value | sizing                   | 1 |
+	| Product Field and Value | licenses                 | 1 |
+	| Product Field and Value | version                  | 7 |
+	| Quantity                | 1                        |   |
+	| Start Date              | ${staticStartDate}       |   |
+	| Status                  | Approved                 |   |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Procst - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._generateProductPurchaseId(
+			accountName = "Procst - ${staticProjectName}",
+			productName = "Portal Production");
+
+		LocalFile.KoroneikiProductPurchaseAPI._generateProductPurchaseKey(
+			accountName = "Procst - ${staticProjectName}",
+			productName = "Portal Production");
+
+		LocalFile.ProvisioningLicenseAPI.createLicenseViaSessionId(
+			accountName = "Procst - ${staticProjectName}",
+			productName = "Portal Production",
+			table = '''| Name               | Procst - ${staticProjectName} License1 Name        |
+	| Description        | Procst - ${staticProjectName} License1 Description |
+	| Active             | true                                               |
+	| Expiration Date    | ${staticEndDate}                                   |
+	| License Entry Type | production                                         |
+	| Max Cluster Nodes  | 0                                                  |
+	| Product Version    | 7.4                                                |
+	| Start Date         | ${staticStartDate}                                 |''');
+
+		LocalFile.ProvisioningLicenseAPI._viewLicense(
+			accountName = "Procst - ${staticProjectName}",
+			licenseName = "Procst - ${staticProjectName} License1 Name",
+			table = '''| Name                  | Procst - ${staticProjectName} License1 Name        |
+	| Complimentary         | false                                              |
+	| Description           | Procst - ${staticProjectName} License1 Description |
+	| Host Name             | localhost                                          |
+	| IP Addresses          | 123.45.67.89                                       |
+	| MAC Addresses         | 0A-1B-2C-3D-4E-5F                                  |
+	| Instance Size         | 1                                                  |
+	| Maximum Cluster Nodes | 0                                                  |
+	| Product Name          | Portal Production                                  |''');
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer");
+
+		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+
+		LocalFile.JSONOkta.viewOktaUserGroupMembership(
+			groupName = "Customer",
+			userEmailAddress = ${staticEmailValue1});
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Procst - ${staticProjectName}");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Procst - ${staticProjectName}");
+
+		LocalFile.ProvisioningAccount.clickSyncToCustomerPortalButton();
+
+		LocalFile.Okta.logoutOfDevDomain();
+
+		LocalFile.CustomerLogin.loginToCustomer(
+			userEmailAddress = ${staticEmailValue1},
+			userPassword = ${staticOktaUserPassword});
+
+		LocalFile.CustomerProjects.clickCustomerProject(projectName = "Procst - ${staticProjectName}");
+
+		LocalFile.CustomerProjects._clickStartProjectSetup();
+
+		LocalFile.CustomerProjects._clickSkipInviteTeamMember();
+
+		LocalFile.CustomerProjectNavigation.chooseSubscriptionAtActivationTab(subscription = "Portal");
+
+		LocalFile.CustomerProjectActivationKeys.seachActivationKey(keyword = "Procst - ${staticProjectName}");
+
+		LocalFile.CustomerProjectActivationKeys.viewActivatonKey(
+			key_licenseKeyword = "Procst - ${staticProjectName} License1 Name",
+			table = '''| Environment Name         | Procst - ${staticProjectName} License1 Name        |
+	| Description              | Procst - ${staticProjectName} License1 Description |
+	| Key Type                 | On-Premise                                         |
+	| Host Name / Cluster Size | localhost                                          |
+	| Environment Type         | Portal Production                                  |
+	| Status                   | Activated                                          |''');
+	}
+
+}

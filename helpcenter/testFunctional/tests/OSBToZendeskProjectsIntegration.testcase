@@ -1,0 +1,802 @@
+definition {
+
+	property testray.main.component.name = "Support QA";
+	property type = "zendesk.integration";
+
+	setUp {
+		LocalFile.Passwords.getPasswords();
+
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | osb.customer1                       |
+	| Email Address | osb.customer1@lrcustomer.com.broken |
+	| First Name    | OSB                                 |
+	| Last Name     | Customer1                           |''');
+
+		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | osb.customer2                       |
+	| Email Address | osb.customer2@lrcustomer.com.broken |
+	| First Name    | OSB                                 |
+	| Last Name     | Customer2                           |''');
+
+		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | osb.customer3                       |
+	| Email Address | osb.customer3@lrcustomer.com.broken |
+	| First Name    | OSB                                 |
+	| Last Name     | Customer3                           |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code     | OSBZENOSBZEN                  | |
+	| Language | English                       | |
+	| Name     | Osbzen - ${staticProjectName} | |
+	| Region   | United States                 | |
+	| Status   | Active                        | |
+	| Tier     | T1                            | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountPostalAddress(
+			accountName = "Osbzen - ${staticProjectName}",
+			table = '''| Country               | United States   |
+	| Locality              | Diamond Bar     |
+	| Region                | California      |
+	| Type                  | Business        |
+	| Mailing               | True            |
+	| Postal Code           | 91765           |
+	| Primary               | True            |
+	| Street Address Line 1 | 123 Main Street |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code   | OSBDSKOSBDSK                  | |
+	| Name   | Osbdsk - ${staticProjectName} | |
+	| Region | United States                 | |
+	| Status | Active                        | |
+	| Tier   | T1                            | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountPostalAddress(
+			accountName = "Osbdsk - ${staticProjectName}",
+			table = '''| Country               | United States   |
+	| Locality              | Los Angeles     |
+	| Region                | California      |
+	| Type                  | Business        |
+	| Mailing               | True            |
+	| Postal Code           | 90013           |
+	| Primary               | True            |
+	| Street Address Line 1 | 456 Main Street |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Osbzen - ${staticProjectName}",
+			contactEmailAddress = "osb.customer1@lrcustomer.com.broken",
+			table = '''| Support Requester |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Osbdsk - ${staticProjectName}",
+			contactEmailAddress = "osb.customer1@lrcustomer.com.broken",
+			table = '''| Support Requester |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Osbzen - ${staticProjectName}",
+			contactEmailAddress = "osb.customer2@lrcustomer.com.broken",
+			table = '''| Support Requester |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Osbdsk - ${staticProjectName}",
+			contactEmailAddress = "osb.customer3@lrcustomer.com.broken",
+			table = '''| Support Requester |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Osbzen - ${staticProjectName}",
+			productName = "Portal Production",
+			table = '''| End Date                | ${staticEndDate}         |   |
+	| Original End Date       | ${staticOriginalEndDate} |   |
+	| Perpetual               | false                    |   |
+	| Product Field and Value | sizing                   | 1 |
+	| Product Field and Value | licenses                 | 1 |
+	| Product Field and Value | version                  | 6 |
+	| Quantity                | 1                        |   |
+	| Start Date              | ${staticStartDate}       |   |
+	| Status                  | Approved                 |   |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Osbzen - ${staticProjectName}",
+			productName = "Gold Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Osbdsk - ${staticProjectName}",
+			productName = "Portal Production",
+			table = '''| End Date                | ${staticEndDate}         |   |
+	| Original End Date       | ${staticOriginalEndDate} |   |
+	| Perpetual               | false                    |   |
+	| Product Field and Value | sizing                   | 1 |
+	| Product Field and Value | licenses                 | 1 |
+	| Product Field and Value | version                  | 6 |
+	| Quantity                | 1                        |   |
+	| Start Date              | ${staticStartDate}       |   |
+	| Status                  | Approved                 |   |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Osbdsk - ${staticProjectName}",
+			productName = "Gold Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Gold Subscription");
+
+		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+
+		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "OSBZENOSBZEN");
+
+		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "OSBDSKOSBDSK");
+
+		LocalFile.ZendeskOrganizationAPI._viewOrganizationSyncFromOsb(organizationName = "Osbzen - ${staticProjectName}");
+
+		LocalFile.ZendeskOrganizationAPI._viewOrganizationSyncFromOsb(organizationName = "Osbdsk - ${staticProjectName}");
+
+		LocalFile.ZendeskUserAPI._viewUserSyncFromOsb(userEmailAddress = "osb.customer1@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserSyncFromOsb(userEmailAddress = "osb.customer2@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserSyncFromOsb(userEmailAddress = "osb.customer3@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserOrganizationIdSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.customer1@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserOrganizationIdSync(
+			organizationName = "Osbdsk - ${staticProjectName}",
+			userEmailAddress = "osb.customer1@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserOrganizationIdSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.customer2@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserOrganizationIdSync(
+			organizationName = "Osbdsk - ${staticProjectName}",
+			userEmailAddress = "osb.customer3@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserOrganizationSubscriptionSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.customer1@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserOrganizationSubscriptionSync(
+			organizationName = "Osbdsk - ${staticProjectName}",
+			userEmailAddress = "osb.customer1@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserOrganizationSubscriptionSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.customer2@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserOrganizationSubscriptionSync(
+			organizationName = "Osbdsk - ${staticProjectName}",
+			userEmailAddress = "osb.customer3@lrcustomer.com.broken");
+	}
+
+	tearDown {
+		LocalFile.ZendeskUserAPI._getDefaultUserId(organizationName = "Osbzen - ${staticProjectName}");
+
+		LocalFile.ZendeskUserAPI._renameFirstDefaultUserIdVariable();
+
+		LocalFile.ZendeskUserAPI._getDefaultUserId(organizationName = "Osbdsk - ${staticProjectName}");
+
+		LocalFile.ZendeskUserAPI._renameSecondDefaultUserIdVariable();
+
+		LocalFile.ZendeskTicketAPI._tearDownTicketByIds(ticketIdList = ${staticRequestIdList});
+
+		LocalFile.OSBAdminProject.tearDownProjects(table = '''| OSBDSKOSBDSK |
+	| OSBZENOSBZEN |''');
+
+		LocalFile.KoroneikiAccountAPI._tearDownAccounts(table = '''| Osbdsk - ${staticProjectName} |
+	| Osbzen - ${staticProjectName} |''');
+
+		LocalFile.KoroneikiAccountAPI._tearDownAccountsViaAccountFieldNameAndValue(
+			fieldName = "Code",
+			table = '''| OSBDSKOSBDSK |
+	| OSBZENOSBZEN |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Gold Subscription");
+
+		LocalFile.JSONUser.tearDownUsers(table = '''| osb.customer1@lrcustomer.com.broken |
+	| osb.customer2@lrcustomer.com.broken |
+	| osb.customer3@lrcustomer.com.broken |''');
+
+		LocalFile.JSONUser.tearDownUsersViaSupport(table = '''| osb.customer1@lrcustomer.com.broken |
+	| osb.customer2@lrcustomer.com.broken |
+	| osb.customer3@lrcustomer.com.broken |''');
+
+		LocalFile.JSONUser.tearDownUsersViaKoroneiki(table = '''| osb.customer1@lrcustomer.com.broken |
+	| osb.customer2@lrcustomer.com.broken |
+	| osb.customer3@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiContactAPI._tearDownContacts(table = '''| osb.customer1@lrcustomer.com.broken |
+	| osb.customer2@lrcustomer.com.broken |
+	| osb.customer3@lrcustomer.com.broken |''');
+
+		LocalFile.JSONOkta.tearDownUsers(table = '''| osb.customer1@lrcustomer.com.broken |
+	| osb.customer2@lrcustomer.com.broken |
+	| osb.customer3@lrcustomer.com.broken |''');
+
+		LocalFile.ZendeskUserAPI._getMultipleUserIdsByEmailAddress(table = '''| osb.customer1@lrcustomer.com.broken |
+	| osb.customer2@lrcustomer.com.broken |
+	| osb.customer3@lrcustomer.com.broken |''');
+
+		LocalFile.ZendeskUserAPI._tearDownUsersByIdList(userIds = ${staticUserIdList});
+
+		LocalFile.ZendeskOrganizationAPI._getMultipleOrganizationExternalIdsByOrganizationNameIfStillPresent(table = '''| Osbdsk - ${staticProjectName} |
+	| Osbzen - ${staticProjectName} |''');
+
+		LocalFile.ZendeskOrganizationAPI._tearDownOrganizationsByExternalIdList(organizationExternalIds = ${staticOrganizationExternalIdList});
+
+		LocalFile.ZendeskUserAPI._tearDownUserById(userId = ${staticDefaultUserId1});
+
+		LocalFile.ZendeskUserAPI._tearDownUserById(userId = ${staticDefaultUserId2});
+	}
+
+	test Viewticketafterrequesteronmultipleprojectsisremovedfromprojectwithnoticket {
+		LocalFile.ZendeskRequestAPI._createRequest(
+			requesterEmail = "osb.customer1@lrcustomer.com.broken",
+			table = '''| Product           | prd_liferay_portal_6_2                           |
+	| Component         | activation_key_project_administration            |
+	| System Status     | production_functioning_with_limited_capabilities |
+	| Subject           | Request Subject                                  |
+	| Description       | Request Description                              |
+	| Organization Name | Osbzen - ${staticProjectName}                    |''');
+
+		LocalFile.ZendeskTicketAPI._viewTicketStatusSync(
+			status = "new",
+			ticketId = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewTicketRequesterSync(
+			requesterEmailAddress = "osb.customer1@lrcustomer.com.broken",
+			ticketId = ${staticRequestIdList});
+
+		LocalFile.KoroneikiAccountAPI._removeCustomerContacts(
+			accountName = "Osbdsk - ${staticProjectName}",
+			table = '''| osb.customer1@lrcustomer.com.broken |''');
+
+		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+
+		LocalFile.ZendeskTicketAPI._viewTicketStatusSync(
+			status = "new",
+			ticketId = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewTicketRequesterSync(
+			requesterEmailAddress = "osb.customer1@lrcustomer.com.broken",
+			ticketId = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewTicketOrganization(
+			organizationName = "Osbzen - ${staticProjectName}",
+			ticketSubject = "Request Subject");
+	}
+
+	test Viewticketafterrequesteronmultipleprojectsisremovedfromprojectwithticket {
+		LocalFile.ZendeskRequestAPI._createRequest(
+			requesterEmail = "osb.customer1@lrcustomer.com.broken",
+			table = '''| Product           | prd_liferay_portal_6_2                           |
+	| Component         | activation_key_project_administration            |
+	| System Status     | production_functioning_with_limited_capabilities |
+	| Subject           | Request Subject                                  |
+	| Description       | Request Description                              |
+	| Organization Name | Osbzen - ${staticProjectName}                    |''');
+
+		LocalFile.ZendeskTicketAPI._viewTicketStatusSync(
+			status = "new",
+			ticketId = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewTicketRequesterSync(
+			requesterEmailAddress = "osb.customer1@lrcustomer.com.broken",
+			ticketId = ${staticRequestIdList});
+
+		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+
+		LocalFile.KoroneikiAccountAPI._removeCustomerContacts(
+			accountName = "Osbzen - ${staticProjectName}",
+			table = '''| osb.customer1@lrcustomer.com.broken |''');
+
+		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+
+		LocalFile.ZendeskTicketAPI._viewTicketStatusSync(
+			status = "new",
+			ticketId = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewTicketRequesterSync(
+			requesterEmailAddress = "osb.customer2@lrcustomer.com.broken",
+			ticketId = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewTicketOrganization(
+			organizationName = "Osbzen - ${staticProjectName}",
+			ticketSubject = "Request Subject");
+	}
+
+	test Viewticketreassignedtouserwithadifferentdefaultorganization {
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Osbzen - ${staticProjectName}",
+			contactEmailAddress = "osb.customer3@lrcustomer.com.broken",
+			table = '''| Support Requester |''');
+
+		LocalFile.KoroneikiAccountAPI._removeCustomerContacts(
+			accountName = "Osbzen - ${staticProjectName}",
+			table = '''| osb.customer2@lrcustomer.com.broken |''');
+
+		LocalFile.ZendeskRequestAPI._createRequest(
+			requesterEmail = "osb.customer1@lrcustomer.com.broken",
+			table = '''| Product           | prd_liferay_portal_6_2                           |
+	| Component         | activation_key_project_administration            |
+	| System Status     | production_functioning_with_limited_capabilities |
+	| Subject           | Request Subject                                  |
+	| Description       | Request Description                              |
+	| Organization Name | Osbzen - ${staticProjectName}                    |''');
+
+		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+
+		LocalFile.ZendeskTicketAPI._viewTicketStatusSync(
+			status = "new",
+			ticketId = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewTicketRequesterSync(
+			requesterEmailAddress = "osb.customer1@lrcustomer.com.broken",
+			ticketId = ${staticRequestIdList});
+
+		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+
+		LocalFile.KoroneikiAccountAPI._removeCustomerContacts(
+			accountName = "Osbzen - ${staticProjectName}",
+			table = '''| osb.customer1@lrcustomer.com.broken |''');
+
+		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+
+		LocalFile.ZendeskTicketAPI._viewTicketStatusSync(
+			status = "new",
+			ticketId = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewTicketRequesterSync(
+			requesterEmailAddress = "osb.customer3@lrcustomer.com.broken",
+			ticketId = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewTicketOrganization(
+			organizationName = "Osbzen - ${staticProjectName}",
+			ticketSubject = "Request Subject");
+	}
+
+	test Viewusertagsaftermultipleprojectexpirations {
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticPastStartAndEndDate();
+
+		LocalFile.KoroneikiProductPurchaseAPI._updateProductPurchase(
+			accountName = "Osbzen - ${staticProjectName}",
+			productName = "Portal Production",
+			table = '''| End Date                | ${staticPastEndDate}         | |
+	| Original End Date       | ${staticPastOriginalEndDate} | |
+	| Perpetual               | false                        | |
+	| Start Date              | ${staticPastStartDate}       | |
+	| Status                  | Approved                     | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._updateProductPurchase(
+			accountName = "Osbzen - ${staticProjectName}",
+			productName = "Gold Subscription",
+			table = '''| End Date                | ${staticPastEndDate}         | |
+	| Original End Date       | ${staticPastOriginalEndDate} | |
+	| Perpetual               | false                        | |
+	| Start Date              | ${staticPastStartDate}       | |
+	| Status                  | Approved                     | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Gold Subscription");
+
+		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+
+		LocalFile.ZendeskUserAPI._viewNoUserOrganizationIdSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.customer1@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserOrganizationIdSync(
+			organizationName = "Osbdsk - ${staticProjectName}",
+			userEmailAddress = "osb.customer1@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewNoUserOrganizationIdSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.customer2@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserOrganizationIdSync(
+			organizationName = "Osbdsk - ${staticProjectName}",
+			userEmailAddress = "osb.customer3@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewNoUserOrganizationSubscriptionSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.customer1@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserOrganizationSubscriptionSync(
+			organizationName = "Osbdsk - ${staticProjectName}",
+			userEmailAddress = "osb.customer1@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewNoUserOrganizationSubscriptionSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.customer2@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserOrganizationSubscriptionSync(
+			organizationName = "Osbdsk - ${staticProjectName}",
+			userEmailAddress = "osb.customer3@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserTagSync(
+			tag = "osb_kb",
+			userEmailAddress = "osb.customer1@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewNoUserTagSync(
+			tag = "osb_kb",
+			userEmailAddress = "osb.customer2@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserTagSync(
+			tag = "osb_kb",
+			userEmailAddress = "osb.customer3@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserTagSync(
+			tag = "osb_customer",
+			userEmailAddress = "osb.customer1@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewNoUserTagSync(
+			tag = "osb_customer",
+			userEmailAddress = "osb.customer2@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserTagSync(
+			tag = "osb_customer",
+			userEmailAddress = "osb.customer3@lrcustomer.com.broken");
+
+		LocalFile.KoroneikiProductPurchaseAPI._updateProductPurchase(
+			accountName = "Osbdsk - ${staticProjectName}",
+			productName = "Portal Production",
+			table = '''| End Date                | ${staticPastEndDate}         | |
+	| Original End Date       | ${staticPastOriginalEndDate} | |
+	| Perpetual               | false                        | |
+	| Start Date              | ${staticPastStartDate}       | |
+	| Status                  | Approved                     | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._updateProductPurchase(
+			accountName = "Osbdsk - ${staticProjectName}",
+			productName = "Gold Subscription",
+			table = '''| End Date                | ${staticPastEndDate}         | |
+	| Original End Date       | ${staticPastOriginalEndDate} | |
+	| Perpetual               | false                        | |
+	| Start Date              | ${staticPastStartDate}       | |
+	| Status                  | Approved                     | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Gold Subscription");
+
+		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+
+		LocalFile.ZendeskUserAPI._viewNoUserOrganizationIdSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.customer1@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewNoUserOrganizationIdSync(
+			organizationName = "Osbdsk - ${staticProjectName}",
+			userEmailAddress = "osb.customer1@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewNoUserOrganizationIdSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.customer2@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewNoUserOrganizationIdSync(
+			organizationName = "Osbdsk - ${staticProjectName}",
+			userEmailAddress = "osb.customer3@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewNoUserOrganizationSubscriptionSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.customer1@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewNoUserOrganizationSubscriptionSync(
+			organizationName = "Osbdsk - ${staticProjectName}",
+			userEmailAddress = "osb.customer1@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewNoUserOrganizationSubscriptionSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.customer2@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewNoUserOrganizationSubscriptionSync(
+			organizationName = "Osbdsk - ${staticProjectName}",
+			userEmailAddress = "osb.customer3@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewNoUserTagSync(
+			tag = "osb_kb",
+			userEmailAddress = "osb.customer1@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewNoUserTagSync(
+			tag = "osb_kb",
+			userEmailAddress = "osb.customer2@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewNoUserTagSync(
+			tag = "osb_kb",
+			userEmailAddress = "osb.customer3@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewNoUserTagSync(
+			tag = "osb_customer",
+			userEmailAddress = "osb.customer1@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewNoUserTagSync(
+			tag = "osb_customer",
+			userEmailAddress = "osb.customer2@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewNoUserTagSync(
+			tag = "osb_customer",
+			userEmailAddress = "osb.customer3@lrcustomer.com.broken");
+	}
+
+	test Viewusertagsaftermultipleroleupdates {
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Osbzen - ${staticProjectName}",
+			contactEmailAddress = "osb.customer1@lrcustomer.com.broken",
+			table = '''| Support User |''');
+
+		LocalFile.KoroneikiAccountAPI._removeContactRolesFromContact(
+			accountName = "Osbzen - ${staticProjectName}",
+			contactEmailAddress = "osb.customer1@lrcustomer.com.broken",
+			table = '''| Support Requester |''');
+
+		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+
+		LocalFile.ZendeskUserAPI._viewUserOrganizationIdSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.customer1@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserOrganizationIdSync(
+			organizationName = "Osbdsk - ${staticProjectName}",
+			userEmailAddress = "osb.customer1@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserOrganizationIdSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.customer2@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserOrganizationIdSync(
+			organizationName = "Osbdsk - ${staticProjectName}",
+			userEmailAddress = "osb.customer3@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserOrganizationSubscriptionSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.customer1@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserOrganizationSubscriptionSync(
+			organizationName = "Osbdsk - ${staticProjectName}",
+			userEmailAddress = "osb.customer1@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserOrganizationSubscriptionSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.customer2@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserOrganizationSubscriptionSync(
+			organizationName = "Osbdsk - ${staticProjectName}",
+			userEmailAddress = "osb.customer3@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserWatcherTagSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.customer1@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewNoUserWatcherTagSync(
+			organizationName = "Osbdsk - ${staticProjectName}",
+			userEmailAddress = "osb.customer1@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserTagSync(
+			tag = "osb_kb",
+			userEmailAddress = "osb.customer1@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserTagSync(
+			tag = "osb_kb",
+			userEmailAddress = "osb.customer2@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserTagSync(
+			tag = "osb_kb",
+			userEmailAddress = "osb.customer3@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserTagSync(
+			tag = "osb_customer",
+			userEmailAddress = "osb.customer1@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserTagSync(
+			tag = "osb_customer",
+			userEmailAddress = "osb.customer2@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserTagSync(
+			tag = "osb_customer",
+			userEmailAddress = "osb.customer3@lrcustomer.com.broken");
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Osbdsk - ${staticProjectName}",
+			contactEmailAddress = "osb.customer1@lrcustomer.com.broken",
+			table = '''| Support User |''');
+
+		LocalFile.KoroneikiAccountAPI._removeContactRolesFromContact(
+			accountName = "Osbdsk - ${staticProjectName}",
+			contactEmailAddress = "osb.customer1@lrcustomer.com.broken",
+			table = '''| Support Requester |''');
+
+		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+
+		LocalFile.ZendeskUserAPI._viewUserOrganizationIdSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.customer1@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserOrganizationIdSync(
+			organizationName = "Osbdsk - ${staticProjectName}",
+			userEmailAddress = "osb.customer1@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserOrganizationIdSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.customer2@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserOrganizationIdSync(
+			organizationName = "Osbdsk - ${staticProjectName}",
+			userEmailAddress = "osb.customer3@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserOrganizationSubscriptionSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.customer1@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserOrganizationSubscriptionSync(
+			organizationName = "Osbdsk - ${staticProjectName}",
+			userEmailAddress = "osb.customer1@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserOrganizationSubscriptionSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.customer2@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserOrganizationSubscriptionSync(
+			organizationName = "Osbdsk - ${staticProjectName}",
+			userEmailAddress = "osb.customer3@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserWatcherTagSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.customer1@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserWatcherTagSync(
+			organizationName = "Osbdsk - ${staticProjectName}",
+			userEmailAddress = "osb.customer1@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserTagSync(
+			tag = "osb_kb",
+			userEmailAddress = "osb.customer1@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserTagSync(
+			tag = "osb_kb",
+			userEmailAddress = "osb.customer2@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserTagSync(
+			tag = "osb_kb",
+			userEmailAddress = "osb.customer3@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewNoUserTagSync(
+			tag = "osb_customer",
+			userEmailAddress = "osb.customer1@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserTagSync(
+			tag = "osb_customer",
+			userEmailAddress = "osb.customer2@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserTagSync(
+			tag = "osb_customer",
+			userEmailAddress = "osb.customer3@lrcustomer.com.broken");
+	}
+
+	test Viewusertagsafteruserremovalfrommultipleprojects {
+		LocalFile.KoroneikiAccountAPI._removeCustomerContacts(
+			accountName = "Osbzen - ${staticProjectName}",
+			table = '''| osb.customer1@lrcustomer.com.broken |''');
+
+		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+
+		LocalFile.ZendeskUserAPI._viewNoUserOrganizationIdSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.customer1@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserOrganizationIdSync(
+			organizationName = "Osbdsk - ${staticProjectName}",
+			userEmailAddress = "osb.customer1@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserOrganizationIdSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.customer2@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserOrganizationIdSync(
+			organizationName = "Osbdsk - ${staticProjectName}",
+			userEmailAddress = "osb.customer3@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserOrganizationSubscriptionSync(
+			organizationName = "Osbdsk - ${staticProjectName}",
+			userEmailAddress = "osb.customer1@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserOrganizationSubscriptionSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.customer2@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserOrganizationSubscriptionSync(
+			organizationName = "Osbdsk - ${staticProjectName}",
+			userEmailAddress = "osb.customer3@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserTagSync(
+			tag = "osb_kb",
+			userEmailAddress = "osb.customer1@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserTagSync(
+			tag = "osb_kb",
+			userEmailAddress = "osb.customer2@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserTagSync(
+			tag = "osb_kb",
+			userEmailAddress = "osb.customer3@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserTagSync(
+			tag = "osb_customer",
+			userEmailAddress = "osb.customer1@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserTagSync(
+			tag = "osb_customer",
+			userEmailAddress = "osb.customer2@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserTagSync(
+			tag = "osb_customer",
+			userEmailAddress = "osb.customer3@lrcustomer.com.broken");
+
+		LocalFile.KoroneikiAccountAPI._removeCustomerContacts(
+			accountName = "Osbdsk - ${staticProjectName}",
+			table = '''| osb.customer1@lrcustomer.com.broken |''');
+
+		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+
+		LocalFile.ZendeskUserAPI._viewNoUserOrganizationIdSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.customer1@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewNoUserOrganizationIdSync(
+			organizationName = "Osbdsk - ${staticProjectName}",
+			userEmailAddress = "osb.customer1@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserOrganizationIdSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.customer2@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserOrganizationIdSync(
+			organizationName = "Osbdsk - ${staticProjectName}",
+			userEmailAddress = "osb.customer3@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewNoUserOrganizationSubscriptionSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.customer1@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewNoUserOrganizationSubscriptionSync(
+			organizationName = "Osbdsk - ${staticProjectName}",
+			userEmailAddress = "osb.customer1@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserOrganizationSubscriptionSync(
+			organizationName = "Osbzen - ${staticProjectName}",
+			userEmailAddress = "osb.customer2@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserOrganizationSubscriptionSync(
+			organizationName = "Osbdsk - ${staticProjectName}",
+			userEmailAddress = "osb.customer3@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewNoUserTagSync(
+			tag = "osb_kb",
+			userEmailAddress = "osb.customer1@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserTagSync(
+			tag = "osb_kb",
+			userEmailAddress = "osb.customer2@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserTagSync(
+			tag = "osb_kb",
+			userEmailAddress = "osb.customer3@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewNoUserTagSync(
+			tag = "osb_customer",
+			userEmailAddress = "osb.customer1@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserTagSync(
+			tag = "osb_customer",
+			userEmailAddress = "osb.customer2@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserTagSync(
+			tag = "osb_customer",
+			userEmailAddress = "osb.customer3@lrcustomer.com.broken");
+	}
+
+}

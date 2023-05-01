@@ -1,0 +1,668 @@
+definition {
+
+	property testray.main.component.name = "Support QA";
+	property type = "osb.integration";
+
+	setUp {
+		LocalFile.Passwords.getPasswords();
+	}
+
+	tearDown {
+		LocalFile.ZendeskUserAPI._getDefaultUserId(organizationName = "Korone - ${staticProjectName}");
+
+		LocalFile.ZendeskUserAPI._renameFirstDefaultUserIdVariable();
+
+		LocalFile.ZendeskUserAPI._getDefaultUserId(organizationName = "Oneiki - ${staticProjectName}");
+
+		LocalFile.ZendeskUserAPI._renameSecondDefaultUserIdVariable();
+
+		LocalFile.OSBAdminProject.tearDownProjects(table = '''| KORONEKORONE |
+	| ONEIKIONEIKI |''');
+
+		LocalFile.KoroneikiAccountAPI._tearDownAccounts(table = '''| Korone - ${staticProjectName} |
+	| Oneiki - ${staticProjectName} |''');
+
+		LocalFile.KoroneikiAccountAPI._tearDownAccountsViaAccountFieldNameAndValue(
+			fieldName = "Code",
+			table = '''| KORONEKORONE |
+	| ONEIKIONEIKI |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+
+		LocalFile.KoroneikiContactAPI._tearDownContacts(table = '''| osb.koroneiki1@lrcustomer.com.broken |
+	| osb.koroneiki2@lrcustomer.com.broken |
+	| bso.koroneiki3@lrcustomer.com.broken |
+	| bso.koroneiki4@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiTeamAPI._tearDownTeams(table = '''| OSB Devlopr Team |
+	| OSB Mktng Team   |''');
+
+		LocalFile.ZendeskOrganizationAPI._getMultipleOrganizationExternalIdsByOrganizationNameIfStillPresent(table = '''| Korone - ${staticProjectName} |
+	| Oneiki - ${staticProjectName} |''');
+
+		LocalFile.ZendeskOrganizationAPI._tearDownOrganizationsByExternalIdList(organizationExternalIds = ${staticOrganizationExternalIdList});
+
+		LocalFile.ZendeskUserAPI._tearDownUserById(userId = ${staticDefaultUserId1});
+
+		LocalFile.ZendeskUserAPI._tearDownUserById(userId = ${staticDefaultUserId2});
+	}
+
+	@help.center.acceptance = "true"
+	test Createteamcontacts {
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | KORONEKORONE                         | |
+	| Contact Email Address | osb.koroneiki1@lrcustomer.com.broken | |
+	| Description           | Test osb account on koroneiki        | |
+	| Fax Number            | 555-555-1234                         | |
+	| Name                  | Korone - ${staticProjectName}        | |
+	| Phone Number          | 555-555-5678                         | |
+	| Profile Email Address | osb.koroneiki1@lrcustomer.com.broken | |
+	| Region                | United States                        | |
+	| Status                | Active                               | |
+	| Tier                  | T4                                   | |
+	| Website               | www.koroneikicorporation.com         | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korone - ${staticProjectName}",
+			productName = "DXP Production",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | true                     | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korone - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | true                     | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | osb.koroneiki1@lrcustomer.com.broken |
+	| First Name    | OSB                                  |
+	| Language      | English                              |
+	| Last Name     | Koroneiki1                           |''');
+
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | osb.koroneiki2@lrcustomer.com.broken |
+	| First Name    | OSB                                  |
+	| Language      | English                              |
+	| Last Name     | Koroneiki2                           |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountTeam(
+			accountName = "Korone - ${staticProjectName}",
+			teamName = "OSB Devlopr Team");
+
+		LocalFile.KoroneikiTeamAPI._assignContacts(
+			table = '''| osb.koroneiki1@lrcustomer.com.broken |
+	| osb.koroneiki2@lrcustomer.com.broken |''',
+			teamName = "OSB Devlopr Team");
+
+		LocalFile.OSBAdmin.loginToSupport(
+			userEmailAddress = ${staticSupportAdminEmailAdress},
+			userPassword = ${staticSupportAdminPassword});
+
+		LocalFile.ProjectDetails.gotoProjectDetailsPage();
+
+		LocalFile.ProjectDetails.searchKeyword(keyword = "Korone");
+
+		LocalFile.ProjectDetails.gotoProject(projectName = "Korone - ${staticProjectName}");
+
+		LocalFile.ProjectDetails.gotoHistory();
+
+		LocalFile.ProjectDetails.viewHistoryEntryByThreeKeywords(
+			fieldName = "Contact",
+			keyword1 = "Updated Team",
+			keyword2 = "OSB Devlopr Team Member",
+			keyword3 = "OSB Koroneiki1",
+			table = '''| Updater Name                | Koroneiki QA Service Producer |
+	| Update Summary              | Updated Team                  |
+	| Update Description          | OSB Devlopr Team Member       |
+	| Update Date                 | Today                         |
+	| Update Field Name           | Contact                       |
+	| Update Field Original Value | N/A                           |
+	| Update Field New Value      | OSB Koroneiki1                |''');
+
+		LocalFile.ProjectDetails.viewHistoryEntryByThreeKeywords(
+			fieldName = "Contact",
+			keyword1 = "Updated Team",
+			keyword2 = "OSB Devlopr Team Member",
+			keyword3 = "OSB Koroneiki2",
+			table = '''| Updater Name                | Koroneiki QA Service Producer |
+	| Update Summary              | Updated Team                  |
+	| Update Description          | OSB Devlopr Team Member       |
+	| Update Date                 | Today                         |
+	| Update Field Name           | Contact                       |
+	| Update Field Original Value | N/A                           |
+	| Update Field New Value      | OSB Koroneiki2                |''');
+	}
+
+	test Createteamcontactsexecutedbyagent {
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | KORONEKORONE                         | |
+	| Contact Email Address | osb.koroneiki1@lrcustomer.com.broken | |
+	| Description           | Test osb account on koroneiki        | |
+	| Fax Number            | 555-555-1234                         | |
+	| Name                  | Korone - ${staticProjectName}        | |
+	| Phone Number          | 555-555-5678                         | |
+	| Profile Email Address | osb.koroneiki1@lrcustomer.com.broken | |
+	| Region                | United States                        | |
+	| Status                | Active                               | |
+	| Tier                  | T4                                   | |
+	| Website               | www.koroneikicorporation.com         | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korone - ${staticProjectName}",
+			productName = "DXP Production",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | true                     | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korone - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | true                     | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | osb.koroneiki1@lrcustomer.com.broken |
+	| First Name    | OSB                                  |
+	| Language      | English                              |
+	| Last Name     | Koroneiki1                           |''');
+
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | osb.koroneiki2@lrcustomer.com.broken |
+	| First Name    | OSB                                  |
+	| Language      | English                              |
+	| Last Name     | Koroneiki2                           |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountTeam(
+			accountName = "Korone - ${staticProjectName}",
+			teamName = "OSB Devlopr Team");
+
+		LocalFile.KoroneikiTeamAPI._assignContactsExecutedByAgent(
+			agentName = "Koroneiki User",
+			table = '''| osb.koroneiki1@lrcustomer.com.broken |
+	| osb.koroneiki2@lrcustomer.com.broken |''',
+			teamName = "OSB Devlopr Team");
+
+		LocalFile.OSBAdmin.loginToSupport(
+			userEmailAddress = ${staticSupportAdminEmailAdress},
+			userPassword = ${staticSupportAdminPassword});
+
+		LocalFile.ProjectDetails.gotoProjectDetailsPage();
+
+		LocalFile.ProjectDetails.searchKeyword(keyword = "Korone");
+
+		LocalFile.ProjectDetails.gotoProject(projectName = "Korone - ${staticProjectName}");
+
+		LocalFile.ProjectDetails.gotoHistory();
+
+		LocalFile.ProjectDetails.viewHistoryEntryByThreeKeywords(
+			fieldName = "Contact",
+			keyword1 = "Updated Team",
+			keyword2 = "OSB Devlopr Team Member",
+			keyword3 = "OSB Koroneiki1",
+			table = '''| Updater Name                | Koroneiki User          |
+	| Update Summary              | Updated Team            |
+	| Update Description          | OSB Devlopr Team Member |
+	| Update Date                 | Today                   |
+	| Update Field Name           | Contact                 |
+	| Update Field Original Value | N/A                     |
+	| Update Field New Value      | OSB Koroneiki1          |''');
+
+		LocalFile.ProjectDetails.viewHistoryEntryByThreeKeywords(
+			fieldName = "Contact",
+			keyword1 = "Updated Team",
+			keyword2 = "OSB Devlopr Team Member",
+			keyword3 = "OSB Koroneiki2",
+			table = '''| Updater Name                | Koroneiki User          |
+	| Update Summary              | Updated Team            |
+	| Update Description          | OSB Devlopr Team Member |
+	| Update Date                 | Today                   |
+	| Update Field Name           | Contact                 |
+	| Update Field Original Value | N/A                     |
+	| Update Field New Value      | OSB Koroneiki2          |''');
+	}
+
+	test Removeteamcontacts {
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | KORONEKORONE                         | |
+	| Contact Email Address | osb.koroneiki1@lrcustomer.com.broken | |
+	| Description           | Test osb account on koroneiki        | |
+	| Fax Number            | 555-555-1234                         | |
+	| Name                  | Korone - ${staticProjectName}        | |
+	| Phone Number          | 555-555-5678                         | |
+	| Profile Email Address | osb.koroneiki1@lrcustomer.com.broken | |
+	| Region                | United States                        | |
+	| Status                | Active                               | |
+	| Tier                  | T4                                   | |
+	| Website               | www.koroneikicorporation.com         | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korone - ${staticProjectName}",
+			productName = "DXP Production",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | true                     | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korone - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | true                     | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | osb.koroneiki1@lrcustomer.com.broken |
+	| First Name    | OSB                                  |
+	| Language      | English                              |
+	| Last Name     | Koroneiki1                           |''');
+
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | osb.koroneiki2@lrcustomer.com.broken |
+	| First Name    | OSB                                  |
+	| Language      | English                              |
+	| Last Name     | Koroneiki2                           |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountTeam(
+			accountName = "Korone - ${staticProjectName}",
+			teamName = "OSB Devlopr Team");
+
+		LocalFile.KoroneikiTeamAPI._assignContacts(
+			table = '''| osb.koroneiki1@lrcustomer.com.broken |
+	| osb.koroneiki2@lrcustomer.com.broken |''',
+			teamName = "OSB Devlopr Team");
+
+		LocalFile.KoroneikiTeamAPI._removeContacts(
+			table = '''| osb.koroneiki1@lrcustomer.com.broken |
+	| osb.koroneiki2@lrcustomer.com.broken |''',
+			teamName = "OSB Devlopr Team");
+
+		LocalFile.OSBAdmin.loginToSupport(
+			userEmailAddress = ${staticSupportAdminEmailAdress},
+			userPassword = ${staticSupportAdminPassword});
+
+		LocalFile.ProjectDetails.gotoProjectDetailsPage();
+
+		LocalFile.ProjectDetails.searchKeyword(keyword = "Korone");
+
+		LocalFile.ProjectDetails.gotoProject(projectName = "Korone - ${staticProjectName}");
+
+		LocalFile.ProjectDetails.gotoHistory();
+
+		LocalFile.ProjectDetails.viewHistoryEntryByThreeKeywordsAndPosition(
+			fieldName = "Contact",
+			keyword1 = "Updated Team",
+			keyword2 = "OSB Devlopr Team Member",
+			keyword3 = "OSB Koroneiki1",
+			positionValue = 1,
+			table = '''| Updater Name                | Koroneiki QA Service Producer |
+	| Update Summary              | Updated Team                  |
+	| Update Description          | OSB Devlopr Team Member       |
+	| Update Date                 | Today                         |
+	| Update Field Name           | Contact                       |
+	| Update Field Original Value | N/A                           |
+	| Update Field New Value      | OSB Koroneiki1                |''');
+
+		LocalFile.ProjectDetails.viewHistoryEntryByThreeKeywordsAndPosition(
+			fieldName = "Contact",
+			keyword1 = "Updated Team",
+			keyword2 = "OSB Devlopr Team Member",
+			keyword3 = "OSB Koroneiki2",
+			positionValue = 1,
+			table = '''| Updater Name                | Koroneiki QA Service Producer |
+	| Update Summary              | Updated Team                  |
+	| Update Description          | OSB Devlopr Team Member       |
+	| Update Date                 | Today                         |
+	| Update Field Name           | Contact                       |
+	| Update Field Original Value | N/A                           |
+	| Update Field New Value      | OSB Koroneiki2                |''');
+
+		LocalFile.ProjectDetails.viewHistoryEntryByThreeKeywordsAndPosition(
+			fieldName = "Contact",
+			keyword1 = "Updated Team",
+			keyword2 = "OSB Devlopr Team Member",
+			keyword3 = "OSB Koroneiki1",
+			positionValue = 2,
+			table = '''| Updater Name                | Koroneiki QA Service Producer |
+	| Update Summary              | Updated Team                  |
+	| Update Description          | OSB Devlopr Team Member       |
+	| Update Date                 | Today                         |
+	| Update Field Name           | Contact                       |
+	| Update Field Original Value | OSB Koroneiki1                |
+	| Update Field New Value      | N/A                           |''');
+
+		LocalFile.ProjectDetails.viewHistoryEntryByThreeKeywordsAndPosition(
+			fieldName = "Contact",
+			keyword1 = "Updated Team",
+			keyword2 = "OSB Devlopr Team Member",
+			keyword3 = "OSB Koroneiki2",
+			positionValue = 2,
+			table = '''| Updater Name                | Koroneiki QA Service Producer |
+	| Update Summary              | Updated Team                  |
+	| Update Description          | OSB Devlopr Team Member       |
+	| Update Date                 | Today                         |
+	| Update Field Name           | Contact                       |
+	| Update Field Original Value | OSB Koroneiki2                |
+	| Update Field New Value      | N/A                           |''');
+	}
+
+	test Removeteamcontactsexecutedbyagent {
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | KORONEKORONE                         | |
+	| Contact Email Address | osb.koroneiki1@lrcustomer.com.broken | |
+	| Description           | Test osb account on koroneiki        | |
+	| Fax Number            | 555-555-1234                         | |
+	| Name                  | Korone - ${staticProjectName}        | |
+	| Phone Number          | 555-555-5678                         | |
+	| Profile Email Address | osb.koroneiki1@lrcustomer.com.broken | |
+	| Region                | United States                        | |
+	| Status                | Active                               | |
+	| Tier                  | T4                                   | |
+	| Website               | www.koroneikicorporation.com         | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korone - ${staticProjectName}",
+			productName = "DXP Production",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | true                     | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korone - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | true                     | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | osb.koroneiki1@lrcustomer.com.broken |
+	| First Name    | OSB                                  |
+	| Language      | English                              |
+	| Last Name     | Koroneiki1                           |''');
+
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | osb.koroneiki2@lrcustomer.com.broken |
+	| First Name    | OSB                                  |
+	| Language      | English                              |
+	| Last Name     | Koroneiki2                           |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountTeam(
+			accountName = "Korone - ${staticProjectName}",
+			teamName = "OSB Devlopr Team");
+
+		LocalFile.KoroneikiTeamAPI._assignContactsExecutedByAgent(
+			agentName = "Koroneiki User",
+			table = '''| osb.koroneiki1@lrcustomer.com.broken |
+	| osb.koroneiki2@lrcustomer.com.broken |''',
+			teamName = "OSB Devlopr Team");
+
+		LocalFile.KoroneikiTeamAPI._removeContactsExecutedByAgent(
+			agentName = "Koroneiki User",
+			table = '''| osb.koroneiki1@lrcustomer.com.broken |
+	| osb.koroneiki2@lrcustomer.com.broken |''',
+			teamName = "OSB Devlopr Team");
+
+		LocalFile.OSBAdmin.loginToSupport(
+			userEmailAddress = ${staticSupportAdminEmailAdress},
+			userPassword = ${staticSupportAdminPassword});
+
+		LocalFile.ProjectDetails.gotoProjectDetailsPage();
+
+		LocalFile.ProjectDetails.searchKeyword(keyword = "Korone");
+
+		LocalFile.ProjectDetails.gotoProject(projectName = "Korone - ${staticProjectName}");
+
+		LocalFile.ProjectDetails.gotoHistory();
+
+		LocalFile.ProjectDetails.viewHistoryEntryByThreeKeywordsAndPosition(
+			fieldName = "Contact",
+			keyword1 = "Updated Team",
+			keyword2 = "OSB Devlopr Team Member",
+			keyword3 = "OSB Koroneiki1",
+			positionValue = 1,
+			table = '''| Updater Name                | Koroneiki User          |
+	| Update Summary              | Updated Team            |
+	| Update Description          | OSB Devlopr Team Member |
+	| Update Date                 | Today                   |
+	| Update Field Name           | Contact                 |
+	| Update Field Original Value | N/A                     |
+	| Update Field New Value      | OSB Koroneiki1          |''');
+
+		LocalFile.ProjectDetails.viewHistoryEntryByThreeKeywordsAndPosition(
+			fieldName = "Contact",
+			keyword1 = "Updated Team",
+			keyword2 = "OSB Devlopr Team Member",
+			keyword3 = "OSB Koroneiki2",
+			positionValue = 1,
+			table = '''| Updater Name                | Koroneiki User          |
+	| Update Summary              | Updated Team            |
+	| Update Description          | OSB Devlopr Team Member |
+	| Update Date                 | Today                   |
+	| Update Field Name           | Contact                 |
+	| Update Field Original Value | N/A                     |
+	| Update Field New Value      | OSB Koroneiki2          |''');
+
+		LocalFile.ProjectDetails.viewHistoryEntryByThreeKeywordsAndPosition(
+			fieldName = "Contact",
+			keyword1 = "Updated Team",
+			keyword2 = "OSB Devlopr Team Member",
+			keyword3 = "OSB Koroneiki1",
+			positionValue = 2,
+			table = '''| Updater Name                | Koroneiki User          |
+	| Update Summary              | Updated Team            |
+	| Update Description          | OSB Devlopr Team Member |
+	| Update Date                 | Today                   |
+	| Update Field Name           | Contact                 |
+	| Update Field Original Value | OSB Koroneiki1          |
+	| Update Field New Value      | N/A                     |''');
+
+		LocalFile.ProjectDetails.viewHistoryEntryByThreeKeywordsAndPosition(
+			fieldName = "Contact",
+			keyword1 = "Updated Team",
+			keyword2 = "OSB Devlopr Team Member",
+			keyword3 = "OSB Koroneiki2",
+			positionValue = 2,
+			table = '''| Updater Name                | Koroneiki User          |
+	| Update Summary              | Updated Team            |
+	| Update Description          | OSB Devlopr Team Member |
+	| Update Date                 | Today                   |
+	| Update Field Name           | Contact                 |
+	| Update Field Original Value | OSB Koroneiki2          |
+	| Update Field New Value      | N/A                     |''');
+	}
+
+	test Removeupdatedteamcontactsfromupdatedteamonupdatedaccount {
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | KORONEKORONE                         | |
+	| Contact Email Address | osb.koroneiki1@lrcustomer.com.broken | |
+	| Description           | Test osb account on koroneiki        | |
+	| Fax Number            | 555-555-1234                         | |
+	| Name                  | Korone - ${staticProjectName}        | |
+	| Phone Number          | 555-555-5678                         | |
+	| Profile Email Address | osb.koroneiki1@lrcustomer.com.broken | |
+	| Region                | United States                        | |
+	| Status                | Active                               | |
+	| Tier                  | T4                                   | |
+	| Website               | www.koroneikicorporation.com         | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korone - ${staticProjectName}",
+			productName = "DXP Production",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | true                     | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korone - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | true                     | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | osb.koroneiki1@lrcustomer.com.broken |
+	| First Name    | OSB                                  |
+	| Language      | English                              |
+	| Last Name     | Koroneiki1                           |''');
+
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | osb.koroneiki2@lrcustomer.com.broken |
+	| First Name    | OSB                                  |
+	| Language      | English                              |
+	| Last Name     | Koroneiki2                           |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountTeam(
+			accountName = "Korone - ${staticProjectName}",
+			teamName = "OSB Devlopr Team");
+
+		LocalFile.KoroneikiTeamAPI._assignContacts(
+			table = '''| osb.koroneiki1@lrcustomer.com.broken |
+	| osb.koroneiki2@lrcustomer.com.broken |''',
+			teamName = "OSB Devlopr Team");
+
+		LocalFile.KoroneikiTeamAPI.updateTeam(
+			teamName = "OSB Devlopr Team",
+			teamNameEdit = "OSB Mktng Team");
+
+		LocalFile.KoroneikiAccountAPI._updateAccount(
+			accountName = "Korone - ${staticProjectName}",
+			table = '''| Code                  | ONEIKIONEIKI                             | |
+	| Description           | Test update account on koroneiki         | |
+	| Fax Number            | 555-555-4321                             | |
+	| Name                  | Oneiki - ${staticProjectName}            | |
+	| Phone Number          | 555-555-8765                             | |
+	| Region                | Japan                                    | |
+	| Status                | Active                                   | |
+	| Tier                  | T1                                       | |
+	| Website               | www.koroneikiupdate.com                  | |''');
+
+		LocalFile.KoroneikiContactAPI._updateContactViaEmailAddress(
+			contactEmailAddress = "osb.koroneiki1@lrcustomer.com.broken",
+			table = '''| Email Address | bso.koroneiki3@lrcustomer.com.broken |
+	| First Name    | BSO                                  |
+	| Last Name     | Koroneiki3                           |''');
+
+		LocalFile.KoroneikiContactAPI._updateContactViaEmailAddress(
+			contactEmailAddress = "osb.koroneiki2@lrcustomer.com.broken",
+			table = '''| Email Address | bso.koroneiki4@lrcustomer.com.broken |
+	| First Name    | BSO                                  |
+	| Last Name     | Koroneiki4                           |''');
+
+		LocalFile.KoroneikiTeamAPI._removeContacts(
+			table = '''| bso.koroneiki3@lrcustomer.com.broken |
+	| bso.koroneiki4@lrcustomer.com.broken |''',
+			teamName = "OSB Mktng Team");
+
+		LocalFile.OSBAdmin.loginToSupport(
+			userEmailAddress = ${staticSupportAdminEmailAdress},
+			userPassword = ${staticSupportAdminPassword});
+
+		LocalFile.ProjectDetails.gotoProjectDetailsPage();
+
+		LocalFile.ProjectDetails.searchKeyword(keyword = "Oneiki");
+
+		LocalFile.ProjectDetails.gotoProject(projectName = "Oneiki - ${staticProjectName}");
+
+		LocalFile.ProjectDetails.gotoHistory();
+
+		LocalFile.ProjectDetails.viewHistoryEntryByThreeKeywords(
+			fieldName = "Contact",
+			keyword1 = "Updated Team",
+			keyword2 = "OSB Devlopr Team Member",
+			keyword3 = "OSB Koroneiki1",
+			table = '''| Updater Name                | Koroneiki QA Service Producer |
+	| Update Summary              | Updated Team                  |
+	| Update Description          | OSB Devlopr Team Member       |
+	| Update Date                 | Today                         |
+	| Update Field Name           | Contact                       |
+	| Update Field Original Value | N/A                           |
+	| Update Field New Value      | OSB Koroneiki1                |''');
+
+		LocalFile.ProjectDetails.viewHistoryEntryByThreeKeywords(
+			fieldName = "Contact",
+			keyword1 = "Updated Team",
+			keyword2 = "OSB Devlopr Team Member",
+			keyword3 = "OSB Koroneiki2",
+			table = '''| Updater Name                | Koroneiki QA Service Producer |
+	| Update Summary              | Updated Team                  |
+	| Update Description          | OSB Devlopr Team Member       |
+	| Update Date                 | Today                         |
+	| Update Field Name           | Contact                       |
+	| Update Field Original Value | N/A                           |
+	| Update Field New Value      | OSB Koroneiki2                |''');
+
+		LocalFile.ProjectDetails.viewHistoryEntryByThreeKeywords(
+			fieldName = "Contact",
+			keyword1 = "Updated Team",
+			keyword2 = "OSB Mktng Team Member",
+			keyword3 = "BSO Koroneiki3",
+			table = '''| Updater Name                | Koroneiki QA Service Producer |
+	| Update Summary              | Updated Team                  |
+	| Update Description          | OSB Mktng Team Member         |
+	| Update Date                 | Today                         |
+	| Update Field Name           | Contact                       |
+	| Update Field Original Value | BSO Koroneiki3                |
+	| Update Field New Value      | N/A                           |''');
+
+		LocalFile.ProjectDetails.viewHistoryEntryByThreeKeywords(
+			fieldName = "Contact",
+			keyword1 = "Updated Team",
+			keyword2 = "OSB Mktng Team Member",
+			keyword3 = "BSO Koroneiki4",
+			table = '''| Updater Name                | Koroneiki QA Service Producer |
+	| Update Summary              | Updated Team                  |
+	| Update Description          | OSB Mktng Team Member         |
+	| Update Date                 | Today                         |
+	| Update Field Name           | Contact                       |
+	| Update Field Original Value | BSO Koroneiki4                |
+	| Update Field New Value      | N/A                           |''');
+	}
+
+}

@@ -1,0 +1,297 @@
+definition {
+
+	property testray.main.component.name = "Support QA";
+	property type = "zendesk.api";
+
+	setUp {
+		LocalFile.Passwords.getPasswords();
+	}
+
+	tearDown {
+		LocalFile.ZendeskTicketAPI._tearDownTicketByIds(ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskUserAPI._tearDownUsersByExternalIdTable(table = '''| User1 |''');
+
+		LocalFile.ZendeskOrganizationAPI._tearDownOrganizationsByExternalIdTable(table = '''| 12345678 |''');
+
+		LocalFile.ZendeskHomepage.pause(timeInSeconds = 3);
+	}
+
+	test EEAURouting {
+		LocalFile.ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved            |
+	| Name             | Organization Name 1 |
+	| Shared Tickets   | true                |
+	| Shared Comments  | true                |
+	| SLA              | Gold                |
+	| Tier             | T4                  |
+	| Support Region   | Australia           |
+	| Support Language | English             | 
+	| External ID      | 12345678            |''');
+
+		LocalFile.ZendeskOrganizationAPI._assignTagsToOrganizationViaOrganizationExternalID(
+			organizationExternalId = 12345678,
+			table = '''| liferay_dxp |''');
+
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
+	| Tags             | osb_customer,osb_kb              |
+	| Password         | ${staticZendeskAdminPassword}    |
+	| Role             | End-user                         |
+	| Access           | Organization                     |
+	| Email            | zendesk.user1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                |
+	| Organization     | Organization Name 1              |
+	| Language         | English                          |
+	| Time Zone        | Sydney                           |
+	| External ID      | User1                            |''');
+
+		LocalFile.ZendeskRequestAPI._createRequest(
+			requesterEmail = "zendesk.user1@zendesk.com.broken",
+			table = '''| Product                  | prd_liferay_dxp_7_4                              |
+	| Component                | activation_key_project_administration            |
+	| Tags                     | escalation_engineer                              |
+	| System Status            | production_functioning_with_limited_capabilities |
+	| Subject                  | Request Subject                                  |
+	| Description              | Request Description                              |
+	| Organization External ID | 12345678                                         |''');
+
+		LocalFile.ZendeskTicketAPI._viewMultipleTicketGroupAssignees(
+			groupAssignee = "EE - AU",
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewTicketSupportSchedule(
+			supportRegionAbbreviation = "JP",
+			ticketId = ${staticRequestIdList});
+	}
+
+	test EECNCNRouting {
+		LocalFile.ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved            |
+	| Name             | Organization Name 1 |
+	| Shared Tickets   | true                |
+	| Shared Comments  | true                |
+	| SLA              | Gold                |
+	| Tier             | T4                  |
+	| Support Region   | China               |
+	| Support Language | Chinese             |
+	| External ID      | 12345678            |''');
+
+		LocalFile.ZendeskOrganizationAPI._assignTagsToOrganizationViaOrganizationExternalID(
+			organizationExternalId = 12345678,
+			table = '''| liferay_dxp |''');
+
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
+	| Tags             | osb_customer,osb_kb              |
+	| Password         | ${staticZendeskAdminPassword}    |
+	| Role             | End-user                         |
+	| Access           | Organization                     |
+	| Email            | zendesk.user1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                |
+	| Organization     | Organization Name 1              |
+	| Language         | Chinese                          |
+	| Time Zone        | Beijing                          | 
+	| External ID      | User1                            |''');
+
+		LocalFile.ZendeskRequestAPI._createRequest(
+			requesterEmail = "zendesk.user1@zendesk.com.broken",
+			table = '''| Product                  | prd_liferay_dxp_7_4                              |
+	| Component                | activation_key_project_administration            |
+	| Tags                     | escalation_engineer                              |
+	| System Status            | production_functioning_with_limited_capabilities |
+	| Subject                  | Request Subject                                  |
+	| Description              | Request Description                              |
+	| Organization External ID | 12345678                                         |''');
+
+		LocalFile.ZendeskTicketAPI._viewMultipleTicketGroupAssignees(
+			groupAssignee = "EE - CN",
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewTicketSupportSchedule(
+			supportRegionAbbreviation = "CN",
+			ticketId = ${staticRequestIdList});
+	}
+
+	test EEHURouting {
+		LocalFile.ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved            |
+	| Name             | Organization Name 1 |
+	| Shared Tickets   | true                |
+	| Shared Comments  | true                |
+	| SLA              | Gold                |
+	| Tier             | T4                  |
+	| Support Region   | Hungary             |
+	| Support Language | English             |
+	| External ID      | 12345678            |''');
+
+		LocalFile.ZendeskOrganizationAPI._assignTagsToOrganizationViaOrganizationExternalID(
+			organizationExternalId = 12345678,
+			table = '''| liferay_dxp |''');
+
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
+	| Tags             | osb_customer,osb_kb              |
+	| Password         | ${staticZendeskAdminPassword}    |
+	| Role             | End-user                         |
+	| Access           | Organization                     |
+	| Email            | zendesk.user1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                |
+	| Organization     | Organization Name 1              |
+	| Language         | English                          |
+	| Time Zone        | Budapest                         | 
+	| External ID      | User1                            |''');
+
+		LocalFile.ZendeskRequestAPI._createRequest(
+			requesterEmail = "zendesk.user1@zendesk.com.broken",
+			table = '''| Product                  | prd_liferay_dxp_7_4                              |
+	| Component                | activation_key_project_administration            |
+	| Tags                     | escalation_engineer                              |
+	| System Status            | production_functioning_with_limited_capabilities |
+	| Subject                  | Request Subject                                  |
+	| Description              | Request Description                              |
+	| Organization External ID | 12345678                                         |''');
+
+		LocalFile.ZendeskTicketAPI._viewMultipleTicketGroupAssignees(
+			groupAssignee = "EE - HU",
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewTicketSupportSchedule(
+			supportRegionAbbreviation = "HU",
+			ticketId = ${staticRequestIdList});
+	}
+
+	test EEINRouting {
+		LocalFile.ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved            |
+	| Name             | Organization Name 1 |
+	| Shared Tickets   | true                |
+	| Shared Comments  | true                |
+	| SLA              | Gold                |
+	| Tier             | T4                  |
+	| Support Region   | India               |
+	| Support Language | English             |
+	| External ID      | 12345678            |''');
+
+		LocalFile.ZendeskOrganizationAPI._assignTagsToOrganizationViaOrganizationExternalID(
+			organizationExternalId = 12345678,
+			table = '''| liferay_dxp |''');
+
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
+	| Tags             | osb_customer,osb_kb              |
+	| Password         | ${staticZendeskAdminPassword}    |
+	| Role             | End-user                         |
+	| Access           | Organization                     |
+	| Email            | zendesk.user1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                |
+	| Organization     | Organization Name 1              |
+	| Language         | English                          |
+	| Time Zone        | Mumbai                           | 
+	| External ID      | User1                            |''');
+
+		LocalFile.ZendeskRequestAPI._createRequest(
+			requesterEmail = "zendesk.user1@zendesk.com.broken",
+			table = '''| Product                  | prd_liferay_dxp_7_4                              |
+	| Component                | activation_key_project_administration            |
+	| Tags                     | escalation_engineer                              |
+	| System Status            | production_functioning_with_limited_capabilities |
+	| Subject                  | Request Subject                                  |
+	| Description              | Request Description                              |
+	| Organization External ID | 12345678                                         |''');
+
+		LocalFile.ZendeskTicketAPI._viewMultipleTicketGroupAssignees(
+			groupAssignee = "EE - IN",
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewTicketSupportSchedule(
+			supportRegionAbbreviation = "IN",
+			ticketId = ${staticRequestIdList});
+	}
+
+	test EEJPRouting {
+		LocalFile.ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved            |
+	| Name             | Organization Name 1 |
+	| Shared Tickets   | true                |
+	| Shared Comments  | true                |
+	| SLA              | Gold                |
+	| Tier             | T4                  |
+	| Support Region   | Japan               |
+	| Support Language | Japanese            |
+	| External ID      | 12345678            |''');
+
+		LocalFile.ZendeskOrganizationAPI._assignTagsToOrganizationViaOrganizationExternalID(
+			organizationExternalId = 12345678,
+			table = '''| liferay_dxp |''');
+
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
+	| Tags             | osb_customer,osb_kb              |
+	| Password         | ${staticZendeskAdminPassword}    |
+	| Role             | End-user                         |
+	| Access           | Organization                     |
+	| Email            | zendesk.user1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                |
+	| Organization     | Organization Name 1              |
+	| Language         | Japanese                         |
+	| Time Zone        | Tokyo                            |
+	| External ID      | User1                            |''');
+
+		LocalFile.ZendeskRequestAPI._createRequest(
+			requesterEmail = "zendesk.user1@zendesk.com.broken",
+			table = '''| Product                  | prd_liferay_dxp_7_4                              |
+	| Component                | activation_key_project_administration            |
+	| Tags                     | escalation_engineer                              |
+	| System Status            | production_functioning_with_limited_capabilities |
+	| Subject                  | Request Subject                                  |
+	| Description              | Request Description                              |
+	| Organization External ID | 12345678                                         |''');
+
+		LocalFile.ZendeskTicketAPI._viewMultipleTicketGroupAssignees(
+			groupAssignee = "EE - JP",
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewTicketSupportSchedule(
+			supportRegionAbbreviation = "JP",
+			ticketId = ${staticRequestIdList});
+	}
+
+	@help.center.acceptance = "true"
+	test EEUSRouting {
+		LocalFile.ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved            |
+	| Name             | Organization Name 1 |
+	| Shared Tickets   | true                |
+	| Shared Comments  | true                |
+	| SLA              | Gold                |
+	| Tier             | T4                  |
+	| Support Region   | US                  |
+	| Support Language | English             |
+	| External ID      | 12345678            |''');
+
+		LocalFile.ZendeskOrganizationAPI._assignTagsToOrganizationViaOrganizationExternalID(
+			organizationExternalId = 12345678,
+			table = '''| liferay_dxp |''');
+
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
+	| Tags             | osb_customer,osb_kb              |
+	| Password         | ${staticZendeskAdminPassword}    |
+	| Role             | End-user                         |
+	| Access           | Organization                     |
+	| Email            | zendesk.user1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                |
+	| Organization     | Organization Name 1              |
+	| Language         | English                          |
+	| Time Zone        | Pacific Time (US & Canada)       |
+	| External ID      | User1                            |''');
+
+		LocalFile.ZendeskRequestAPI._createRequest(
+			requesterEmail = "zendesk.user1@zendesk.com.broken",
+			table = '''| Product                  | prd_liferay_dxp_7_4                              |
+	| Component                | activation_key_project_administration            |
+	| Tags                     | escalation_engineer                              |
+	| System Status            | production_functioning_with_limited_capabilities |
+	| Subject                  | Request Subject                                  |
+	| Description              | Request Description                              |
+	| Organization External ID | 12345678                                         |''');
+
+		LocalFile.ZendeskTicketAPI._viewMultipleTicketGroupAssignees(
+			groupAssignee = "EE - US",
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewTicketSupportSchedule(
+			supportRegionAbbreviation = "US",
+			ticketId = ${staticRequestIdList});
+	}
+
+}

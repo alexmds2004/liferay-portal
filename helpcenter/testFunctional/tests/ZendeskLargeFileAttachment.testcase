@@ -1,0 +1,2510 @@
+definition {
+
+	property testray.main.component.name = "Support QA";
+	property type = "zendesk.frontend";
+
+	setUp {
+		LocalFile.Passwords.getPasswords();
+	}
+
+	tearDown {
+		LocalFile.ZendeskUserAPI._getDefaultUserId(organizationName = "Lfazen - ${staticProjectName}");
+
+		LocalFile.ZendeskUserAPI._tearDownUsersRequestedTicketsByEmailAddressTable(table = '''| lfa.customer1@lrcustomer.com.broken |''');
+
+		LocalFile.OSBAdminProject.tearDownProjects(table = '''| LFAZENLFAZEN |''');
+
+		LocalFile.KoroneikiAccountAPI._tearDownAccounts(table = '''| Lfazen - ${staticProjectName} |''');
+
+		LocalFile.KoroneikiAccountAPI._tearDownAccountsViaAccountFieldNameAndValue(
+			fieldName = "Code",
+			table = '''| LFAZENLFAZEN |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Gold Subscription");
+
+		LocalFile.JSONUser.tearDownUsers(table = '''| lfa.customer1@lrcustomer.com.broken |''');
+
+		LocalFile.JSONUser.tearDownUsersViaSupport(table = '''| lfa.customer1@lrcustomer.com.broken |''');
+
+		LocalFile.JSONUser.tearDownUsersViaKoroneiki(table = '''| lfa.customer1@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiContactAPI._tearDownContacts(table = '''| lfa.customer1@lrcustomer.com.broken |''');
+
+		LocalFile.JSONOkta.tearDownUsers(table = '''| lfa.customer1@lrcustomer.com.broken |''');
+
+		LocalFile.ZendeskUserAPI._getMultipleUserIdsByEmailAddress(table = '''| lfa.customer1@lrcustomer.com.broken |''');
+
+		LocalFile.ZendeskUserAPI._tearDownUsersByIdList(userIds = ${staticUserIdList});
+
+		LocalFile.ZendeskOrganizationAPI._getMultipleOrganizationExternalIdsByOrganizationNameIfStillPresent(table = '''| Lfazen - ${staticProjectName} |''');
+
+		LocalFile.ZendeskOrganizationAPI._tearDownOrganizationsByExternalIdList(organizationExternalIds = ${staticOrganizationExternalIdList});
+
+		LocalFile.ZendeskUserAPI._tearDownUserById(userId = ${staticDefaultUserId});
+	}
+
+	test Deletelargefile {
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | lfa.customer1                       |
+	| Email Address | lfa.customer1@lrcustomer.com.broken |
+	| First Name    | LFA                                 |
+	| Last Name     | Customer1                           |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code        | LFAZENLFAZEN                  | |
+	| Data Region | United States                 | |
+	| Language    | English                       | |
+	| Name        | Lfazen - ${staticProjectName} | |
+	| Region      | United States                 | |
+	| Status      | Active                        | |
+	| Tier        | T1                            | |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Lfazen - ${staticProjectName}",
+			contactEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			table = '''| Support Requester |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Lfazen - ${staticProjectName}",
+			productName = "Portal Production",
+			table = '''| End Date                | ${staticEndDate}         |   |
+	| Original End Date       | ${staticOriginalEndDate} |   |
+	| Perpetual               | false                    |   |
+	| Product Field and Value | sizing                   | 1 |
+	| Product Field and Value | licenses                 | 1 |
+	| Product Field and Value | version                  | 6 |
+	| Quantity                | 1                        |   |
+	| Start Date              | ${staticStartDate}       |   |
+	| Status                  | Approved                 |   |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Lfazen - ${staticProjectName}",
+			productName = "Gold Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Gold Subscription");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - Portal");
+
+		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+
+		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "LFAZENLFAZEN");
+
+		LocalFile.ZendeskOrganizationAPI._viewOrganizationSyncFromOsb(organizationName = "Lfazen - ${staticProjectName}");
+
+		LocalFile.JSONUser.viewSupportUserSync(userEmailAddress = "lfa.customer1@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserSyncFromOsb(userEmailAddress = "lfa.customer1@lrcustomer.com.broken");
+
+		LocalFile.JSONUser.updateSupportPassword(
+			userEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.ZendeskUserAPI._updateUserPasswordByEmailAddress(
+			userEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			userPassword = ${staticZendeskAdminPassword});
+
+		LocalFile.OSBAdmin.logoutAndLoginToSupport(
+			userEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.ZendeskHomepage.login(
+			userEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			userPassword = ${staticZendeskAdminPassword});
+
+		LocalFile.ZendeskRequest.create(table = '''| Product       | Liferay Portal                          | 6.2                                   |
+	| Component     | Activation Key & Project Administration |                                       |
+	| System Status | Production                              | Functioning with limited capabilities |
+	| Subject       | Request Subject                         |                                       |
+	| Description   | Request Description                     |                                       |
+	| Attachments   | Document_1.txt                          |                                       |''');
+
+		LocalFile.ZendeskRequest.view(table = '''| Subject       | Request Subject                                    |
+	| Status        | OPEN                                               |
+	| Requester     | LFA Customer1                                      |
+	| Priority      | Normal                                             |
+	| Product       | Liferay Portal > 6.2                               |
+	| Sub-Status    | —                                                  |
+	| Component     | Activation Key & Project Administration            |
+	| System Status | Production > Functioning with limited capabilities |
+	| Attachments   | Document_1.txt                                     |''');
+
+		LocalFile.ZendeskRequest.viewComment(
+			commentContent = "Request Description",
+			table = '''| Author      | LFA Customer1       |
+	| Comment     | Request Description |
+	| Attachments | Document_1.txt      |''');
+
+		LocalFile.ZendeskRequest.uploadFileViaLargeFileUploader(table = '''| Attachment       | Document_2.txt      |
+	| Comment          | Large File Comment  |
+	| Data Region      | United States       |
+	| No Personal Data | false               |''');
+
+		LocalFile.ZendeskRequest.viewLargeFileComment(
+			commentContent = "Large File Comment",
+			table = '''| Author      | LFA Customer1       |
+	| Comment     | Large File Comment  |
+	| Attachment  | Document_2.txt      |''');
+
+		LocalFile.ProjectDetails.gotoProjectDetailsPage();
+
+		LocalFile.ProjectDetails.gotoAttachments();
+
+		LocalFile.ProjectDetails.deleteAttachment(fileKeyword = "Document_2.txt");
+
+		LocalFile.ProjectDetails.viewNoAttachment(fileKeyword = "Document_2.txt");
+	}
+
+	test Deletelargefileasadmin {
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | lfa.customer1                       |
+	| Email Address | lfa.customer1@lrcustomer.com.broken |
+	| First Name    | LFA                                 |
+	| Last Name     | Customer1                           |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code        | LFAZENLFAZEN                  | |
+	| Data Region | United States                 | |
+	| Language    | English                       | |
+	| Name        | Lfazen - ${staticProjectName} | |
+	| Region      | United States                 | |
+	| Status      | Active                        | |
+	| Tier        | T1                            | |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Lfazen - ${staticProjectName}",
+			contactEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			table = '''| Support Requester |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Lfazen - ${staticProjectName}",
+			productName = "Portal Production",
+			table = '''| End Date                | ${staticEndDate}         |   |
+	| Original End Date       | ${staticOriginalEndDate} |   |
+	| Perpetual               | false                    |   |
+	| Product Field and Value | sizing                   | 1 |
+	| Product Field and Value | licenses                 | 1 |
+	| Product Field and Value | version                  | 6 |
+	| Quantity                | 1                        |   |
+	| Start Date              | ${staticStartDate}       |   |
+	| Status                  | Approved                 |   |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Lfazen - ${staticProjectName}",
+			productName = "Gold Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Gold Subscription");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - Portal");
+
+		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+
+		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "LFAZENLFAZEN");
+
+		LocalFile.ZendeskOrganizationAPI._viewOrganizationSyncFromOsb(organizationName = "Lfazen - ${staticProjectName}");
+
+		LocalFile.JSONUser.viewSupportUserSync(userEmailAddress = "lfa.customer1@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserSyncFromOsb(userEmailAddress = "lfa.customer1@lrcustomer.com.broken");
+
+		LocalFile.JSONUser.updateSupportPassword(
+			userEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.ZendeskUserAPI._updateUserPasswordByEmailAddress(
+			userEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			userPassword = ${staticZendeskAdminPassword});
+
+		LocalFile.OSBAdmin.logoutAndLoginToSupport(
+			userEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.ZendeskHomepage.login(
+			userEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			userPassword = ${staticZendeskAdminPassword});
+
+		LocalFile.ZendeskRequest.create(table = '''| Product       | Liferay Portal                          | 6.2                                   |
+	| Component     | Activation Key & Project Administration |                                       |
+	| System Status | Production                              | Functioning with limited capabilities |
+	| Subject       | Request Subject                         |                                       |
+	| Description   | Request Description                     |                                       |
+	| Attachments   | Document_1.txt                          |                                       |''');
+
+		LocalFile.ZendeskRequest.view(table = '''| Subject       | Request Subject                                    |
+	| Status        | OPEN                                               |
+	| Requester     | LFA Customer1                                      |
+	| Priority      | Normal                                             |
+	| Product       | Liferay Portal > 6.2                               |
+	| Sub-Status    | —                                                  |
+	| Component     | Activation Key & Project Administration            |
+	| System Status | Production > Functioning with limited capabilities |
+	| Attachments   | Document_1.txt                                     |''');
+
+		LocalFile.ZendeskRequest.viewComment(
+			commentContent = "Request Description",
+			table = '''| Author      | LFA Customer1       |
+	| Comment     | Request Description |
+	| Attachments | Document_1.txt      |''');
+
+		LocalFile.ZendeskRequest.uploadFileViaLargeFileUploader(table = '''| Attachment       | Document_2.txt      |
+	| Comment          | Large File Comment  |
+	| Data Region      | United States       |
+	| No Personal Data | false               |''');
+
+		LocalFile.ZendeskRequest.viewLargeFileComment(
+			commentContent = "Large File Comment",
+			table = '''| Author      | LFA Customer1       |
+	| Comment     | Large File Comment  |
+	| Attachment  | Document_2.txt      |''');
+
+		LocalFile.OSBAdmin.logoutAndLoginToSupport(
+			userEmailAddress = "amos.fong@liferay.com.broken",
+			userPassword = "test");
+
+		LocalFile.ProjectDetails.gotoProjectDetailsPage();
+
+		LocalFile.ProjectDetails.searchProject(projectName = "Lfazen - ${staticProjectName}");
+
+		LocalFile.ProjectDetails.gotoProject(projectName = "Lfazen - ${staticProjectName}");
+
+		LocalFile.ProjectDetails.gotoAttachments();
+
+		LocalFile.ProjectDetails.viewAttachmentDeleteLink(fileKeyword = "Document_2.txt");
+
+		LocalFile.ProjectDetails.deleteAttachment(fileKeyword = "Document_2.txt");
+
+		LocalFile.ProjectDetails.viewNoAttachment(fileKeyword = "Document_2.txt");
+	}
+
+	test Deletelargefilewithnopersonaldata {
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | lfa.customer1                       |
+	| Email Address | lfa.customer1@lrcustomer.com.broken |
+	| First Name    | LFA                                 |
+	| Last Name     | Customer1                           |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code        | LFAZENLFAZEN                  | |
+	| Data Region | United States                 | |
+	| Language    | English                       | |
+	| Name        | Lfazen - ${staticProjectName} | |
+	| Region      | United States                 | |
+	| Status      | Active                        | |
+	| Tier        | T1                            | |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Lfazen - ${staticProjectName}",
+			contactEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			table = '''| Support Requester |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Lfazen - ${staticProjectName}",
+			productName = "Portal Production",
+			table = '''| End Date                | ${staticEndDate}         |   |
+	| Original End Date       | ${staticOriginalEndDate} |   |
+	| Perpetual               | false                    |   |
+	| Product Field and Value | sizing                   | 1 |
+	| Product Field and Value | licenses                 | 1 |
+	| Product Field and Value | version                  | 6 |
+	| Quantity                | 1                        |   |
+	| Start Date              | ${staticStartDate}       |   |
+	| Status                  | Approved                 |   |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Lfazen - ${staticProjectName}",
+			productName = "Gold Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Gold Subscription");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - Portal");
+
+		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+
+		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "LFAZENLFAZEN");
+
+		LocalFile.ZendeskOrganizationAPI._viewOrganizationSyncFromOsb(organizationName = "Lfazen - ${staticProjectName}");
+
+		LocalFile.JSONUser.viewSupportUserSync(userEmailAddress = "lfa.customer1@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserSyncFromOsb(userEmailAddress = "lfa.customer1@lrcustomer.com.broken");
+
+		LocalFile.JSONUser.updateSupportPassword(
+			userEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.ZendeskUserAPI._updateUserPasswordByEmailAddress(
+			userEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			userPassword = ${staticZendeskAdminPassword});
+
+		LocalFile.OSBAdmin.logoutAndLoginToSupport(
+			userEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.ZendeskHomepage.login(
+			userEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			userPassword = ${staticZendeskAdminPassword});
+
+		LocalFile.ZendeskRequest.create(table = '''| Product       | Liferay Portal                          | 6.2                                   |
+	| Component     | Activation Key & Project Administration |                                       |
+	| System Status | Production                              | Functioning with limited capabilities |
+	| Subject       | Request Subject                         |                                       |
+	| Description   | Request Description                     |                                       |
+	| Attachments   | Document_1.txt                          |                                       |''');
+
+		LocalFile.ZendeskRequest.view(table = '''| Subject       | Request Subject                                    |
+	| Status        | OPEN                                               |
+	| Requester     | LFA Customer1                                      |
+	| Priority      | Normal                                             |
+	| Product       | Liferay Portal > 6.2                               |
+	| Sub-Status    | —                                                  |
+	| Component     | Activation Key & Project Administration            |
+	| System Status | Production > Functioning with limited capabilities |
+	| Attachments   | Document_1.txt                                     |''');
+
+		LocalFile.ZendeskRequest.viewComment(
+			commentContent = "Request Description",
+			table = '''| Author      | LFA Customer1       |
+	| Comment     | Request Description |
+	| Attachments | Document_1.txt      |''');
+
+		LocalFile.ZendeskRequest.uploadFileViaLargeFileUploader(table = '''| Attachment       | Document_2.txt      |
+	| Comment          | Large File Comment  |
+	| Data Region      | United States       |
+	| No Personal Data | true                |''');
+
+		LocalFile.ZendeskRequest.viewLargeFileComment(
+			commentContent = "Large File Comment",
+			table = '''| Author      | LFA Customer1       |
+	| Comment     | Large File Comment  |
+	| Attachment  | Document_2.txt      |''');
+
+		LocalFile.ProjectDetails.gotoProjectDetailsPage();
+
+		LocalFile.ProjectDetails.gotoAttachments();
+
+		LocalFile.ProjectDetails.deleteAttachment(fileKeyword = "Document_2.txt");
+
+		LocalFile.ProjectDetails.viewNoAttachment(fileKeyword = "Document_2.txt");
+	}
+
+	test Deletelargefilewithnopersonaldataasadmin {
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | lfa.customer1                       |
+	| Email Address | lfa.customer1@lrcustomer.com.broken |
+	| First Name    | LFA                                 |
+	| Last Name     | Customer1                           |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code        | LFAZENLFAZEN                  | |
+	| Data Region | United States                 | |
+	| Language    | English                       | |
+	| Name        | Lfazen - ${staticProjectName} | |
+	| Region      | United States                 | |
+	| Status      | Active                        | |
+	| Tier        | T1                            | |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Lfazen - ${staticProjectName}",
+			contactEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			table = '''| Support Requester |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Lfazen - ${staticProjectName}",
+			productName = "Portal Production",
+			table = '''| End Date                | ${staticEndDate}         |   |
+	| Original End Date       | ${staticOriginalEndDate} |   |
+	| Perpetual               | false                    |   |
+	| Product Field and Value | sizing                   | 1 |
+	| Product Field and Value | licenses                 | 1 |
+	| Product Field and Value | version                  | 6 |
+	| Quantity                | 1                        |   |
+	| Start Date              | ${staticStartDate}       |   |
+	| Status                  | Approved                 |   |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Lfazen - ${staticProjectName}",
+			productName = "Gold Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Gold Subscription");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - Portal");
+
+		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+
+		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "LFAZENLFAZEN");
+
+		LocalFile.ZendeskOrganizationAPI._viewOrganizationSyncFromOsb(organizationName = "Lfazen - ${staticProjectName}");
+
+		LocalFile.JSONUser.viewSupportUserSync(userEmailAddress = "lfa.customer1@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserSyncFromOsb(userEmailAddress = "lfa.customer1@lrcustomer.com.broken");
+
+		LocalFile.JSONUser.updateSupportPassword(
+			userEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.ZendeskUserAPI._updateUserPasswordByEmailAddress(
+			userEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			userPassword = ${staticZendeskAdminPassword});
+
+		LocalFile.OSBAdmin.logoutAndLoginToSupport(
+			userEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.ZendeskHomepage.login(
+			userEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			userPassword = ${staticZendeskAdminPassword});
+
+		LocalFile.ZendeskRequest.create(table = '''| Product       | Liferay Portal                          | 6.2                                   |
+	| Component     | Activation Key & Project Administration |                                       |
+	| System Status | Production                              | Functioning with limited capabilities |
+	| Subject       | Request Subject                         |                                       |
+	| Description   | Request Description                     |                                       |
+	| Attachments   | Document_1.txt                          |                                       |''');
+
+		LocalFile.ZendeskRequest.view(table = '''| Subject       | Request Subject                                    |
+	| Status        | OPEN                                               |
+	| Requester     | LFA Customer1                                      |
+	| Priority      | Normal                                             |
+	| Product       | Liferay Portal > 6.2                               |
+	| Sub-Status    | —                                                  |
+	| Component     | Activation Key & Project Administration            |
+	| System Status | Production > Functioning with limited capabilities |
+	| Attachments   | Document_1.txt                                     |''');
+
+		LocalFile.ZendeskRequest.viewComment(
+			commentContent = "Request Description",
+			table = '''| Author      | LFA Customer1       |
+	| Comment     | Request Description |
+	| Attachments | Document_1.txt      |''');
+
+		LocalFile.ZendeskRequest.uploadFileViaLargeFileUploader(table = '''| Attachment       | Document_2.txt      |
+	| Comment          | Large File Comment  |
+	| Data Region      | United States       |
+	| No Personal Data | true                |''');
+
+		LocalFile.ZendeskRequest.viewLargeFileComment(
+			commentContent = "Large File Comment",
+			table = '''| Author      | LFA Customer1       |
+	| Comment     | Large File Comment  |
+	| Attachment  | Document_2.txt      |''');
+
+		LocalFile.OSBAdmin.logoutAndLoginToSupport(
+			userEmailAddress = "amos.fong@liferay.com.broken",
+			userPassword = "test");
+
+		LocalFile.ProjectDetails.gotoProjectDetailsPage();
+
+		LocalFile.ProjectDetails.searchProject(projectName = "Lfazen - ${staticProjectName}");
+
+		LocalFile.ProjectDetails.gotoProject(projectName = "Lfazen - ${staticProjectName}");
+
+		LocalFile.ProjectDetails.gotoAttachments();
+
+		LocalFile.ProjectDetails.viewAttachmentDeleteLink(fileKeyword = "Document_2.txt");
+
+		LocalFile.ProjectDetails.deleteAttachment(fileKeyword = "Document_2.txt");
+
+		LocalFile.ProjectDetails.viewNoAttachment(fileKeyword = "Document_2.txt");
+	}
+
+	test Updatelargefiletonopersonaldata {
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | lfa.customer1                       |
+	| Email Address | lfa.customer1@lrcustomer.com.broken |
+	| First Name    | LFA                                 |
+	| Last Name     | Customer1                           |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code        | LFAZENLFAZEN                  | |
+	| Data Region | United States                 | |
+	| Language    | English                       | |
+	| Name        | Lfazen - ${staticProjectName} | |
+	| Region      | United States                 | |
+	| Status      | Active                        | |
+	| Tier        | T1                            | |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Lfazen - ${staticProjectName}",
+			contactEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			table = '''| Support Requester |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Lfazen - ${staticProjectName}",
+			productName = "Portal Production",
+			table = '''| End Date                | ${staticEndDate}         |   |
+	| Original End Date       | ${staticOriginalEndDate} |   |
+	| Perpetual               | false                    |   |
+	| Product Field and Value | sizing                   | 1 |
+	| Product Field and Value | licenses                 | 1 |
+	| Product Field and Value | version                  | 6 |
+	| Quantity                | 1                        |   |
+	| Start Date              | ${staticStartDate}       |   |
+	| Status                  | Approved                 |   |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Lfazen - ${staticProjectName}",
+			productName = "Gold Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Gold Subscription");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - Portal");
+
+		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+
+		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "LFAZENLFAZEN");
+
+		LocalFile.ZendeskOrganizationAPI._viewOrganizationSyncFromOsb(organizationName = "Lfazen - ${staticProjectName}");
+
+		LocalFile.JSONUser.viewSupportUserSync(userEmailAddress = "lfa.customer1@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserSyncFromOsb(userEmailAddress = "lfa.customer1@lrcustomer.com.broken");
+
+		LocalFile.JSONUser.updateSupportPassword(
+			userEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.ZendeskUserAPI._updateUserPasswordByEmailAddress(
+			userEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			userPassword = ${staticZendeskAdminPassword});
+
+		LocalFile.OSBAdmin.logoutAndLoginToSupport(
+			userEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.ZendeskHomepage.login(
+			userEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			userPassword = ${staticZendeskAdminPassword});
+
+		LocalFile.ZendeskRequest.create(table = '''| Product       | Liferay Portal                          | 6.2                                   |
+	| Component     | Activation Key & Project Administration |                                       |
+	| System Status | Production                              | Functioning with limited capabilities |
+	| Subject       | Request Subject                         |                                       |
+	| Description   | Request Description                     |                                       |
+	| Attachments   | Document_1.txt                          |                                       |''');
+
+		LocalFile.ZendeskRequest.view(table = '''| Subject       | Request Subject                                    |
+	| Status        | OPEN                                               |
+	| Requester     | LFA Customer1                                      |
+	| Priority      | Normal                                             |
+	| Product       | Liferay Portal > 6.2                               |
+	| Sub-Status    | —                                                  |
+	| Component     | Activation Key & Project Administration            |
+	| System Status | Production > Functioning with limited capabilities |
+	| Attachments   | Document_1.txt                                     |''');
+
+		LocalFile.ZendeskRequest.viewComment(
+			commentContent = "Request Description",
+			table = '''| Author      | LFA Customer1       |
+	| Comment     | Request Description |
+	| Attachments | Document_1.txt      |''');
+
+		LocalFile.ZendeskRequest.uploadFileViaLargeFileUploader(table = '''| Attachment       | Document_2.txt      |
+	| Comment          | Large File Comment  |
+	| Data Region      | United States       |
+	| No Personal Data | false               |''');
+
+		LocalFile.ZendeskRequest.viewLargeFileComment(
+			commentContent = "Large File Comment",
+			table = '''| Author      | LFA Customer1       |
+	| Comment     | Large File Comment  |
+	| Attachment  | Document_2.txt      |''');
+
+		LocalFile.ProjectDetails.gotoProjectDetailsPage();
+
+		LocalFile.ProjectDetails.gotoAttachments();
+
+		LocalFile.ProjectDetails.editAttachmentToBeAccessibleFromAnywhere(fileKeyword = "Document_2.txt");
+
+		LocalFile.ProjectDetails.viewAttachment(
+			fileKeyword = "Document_2.txt",
+			table = '''| Ticket                         | ${staticRequestId} |
+	| File Name                      | Document_2.txt     |
+	| File Name Link                 | false              |
+	| File Size                      | 1KB                |
+	| Attached                       | LFA Customer1      |
+	| Does Not Contain Personal Data | true               |''');
+
+		LocalFile.ProjectDetails.viewAttachmentDeleteLink(fileKeyword = "Document_2.txt");
+	}
+
+	@help.center.acceptance = "true"
+	test Uploadlargefile {
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | lfa.customer1                       |
+	| Email Address | lfa.customer1@lrcustomer.com.broken |
+	| First Name    | LFA                                 |
+	| Last Name     | Customer1                           |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code        | LFAZENLFAZEN                  | |
+	| Data Region | United States                 | |
+	| Language    | English                       | |
+	| Name        | Lfazen - ${staticProjectName} | |
+	| Region      | United States                 | |
+	| Status      | Active                        | |
+	| Tier        | T1                            | |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Lfazen - ${staticProjectName}",
+			contactEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			table = '''| Support Requester |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Lfazen - ${staticProjectName}",
+			productName = "Portal Production",
+			table = '''| End Date                | ${staticEndDate}         |   |
+	| Original End Date       | ${staticOriginalEndDate} |   |
+	| Perpetual               | false                    |   |
+	| Product Field and Value | sizing                   | 1 |
+	| Product Field and Value | licenses                 | 1 |
+	| Product Field and Value | version                  | 6 |
+	| Quantity                | 1                        |   |
+	| Start Date              | ${staticStartDate}       |   |
+	| Status                  | Approved                 |   |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Lfazen - ${staticProjectName}",
+			productName = "Gold Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Gold Subscription");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - Portal");
+
+		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+
+		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "LFAZENLFAZEN");
+
+		LocalFile.ZendeskOrganizationAPI._viewOrganizationSyncFromOsb(organizationName = "Lfazen - ${staticProjectName}");
+
+		LocalFile.JSONUser.viewSupportUserSync(userEmailAddress = "lfa.customer1@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserSyncFromOsb(userEmailAddress = "lfa.customer1@lrcustomer.com.broken");
+
+		LocalFile.JSONUser.updateSupportPassword(
+			userEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.ZendeskUserAPI._updateUserPasswordByEmailAddress(
+			userEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			userPassword = ${staticZendeskAdminPassword});
+
+		LocalFile.OSBAdmin.logoutAndLoginToSupport(
+			userEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.ZendeskHomepage.login(
+			userEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			userPassword = ${staticZendeskAdminPassword});
+
+		LocalFile.ZendeskRequest.create(table = '''| Product       | Liferay Portal                          | 6.2                                   |
+	| Component     | Activation Key & Project Administration |                                       |
+	| System Status | Production                              | Functioning with limited capabilities |
+	| Subject       | Request Subject                         |                                       |
+	| Description   | Request Description                     |                                       |
+	| Attachments   | Document_1.txt                          |                                       |''');
+
+		LocalFile.ZendeskRequest.view(table = '''| Subject       | Request Subject                                    |
+	| Status        | OPEN                                               |
+	| Requester     | LFA Customer1                                      |
+	| Priority      | Normal                                             |
+	| Product       | Liferay Portal > 6.2                               |
+	| Sub-Status    | —                                                  |
+	| Component     | Activation Key & Project Administration            |
+	| System Status | Production > Functioning with limited capabilities |
+	| Attachments   | Document_1.txt                                     |''');
+
+		LocalFile.ZendeskRequest.viewComment(
+			commentContent = "Request Description",
+			table = '''| Author      | LFA Customer1       |
+	| Comment     | Request Description |
+	| Attachments | Document_1.txt      |''');
+
+		LocalFile.ZendeskRequest.uploadFileViaLargeFileUploader(table = '''| Attachment       | Document_2.txt      |
+	| Comment          | Large File Comment  |
+	| Data Region      | United States       |
+	| No Personal Data | false               |''');
+
+		LocalFile.ZendeskRequest.viewLargeFileComment(
+			commentContent = "Large File Comment",
+			table = '''| Author      | LFA Customer1       |
+	| Comment     | Large File Comment  |
+	| Attachment  | Document_2.txt      |''');
+
+		LocalFile.ProjectDetails.gotoProjectDetailsPage();
+
+		LocalFile.ProjectDetails.gotoAttachments();
+
+		LocalFile.ProjectDetails.viewAttachment(
+			fileKeyword = "Document_2.txt",
+			table = '''| Ticket                         | ${staticRequestId} |
+	| File Name                      | Document_2.txt     |
+	| File Name Link                 | false              |
+	| File Size                      | 1KB                |
+	| Attached                       | LFA Customer1      |
+	| Does Not Contain Personal Data | false              |''');
+
+		LocalFile.ProjectDetails.viewAttachmentActionsLink(fileKeyword = "Document_2.txt");
+	}
+
+	test Uploadlargefileforaccountwithnodataregion {
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | lfa.customer1                       |
+	| Email Address | lfa.customer1@lrcustomer.com.broken |
+	| First Name    | LFA                                 |
+	| Last Name     | Customer1                           |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code   | LFAZENLFAZEN                  | |
+	| Name   | Lfazen - ${staticProjectName} | |
+	| Status | Active                        | |
+	| Tier   | T1                            | |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Lfazen - ${staticProjectName}",
+			contactEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			table = '''| Support Requester |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Lfazen - ${staticProjectName}",
+			productName = "Portal Production",
+			table = '''| End Date                | ${staticEndDate}         |   |
+	| Original End Date       | ${staticOriginalEndDate} |   |
+	| Perpetual               | false                    |   |
+	| Product Field and Value | sizing                   | 1 |
+	| Product Field and Value | licenses                 | 1 |
+	| Product Field and Value | version                  | 6 |
+	| Quantity                | 1                        |   |
+	| Start Date              | ${staticStartDate}       |   |
+	| Status                  | Approved                 |   |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Lfazen - ${staticProjectName}",
+			productName = "Gold Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Gold Subscription");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - Portal");
+
+		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+
+		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "LFAZENLFAZEN");
+
+		LocalFile.ZendeskOrganizationAPI._viewOrganizationSyncFromOsb(organizationName = "Lfazen - ${staticProjectName}");
+
+		LocalFile.JSONUser.viewSupportUserSync(userEmailAddress = "lfa.customer1@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserSyncFromOsb(userEmailAddress = "lfa.customer1@lrcustomer.com.broken");
+
+		LocalFile.JSONUser.updateSupportPassword(
+			userEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.ZendeskUserAPI._updateUserPasswordByEmailAddress(
+			userEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			userPassword = ${staticZendeskAdminPassword});
+
+		LocalFile.OSBAdmin.logoutAndLoginToSupport(
+			userEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.ZendeskHomepage.login(
+			userEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			userPassword = ${staticZendeskAdminPassword});
+
+		LocalFile.ZendeskRequest.create(table = '''| Product       | Liferay Portal                          | 6.2                                   |
+	| Component     | Activation Key & Project Administration |                                       |
+	| System Status | Production                              | Functioning with limited capabilities |
+	| Subject       | Request Subject                         |                                       |
+	| Description   | Request Description                     |                                       |
+	| Attachments   | Document_1.txt                          |                                       |''');
+
+		LocalFile.ZendeskRequest.view(table = '''| Subject       | Request Subject                                    |
+	| Status        | OPEN                                               |
+	| Requester     | LFA Customer1                                      |
+	| Priority      | Normal                                             |
+	| Product       | Liferay Portal > 6.2                               |
+	| Sub-Status    | —                                                  |
+	| Component     | Activation Key & Project Administration            |
+	| System Status | Production > Functioning with limited capabilities |
+	| Attachments   | Document_1.txt                                     |''');
+
+		LocalFile.ZendeskRequest.viewComment(
+			commentContent = "Request Description",
+			table = '''| Author      | LFA Customer1       |
+	| Comment     | Request Description |
+	| Attachments | Document_1.txt      |''');
+
+		LocalFile.ZendeskRequest.uploadFileViaLargeFileUploader(table = '''| Attachment       | Document_2.txt     |
+	| Comment          | Large File Comment |
+	| Data Region      | United States      |
+	| No Personal Data | false              |''');
+
+		LocalFile.ZendeskRequest.viewLargeFileComment(
+			commentContent = "Large File Comment",
+			table = '''| Author      | LFA Customer1       |
+	| Comment     | Large File Comment  |
+	| Attachment  | Document_2.txt      |''');
+	}
+
+	test UploadlargefileforBrazildataregion {
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | lfa.customer1                       |
+	| Email Address | lfa.customer1@lrcustomer.com.broken |
+	| First Name    | LFA                                 |
+	| Last Name     | Customer1                           |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code        | LFAZENLFAZEN                  | |
+	| Data Region | Brazil                        | |
+	| Language    | Portuguese                    | |
+	| Name        | Lfazen - ${staticProjectName} | |
+	| Region      | Brazil                        | |
+	| Status      | Active                        | |
+	| Tier        | T1                            | |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Lfazen - ${staticProjectName}",
+			contactEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			table = '''| Support Requester |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Lfazen - ${staticProjectName}",
+			productName = "Portal Production",
+			table = '''| End Date                | ${staticEndDate}         |   |
+	| Original End Date       | ${staticOriginalEndDate} |   |
+	| Perpetual               | false                    |   |
+	| Product Field and Value | sizing                   | 1 |
+	| Product Field and Value | licenses                 | 1 |
+	| Product Field and Value | version                  | 6 |
+	| Quantity                | 1                        |   |
+	| Start Date              | ${staticStartDate}       |   |
+	| Status                  | Approved                 |   |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Lfazen - ${staticProjectName}",
+			productName = "Gold Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Gold Subscription");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - Portal");
+
+		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+
+		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "LFAZENLFAZEN");
+
+		LocalFile.ZendeskOrganizationAPI._viewOrganizationSyncFromOsb(organizationName = "Lfazen - ${staticProjectName}");
+
+		LocalFile.JSONUser.viewSupportUserSync(userEmailAddress = "lfa.customer1@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserSyncFromOsb(userEmailAddress = "lfa.customer1@lrcustomer.com.broken");
+
+		LocalFile.JSONUser.updateSupportPassword(
+			userEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.ZendeskUserAPI._updateUserPasswordByEmailAddress(
+			userEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			userPassword = ${staticZendeskAdminPassword});
+
+		LocalFile.OSBAdmin.logoutAndLoginToSupport(
+			userEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.ZendeskHomepage.login(
+			userEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			userPassword = ${staticZendeskAdminPassword});
+
+		LocalFile.ZendeskRequest.create(table = '''| Product       | Liferay Portal                          | 6.2                                   |
+	| Component     | Activation Key & Project Administration |                                       |
+	| System Status | Production                              | Functioning with limited capabilities |
+	| Subject       | Request Subject                         |                                       |
+	| Description   | Request Description                     |                                       |
+	| Attachments   | Document_1.txt                          |                                       |''');
+
+		LocalFile.ZendeskRequest.view(table = '''| Subject       | Request Subject                                    |
+	| Status        | OPEN                                               |
+	| Requester     | LFA Customer1                                      |
+	| Priority      | Normal                                             |
+	| Product       | Liferay Portal > 6.2                               |
+	| Sub-Status    | —                                                  |
+	| Component     | Activation Key & Project Administration            |
+	| System Status | Production > Functioning with limited capabilities |
+	| Attachments   | Document_1.txt                                     |''');
+
+		LocalFile.ZendeskRequest.viewComment(
+			commentContent = "Request Description",
+			table = '''| Author      | LFA Customer1       |
+	| Comment     | Request Description |
+	| Attachments | Document_1.txt      |''');
+
+		LocalFile.ZendeskRequest.uploadFileViaLargeFileUploader(table = '''| Attachment       | Document_2.txt      |
+	| Comment          | Large File Comment  |
+	| Data Region      | European Union      |
+	| No Personal Data | false               |''');
+
+		LocalFile.ZendeskRequest.viewLargeFileComment(
+			commentContent = "Large File Comment",
+			table = '''| Author      | LFA Customer1       |
+	| Comment     | Large File Comment  |
+	| Attachment  | Document_2.txt      |''');
+	}
+
+	@help.center.acceptance = "true"
+	test UploadlargefileforHungarydataregion {
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | lfa.customer1                       |
+	| Email Address | lfa.customer1@lrcustomer.com.broken |
+	| First Name    | LFA                                 |
+	| Last Name     | Customer1                           |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code        | LFAZENLFAZEN                  | |
+	| Data Region | Hungary                       | |
+	| Language    | English                       | |
+	| Name        | Lfazen - ${staticProjectName} | |
+	| Region      | Hungary                       | |
+	| Status      | Active                        | |
+	| Tier        | T1                            | |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Lfazen - ${staticProjectName}",
+			contactEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			table = '''| Support Requester |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Lfazen - ${staticProjectName}",
+			productName = "Portal Production",
+			table = '''| End Date                | ${staticEndDate}         |   |
+	| Original End Date       | ${staticOriginalEndDate} |   |
+	| Perpetual               | false                    |   |
+	| Product Field and Value | sizing                   | 1 |
+	| Product Field and Value | licenses                 | 1 |
+	| Product Field and Value | version                  | 6 |
+	| Quantity                | 1                        |   |
+	| Start Date              | ${staticStartDate}       |   |
+	| Status                  | Approved                 |   |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Lfazen - ${staticProjectName}",
+			productName = "Gold Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Gold Subscription");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - Portal");
+
+		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+
+		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "LFAZENLFAZEN");
+
+		LocalFile.ZendeskOrganizationAPI._viewOrganizationSyncFromOsb(organizationName = "Lfazen - ${staticProjectName}");
+
+		LocalFile.JSONUser.viewSupportUserSync(userEmailAddress = "lfa.customer1@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserSyncFromOsb(userEmailAddress = "lfa.customer1@lrcustomer.com.broken");
+
+		LocalFile.JSONUser.updateSupportPassword(
+			userEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.ZendeskUserAPI._updateUserPasswordByEmailAddress(
+			userEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			userPassword = ${staticZendeskAdminPassword});
+
+		LocalFile.OSBAdmin.logoutAndLoginToSupport(
+			userEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.ZendeskHomepage.login(
+			userEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			userPassword = ${staticZendeskAdminPassword});
+
+		LocalFile.ZendeskRequest.create(table = '''| Product       | Liferay Portal                          | 6.2                                   |
+	| Component     | Activation Key & Project Administration |                                       |
+	| System Status | Production                              | Functioning with limited capabilities |
+	| Subject       | Request Subject                         |                                       |
+	| Description   | Request Description                     |                                       |
+	| Attachments   | Document_1.txt                          |                                       |''');
+
+		LocalFile.ZendeskRequest.view(table = '''| Subject       | Request Subject                                    |
+	| Status        | OPEN                                               |
+	| Requester     | LFA Customer1                                      |
+	| Priority      | Normal                                             |
+	| Product       | Liferay Portal > 6.2                               |
+	| Sub-Status    | —                                                  |
+	| Component     | Activation Key & Project Administration            |
+	| System Status | Production > Functioning with limited capabilities |
+	| Attachments   | Document_1.txt                                     |''');
+
+		LocalFile.ZendeskRequest.viewComment(
+			commentContent = "Request Description",
+			table = '''| Author      | LFA Customer1       |
+	| Comment     | Request Description |
+	| Attachments | Document_1.txt      |''');
+
+		LocalFile.ZendeskRequest.uploadFileViaLargeFileUploader(table = '''| Attachment       | Document_2.txt      |
+	| Comment          | Large File Comment  |
+	| Data Region      | European Union      |
+	| No Personal Data | false               |''');
+
+		LocalFile.ZendeskRequest.viewLargeFileComment(
+			commentContent = "Large File Comment",
+			table = '''| Author      | LFA Customer1       |
+	| Comment     | Large File Comment  |
+	| Attachment  | Document_2.txt      |''');
+	}
+
+	test UploadlargefileforJapandataregion {
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | lfa.customer1                       |
+	| Email Address | lfa.customer1@lrcustomer.com.broken |
+	| First Name    | LFA                                 |
+	| Last Name     | Customer1                           |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code        | LFAZENLFAZEN                  | |
+	| Data Region | Japan                         | |
+	| Language    | English                       | |
+	| Name        | Lfazen - ${staticProjectName} | |
+	| Region      | Australia                     | |
+	| Status      | Active                        | |
+	| Tier        | T1                            | |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Lfazen - ${staticProjectName}",
+			contactEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			table = '''| Support Requester |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Lfazen - ${staticProjectName}",
+			productName = "Portal Production",
+			table = '''| End Date                | ${staticEndDate}         |   |
+	| Original End Date       | ${staticOriginalEndDate} |   |
+	| Perpetual               | false                    |   |
+	| Product Field and Value | sizing                   | 1 |
+	| Product Field and Value | licenses                 | 1 |
+	| Product Field and Value | version                  | 6 |
+	| Quantity                | 1                        |   |
+	| Start Date              | ${staticStartDate}       |   |
+	| Status                  | Approved                 |   |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Lfazen - ${staticProjectName}",
+			productName = "Gold Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Gold Subscription");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - Portal");
+
+		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+
+		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "LFAZENLFAZEN");
+
+		LocalFile.ZendeskOrganizationAPI._viewOrganizationSyncFromOsb(organizationName = "Lfazen - ${staticProjectName}");
+
+		LocalFile.JSONUser.viewSupportUserSync(userEmailAddress = "lfa.customer1@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserSyncFromOsb(userEmailAddress = "lfa.customer1@lrcustomer.com.broken");
+
+		LocalFile.JSONUser.updateSupportPassword(
+			userEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.ZendeskUserAPI._updateUserPasswordByEmailAddress(
+			userEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			userPassword = ${staticZendeskAdminPassword});
+
+		LocalFile.OSBAdmin.logoutAndLoginToSupport(
+			userEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.ZendeskHomepage.login(
+			userEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			userPassword = ${staticZendeskAdminPassword});
+
+		LocalFile.ZendeskRequest.create(table = '''| Product       | Liferay Portal                          | 6.2                                   |
+	| Component     | Activation Key & Project Administration |                                       |
+	| System Status | Production                              | Functioning with limited capabilities |
+	| Subject       | Request Subject                         |                                       |
+	| Description   | Request Description                     |                                       |
+	| Attachments   | Document_1.txt                          |                                       |''');
+
+		LocalFile.ZendeskRequest.view(table = '''| Subject       | Request Subject                                    |
+	| Status        | OPEN                                               |
+	| Requester     | LFA Customer1                                      |
+	| Priority      | Normal                                             |
+	| Product       | Liferay Portal > 6.2                               |
+	| Sub-Status    | —                                                  |
+	| Component     | Activation Key & Project Administration            |
+	| System Status | Production > Functioning with limited capabilities |
+	| Attachments   | Document_1.txt                                     |''');
+
+		LocalFile.ZendeskRequest.viewComment(
+			commentContent = "Request Description",
+			table = '''| Author      | LFA Customer1       |
+	| Comment     | Request Description |
+	| Attachments | Document_1.txt      |''');
+
+		LocalFile.ZendeskRequest.uploadFileViaLargeFileUploader(table = '''| Attachment       | Document_2.txt      |
+	| Comment          | Large File Comment  |
+	| Data Region      | European Union      |
+	| No Personal Data | false               |''');
+
+		LocalFile.ZendeskRequest.viewLargeFileComment(
+			commentContent = "Large File Comment",
+			table = '''| Author      | LFA Customer1       |
+	| Comment     | Large File Comment  |
+	| Attachment  | Document_2.txt      |''');
+	}
+
+	test Uploadlargefileonsolvedticket {
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | lfa.customer1                       |
+	| Email Address | lfa.customer1@lrcustomer.com.broken |
+	| First Name    | LFA                                 |
+	| Last Name     | Customer1                           |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code        | LFAZENLFAZEN                  | |
+	| Language    | English                       | |
+	| Data Region | United States                 | |
+	| Name        | Lfazen - ${staticProjectName} | |
+	| Region      | United States                 | |
+	| Status      | Active                        | |
+	| Tier        | T1                            | |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Lfazen - ${staticProjectName}",
+			contactEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			table = '''| Support Requester |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Lfazen - ${staticProjectName}",
+			productName = "Portal Production",
+			table = '''| End Date                | ${staticEndDate}         |   |
+	| Original End Date       | ${staticOriginalEndDate} |   |
+	| Perpetual               | false                    |   |
+	| Product Field and Value | sizing                   | 1 |
+	| Product Field and Value | licenses                 | 1 |
+	| Product Field and Value | version                  | 6 |
+	| Quantity                | 1                        |   |
+	| Start Date              | ${staticStartDate}       |   |
+	| Status                  | Approved                 |   |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Lfazen - ${staticProjectName}",
+			productName = "Gold Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Gold Subscription");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - Portal");
+
+		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+
+		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "LFAZENLFAZEN");
+
+		LocalFile.ZendeskOrganizationAPI._viewOrganizationSyncFromOsb(organizationName = "Lfazen - ${staticProjectName}");
+
+		LocalFile.JSONUser.viewSupportUserSync(userEmailAddress = "lfa.customer1@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserSyncFromOsb(userEmailAddress = "lfa.customer1@lrcustomer.com.broken");
+
+		LocalFile.JSONUser.updateSupportPassword(
+			userEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.ZendeskUserAPI._updateUserPasswordByEmailAddress(
+			userEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			userPassword = ${staticZendeskAdminPassword});
+
+		LocalFile.OSBAdmin.logoutAndLoginToSupport(
+			userEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.ZendeskHomepage.login(
+			userEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			userPassword = ${staticZendeskAdminPassword});
+
+		LocalFile.ZendeskRequest.create(table = '''| Product       | Liferay Portal                          | 6.2                                   |
+	| Component     | Activation Key & Project Administration |                                       |
+	| System Status | Production                              | Functioning with limited capabilities |
+	| Subject       | Request Subject                         |                                       |
+	| Description   | Request Description                     |                                       |
+	| Attachments   | Document_1.txt                          |                                       |''');
+
+		LocalFile.ZendeskTicketAPI._changeTicketStatusAndSubStatusAndLongTermResolution(
+			ticketId = ${staticRequestId},
+			ticketLongTermResolution = "bug_fix",
+			ticketStatus = "solved",
+			ticketSubStatus = "completed");
+
+		LocalFile.ZendeskHomepage.gotoMyActivities();
+
+		LocalFile.ZendeskRequest.gotoViaIndex(requestSubject = "Request Subject");
+
+		LocalFile.ZendeskRequest.view(table = '''| Subject       | Request Subject                                    |
+	| Status        | SOLVED                                             |
+	| Requester     | LFA Customer1                                      |
+	| Priority      | Normal                                             |
+	| Product       | Liferay Portal > 6.2                               |
+	| Sub-Status    | Completed                                          |
+	| Component     | Activation Key & Project Administration            |
+	| System Status | Production > Functioning with limited capabilities |
+	| Attachments   | Document_1.txt                                     |''');
+
+		LocalFile.ZendeskRequest.viewComment(
+			commentContent = "Request Description",
+			table = '''| Author      | LFA Customer1       |
+	| Comment     | Request Description |
+	| Attachments | Document_1.txt      |''');
+
+		LocalFile.ZendeskRequest.uploadFileViaLargeFileUploader(table = '''| Attachment       | Document_2.txt      |
+	| Comment          | Large File Comment  |
+	| Data Region      | United States       |
+	| No Personal Data | false               |''');
+
+		LocalFile.ZendeskRequest.viewLargeFileComment(
+			commentContent = "Large File Comment",
+			table = '''| Author      | LFA Customer1       |
+	| Comment     | Large File Comment  |
+	| Attachment  | Document_2.txt      |''');
+
+		LocalFile.ZendeskRequest.view(table = '''| Subject       | Request Subject                                    |
+	| Status        | OPEN                                               |
+	| Requester     | LFA Customer1                                      |
+	| Priority      | Normal                                             |
+	| Product       | Liferay Portal > 6.2                               |
+	| Sub-Status    | —                                                  |
+	| Component     | Activation Key & Project Administration            |
+	| System Status | Production > Functioning with limited capabilities |
+	| Attachments   | Document_1.txt                                     |''');
+	}
+
+	test Uploadlargefiles {
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | lfa.customer1                       |
+	| Email Address | lfa.customer1@lrcustomer.com.broken |
+	| First Name    | LFA                                 |
+	| Last Name     | Customer1                           |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code        | LFAZENLFAZEN                  | |
+	| Data Region | United States                 | |
+	| Language    | English                       | |
+	| Name        | Lfazen - ${staticProjectName} | |
+	| Region      | United States                 | |
+	| Status      | Active                        | |
+	| Tier        | T1                            | |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Lfazen - ${staticProjectName}",
+			contactEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			table = '''| Support Requester |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Lfazen - ${staticProjectName}",
+			productName = "Portal Production",
+			table = '''| End Date                | ${staticEndDate}         |   |
+	| Original End Date       | ${staticOriginalEndDate} |   |
+	| Perpetual               | false                    |   |
+	| Product Field and Value | sizing                   | 1 |
+	| Product Field and Value | licenses                 | 1 |
+	| Product Field and Value | version                  | 6 |
+	| Quantity                | 1                        |   |
+	| Start Date              | ${staticStartDate}       |   |
+	| Status                  | Approved                 |   |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Lfazen - ${staticProjectName}",
+			productName = "Gold Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Gold Subscription");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - Portal");
+
+		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+
+		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "LFAZENLFAZEN");
+
+		LocalFile.ZendeskOrganizationAPI._viewOrganizationSyncFromOsb(organizationName = "Lfazen - ${staticProjectName}");
+
+		LocalFile.JSONUser.viewSupportUserSync(userEmailAddress = "lfa.customer1@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserSyncFromOsb(userEmailAddress = "lfa.customer1@lrcustomer.com.broken");
+
+		LocalFile.JSONUser.updateSupportPassword(
+			userEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.ZendeskUserAPI._updateUserPasswordByEmailAddress(
+			userEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			userPassword = ${staticZendeskAdminPassword});
+
+		LocalFile.OSBAdmin.logoutAndLoginToSupport(
+			userEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.ZendeskHomepage.login(
+			userEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			userPassword = ${staticZendeskAdminPassword});
+
+		LocalFile.ZendeskRequest.create(table = '''| Product       | Liferay Portal                          | 6.2                                   |
+	| Component     | Activation Key & Project Administration |                                       |
+	| System Status | Production                              | Functioning with limited capabilities |
+	| Subject       | Request Subject                         |                                       |
+	| Description   | Request Description                     |                                       |
+	| Attachments   | Document_1.txt                          |                                       |''');
+
+		LocalFile.ZendeskRequest.view(table = '''| Subject       | Request Subject                                    |
+	| Status        | OPEN                                               |
+	| Requester     | LFA Customer1                                      |
+	| Priority      | Normal                                             |
+	| Product       | Liferay Portal > 6.2                               |
+	| Sub-Status    | —                                                  |
+	| Component     | Activation Key & Project Administration            |
+	| System Status | Production > Functioning with limited capabilities |
+	| Attachments   | Document_1.txt                                     |''');
+
+		LocalFile.ZendeskRequest.viewComment(
+			commentContent = "Request Description",
+			table = '''| Author      | LFA Customer1       |
+	| Comment     | Request Description |
+	| Attachments | Document_1.txt      |''');
+
+		LocalFile.ZendeskRequest.uploadFileViaLargeFileUploader(table = '''| Attachment       | Document_2.txt      |
+	| Comment          | Large File Comment1 |
+	| Data Region      | United States       |
+	| No Personal Data | false               |''');
+
+		LocalFile.ZendeskRequest.viewLargeFileComment(
+			commentContent = "Large File Comment1",
+			table = '''| Author      | LFA Customer1       |
+	| Comment     | Large File Comment1 |
+	| Attachment  | Document_2.txt      |''');
+
+		LocalFile.ZendeskHomepage.acceptAllCookies();
+
+		LocalFile.ZendeskRequest.uploadFileViaLargeFileUploader(table = '''| Attachment       | Document_3.txt      |
+	| Comment          | Large File Comment2 |
+	| Data Region      | United States       |
+	| No Personal Data | false               |''');
+
+		LocalFile.ZendeskRequest.viewLargeFileComment(
+			commentContent = "Large File Comment2",
+			table = '''| Author      | LFA Customer1       |
+	| Comment     | Large File Comment2 |
+	| Attachment  | Document_3.txt      |''');
+
+		LocalFile.ProjectDetails.gotoProjectDetailsPage();
+
+		LocalFile.ProjectDetails.gotoAttachments();
+
+		LocalFile.ProjectDetails.viewAttachment(
+			fileKeyword = "Document_2.txt",
+			table = '''| Ticket                         | ${staticRequestId} |
+	| File Name                      | Document_2.txt     |
+	| File Name Link                 | false              |
+	| File Size                      | 1KB                |
+	| Attached                       | LFA Customer1      |
+	| Does Not Contain Personal Data | false              |''');
+
+		LocalFile.ProjectDetails.viewAttachmentActionsLink(fileKeyword = "Document_2.txt");
+
+		LocalFile.ProjectDetails.viewAttachment(
+			fileKeyword = "Document_3.txt",
+			table = '''| Ticket                         | ${staticRequestId} |
+	| File Name                      | Document_3.txt     |
+	| File Name Link                 | false              |
+	| File Size                      | 1KB                |
+	| Attached                       | LFA Customer1      |
+	| Does Not Contain Personal Data | false              |''');
+
+		LocalFile.ProjectDetails.viewAttachmentActionsLink(fileKeyword = "Document_3.txt");
+	}
+
+	test Uploadlargefilestodifferenttickets {
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | lfa.customer1                       |
+	| Email Address | lfa.customer1@lrcustomer.com.broken |
+	| First Name    | LFA                                 |
+	| Last Name     | Customer1                           |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code        | LFAZENLFAZEN                  | |
+	| Data Region | United States                 | |
+	| Language    | English                       | |
+	| Name        | Lfazen - ${staticProjectName} | |
+	| Region      | United States                 | |
+	| Status      | Active                        | |
+	| Tier        | T1                            | |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Lfazen - ${staticProjectName}",
+			contactEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			table = '''| Support Requester |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Lfazen - ${staticProjectName}",
+			productName = "Portal Production",
+			table = '''| End Date                | ${staticEndDate}         |   |
+	| Original End Date       | ${staticOriginalEndDate} |   |
+	| Perpetual               | false                    |   |
+	| Product Field and Value | sizing                   | 1 |
+	| Product Field and Value | licenses                 | 1 |
+	| Product Field and Value | version                  | 6 |
+	| Quantity                | 1                        |   |
+	| Start Date              | ${staticStartDate}       |   |
+	| Status                  | Approved                 |   |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Lfazen - ${staticProjectName}",
+			productName = "Gold Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Gold Subscription");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - Portal");
+
+		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+
+		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "LFAZENLFAZEN");
+
+		LocalFile.ZendeskOrganizationAPI._viewOrganizationSyncFromOsb(organizationName = "Lfazen - ${staticProjectName}");
+
+		LocalFile.JSONUser.viewSupportUserSync(userEmailAddress = "lfa.customer1@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserSyncFromOsb(userEmailAddress = "lfa.customer1@lrcustomer.com.broken");
+
+		LocalFile.JSONUser.updateSupportPassword(
+			userEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.ZendeskUserAPI._updateUserPasswordByEmailAddress(
+			userEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			userPassword = ${staticZendeskAdminPassword});
+
+		LocalFile.OSBAdmin.logoutAndLoginToSupport(
+			userEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.ZendeskHomepage.login(
+			userEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			userPassword = ${staticZendeskAdminPassword});
+
+		LocalFile.ZendeskRequest.create(table = '''| Product       | Liferay Portal                          | 6.2                                   |
+	| Component     | Activation Key & Project Administration |                                       |
+	| System Status | Production                              | Functioning with limited capabilities |
+	| Subject       | Request1 Subject                        |                                       |
+	| Description   | Request1 Description                    |                                       |
+	| Attachments   | Document_1.txt                          |                                       |''');
+
+		LocalFile.ZendeskRequest.renameFirstRequestIdVariable();
+
+		LocalFile.ZendeskRequest.view(table = '''| Subject       | Request1 Subject                                   |
+	| Status        | OPEN                                               |
+	| Requester     | LFA Customer1                                      |
+	| Priority      | Normal                                             |
+	| Product       | Liferay Portal > 6.2                               |
+	| Sub-Status    | —                                                  |
+	| Component     | Activation Key & Project Administration            |
+	| System Status | Production > Functioning with limited capabilities |
+	| Attachments   | Document_1.txt                                     |''');
+
+		LocalFile.ZendeskRequest.viewComment(
+			commentContent = "Request1 Description",
+			table = '''| Author      | LFA Customer1        |
+	| Comment     | Request1 Description |
+	| Attachments | Document_1.txt       |''');
+
+		LocalFile.ZendeskRequest.uploadFileViaLargeFileUploader(table = '''| Attachment       | Document_2.txt      |
+	| Comment          | Large File Comment1 |
+	| Data Region      | United States       |
+	| No Personal Data | false               |''');
+
+		LocalFile.ZendeskRequest.viewLargeFileComment(
+			commentContent = "Large File Comment1",
+			table = '''| Author      | LFA Customer1       |
+	| Comment     | Large File Comment1 |
+	| Attachment  | Document_2.txt      |''');
+
+		LocalFile.ZendeskHomepage.gotoHomePage();
+
+		LocalFile.ZendeskHomepage.acceptAllCookies();
+
+		LocalFile.ZendeskRequest.create(table = '''| Product       | Liferay Portal                          | 6.2                                   |
+	| Component     | Activation Key & Project Administration |                                       |
+	| System Status | Production                              | Functioning with limited capabilities |
+	| Subject       | Request2 Subject                        |                                       |
+	| Description   | Request2 Description                    |                                       |
+	| Attachments   | Document_3.txt                          |                                       |''');
+
+		LocalFile.ZendeskRequest.renameSecondRequestIdVariable();
+
+		LocalFile.ZendeskRequest.view(table = '''| Subject       | Request2 Subject                                   |
+	| Status        | OPEN                                               |
+	| Requester     | LFA Customer1                                      |
+	| Priority      | Normal                                             |
+	| Product       | Liferay Portal > 6.2                               |
+	| Sub-Status    | —                                                  |
+	| Component     | Activation Key & Project Administration            |
+	| System Status | Production > Functioning with limited capabilities |
+	| Attachments   | Document_3.txt                                     |''');
+
+		LocalFile.ZendeskRequest.viewComment(
+			commentContent = "Request2 Description",
+			table = '''| Author      | LFA Customer1        |
+	| Comment     | Request2 Description |
+	| Attachments | Document_3.txt       |''');
+
+		LocalFile.ZendeskRequest.uploadFileViaLargeFileUploader(table = '''| Attachment       | Document_4.txt      |
+	| Comment          | Large File Comment2 |
+	| Data Region      | United States       |
+	| No Personal Data | false               |''');
+
+		LocalFile.ZendeskRequest.viewLargeFileComment(
+			commentContent = "Large File Comment2",
+			table = '''| Author      | LFA Customer1       |
+	| Comment     | Large File Comment2 |
+	| Attachment  | Document_4.txt      |''');
+
+		LocalFile.ProjectDetails.gotoProjectDetailsPage();
+
+		LocalFile.ProjectDetails.gotoAttachments();
+
+		LocalFile.ProjectDetails.viewAttachment(
+			fileKeyword = "Document_2.txt",
+			table = '''| Ticket                         | ${staticRequestId1} |
+	| File Name                      | Document_2.txt      |
+	| File Name Link                 | false               |
+	| File Size                      | 1KB                 |
+	| Attached                       | LFA Customer1       |
+	| Does Not Contain Personal Data | false               |''');
+
+		LocalFile.ProjectDetails.viewAttachmentActionsLink(fileKeyword = "Document_2.txt");
+
+		LocalFile.ProjectDetails.viewAttachment(
+			fileKeyword = "Document_4.txt",
+			table = '''| Ticket                         | ${staticRequestId2} |
+	| File Name                      | Document_4.txt      |
+	| File Name Link                 | false               |
+	| File Size                      | 0KB                 |
+	| Attached                       | LFA Customer1       |
+	| Does Not Contain Personal Data | false               |''');
+
+		LocalFile.ProjectDetails.viewAttachmentActionsLink(fileKeyword = "Document_4.txt");
+	}
+
+	test Uploadlargefileswithnopersonaldata {
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | lfa.customer1                       |
+	| Email Address | lfa.customer1@lrcustomer.com.broken |
+	| First Name    | LFA                                 |
+	| Last Name     | Customer1                           |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code        | LFAZENLFAZEN                  | |
+	| Data Region | United States                 | |
+	| Language    | English                       | |
+	| Name        | Lfazen - ${staticProjectName} | |
+	| Region      | United States                 | |
+	| Status      | Active                        | |
+	| Tier        | T1                            | |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Lfazen - ${staticProjectName}",
+			contactEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			table = '''| Support Requester |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Lfazen - ${staticProjectName}",
+			productName = "Portal Production",
+			table = '''| End Date                | ${staticEndDate}         |   |
+	| Original End Date       | ${staticOriginalEndDate} |   |
+	| Perpetual               | false                    |   |
+	| Product Field and Value | sizing                   | 1 |
+	| Product Field and Value | licenses                 | 1 |
+	| Product Field and Value | version                  | 6 |
+	| Quantity                | 1                        |   |
+	| Start Date              | ${staticStartDate}       |   |
+	| Status                  | Approved                 |   |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Lfazen - ${staticProjectName}",
+			productName = "Gold Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Gold Subscription");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - Portal");
+
+		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+
+		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "LFAZENLFAZEN");
+
+		LocalFile.ZendeskOrganizationAPI._viewOrganizationSyncFromOsb(organizationName = "Lfazen - ${staticProjectName}");
+
+		LocalFile.JSONUser.viewSupportUserSync(userEmailAddress = "lfa.customer1@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserSyncFromOsb(userEmailAddress = "lfa.customer1@lrcustomer.com.broken");
+
+		LocalFile.JSONUser.updateSupportPassword(
+			userEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.ZendeskUserAPI._updateUserPasswordByEmailAddress(
+			userEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			userPassword = ${staticZendeskAdminPassword});
+
+		LocalFile.OSBAdmin.logoutAndLoginToSupport(
+			userEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.ZendeskHomepage.login(
+			userEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			userPassword = ${staticZendeskAdminPassword});
+
+		LocalFile.ZendeskRequest.create(table = '''| Product       | Liferay Portal                          | 6.2                                   |
+	| Component     | Activation Key & Project Administration |                                       |
+	| System Status | Production                              | Functioning with limited capabilities |
+	| Subject       | Request Subject                         |                                       |
+	| Description   | Request Description                     |                                       |
+	| Attachments   | Document_1.txt                          |                                       |''');
+
+		LocalFile.ZendeskRequest.view(table = '''| Subject       | Request Subject                                    |
+	| Status        | OPEN                                               |
+	| Requester     | LFA Customer1                                      |
+	| Priority      | Normal                                             |
+	| Product       | Liferay Portal > 6.2                               |
+	| Sub-Status    | —                                                  |
+	| Component     | Activation Key & Project Administration            |
+	| System Status | Production > Functioning with limited capabilities |
+	| Attachments   | Document_1.txt                                     |''');
+
+		LocalFile.ZendeskRequest.viewComment(
+			commentContent = "Request Description",
+			table = '''| Author      | LFA Customer1       |
+	| Comment     | Request Description |
+	| Attachments | Document_1.txt      |''');
+
+		LocalFile.ZendeskRequest.uploadFileViaLargeFileUploader(table = '''| Attachment       | Document_2.txt      |
+	| Comment          | Large File Comment1 |
+	| Data Region      | United States       |
+	| No Personal Data | true                |''');
+
+		LocalFile.ZendeskRequest.viewLargeFileComment(
+			commentContent = "Large File Comment1",
+			table = '''| Author      | LFA Customer1       |
+	| Comment     | Large File Comment1 |
+	| Attachment  | Document_2.txt      |''');
+
+		LocalFile.ZendeskHomepage.acceptAllCookies();
+
+		LocalFile.ZendeskRequest.uploadFileViaLargeFileUploader(table = '''| Attachment       | Document_3.txt      |
+	| Comment          | Large File Comment2 |
+	| Data Region      | United States       |
+	| No Personal Data | true                |''');
+
+		LocalFile.ZendeskRequest.viewLargeFileComment(
+			commentContent = "Large File Comment2",
+			table = '''| Author      | LFA Customer1       |
+	| Comment     | Large File Comment2 |
+	| Attachment  | Document_3.txt      |''');
+
+		LocalFile.ProjectDetails.gotoProjectDetailsPage();
+
+		LocalFile.ProjectDetails.gotoAttachments();
+
+		LocalFile.ProjectDetails.viewAttachment(
+			fileKeyword = "Document_2.txt",
+			table = '''| Ticket                         | ${staticRequestId} |
+	| File Name                      | Document_2.txt     |
+	| File Name Link                 | false              |
+	| File Size                      | 1KB                |
+	| Attached                       | LFA Customer1      |
+	| Does Not Contain Personal Data | true               |''');
+
+		LocalFile.ProjectDetails.viewAttachmentDeleteLink(fileKeyword = "Document_2.txt");
+
+		LocalFile.ProjectDetails.viewAttachment(
+			fileKeyword = "Document_3.txt",
+			table = '''| Ticket                         | ${staticRequestId} |
+	| File Name                      | Document_3.txt     |
+	| File Name Link                 | false              |
+	| File Size                      | 1KB                |
+	| Attached                       | LFA Customer1      |
+	| Does Not Contain Personal Data | true               |''');
+
+		LocalFile.ProjectDetails.viewAttachmentDeleteLink(fileKeyword = "Document_3.txt");
+	}
+
+	test Uploadlargefileswithpersonaldataandnopersonaldata {
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | lfa.customer1                       |
+	| Email Address | lfa.customer1@lrcustomer.com.broken |
+	| First Name    | LFA                                 |
+	| Last Name     | Customer1                           |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code        | LFAZENLFAZEN                  | |
+	| Data Region | United States                 | |
+	| Language    | English                       | |
+	| Name        | Lfazen - ${staticProjectName} | |
+	| Region      | United States                 | |
+	| Status      | Active                        | |
+	| Tier        | T1                            | |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Lfazen - ${staticProjectName}",
+			contactEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			table = '''| Support Requester |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Lfazen - ${staticProjectName}",
+			productName = "Portal Production",
+			table = '''| End Date                | ${staticEndDate}         |   |
+	| Original End Date       | ${staticOriginalEndDate} |   |
+	| Perpetual               | false                    |   |
+	| Product Field and Value | sizing                   | 1 |
+	| Product Field and Value | licenses                 | 1 |
+	| Product Field and Value | version                  | 6 |
+	| Quantity                | 1                        |   |
+	| Start Date              | ${staticStartDate}       |   |
+	| Status                  | Approved                 |   |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Lfazen - ${staticProjectName}",
+			productName = "Gold Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Gold Subscription");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - Portal");
+
+		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+
+		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "LFAZENLFAZEN");
+
+		LocalFile.ZendeskOrganizationAPI._viewOrganizationSyncFromOsb(organizationName = "Lfazen - ${staticProjectName}");
+
+		LocalFile.JSONUser.viewSupportUserSync(userEmailAddress = "lfa.customer1@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserSyncFromOsb(userEmailAddress = "lfa.customer1@lrcustomer.com.broken");
+
+		LocalFile.JSONUser.updateSupportPassword(
+			userEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.ZendeskUserAPI._updateUserPasswordByEmailAddress(
+			userEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			userPassword = ${staticZendeskAdminPassword});
+
+		LocalFile.OSBAdmin.logoutAndLoginToSupport(
+			userEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.ZendeskHomepage.login(
+			userEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			userPassword = ${staticZendeskAdminPassword});
+
+		LocalFile.ZendeskRequest.create(table = '''| Product       | Liferay Portal                          | 6.2                                   |
+	| Component     | Activation Key & Project Administration |                                       |
+	| System Status | Production                              | Functioning with limited capabilities |
+	| Subject       | Request Subject                         |                                       |
+	| Description   | Request Description                     |                                       |
+	| Attachments   | Document_1.txt                          |                                       |''');
+
+		LocalFile.ZendeskRequest.view(table = '''| Subject       | Request Subject                                    |
+	| Status        | OPEN                                               |
+	| Requester     | LFA Customer1                                      |
+	| Priority      | Normal                                             |
+	| Product       | Liferay Portal > 6.2                               |
+	| Sub-Status    | —                                                  |
+	| Component     | Activation Key & Project Administration            |
+	| System Status | Production > Functioning with limited capabilities |
+	| Attachments   | Document_1.txt                                     |''');
+
+		LocalFile.ZendeskRequest.viewComment(
+			commentContent = "Request Description",
+			table = '''| Author      | LFA Customer1       |
+	| Comment     | Request Description |
+	| Attachments | Document_1.txt      |''');
+
+		LocalFile.ZendeskRequest.uploadFileViaLargeFileUploader(table = '''| Attachment       | Document_2.txt      |
+	| Comment          | Large File Comment1 |
+	| Data Region      | United States       |
+	| No Personal Data | false               |''');
+
+		LocalFile.ZendeskRequest.viewLargeFileComment(
+			commentContent = "Large File Comment1",
+			table = '''| Author      | LFA Customer1       |
+	| Comment     | Large File Comment1 |
+	| Attachment  | Document_2.txt      |''');
+
+		LocalFile.ZendeskHomepage.acceptAllCookies();
+
+		LocalFile.ZendeskRequest.uploadFileViaLargeFileUploader(table = '''| Attachment       | Document_3.txt      |
+	| Comment          | Large File Comment2 |
+	| Data Region      | United States       |
+	| No Personal Data | true                |''');
+
+		LocalFile.ZendeskRequest.viewLargeFileComment(
+			commentContent = "Large File Comment2",
+			table = '''| Author      | LFA Customer1       |
+	| Comment     | Large File Comment2 |
+	| Attachment  | Document_3.txt      |''');
+
+		LocalFile.ProjectDetails.gotoProjectDetailsPage();
+
+		LocalFile.ProjectDetails.gotoAttachments();
+
+		LocalFile.ProjectDetails.viewAttachment(
+			fileKeyword = "Document_2.txt",
+			table = '''| Ticket                         | ${staticRequestId} |
+	| File Name                      | Document_2.txt     |
+	| File Name Link                 | false              |
+	| File Size                      | 1KB                |
+	| Attached                       | LFA Customer1      |
+	| Does Not Contain Personal Data | false              |''');
+
+		LocalFile.ProjectDetails.viewAttachmentActionsLink(fileKeyword = "Document_2.txt");
+
+		LocalFile.ProjectDetails.viewAttachment(
+			fileKeyword = "Document_3.txt",
+			table = '''| Ticket                         | ${staticRequestId} |
+	| File Name                      | Document_3.txt     |
+	| File Name Link                 | false              |
+	| File Size                      | 1KB                |
+	| Attached                       | LFA Customer1      |
+	| Does Not Contain Personal Data | true               |''');
+
+		LocalFile.ProjectDetails.viewAttachmentDeleteLink(fileKeyword = "Document_3.txt");
+	}
+
+	@help.center.acceptance = "true"
+	test Uploadlargefilewithnopersonaldata {
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | lfa.customer1                       |
+	| Email Address | lfa.customer1@lrcustomer.com.broken |
+	| First Name    | LFA                                 |
+	| Last Name     | Customer1                           |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code        | LFAZENLFAZEN                  | |
+	| Data Region | United States                 | |
+	| Language    | English                       | |
+	| Name        | Lfazen - ${staticProjectName} | |
+	| Region      | United States                 | |
+	| Status      | Active                        | |
+	| Tier        | T1                            | |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Lfazen - ${staticProjectName}",
+			contactEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			table = '''| Support Requester |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Lfazen - ${staticProjectName}",
+			productName = "Portal Production",
+			table = '''| End Date                | ${staticEndDate}         |   |
+	| Original End Date       | ${staticOriginalEndDate} |   |
+	| Perpetual               | false                    |   |
+	| Product Field and Value | sizing                   | 1 |
+	| Product Field and Value | licenses                 | 1 |
+	| Product Field and Value | version                  | 6 |
+	| Quantity                | 1                        |   |
+	| Start Date              | ${staticStartDate}       |   |
+	| Status                  | Approved                 |   |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Lfazen - ${staticProjectName}",
+			productName = "Gold Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Gold Subscription");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - Portal");
+
+		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+
+		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "LFAZENLFAZEN");
+
+		LocalFile.ZendeskOrganizationAPI._viewOrganizationSyncFromOsb(organizationName = "Lfazen - ${staticProjectName}");
+
+		LocalFile.JSONUser.viewSupportUserSync(userEmailAddress = "lfa.customer1@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserSyncFromOsb(userEmailAddress = "lfa.customer1@lrcustomer.com.broken");
+
+		LocalFile.JSONUser.updateSupportPassword(
+			userEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.ZendeskUserAPI._updateUserPasswordByEmailAddress(
+			userEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			userPassword = ${staticZendeskAdminPassword});
+
+		LocalFile.OSBAdmin.logoutAndLoginToSupport(
+			userEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.ZendeskHomepage.login(
+			userEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			userPassword = ${staticZendeskAdminPassword});
+
+		LocalFile.ZendeskRequest.create(table = '''| Product       | Liferay Portal                          | 6.2                                   |
+	| Component     | Activation Key & Project Administration |                                       |
+	| System Status | Production                              | Functioning with limited capabilities |
+	| Subject       | Request Subject                         |                                       |
+	| Description   | Request Description                     |                                       |
+	| Attachments   | Document_1.txt                          |                                       |''');
+
+		LocalFile.ZendeskRequest.view(table = '''| Subject       | Request Subject                                    |
+	| Status        | OPEN                                               |
+	| Requester     | LFA Customer1                                      |
+	| Priority      | Normal                                             |
+	| Product       | Liferay Portal > 6.2                               |
+	| Sub-Status    | —                                                  |
+	| Component     | Activation Key & Project Administration            |
+	| System Status | Production > Functioning with limited capabilities |
+	| Attachments   | Document_1.txt                                     |''');
+
+		LocalFile.ZendeskRequest.viewComment(
+			commentContent = "Request Description",
+			table = '''| Author      | LFA Customer1       |
+	| Comment     | Request Description |
+	| Attachments | Document_1.txt      |''');
+
+		LocalFile.ZendeskRequest.uploadFileViaLargeFileUploader(table = '''| Attachment       | Document_2.txt      |
+	| Comment          | Large File Comment  |
+	| Data Region      | United States       |
+	| No Personal Data | true                |''');
+
+		LocalFile.ZendeskRequest.viewLargeFileComment(
+			commentContent = "Large File Comment",
+			table = '''| Author      | LFA Customer1       |
+	| Comment     | Large File Comment  |
+	| Attachment  | Document_2.txt      |''');
+
+		LocalFile.ProjectDetails.gotoProjectDetailsPage();
+
+		LocalFile.ProjectDetails.gotoAttachments();
+
+		LocalFile.ProjectDetails.viewAttachment(
+			fileKeyword = "Document_2.txt",
+			table = '''| Ticket                         | ${staticRequestId} |
+	| File Name                      | Document_2.txt     |
+	| File Name Link                 | false              |
+	| File Size                      | 1KB                |
+	| Attached                       | LFA Customer1      |
+	| Does Not Contain Personal Data | true               |''');
+
+		LocalFile.ProjectDetails.viewAttachmentDeleteLink(fileKeyword = "Document_2.txt");
+	}
+
+	test Viewlargefileticketlink {
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | lfa.customer1                       |
+	| Email Address | lfa.customer1@lrcustomer.com.broken |
+	| First Name    | LFA                                 |
+	| Last Name     | Customer1                           |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code        | LFAZENLFAZEN                  | |
+	| Data Region | United States                 | |
+	| Language    | English                       | |
+	| Name        | Lfazen - ${staticProjectName} | |
+	| Region      | United States                 | |
+	| Status      | Active                        | |
+	| Tier        | T1                            | |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Lfazen - ${staticProjectName}",
+			contactEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			table = '''| Support Requester |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Lfazen - ${staticProjectName}",
+			productName = "Portal Production",
+			table = '''| End Date                | ${staticEndDate}         |   |
+	| Original End Date       | ${staticOriginalEndDate} |   |
+	| Perpetual               | false                    |   |
+	| Product Field and Value | sizing                   | 1 |
+	| Product Field and Value | licenses                 | 1 |
+	| Product Field and Value | version                  | 6 |
+	| Quantity                | 1                        |   |
+	| Start Date              | ${staticStartDate}       |   |
+	| Status                  | Approved                 |   |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Lfazen - ${staticProjectName}",
+			productName = "Gold Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Gold Subscription");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - Portal");
+
+		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+
+		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "LFAZENLFAZEN");
+
+		LocalFile.ZendeskOrganizationAPI._viewOrganizationSyncFromOsb(organizationName = "Lfazen - ${staticProjectName}");
+
+		LocalFile.JSONUser.viewSupportUserSync(userEmailAddress = "lfa.customer1@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserSyncFromOsb(userEmailAddress = "lfa.customer1@lrcustomer.com.broken");
+
+		LocalFile.JSONUser.updateSupportPassword(
+			userEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.ZendeskUserAPI._updateUserPasswordByEmailAddress(
+			userEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			userPassword = ${staticZendeskAdminPassword});
+
+		LocalFile.OSBAdmin.logoutAndLoginToSupport(
+			userEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.ZendeskHomepage.login(
+			userEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			userPassword = ${staticZendeskAdminPassword});
+
+		LocalFile.ZendeskRequest.create(table = '''| Product       | Liferay Portal                          | 6.2                                   |
+	| Component     | Activation Key & Project Administration |                                       |
+	| System Status | Production                              | Functioning with limited capabilities |
+	| Subject       | Request Subject                         |                                       |
+	| Description   | Request Description                     |                                       |
+	| Attachments   | Document_1.txt                          |                                       |''');
+
+		LocalFile.ZendeskRequest.view(table = '''| Subject       | Request Subject                                    |
+	| Status        | OPEN                                               |
+	| Requester     | LFA Customer1                                      |
+	| Priority      | Normal                                             |
+	| Product       | Liferay Portal > 6.2                               |
+	| Sub-Status    | —                                                  |
+	| Component     | Activation Key & Project Administration            |
+	| System Status | Production > Functioning with limited capabilities |
+	| Attachments   | Document_1.txt                                     |''');
+
+		LocalFile.ZendeskRequest.viewComment(
+			commentContent = "Request Description",
+			table = '''| Author      | LFA Customer1       |
+	| Comment     | Request Description |
+	| Attachments | Document_1.txt      |''');
+
+		LocalFile.ZendeskRequest.uploadFileViaLargeFileUploader(table = '''| Attachment       | Document_2.txt      |
+	| Comment          | Large File Comment  |
+	| Data Region      | United States       |
+	| No Personal Data | false               |''');
+
+		LocalFile.ZendeskRequest.viewLargeFileComment(
+			commentContent = "Large File Comment",
+			table = '''| Author      | LFA Customer1       |
+	| Comment     | Large File Comment  |
+	| Attachment  | Document_2.txt      |''');
+
+		LocalFile.ProjectDetails.gotoProjectDetailsPage();
+
+		LocalFile.ProjectDetails.gotoAttachments();
+
+		LocalFile.ProjectDetails.clickAttachmentTicketLink(fileKeyword = "Document_2.txt");
+
+		LocalFile.ZendeskRequest.view(table = '''| Subject       | Request Subject                                    |
+	| Status        | OPEN                                               |
+	| Requester     | LFA Customer1                                      |
+	| Priority      | Normal                                             |
+	| Product       | Liferay Portal > 6.2                               |
+	| Sub-Status    | —                                                  |
+	| Component     | Activation Key & Project Administration            |
+	| System Status | Production > Functioning with limited capabilities |
+	| Attachments   | Document_1.txt                                     |''');
+
+		LocalFile.ZendeskRequest.viewComment(
+			commentContent = "Request Description",
+			table = '''| Author      | LFA Customer1       |
+	| Comment     | Request Description |
+	| Attachments | Document_1.txt      |''');
+
+		LocalFile.ZendeskRequest.viewLargeFileComment(
+			commentContent = "Large File Comment",
+			table = '''| Author      | LFA Customer1       |
+	| Comment     | Large File Comment  |
+	| Attachment  | Document_2.txt      |''');
+	}
+
+	test Viewlargefileticketlinks {
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | lfa.customer1                       |
+	| Email Address | lfa.customer1@lrcustomer.com.broken |
+	| First Name    | LFA                                 |
+	| Last Name     | Customer1                           |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code        | LFAZENLFAZEN                  | |
+	| Data Region | United States                 | |
+	| Language    | English                       | |
+	| Name        | Lfazen - ${staticProjectName} | |
+	| Region      | United States                 | |
+	| Status      | Active                        | |
+	| Tier        | T1                            | |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Lfazen - ${staticProjectName}",
+			contactEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			table = '''| Support Requester |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Lfazen - ${staticProjectName}",
+			productName = "Portal Production",
+			table = '''| End Date                | ${staticEndDate}         |   |
+	| Original End Date       | ${staticOriginalEndDate} |   |
+	| Perpetual               | false                    |   |
+	| Product Field and Value | sizing                   | 1 |
+	| Product Field and Value | licenses                 | 1 |
+	| Product Field and Value | version                  | 6 |
+	| Quantity                | 1                        |   |
+	| Start Date              | ${staticStartDate}       |   |
+	| Status                  | Approved                 |   |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Lfazen - ${staticProjectName}",
+			productName = "Gold Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Gold Subscription");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - Portal");
+
+		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+
+		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "LFAZENLFAZEN");
+
+		LocalFile.ZendeskOrganizationAPI._viewOrganizationSyncFromOsb(organizationName = "Lfazen - ${staticProjectName}");
+
+		LocalFile.JSONUser.viewSupportUserSync(userEmailAddress = "lfa.customer1@lrcustomer.com.broken");
+
+		LocalFile.ZendeskUserAPI._viewUserSyncFromOsb(userEmailAddress = "lfa.customer1@lrcustomer.com.broken");
+
+		LocalFile.JSONUser.updateSupportPassword(
+			userEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.ZendeskUserAPI._updateUserPasswordByEmailAddress(
+			userEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			userPassword = ${staticZendeskAdminPassword});
+
+		LocalFile.OSBAdmin.logoutAndLoginToSupport(
+			userEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.ZendeskHomepage.login(
+			userEmailAddress = "lfa.customer1@lrcustomer.com.broken",
+			userPassword = ${staticZendeskAdminPassword});
+
+		LocalFile.ZendeskRequest.create(table = '''| Product       | Liferay Portal                          | 6.2                                   |
+	| Component     | Activation Key & Project Administration |                                       |
+	| System Status | Production                              | Functioning with limited capabilities |
+	| Subject       | Request1 Subject                        |                                       |
+	| Description   | Request1 Description                    |                                       |
+	| Attachments   | Document_1.txt                          |                                       |''');
+
+		LocalFile.ZendeskRequest.renameFirstRequestIdVariable();
+
+		LocalFile.ZendeskRequest.view(table = '''| Subject       | Request1 Subject                                   |
+	| Status        | OPEN                                               |
+	| Requester     | LFA Customer1                                      |
+	| Priority      | Normal                                             |
+	| Product       | Liferay Portal > 6.2                               |
+	| Sub-Status    | —                                                  |
+	| Component     | Activation Key & Project Administration            |
+	| System Status | Production > Functioning with limited capabilities |
+	| Attachments   | Document_1.txt                                     |''');
+
+		LocalFile.ZendeskRequest.viewComment(
+			commentContent = "Request1 Description",
+			table = '''| Author      | LFA Customer1        |
+	| Comment     | Request1 Description |
+	| Attachments | Document_1.txt       |''');
+
+		LocalFile.ZendeskRequest.uploadFileViaLargeFileUploader(table = '''| Attachment       | Document_2.txt      |
+	| Comment          | Large File Comment1 |
+	| Data Region      | United States       |
+	| No Personal Data | false               |''');
+
+		LocalFile.ZendeskRequest.viewLargeFileComment(
+			commentContent = "Large File Comment1",
+			table = '''| Author      | LFA Customer1       |
+	| Comment     | Large File Comment1 |
+	| Attachment  | Document_2.txt      |''');
+
+		LocalFile.ZendeskHomepage.gotoHomePage();
+
+		LocalFile.ZendeskHomepage.acceptAllCookies();
+
+		LocalFile.ZendeskRequest.create(table = '''| Product       | Liferay Portal                          | 6.2                                   |
+	| Component     | Activation Key & Project Administration |                                       |
+	| System Status | Production                              | Functioning with limited capabilities |
+	| Subject       | Request2 Subject                        |                                       |
+	| Description   | Request2 Description                    |                                       |
+	| Attachments   | Document_3.txt                          |                                       |''');
+
+		LocalFile.ZendeskRequest.renameSecondRequestIdVariable();
+
+		LocalFile.ZendeskRequest.view(table = '''| Subject       | Request2 Subject                                   |
+	| Status        | OPEN                                               |
+	| Requester     | LFA Customer1                                      |
+	| Priority      | Normal                                             |
+	| Product       | Liferay Portal > 6.2                               |
+	| Sub-Status    | —                                                  |
+	| Component     | Activation Key & Project Administration            |
+	| System Status | Production > Functioning with limited capabilities |
+	| Attachments   | Document_3.txt                                     |''');
+
+		LocalFile.ZendeskRequest.viewComment(
+			commentContent = "Request2 Description",
+			table = '''| Author      | LFA Customer1        |
+	| Comment     | Request2 Description |
+	| Attachments | Document_3.txt       |''');
+
+		LocalFile.ZendeskRequest.uploadFileViaLargeFileUploader(table = '''| Attachment       | Document_4.txt      |
+	| Comment          | Large File Comment2 |
+	| Data Region      | United States       |
+	| No Personal Data | false               |''');
+
+		LocalFile.ZendeskRequest.viewLargeFileComment(
+			commentContent = "Large File Comment2",
+			table = '''| Author     | LFA Customer1       |
+	| Comment    | Large File Comment2 |
+	| Attachment | Document_4.txt      |''');
+
+		LocalFile.ProjectDetails.gotoProjectDetailsPage();
+
+		LocalFile.ProjectDetails.gotoAttachments();
+
+		LocalFile.ProjectDetails.clickAttachmentTicketLink(fileKeyword = "Document_2.txt");
+
+		LocalFile.ZendeskRequest.view(table = '''| Subject       | Request1 Subject                                   |
+	| Status        | OPEN                                               |
+	| Requester     | LFA Customer1                                      |
+	| Priority      | Normal                                             |
+	| Product       | Liferay Portal > 6.2                               |
+	| Sub-Status    | —                                                  |
+	| Component     | Activation Key & Project Administration            |
+	| System Status | Production > Functioning with limited capabilities |
+	| Attachments   | Document_1.txt                                     |''');
+
+		LocalFile.ZendeskRequest.viewComment(
+			commentContent = "Request1 Description",
+			table = '''| Author      | LFA Customer1        |
+	| Comment     | Request1 Description |
+	| Attachments | Document_1.txt       |''');
+
+		LocalFile.ZendeskRequest.viewLargeFileComment(
+			commentContent = "Large File Comment1",
+			table = '''| Author      | LFA Customer1       |
+	| Comment     | Large File Comment1 |
+	| Attachment  | Document_2.txt      |''');
+
+		LocalFile.ProjectDetails.gotoProjectDetailsPage();
+
+		LocalFile.ProjectDetails.gotoAttachments();
+
+		LocalFile.ProjectDetails.clickAttachmentTicketLink(fileKeyword = "Document_4.txt");
+
+		LocalFile.ZendeskRequest.view(table = '''| Subject       | Request2 Subject                                   |
+	| Status        | OPEN                                               |
+	| Requester     | LFA Customer1                                      |
+	| Priority      | Normal                                             |
+	| Product       | Liferay Portal > 6.2                               |
+	| Sub-Status    | —                                                  |
+	| Component     | Activation Key & Project Administration            |
+	| System Status | Production > Functioning with limited capabilities |
+	| Attachments   | Document_3.txt                                     |''');
+
+		LocalFile.ZendeskRequest.viewComment(
+			commentContent = "Request2 Description",
+			table = '''| Author      | LFA Customer1        |
+	| Comment     | Request2 Description |
+	| Attachments | Document_3.txt       |''');
+
+		LocalFile.ZendeskRequest.viewLargeFileComment(
+			commentContent = "Large File Comment2",
+			table = '''| Author      | LFA Customer1       |
+	| Comment     | Large File Comment2 |
+	| Attachment  | Document_4.txt      |''');
+	}
+
+}

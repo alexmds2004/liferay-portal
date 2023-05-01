@@ -1,0 +1,842 @@
+definition {
+
+	property testray.main.component.name = "Support QA";
+	property type = "osb.integration";
+
+	setUp {
+		LocalFile.Passwords.getPasswords();
+
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | lxcsm.customer1                       |
+	| Email Address | lxcsm.customer1@lrcustomer.com.broken |
+	| First Name    | LXCSM                                 |
+	| Last Name     | Customer1                             |''');
+
+		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | lxcsm.customer2                       |
+	| Email Address | lxcsm.customer2@lrcustomer.com.broken |
+	| First Name    | LXCSM                                 |
+	| Last Name     | Customer2                             |''');
+
+		LocalFile.JSONUser.createViaSupport(table = '''| Screen Name   | lxcsm.user1                       |
+	| Email Address | lxcsm.user1@lrcustomer.com.broken |
+	| First Name    | LXCSM                             |
+	| Last Name     | User1                             |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code   | LXCZENLXCZEN                  | |
+	| Name   | Lxczen - ${staticProjectName} | |
+	| Region | United States                 | |
+	| Status | Active                        | |
+	| Tier   | T1                            | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code   | LXCDUPLXCDUP                  | |
+	| Name   | Lxcdup - ${staticProjectName} | |
+	| Region | United States                 | |
+	| Status | Active                        | |
+	| Tier   | T1                            | |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Lxczen - ${staticProjectName}",
+			contactEmailAddress = "lxcsm.customer1@lrcustomer.com.broken",
+			table = '''| Support Requester |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Lxczen - ${staticProjectName}",
+			contactEmailAddress = "lxcsm.customer2@lrcustomer.com.broken",
+			table = '''| Support User |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Lxczen - ${staticProjectName}",
+			productName = "LXC SM Subscription HA Production",
+			table = '''| End Date                | ${staticEndDate}         |   |
+	| Original End Date       | ${staticOriginalEndDate} |   |
+	| Perpetual               | false                    |   |
+	| Product Field and Value | sizing                   | 1 |
+	| Quantity                | 1                        |   |
+	| Start Date              | ${staticStartDate}       |   |
+	| Status                  | Approved                 |   |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Lxczen - ${staticProjectName}",
+			productName = "Premium Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Premium Subscription");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - LXC SM");
+
+		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "LXCZENLXCZEN");
+
+		LocalFile.Downloads.teardownDownloadedListedFiles(list = ${staticDownloadedListName});
+	}
+
+	tearDown {
+		LocalFile.ZendeskHomepage.pause(timeInSeconds = 10);
+
+		LocalFile.ZendeskUserAPI._getDefaultUserId(organizationName = "Lxczen - ${staticProjectName}");
+
+		LocalFile.ZendeskUserAPI._renameFirstDefaultUserIdVariable();
+
+		LocalFile.ZendeskUserAPI._getDefaultUserId(organizationName = "Lxcdup - ${staticProjectName}");
+
+		LocalFile.ZendeskUserAPI._renameSecondDefaultUserIdVariable();
+
+		LocalFile.OSBAdminProject.tearDownProjects(table = '''| LXCZENLXCZEN |
+	| LXCDUPLXCDUP |''');
+
+		LocalFile.KoroneikiAccountAPI._tearDownAccounts(table = '''| Lxczen - ${staticProjectName} |
+	| Lxcdup - ${staticProjectName} |''');
+
+		LocalFile.KoroneikiAccountAPI._tearDownAccountsViaAccountFieldNameAndValue(
+			fieldName = "Code",
+			table = '''| LXCZENLXCZEN |
+	| LXCDUPLXCDUP |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Premium Subscription");
+
+		LocalFile.JSONUser.tearDownUsers(table = '''| lxcsm.customer1@lrcustomer.com.broken |
+	| lxcsm.customer2@lrcustomer.com.broken |''');
+
+		LocalFile.JSONUser.tearDownUsersViaSupport(table = '''| lxcsm.customer1@lrcustomer.com.broken |
+	| lxcsm.customer2@lrcustomer.com.broken |
+	| lxcsm.user1@lrcustomer.com.broken     |''');
+
+		LocalFile.JSONUser.tearDownUsersViaKoroneiki(table = '''| lxcsm.customer1@lrcustomer.com.broken |
+	| lxcsm.customer2@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiContactAPI._tearDownContacts(table = '''| lxcsm.customer1@lrcustomer.com.broken |
+	| lxcsm.customer2@lrcustomer.com.broken |''');
+
+		LocalFile.JSONOkta.tearDownUsers(table = '''| lxcsm.customer1@lrcustomer.com.broken |
+	| lxcsm.customer2@lrcustomer.com.broken |''');
+
+		LocalFile.ZendeskUserAPI._getMultipleUserIdsByEmailAddress(table = '''| lxcsm.customer1@lrcustomer.com.broken |
+	| lxcsm.customer2@lrcustomer.com.broken |''');
+
+		LocalFile.ZendeskUserAPI._tearDownUsersByIdList(userIds = ${staticUserIdList});
+
+		LocalFile.ZendeskOrganizationAPI._getMultipleOrganizationExternalIdsByOrganizationNameIfStillPresent(table = '''| Lxczen - ${staticProjectName} |
+	| Lxcdup - ${staticProjectName} |''');
+
+		LocalFile.ZendeskOrganizationAPI._tearDownOrganizationsByExternalIdList(organizationExternalIds = ${staticOrganizationExternalIdList});
+
+		LocalFile.ZendeskUserAPI._tearDownUserById(userId = ${staticDefaultUserId1});
+
+		LocalFile.ZendeskUserAPI._tearDownUserById(userId = ${staticDefaultUserId2});
+
+		LocalFile.OSBAdmin.logoutAndLoginToSupport(
+			userEmailAddress = ${staticSupportAdminEmailAdress},
+			userPassword = ${staticSupportAdminPassword});
+
+		LocalFile.DXPCloud.tearDownDXPCloudSubscriptionUsers(table = '''| lxcsm.customer1@lrcustomer.com.broken |
+	| lxcsm.customer2@lrcustomer.com.broken |
+	| lxcsm.user1@lrcustomer.com.broken     |''');
+	}
+
+	test Downloadselfprovisioninglicense {
+		LocalFile.JSONUser.updateSupportPassword(
+			userEmailAddress = "lxcsm.customer1@lrcustomer.com.broken",
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.JSONUser.updateSupportPassword(
+			userEmailAddress = "lxcsm.customer2@lrcustomer.com.broken",
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.JSONUser.assignUserToSupportGroup(
+			groupName = "Help Center",
+			userEmailAddress = "lxcsm.customer1@lrcustomer.com.broken");
+
+		LocalFile.JSONUser.assignUserToSupportGroup(
+			groupName = "Help Center",
+			userEmailAddress = "lxcsm.customer2@lrcustomer.com.broken");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - DXP");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - LXC SM");
+
+		LocalFile.OSBAdmin.logoutAndLoginToSupport(
+			userEmailAddress = "lxcsm.customer1@lrcustomer.com.broken",
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.SelfProvisioning.gotoSelfProvisioningPage();
+
+		LocalFile.SelfProvisioning.downloadSelfProvisioningLicense(table = '''| Project | Lxczen - ${staticProjectName} |
+	| Product | DXP                           |
+	| Version | 7.4                           |''');
+
+		LocalFile.SelfProvisioning.downloadSelfProvisioningLicense(table = '''| Project | Lxczen - ${staticProjectName} |
+	| Product | DXP                           |
+	| Version | 7.3                           |''');
+
+		LocalFile.SelfProvisioning.downloadSelfProvisioningLicense(table = '''| Project | Lxczen - ${staticProjectName} |
+	| Product | DXP                           |
+	| Version | 7.2                           |''');
+
+		LocalFile.ProvisioningLicense.assertDownloadedLicensePresent(
+			fileType = "xml",
+			table = '''| License Type | activation-key            |
+	| Product      | DXP Development           |
+	| Version      | 7.4                       |
+	| License Name | Developer Activation Keys |''');
+
+		LocalFile.ProvisioningLicense.assertDownloadedLicensePresent(
+			fileType = "xml",
+			table = '''| License Type | activation-key            |
+	| Product      | DXP Development           |
+	| Version      | 7.3                       |
+	| License Name | Developer Activation Keys |''');
+
+		LocalFile.ProvisioningLicense.assertDownloadedLicensePresent(
+			fileType = "xml",
+			table = '''| License Type | activation-key            |
+	| Product      | DXP Development           |
+	| Version      | 7.2                       |
+	| License Name | Developer Activation Keys |''');
+
+		LocalFile.OSBAdmin.logoutAndLoginToSupport(
+			userEmailAddress = "lxcsm.customer2@lrcustomer.com.broken",
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.SelfProvisioning.gotoSelfProvisioningPage();
+
+		LocalFile.SelfProvisioning.downloadSelfProvisioningLicense(table = '''| Project | Lxczen - ${staticProjectName} |
+	| Product | DXP                           |
+	| Version | 7.4                           |''');
+
+		LocalFile.SelfProvisioning.downloadSelfProvisioningLicense(table = '''| Project | Lxczen - ${staticProjectName} |
+	| Product | DXP                           |
+	| Version | 7.3                           |''');
+
+		LocalFile.SelfProvisioning.downloadSelfProvisioningLicense(table = '''| Project | Lxczen - ${staticProjectName} |
+	| Product | DXP                           |
+	| Version | 7.2                           |''');
+
+		LocalFile.ProvisioningLicense.assertDownloadedLicensePresent(
+			fileType = "xml",
+			table = '''| License Type | activation-key            |
+	| Product      | DXP Development           |
+	| Version      | 7.4                       |
+	| License Name | Developer Activation Keys |
+	| Copy         | 1                         |''');
+
+		LocalFile.ProvisioningLicense.assertDownloadedLicensePresent(
+			fileType = "xml",
+			table = '''| License Type | activation-key            |
+	| Product      | DXP Development           |
+	| Version      | 7.3                       |
+	| License Name | Developer Activation Keys |
+	| Copy         | 1                         |''');
+
+		LocalFile.ProvisioningLicense.assertDownloadedLicensePresent(
+			fileType = "xml",
+			table = '''| License Type | activation-key            |
+	| Product      | DXP Development           |
+	| Version      | 7.2                       |
+	| License Name | Developer Activation Keys |
+	| Copy         | 1                         |''');
+	}
+
+	test Viewdownloadspage {
+		LocalFile.JSONUser.updateSupportPassword(
+			userEmailAddress = "lxcsm.customer1@lrcustomer.com.broken",
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.JSONUser.updateSupportPassword(
+			userEmailAddress = "lxcsm.customer2@lrcustomer.com.broken",
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.JSONUser.assignUserToSupportGroup(
+			groupName = "Help Center",
+			userEmailAddress = "lxcsm.customer1@lrcustomer.com.broken");
+
+		LocalFile.JSONUser.assignUserToSupportGroup(
+			groupName = "Help Center",
+			userEmailAddress = "lxcsm.customer2@lrcustomer.com.broken");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - DXP");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - LXC SM");
+
+		LocalFile.OSBAdmin.logoutAndLoginToSupport(
+			userEmailAddress = "lxcsm.customer1@lrcustomer.com.broken",
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.Downloads.gotoDownloadsPage();
+
+		LocalFile.Downloads.setSearchFilters(
+			fileType = "Product/Updates",
+			productName = "DXP 7.3");
+
+		LocalFile.Downloads.viewDownloadHeader(downloadName = "Liferay DXP 7.3 Service Pack 1");
+
+		LocalFile.Downloads.viewDownloadHeader(downloadName = "Liferay DXP 7.3 and Liferay Commerce 3.0");
+
+		LocalFile.Downloads.setSearchFilters(
+			fileType = "Fix Packs",
+			productName = "DXP 7.2");
+
+		LocalFile.Downloads.viewDownloadHeader(downloadName = "Liferay DXP 7.2 Fix Pack 2");
+
+		LocalFile.Downloads.viewDownloadHeader(downloadName = "Liferay DXP 7.2 Fix Pack 1");
+
+		LocalFile.Downloads.setSearchFilters(
+			fileType = "Fix Packs",
+			productName = "DXP 7.1");
+
+		LocalFile.Downloads.viewDownloadHeader(downloadName = "Liferay DXP 7.1 Fix Pack 14");
+
+		LocalFile.Downloads.viewDownloadHeader(downloadName = "Liferay DXP 7.1 Fix Pack 13");
+
+		LocalFile.Downloads.setSearchFilters(
+			fileType = "Fix Packs",
+			productName = "DXP 7.0");
+
+		LocalFile.Downloads.viewDownloadHeader(downloadName = "Liferay DXP 7.0 Fix Pack 86");
+
+		LocalFile.Downloads.viewDownloadHeader(downloadName = "Liferay DXP 7.0 Fix Pack 85");
+
+		LocalFile.OSBAdmin.logoutAndLoginToSupport(
+			userEmailAddress = "lxcsm.customer2@lrcustomer.com.broken",
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.Downloads.gotoDownloadsPage();
+
+		LocalFile.Downloads.setSearchFilters(
+			fileType = "Product/Updates",
+			productName = "DXP 7.3");
+
+		LocalFile.Downloads.viewDownloadHeader(downloadName = "Liferay DXP 7.3 Service Pack 1");
+
+		LocalFile.Downloads.viewDownloadHeader(downloadName = "Liferay DXP 7.3 and Liferay Commerce 3.0");
+
+		LocalFile.Downloads.setSearchFilters(
+			fileType = "Fix Packs",
+			productName = "DXP 7.2");
+
+		LocalFile.Downloads.viewDownloadHeader(downloadName = "Liferay DXP 7.2 Fix Pack 2");
+
+		LocalFile.Downloads.viewDownloadHeader(downloadName = "Liferay DXP 7.2 Fix Pack 1");
+
+		LocalFile.Downloads.setSearchFilters(
+			fileType = "Fix Packs",
+			productName = "DXP 7.1");
+
+		LocalFile.Downloads.viewDownloadHeader(downloadName = "Liferay DXP 7.1 Fix Pack 14");
+
+		LocalFile.Downloads.viewDownloadHeader(downloadName = "Liferay DXP 7.1 Fix Pack 13");
+
+		LocalFile.Downloads.setSearchFilters(
+			fileType = "Fix Packs",
+			productName = "DXP 7.0");
+
+		LocalFile.Downloads.viewDownloadHeader(downloadName = "Liferay DXP 7.0 Fix Pack 86");
+
+		LocalFile.Downloads.viewDownloadHeader(downloadName = "Liferay DXP 7.0 Fix Pack 85");
+	}
+
+	test Viewnosubscriptionaftercustomerremoval {
+		LocalFile.KoroneikiAccountAPI._removeCustomerContacts(
+			accountName = "Lxczen - ${staticProjectName}",
+			table = '''| lxcsm.customer1@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - LXC SM");
+
+		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+
+		LocalFile.DXPCloud.viewNoSubscribedUser(userEmailAddress = "lxcsm.customer1@lrcustomer.com.broken");
+
+		LocalFile.DXPCloud.viewSubscribedUser(userEmailAddress = "lxcsm.customer2@lrcustomer.com.broken");
+
+		LocalFile.KoroneikiAccountAPI._removeCustomerContacts(
+			accountName = "Lxczen - ${staticProjectName}",
+			table = '''| lxcsm.customer2@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - LXC SM");
+
+		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+
+		LocalFile.DXPCloud.viewNoSubscribedUser(userEmailAddress = "lxcsm.customer1@lrcustomer.com.broken");
+
+		LocalFile.DXPCloud.viewNoSubscribedUser(userEmailAddress = "lxcsm.customer2@lrcustomer.com.broken");
+	}
+
+	test Viewnosubscriptionafterofferingcancellation {
+		LocalFile.KoroneikiProductPurchaseAPI._updateProductPurchase(
+			accountName = "Lxczen - ${staticProjectName}",
+			productName = "LXC SM Subscription HA Production",
+			table = '''| End Date          | ${staticEndDate}         | |
+	| Original End Date | ${staticOriginalEndDate} | |
+	| Perpetual         | false                    | |
+	| Start Date        | ${staticStartDate}       | |
+	| Status            | Cancelled                | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._updateProductPurchase(
+			accountName = "Lxczen - ${staticProjectName}",
+			productName = "Premium Subscription",
+			table = '''| End Date          | ${staticEndDate}         | |
+	| Original End Date | ${staticOriginalEndDate} | |
+	| Perpetual         | false                    | |
+	| Start Date        | ${staticStartDate}       | |
+	| Status            | Cancelled                | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Premium Subscription");
+
+		LocalFile.KoroneikiAccountAPI._removeCustomerContacts(
+			accountName = "Lxczen - ${staticProjectName}",
+			table = '''| lxcsm.customer1@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiAccountAPI._removeCustomerContacts(
+			accountName = "Lxczen - ${staticProjectName}",
+			table = '''| lxcsm.customer2@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - LXC SM");
+
+		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+
+		LocalFile.DXPCloud.viewNoSubscribedUser(userEmailAddress = "lxcsm.customer1@lrcustomer.com.broken");
+
+		LocalFile.DXPCloud.viewNoSubscribedUser(userEmailAddress = "lxcsm.customer2@lrcustomer.com.broken");
+	}
+
+	test Viewnosubscriptionafterofferingexpiration {
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticPastStartAndEndDate();
+
+		LocalFile.KoroneikiProductPurchaseAPI._updateProductPurchase(
+			accountName = "Lxczen - ${staticProjectName}",
+			productName = "LXC SM Subscription HA Production",
+			table = '''| End Date          | ${staticPastEndDate}         | |
+	| Original End Date | ${staticPastOriginalEndDate} | |
+	| Perpetual         | false                        | |
+	| Start Date        | ${staticPastStartDate}       | |
+	| Status            | Approved                     | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._updateProductPurchase(
+			accountName = "Lxczen - ${staticProjectName}",
+			productName = "Premium Subscription",
+			table = '''| End Date          | ${staticPastEndDate}         | |
+	| Original End Date | ${staticPastOriginalEndDate} | |
+	| Perpetual         | false                        | |
+	| Start Date        | ${staticPastStartDate}       | |
+	| Status            | Approved                     | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Premium Subscription");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - LXC SM");
+
+		LocalFile.DXPCloud.viewNoSubscribedUser(userEmailAddress = "lxcsm.customer1@lrcustomer.com.broken");
+
+		LocalFile.DXPCloud.viewNoSubscribedUser(userEmailAddress = "lxcsm.customer2@lrcustomer.com.broken");
+	}
+
+	test Viewnosubscriptionafterofferingremoval {
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticPastStartAndEndDate();
+
+		LocalFile.KoroneikiProductPurchaseAPI._deleteProductPurchase(
+			accountName = "Lxczen - ${staticProjectName}",
+			productName = "LXC SM Subscription HA Production");
+
+		LocalFile.KoroneikiProductPurchaseAPI._deleteProductPurchase(
+			accountName = "Lxczen - ${staticProjectName}",
+			productName = "Premium Subscription");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - LXC SM");
+
+		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+
+		LocalFile.DXPCloud.viewNoSubscribedUser(userEmailAddress = "lxcsm.customer1@lrcustomer.com.broken");
+
+		LocalFile.DXPCloud.viewNoSubscribedUser(userEmailAddress = "lxcsm.customer2@lrcustomer.com.broken");
+	}
+
+	test Viewreleasenotes {
+		LocalFile.JSONUser.updateSupportPassword(
+			userEmailAddress = "lxcsm.customer1@lrcustomer.com.broken",
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.JSONUser.updateSupportPassword(
+			userEmailAddress = "lxcsm.customer2@lrcustomer.com.broken",
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.JSONUser.assignUserToSupportGroup(
+			groupName = "Help Center",
+			userEmailAddress = "lxcsm.customer1@lrcustomer.com.broken");
+
+		LocalFile.JSONUser.assignUserToSupportGroup(
+			groupName = "Help Center",
+			userEmailAddress = "lxcsm.customer2@lrcustomer.com.broken");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - DXP");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - LXC SM");
+
+		LocalFile.OSBAdmin.logoutAndLoginToSupport(
+			userEmailAddress = "lxcsm.customer1@lrcustomer.com.broken",
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.ReleaseNotes.gotoDXPReleaseNotes();
+
+		LocalFile.ReleaseNotes.setSearchFilters(
+			fixPackName1 = "Fix Pack 74",
+			fixPackName2 = "Fix Pack 76",
+			productName = "DXP 7.0");
+
+		LocalFile.ReleaseNotes.refineFilters(table = '''| Key Highlights    | true  |
+	| Important Changes | false |
+	| Known Issues      | false |
+	| Security          | false |''');
+
+		LocalFile.ReleaseNotes.viewFixPackHighlightsWithRefinedFilters(
+			fixPackName = "Fix Pack 76",
+			productName = "DXP 7.0",
+			table = '''| Key Highlights    | true  |
+	| Important Changes | false |
+	| Known Issues      | false |
+	| Security          | false |''');
+
+		LocalFile.ReleaseNotes.viewFixPackHighlightsWithRefinedFilters(
+			fixPackName = "Fix Pack 75",
+			productName = "DXP 7.0",
+			table = '''| Key Highlights    | true  |
+	| Important Changes | false |
+	| Known Issues      | false |
+	| Security          | false |''');
+
+		LocalFile.ReleaseNotes.gotoChangelog();
+
+		LocalFile.ReleaseNotes.viewChangelogReleaseVersion(version = "Fix Pack 76");
+
+		LocalFile.ReleaseNotes.viewChangelogReleaseVersion(version = "Fix Pack 75");
+
+		LocalFile.ReleaseNotes.gotoModuleChanges();
+
+		LocalFile.ReleaseNotes.refineFilters(table = '''| Liferay Artifacts     | true  |
+	| Third Party Libraries | false |
+	| Only Show Changes     | false |''');
+
+		LocalFile.ReleaseNotes.viewResultsCount(resultsCount = 716);
+
+		LocalFile.ReleaseNotes.viewNoModuleChange(name = "antlr");
+
+		LocalFile.ReleaseNotes.viewModuleChangeText(
+			name = "com.liferay.adaptive.media.api",
+			table = '''| Name          | com.liferay.adaptive.media.api |
+	| Group         | com.liferay	                 |
+	| Fix Pack From | 2.0.3                          |
+	| Fix Pack To   | 2.0.3                          |
+	| Change        | false                          |''');
+
+		LocalFile.ReleaseNotes.viewModuleChangeText(
+			name = "com.liferay.adaptive.media.document.library",
+			table = '''| Name          | com.liferay.adaptive.media.document.library |
+	| Group         | com.liferay	                              |
+	| Fix Pack From | 1.0.7                                       |
+	| Fix Pack To   | 1.0.9                                       |
+	| Change        | true                                        |''');
+
+		LocalFile.OSBAdmin.logoutAndLoginToSupport(
+			userEmailAddress = "lxcsm.customer2@lrcustomer.com.broken",
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.ReleaseNotes.gotoDXPReleaseNotes();
+
+		LocalFile.ReleaseNotes.setSearchFilters(
+			fixPackName1 = "Fix Pack 74",
+			fixPackName2 = "Fix Pack 76",
+			productName = "DXP 7.0");
+
+		LocalFile.ReleaseNotes.refineFilters(table = '''| Key Highlights    | true  |
+	| Important Changes | false |
+	| Known Issues      | false |
+	| Security          | false |''');
+
+		LocalFile.ReleaseNotes.viewFixPackHighlightsWithRefinedFilters(
+			fixPackName = "Fix Pack 76",
+			productName = "DXP 7.0",
+			table = '''| Key Highlights    | true  |
+	| Important Changes | false |
+	| Known Issues      | false |
+	| Security          | false |''');
+
+		LocalFile.ReleaseNotes.viewFixPackHighlightsWithRefinedFilters(
+			fixPackName = "Fix Pack 75",
+			productName = "DXP 7.0",
+			table = '''| Key Highlights    | true  |
+	| Important Changes | false |
+	| Known Issues      | false |
+	| Security          | false |''');
+
+		LocalFile.ReleaseNotes.gotoChangelog();
+
+		LocalFile.ReleaseNotes.viewChangelogReleaseVersion(version = "Fix Pack 76");
+
+		LocalFile.ReleaseNotes.viewChangelogReleaseVersion(version = "Fix Pack 75");
+
+		LocalFile.ReleaseNotes.gotoModuleChanges();
+
+		LocalFile.ReleaseNotes.refineFilters(table = '''| Liferay Artifacts     | true  |
+	| Third Party Libraries | false |
+	| Only Show Changes     | false |''');
+
+		LocalFile.ReleaseNotes.viewResultsCount(resultsCount = 716);
+
+		LocalFile.ReleaseNotes.viewNoModuleChange(name = "antlr");
+
+		LocalFile.ReleaseNotes.viewModuleChangeText(
+			name = "com.liferay.adaptive.media.api",
+			table = '''| Name          | com.liferay.adaptive.media.api |
+	| Group         | com.liferay	                 |
+	| Fix Pack From | 2.0.3                          |
+	| Fix Pack To   | 2.0.3                          |
+	| Change        | false                          |''');
+
+		LocalFile.ReleaseNotes.viewModuleChangeText(
+			name = "com.liferay.adaptive.media.document.library",
+			table = '''| Name          | com.liferay.adaptive.media.document.library |
+	| Group         | com.liferay	                              |
+	| Fix Pack From | 1.0.7                                       |
+	| Fix Pack To   | 1.0.9                                       |
+	| Change        | true                                        |''');
+	}
+
+	test Viewselfprovisioningpage {
+		LocalFile.JSONUser.updateSupportPassword(
+			userEmailAddress = "lxcsm.customer1@lrcustomer.com.broken",
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.JSONUser.updateSupportPassword(
+			userEmailAddress = "lxcsm.customer2@lrcustomer.com.broken",
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.JSONUser.assignUserToSupportGroup(
+			groupName = "Help Center",
+			userEmailAddress = "lxcsm.customer1@lrcustomer.com.broken");
+
+		LocalFile.JSONUser.assignUserToSupportGroup(
+			groupName = "Help Center",
+			userEmailAddress = "lxcsm.customer2@lrcustomer.com.broken");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - DXP");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - LXC SM");
+
+		LocalFile.OSBAdmin.logoutAndLoginToSupport(
+			userEmailAddress = "lxcsm.customer1@lrcustomer.com.broken",
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.SelfProvisioning.gotoSelfProvisioningPage();
+
+		LocalFile.SelfProvisioning.viewSelfProvisioningOptions(table = '''| Project | Lxczen - ${staticProjectName} |
+	| Product | DXP                           |
+	| Version | 7.4                           |
+	| Version | 7.3                           |
+	| Version | 7.2                           |''');
+
+		LocalFile.OSBAdmin.logoutAndLoginToSupport(
+			userEmailAddress = "lxcsm.customer2@lrcustomer.com.broken",
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.SelfProvisioning.gotoSelfProvisioningPage();
+
+		LocalFile.SelfProvisioning.viewSelfProvisioningOptions(table = '''| Project | Lxczen - ${staticProjectName} |
+	| Product | DXP                           |
+	| Version | 7.4                           |
+	| Version | 7.3                           |
+	| Version | 7.2                           |''');
+	}
+
+	test Viewsourcecodeaccesstab {
+		LocalFile.JSONUser.updateSupportPassword(
+			userEmailAddress = "lxcsm.customer1@lrcustomer.com.broken",
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.JSONUser.updateSupportPassword(
+			userEmailAddress = "lxcsm.customer2@lrcustomer.com.broken",
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.JSONUser.assignUserToSupportGroup(
+			groupName = "Help Center",
+			userEmailAddress = "lxcsm.customer1@lrcustomer.com.broken");
+
+		LocalFile.JSONUser.assignUserToSupportGroup(
+			groupName = "Help Center",
+			userEmailAddress = "lxcsm.customer2@lrcustomer.com.broken");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - DXP");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - LXC SM");
+
+		LocalFile.OSBAdmin.logoutAndLoginToSupport(
+			userEmailAddress = "lxcsm.customer1@lrcustomer.com.broken",
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.ProjectDetails.gotoProjectDetailsPage();
+
+		LocalFile.ProjectDetails.gotoSourceCodeAccess();
+
+		LocalFile.ProjectDetails.viewSourceCodeAccessAddAccessButton();
+
+		LocalFile.ProjectDetails.viewSourceCodeAccessForm();
+
+		LocalFile.OSBAdmin.logoutAndLoginToSupport(
+			userEmailAddress = "lxcsm.customer2@lrcustomer.com.broken",
+			userPassword = ${staticSupportUserTestPassword});
+
+		LocalFile.ProjectDetails.gotoProjectDetailsPage();
+
+		LocalFile.ProjectDetails.gotoSourceCodeAccess();
+
+		LocalFile.ProjectDetails.viewSourceCodeAccessAddAccessButton();
+
+		LocalFile.ProjectDetails.viewSourceCodeAccessForm();
+	}
+
+	@help.center.acceptance = "true"
+	test Viewsubscription {
+		LocalFile.DXPCloud.viewSubscribedUser(userEmailAddress = "lxcsm.customer1@lrcustomer.com.broken");
+
+		LocalFile.DXPCloud.viewSubscribedUser(userEmailAddress = "lxcsm.customer2@lrcustomer.com.broken");
+	}
+
+	test Viewsubscriptionafterremovalandreassignmenttoaccount {
+		LocalFile.KoroneikiAccountAPI._removeCustomerContacts(
+			accountName = "Lxczen - ${staticProjectName}",
+			table = '''| lxcsm.customer1@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - LXC SM");
+
+		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+
+		LocalFile.DXPCloud.viewNoSubscribedUser(userEmailAddress = "lxcsm.customer1@lrcustomer.com.broken");
+
+		LocalFile.DXPCloud.viewSubscribedUser(userEmailAddress = "lxcsm.customer2@lrcustomer.com.broken");
+
+		LocalFile.KoroneikiAccountAPI._removeCustomerContacts(
+			accountName = "Lxczen - ${staticProjectName}",
+			table = '''| lxcsm.customer2@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - LXC SM");
+
+		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+
+		LocalFile.DXPCloud.viewNoSubscribedUser(userEmailAddress = "lxcsm.customer1@lrcustomer.com.broken");
+
+		LocalFile.DXPCloud.viewNoSubscribedUser(userEmailAddress = "lxcsm.customer2@lrcustomer.com.broken");
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Lxczen - ${staticProjectName}",
+			contactEmailAddress = "lxcsm.customer1@lrcustomer.com.broken",
+			table = '''| Support Requester |''');
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - LXC SM");
+
+		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+
+		LocalFile.DXPCloud.viewSubscribedUser(userEmailAddress = "lxcsm.customer1@lrcustomer.com.broken");
+
+		LocalFile.DXPCloud.viewNoSubscribedUser(userEmailAddress = "lxcsm.customer2@lrcustomer.com.broken");
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Lxczen - ${staticProjectName}",
+			contactEmailAddress = "lxcsm.customer2@lrcustomer.com.broken",
+			table = '''| Support User |''');
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - LXC SM");
+
+		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+
+		LocalFile.DXPCloud.viewSubscribedUser(userEmailAddress = "lxcsm.customer2@lrcustomer.com.broken");
+
+		LocalFile.DXPCloud.viewSubscribedUser(userEmailAddress = "lxcsm.customer1@lrcustomer.com.broken");
+	}
+
+	test Viewsubscriptionafterremovalfromoneaccount {
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Lxcdup - ${staticProjectName}",
+			contactEmailAddress = "lxcsm.customer1@lrcustomer.com.broken",
+			table = '''| Support Requester |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Lxcdup - ${staticProjectName}",
+			contactEmailAddress = "lxcsm.customer2@lrcustomer.com.broken",
+			table = '''| Support User |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Lxcdup - ${staticProjectName}",
+			productName = "LXC SM Subscription HA Production",
+			table = '''| End Date                | ${staticEndDate}         |   |
+	| Original End Date       | ${staticOriginalEndDate} |   |
+	| Perpetual               | false                    |   |
+	| Product Field and Value | sizing                   | 1 |
+	| Quantity                | 1                        |   |
+	| Start Date              | ${staticStartDate}       |   |
+	| Status                  | Approved                 |   |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Lxcdup - ${staticProjectName}",
+			productName = "Premium Subscription",
+			table = '''| End Date                | ${staticEndDate}         | |
+	| Original End Date       | ${staticOriginalEndDate} | |
+	| Perpetual               | false                    | |
+	| Quantity                | 1                        | |
+	| Start Date              | ${staticStartDate}       | |
+	| Status                  | Approved                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Premium Subscription");
+
+		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "LXCDUPLXCDUP");
+
+		LocalFile.KoroneikiAccountAPI._removeCustomerContacts(
+			accountName = "Lxczen - ${staticProjectName}",
+			table = '''| lxcsm.customer1@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiAccountAPI._removeCustomerContacts(
+			accountName = "Lxczen - ${staticProjectName}",
+			table = '''| lxcsm.customer2@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer - LXC SM");
+
+		LocalFile.DXPCloud.viewSubscribedUser(userEmailAddress = "lxcsm.customer1@lrcustomer.com.broken");
+
+		LocalFile.DXPCloud.viewSubscribedUser(userEmailAddress = "lxcsm.customer2@lrcustomer.com.broken");
+	}
+
+}

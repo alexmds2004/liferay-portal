@@ -1,0 +1,485 @@
+definition {
+
+	property testray.main.component.name = "Support QA";
+	property type = "provisioning.integration";
+
+	setUp {
+		LocalFile.Passwords.getPasswords();
+
+		LocalFile.OSBAdminRabbitMQ.generateStaticVariables();
+
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningCompanyName();
+
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | sea.koroneiki1                       |
+	| Email Address | sea.koroneiki1@lrcustomer.com.broken |
+	| First Name    | SEA                                  |
+	| Last Name     | Koroneiki1                           |''');
+
+		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | sea.koroneiki2                       |
+	| Email Address | sea.koroneiki2@lrcustomer.com.broken |
+	| First Name    | SEA                                  |
+	| Last Name     | Koroneiki2                           |''');
+	}
+
+	tearDown {
+		LocalFile.ZendeskUserAPI._getDefaultUserId(organizationName = "Korsea - ${staticProjectName}");
+
+		LocalFile.ZendeskUserAPI._renameFirstDefaultUserIdVariable();
+
+		LocalFile.ZendeskUserAPI._getDefaultUserId(organizationName = "Seakor - ${staticCompanyName}");
+
+		LocalFile.ZendeskUserAPI._renameSecondDefaultUserIdVariable();
+
+		LocalFile.ZendeskUserAPI._getDefaultUserId(organizationName = "Seapar - ${staticProjectName}");
+
+		LocalFile.ZendeskUserAPI._renameThirdDefaultUserIdVariable();
+
+		LocalFile.OSBAdminProject.tearDownProjects(table = '''| SEAPARSEAPAR |
+	| SEAKORKORSEA |
+	| SEAKOR       |''');
+
+		LocalFile.KoroneikiAccountAPI._tearDownAccounts(table = '''| Seapar - ${staticProjectName} |''');
+
+		LocalFile.KoroneikiAccountAPI._tearDownAccountsViaAccountFieldNameAndValue(
+			fieldName = "Code",
+			table = '''| SEAPARSEAPAR |''');
+
+		LocalFile.KoroneikiAccountAPI._tearDownAccounts(table = '''| Korsea - ${staticProjectName} |
+	| Seakor - ${staticCompanyName} |''');
+
+		LocalFile.KoroneikiAccountAPI._tearDownAccountsViaAccountFieldNameAndValue(
+			fieldName = "Code",
+			table = '''| SEAKORKORSEA |
+	| SEAKOR       |''');
+
+		LocalFile.JSONUser.tearDownUsers(table = '''| sea.koroneiki1@lrcustomer.com.broken |
+	| sea.koroneiki2@lrcustomer.com.broken |''');
+
+		LocalFile.JSONUser.tearDownUsersViaSupport(table = '''| sea.koroneiki1@lrcustomer.com.broken |
+	| sea.koroneiki2@lrcustomer.com.broken |''');
+
+		LocalFile.JSONUser.tearDownUsersViaKoroneiki(table = '''| sea.koroneiki1@lrcustomer.com.broken |
+	| sea.koroneiki2@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiContactAPI._tearDownContacts(table = '''| sea.koroneiki1@lrcustomer.com.broken |
+	| sea.koroneiki2@lrcustomer.com.broken |''');
+
+		LocalFile.JSONOkta.tearDownUsers(table = '''| sea.koroneiki1@lrcustomer.com.broken |
+	| sea.koroneiki2@lrcustomer.com.broken |''');
+
+		LocalFile.ZendeskTicketAPI._tearDownTicketsByKeywords(table = '''| New Subscription(s) for Korsea - ${staticProjectName} |
+	| New Subscription(s) for Seakor - ${staticCompanyName} |''');
+
+		LocalFile.ZendeskUserAPI._getMultipleUserIdsByEmailAddress(table = '''| sea.koroneiki1@lrcustomer.com.broken |
+	| sea.koroneiki2@lrcustomer.com.broken |''');
+
+		LocalFile.ZendeskUserAPI._tearDownUsersByIdList(userIds = ${staticUserIdList});
+
+		LocalFile.ZendeskOrganizationAPI._getMultipleOrganizationExternalIdsByOrganizationNameIfStillPresent(table = '''| Seapar - ${staticProjectName} |
+	| Korsea - ${staticProjectName} |
+	| Seakor - ${staticCompanyName} |''');
+
+		LocalFile.ZendeskOrganizationAPI._tearDownOrganizationsByExternalIdList(organizationExternalIds = ${staticOrganizationExternalIdList});
+
+		LocalFile.ZendeskUserAPI._tearDownUserById(userId = ${staticDefaultUserId1});
+
+		LocalFile.ZendeskUserAPI._tearDownUserById(userId = ${staticDefaultUserId2});
+
+		LocalFile.ZendeskUserAPI._tearDownUserById(userId = ${staticDefaultUserId3});
+	}
+
+	@help.center.acceptance = "true"
+	test Viewadvancedsearchresults {
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticYyyyMmDdPastStartAndEndDate();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticYyyyMmDdFutureStartAndEndDate();
+
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Seakor - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Contact Email Address                  | sea.koroneiki1@lrcustomer.com.broken       |
+	| Contact First Name                     | SEA                                        |
+	| Contact Last Name                      | Koroneiki1                                 |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | sea.koroneiki2@lrcustomer.com.broken       |
+	| Owner First Name                       | SEA                                        |
+	| Owner Last Name                        | Koroneiki2                                 |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Korsea - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | SEAPARSEAPAR                                   | |
+	| Contact Email Address | sea.koroneiki2@lrcustomer.com.broken           | |
+	| Description           | Test provisioning partner account on koroneiki | |
+	| Fax Number            | 555-555-9012                                   | |
+	| Name                  | Seapar - ${staticProjectName}                  | |
+	| Profile Email Address | sea.koroneiki2@lrcustomer.com.broken           | |
+	| Region                | United States                                  | |
+	| Status                | Active                                         | |
+	| Tier                  | T4                                             | |
+	| Website               | www.koroneikipartner.com                       | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Seapar - ${staticProjectName}",
+			productName = "Service Partnership",
+			table = '''| Perpetual   | true     | |
+	| Quantity    | 1        | |
+	| Status      | Approved | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Partner");
+
+		LocalFile.KoroneikiAccountAPI._createAssignedTeamNestedField(
+			accountName = "Korsea - ${staticProjectName}",
+			teamName = "Seapar - ${staticProjectName}");
+
+		LocalFile.KoroneikiAccountAPI._updateAccountIncludingAssignedTeams(
+			accountName = "Korsea - ${staticProjectName}",
+			table = '''| Assigned Team Nested Field | ${staticAssignedTeamNestedField} | |''');
+
+		LocalFile.KoroneikiAccountAPI._assignTeamRolesToTeam(
+			accountName = "Korsea - ${staticProjectName}",
+			table = '''| Partner |''',
+			teamName = "Seapar - ${staticProjectName}");
+
+		LocalFile.KoroneikiAccountAPI._assignTeamRolesToTeam(
+			accountName = "Korsea - ${staticProjectName}",
+			table = '''| First Line Support |''',
+			teamName = "Seapar - ${staticProjectName}");
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.expandAccountAdvancedSearchForm();
+
+		LocalFile.Provisioning.populateAdvancedSearchFormAndSearch(table = '''| Match              |               | Radio Button | All                              |
+	| Account Name       |               | Input        | Seapar - ${staticProjectName}    |
+	| Code               |               | Input        | SEAPARSEAPAR                     |
+	| Account            |               | Panel        | Collapse                         |
+	| Categorization     |               | Panel        | Expand                           |
+	| Partner            | Yes           | Checkbox     | true                             |
+	| Provides FLS       | Yes           | Checkbox     | true                             |
+	| Receives FLS       | No            | Checkbox     | true                             |
+	| Internal           | No            | Checkbox     | true                             |
+	| Subscription State | Active        | Checkbox     | false                            |
+	| Subscription State | Cancelled     | Checkbox     | false                            |
+	| Subscription State | Expired       | Checkbox     | false                            |
+	| Subscription State | Unactivated   | Checkbox     | false                            |
+	| Tier               | T4            | Checkbox     | true                             |
+	| Support Region     | United States | Checkbox     | true                             |
+	| Categorization     |               | Panel        | Collapse                         |
+	| Dates              |               | Panel        | Expand                           |
+	| Created After      |               | Input        | ${staticYyyyMmDdPastEndDate}     |
+	| Created Before     |               | Input        | ${staticYyyyMmDdFutureStartDate} |
+	| Modified After     |               | Input        | ${staticYyyyMmDdPastEndDate}     |
+	| Modified Before    |               | Input        | ${staticYyyyMmDdFutureStartDate} |
+	| Date               |               | Panel        | Collapse                         |''');
+
+		LocalFile.Provisioning._viewAccountViaIndex(
+			accountName = "Seapar - ${staticProjectName}",
+			table = '''| Name    | Seapar - ${staticProjectName} |
+	| Code    | SEAPARSEAPAR                  |
+	| Region  | United States                 |
+	| Tier    | T4                            |''');
+
+		LocalFile.Provisioning.viewSearchInfoMessage(table = '''| Label | Code: SEAPARSEAPAR                                |
+	| Label | Account Name: Seapar - ${staticProjectName}       |
+	| Label | Partner: Yes                                      |
+	| Label | Provides FLS: Yes                                 |
+	| Label | Receives FLS: No                                  |
+	| Label | Internal: No                                      |
+	| Label | Tier: T4                                          |
+	| Label | Support Region: United States                     |
+	| Label | Modified After: ${staticYyyyMmDdPastEndDate}      |
+	| Label | Modified Before: ${staticYyyyMmDdFutureStartDate} |
+	| Label | Created Before: ${staticYyyyMmDdFutureStartDate}  |
+	| Label | Created After: ${staticYyyyMmDdPastEndDate}       |''');
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.expandAccountAdvancedSearchForm();
+
+		LocalFile.Provisioning.populateAdvancedSearchFormAndSearch(table = '''| Match               |               | Radio Button  | All                              |
+	| Account Name        |               | Input         | Korsea - ${staticProjectName}    |
+	| Code                |               | Input         | SEAKORKORSEA                     |
+	| Partner/Reseller/SI |               | Select Entity | Seapar - ${staticProjectName}    |
+	| First Line Support  |               | Select Entity | Seapar - ${staticProjectName}    |
+	| Country             |               | Select        | United States                    |
+	| Account             |               | Panel         | Collapse                         |
+	| Categorization      |               | Panel         | Expand                           |
+	| Partner             | No            | Checkbox      | true                             |
+	| Provides FLS        | No            | Checkbox      | true                             |
+	| Receives FLS        | Yes           | Checkbox      | true                             |
+	| Internal            | No            | Checkbox      | true                             |
+	| Tier                | T4            | Checkbox      | true                             |
+	| Subscription State  | Active        | Checkbox      | true                             |
+	| Subscription State  | Cancelled     | Checkbox      | false                            |
+	| Subscription State  | Expired       | Checkbox      | false                            |
+	| Subscription State  | Unactivated   | Checkbox      | false                            |
+	| Subscription Level  | Platinum      | Checkbox      | true                             |
+	| Support Region      | United States | Checkbox      | true                             |
+	| Categorization      |               | Panel         | Collapse                         |
+	| Dates               |               | Panel         | Expand                           |
+	| Created After       |               | Input         | ${staticYyyyMmDdPastEndDate}     |
+	| Created Before      |               | Input         | ${staticYyyyMmDdFutureStartDate} |
+	| Modified After      |               | Input         | ${staticYyyyMmDdPastEndDate}     |
+	| Modified Before     |               | Input         | ${staticYyyyMmDdFutureStartDate} |
+	| Date                |               | Panel         | Collapse                         |''');
+
+		LocalFile.Provisioning._viewAccountViaIndex(
+			accountName = "Korsea - ${staticProjectName}",
+			table = '''| Name    | Korsea - ${staticProjectName} |
+	| Code    | SEAKORKORSEA                  |
+	| Partner | Seapar - ${staticProjectName} |
+	| Region  | United States                 |
+	| SLA     | Platinum                      |
+	| Tier    | T4                            |
+	| State   | ACTIVE                        |''');
+
+		LocalFile.Provisioning.viewSearchInfoMessage(table = '''| Label | Country: United States                             |
+	| Label | Code: SEAKORKORSEA                                 |
+	| Label | Account Name: Korsea - ${staticProjectName}        |
+	| Label | Partner/Reseller/SI: Seapar - ${staticProjectName} |
+	| Label | First Line Support: Seapar - ${staticProjectName}  |
+	| Label | Partner: No                                        |
+	| Label | Provides FLS: No                                   |
+	| Label | Receives FLS: Yes                                  |
+	| Label | Internal: No                                       |
+	| Label | Tier: T4                                           |
+	| Label | Subscription State: Active                         |
+	| Label | Subscription Level: Platinum Subscription          |
+	| Label | Support Region: United States                      |
+	| Label | Modified After: ${staticYyyyMmDdPastEndDate}       |
+	| Label | Modified Before: ${staticYyyyMmDdFutureStartDate}  |
+	| Label | Created Before: ${staticYyyyMmDdFutureStartDate}   |
+	| Label | Created After: ${staticYyyyMmDdPastEndDate}        |''');
+	}
+
+	test Viewadvancedsearchresultsafterpartnerupdateviaprovisioning {
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticYyyyMmDdPastStartAndEndDate();
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticYyyyMmDdFutureStartAndEndDate();
+
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Seakor - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Contact Email Address                  | sea.koroneiki1@lrcustomer.com.broken       |
+	| Contact First Name                     | SEA                                        |
+	| Contact Last Name                      | Koroneiki1                                 |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | sea.koroneiki2@lrcustomer.com.broken       |
+	| Owner First Name                       | SEA                                        |
+	| Owner Last Name                        | Koroneiki2                                 |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | Liferay Digital Enterprise - Prod Sizing 4 |
+	| Project Name                           | Korsea - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | SEAPARSEAPAR                                   | |
+	| Contact Email Address | sea.koroneiki2@lrcustomer.com.broken           | |
+	| Description           | Test provisioning partner account on koroneiki | |
+	| Fax Number            | 555-555-9012                                   | |
+	| Name                  | Seapar - ${staticProjectName}                  | |
+	| Profile Email Address | sea.koroneiki2@lrcustomer.com.broken           | |
+	| Region                | United States                                  | |
+	| Status                | Active                                         | |
+	| Tier                  | T4                                             | |
+	| Website               | www.koroneikipartner.com                       | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Seapar - ${staticProjectName}",
+			productName = "Service Partnership",
+			table = '''| Perpetual   | true     | |
+	| Quantity    | 1        | |
+	| Status      | Approved | |''');
+
+		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Partner");
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.searchAccounts(keyword = "Korsea");
+
+		LocalFile.Provisioning.clickAccount(accountName = "Korsea - ${staticProjectName}");
+
+		LocalFile.Provisioning.clickTab(tabName = "Details");
+
+		LocalFile.ProvisioningAccount.editAccountDetails(table = '''| Partner/Reseller/SI | Select Entity | Seapar - ${staticProjectName} | |
+	| First Line Support  | Select Entity | Seapar - ${staticProjectName} | |''');
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.expandAccountAdvancedSearchForm();
+
+		LocalFile.Provisioning.populateAdvancedSearchFormAndSearch(table = '''| Match              |               | Radio Button | All                              |
+	| Account Name       |               | Input        | Seapar - ${staticProjectName}    |
+	| Code               |               | Input        | SEAPARSEAPAR                     |
+	| Account            |               | Panel        | Collapse                         |
+	| Categorization     |               | Panel        | Expand                           |
+	| Partner            | Yes           | Checkbox     | true                             |
+	| Provides FLS       | Yes           | Checkbox     | true                             |
+	| Receives FLS       | No            | Checkbox     | true                             |
+	| Internal           | No            | Checkbox     | true                             |
+	| Tier               | T4            | Checkbox     | true                             |
+	| Subscription State | Active        | Checkbox     | false                            |
+	| Subscription State | Cancelled     | Checkbox     | false                            |
+	| Subscription State | Expired       | Checkbox     | false                            |
+	| Subscription State | Unactivated   | Checkbox     | false                            |
+	| Support Region     | United States | Checkbox     | true                             |
+	| Categorization     |               | Panel        | Collapse                         |
+	| Dates              |               | Panel        | Expand                           |
+	| Created After      |               | Input        | ${staticYyyyMmDdPastEndDate}     |
+	| Created Before     |               | Input        | ${staticYyyyMmDdFutureStartDate} |
+	| Modified After     |               | Input        | ${staticYyyyMmDdPastEndDate}     |
+	| Modified Before    |               | Input        | ${staticYyyyMmDdFutureStartDate} |
+	| Date               |               | Panel        | Collapse                         |''');
+
+		LocalFile.Provisioning._viewAccountViaIndex(
+			accountName = "Seapar - ${staticProjectName}",
+			table = '''| Name    | Seapar - ${staticProjectName} |
+	| Code    | SEAPARSEAPAR                  |
+	| Region  | United States                 |
+	| Tier    | T4                            |''');
+
+		LocalFile.Provisioning.viewSearchInfoMessage(table = '''| Label | Code: SEAPARSEAPAR                                |
+	| Label | Account Name: Seapar - ${staticProjectName}       |
+	| Label | Partner: Yes                                      |
+	| Label | Provides FLS: Yes                                 |
+	| Label | Receives FLS: No                                  |
+	| Label | Internal: No                                      |
+	| Label | Tier: T4                                          |
+	| Label | Support Region: United States                     |
+	| Label | Modified After: ${staticYyyyMmDdPastEndDate}      |
+	| Label | Modified Before: ${staticYyyyMmDdFutureStartDate} |
+	| Label | Created Before: ${staticYyyyMmDdFutureStartDate}  |
+	| Label | Created After: ${staticYyyyMmDdPastEndDate}       |''');
+
+		LocalFile.Provisioning.gotoAccounts();
+
+		LocalFile.Provisioning.expandAccountAdvancedSearchForm();
+
+		LocalFile.Provisioning.populateAdvancedSearchFormAndSearch(table = '''| Match               |               | Radio Button  | All                              |
+	| Account Name        |               | Input         | Korsea - ${staticProjectName}    |
+	| Code                |               | Input         | SEAKORKORSEA                     |
+	| Partner/Reseller/SI |               | Select Entity | Seapar - ${staticProjectName}    |
+	| First Line Support  |               | Select Entity | Seapar - ${staticProjectName}    |
+	| Country             |               | Select        | United States                    |
+	| Account             |               | Panel         | Collapse                         |
+	| Categorization      |               | Panel         | Expand                           |
+	| Partner             | No            | Checkbox      | true                             |
+	| Provides FLS        | No            | Checkbox      | true                             |
+	| Receives FLS        | Yes           | Checkbox      | true                             |
+	| Internal            | No            | Checkbox      | true                             |
+	| Tier                | T4            | Checkbox      | true                             |
+	| Subscription State  | Active        | Checkbox      | true                             |
+	| Subscription State  | Cancelled     | Checkbox      | false                            |
+	| Subscription State  | Expired       | Checkbox      | false                            |
+	| Subscription State  | Unactivated   | Checkbox      | false                            |
+	| Subscription Level  | Platinum      | Checkbox      | true                             |
+	| Support Region      | United States | Checkbox      | true                             |
+	| Categorization      |               | Panel         | Collapse                         |
+	| Dates               |               | Panel         | Expand                           |
+	| Created After       |               | Input         | ${staticYyyyMmDdPastEndDate}     |
+	| Created Before      |               | Input         | ${staticYyyyMmDdFutureStartDate} |
+	| Modified After      |               | Input         | ${staticYyyyMmDdPastEndDate}     |
+	| Modified Before     |               | Input         | ${staticYyyyMmDdFutureStartDate} |
+	| Date                |               | Panel         | Collapse                         |''');
+
+		LocalFile.Provisioning._viewAccountViaIndex(
+			accountName = "Korsea - ${staticProjectName}",
+			table = '''| Name    | Korsea - ${staticProjectName} |
+	| Code    | SEAKORKORSEA                  |
+	| Partner | Seapar - ${staticProjectName} |
+	| Region  | United States                 |
+	| SLA     | Platinum                      |
+	| Tier    | T4                            |
+	| State   | ACTIVE                        |''');
+
+		LocalFile.Provisioning.viewSearchInfoMessage(table = '''| Label | Country: United States                             |
+	| Label | Code: SEAKORKORSEA                                 |
+	| Label | Account Name: Korsea - ${staticProjectName}        |
+	| Label | Partner/Reseller/SI: Seapar - ${staticProjectName} |
+	| Label | First Line Support: Seapar - ${staticProjectName}  |
+	| Label | Partner: No                                        |
+	| Label | Provides FLS: No                                   |
+	| Label | Receives FLS: Yes                                  |
+	| Label | Internal: No                                       |
+	| Label | Tier: T4                                           |
+	| Label | Subscription State: Active                         |
+	| Label | Subscription Level: Platinum Subscription          |
+	| Label | Support Region: United States                      |
+	| Label | Modified After: ${staticYyyyMmDdPastEndDate}       |
+	| Label | Modified Before: ${staticYyyyMmDdFutureStartDate}  |
+	| Label | Created Before: ${staticYyyyMmDdFutureStartDate}   |
+	| Label | Created After: ${staticYyyyMmDdPastEndDate}        |''');
+	}
+
+}

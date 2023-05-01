@@ -1,0 +1,796 @@
+definition {
+
+	property testray.main.component.name = "Support QA";
+	property type = "zendesk.api";
+
+	setUp {
+		LocalFile.Passwords.getPasswords();
+
+		LocalFile.ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved              |
+	| Name             | Organization Name 1   |
+	| Tags             | lxc_sm,liferay_portal |
+	| Shared Tickets   | true                  |
+	| Shared Comments  | true                  |
+	| SLA              | Gold                  |
+	| Tier             | T4                    |
+	| Support Region   | US                    |
+	| Support Language | English               |
+	| External ID      | 12345678              |''');
+	}
+
+	tearDown {
+		LocalFile.ZendeskUserAPI._tearDownUsersRequestedTicketsByExternalIdTable(table = '''| Enduser1 |''');
+
+		LocalFile.ZendeskUserAPI._tearDownUsersByExternalIdTable(table = '''| Enduser1 |''');
+
+		LocalFile.ZendeskOrganizationAPI._tearDownOrganizationsByExternalIdTable(table = '''| 12345678 |''');
+	}
+
+	test Updateaticketstatustoclosedandviewheatscoreaftersubsequentupdates {
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk Enduser1                    |
+	| Tags             | osb_customer,osb_kb                 |
+	| Password         | ${staticZendeskAdminPassword}       |
+	| Role             | End-user                            |
+	| Access           | Organization                        |
+	| Email            | zendesk.enduser1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                   |
+	| Organization     | Organization Name 1                 |
+	| Language         | English                             |
+	| Time Zone        | Pacific Time (US & Canada)          |
+	| External ID      | Enduser1                            |''');
+
+		LocalFile.ZendeskUserAPI._assignUserToOrganization(
+			organizationExternalId = 12345678,
+			userEmailAddress = "zendesk.enduser1@zendesk.com.broken");
+
+		LocalFile.ZendeskRequestAPI._createRequest(
+			requesterEmail = "zendesk.enduser1@zendesk.com.broken",
+			table = '''| Product                  | prd_liferay_dxp_7_4                              |
+	| Component                | activation_key_project_administration            |
+	| System Status            | production_functioning_with_limited_capabilities |
+	| Subject                  | Request Heat Score Subject                       |
+	| Description              | Request Heat Score Description                   |
+	| Organization External ID | 12345678                                         |''');
+
+		LocalFile.ZendeskTicketAPI._viewMultipleTicketPriorities(
+			priority = "normal",
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._assignTicket(
+			ticketId = ${staticRequestIdList},
+			userEmailAddress = "zendesk.enduser1@zendesk.com.broken");
+
+		LocalFile.ZendeskTicketAPI._changeTicketSubStatus(
+			ticketId = ${staticRequestIdList},
+			ticketSubStatus = "resolution_planning");
+
+		LocalFile.ZendeskTicketAPI._viewTicketStatusSync(
+			status = "new",
+			ticketId = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewMultipleTicketSubStatuses(
+			subStatus = "resolution_planning",
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewMultipleTicketEnvironments(
+			environment = "production",
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewTicketHeatScore(
+			heatScore = 6,
+			ticketId = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._changeTicketStatus(
+			ticketId = ${staticRequestIdList},
+			ticketStatus = "closed");
+
+		LocalFile.ZendeskTicketAPI._changeTicketSubStatus(
+			ticketId = ${staticRequestIdList},
+			ticketSubStatus = "solution_proposed");
+
+		LocalFile.ZendeskTicketAPI._viewTicketStatusSync(
+			status = "closed",
+			ticketId = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewTicketHeatScore(
+			heatScore = 6,
+			ticketId = ${staticRequestIdList});
+	}
+
+	test Updateaticketstatustosolvedandviewheatscoreaftersubsequentupdates {
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk Enduser1                    |
+	| Tags             | osb_customer,osb_kb                 |
+	| Password         | ${staticZendeskAdminPassword}       |
+	| Role             | End-user                            |
+	| Access           | Organization                        |
+	| Email            | zendesk.enduser1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                   |
+	| Organization     | Organization Name 1                 |
+	| Language         | English                             |
+	| Time Zone        | Pacific Time (US & Canada)          |
+	| External ID      | Enduser1                            |''');
+
+		LocalFile.ZendeskUserAPI._assignUserToOrganization(
+			organizationExternalId = 12345678,
+			userEmailAddress = "zendesk.enduser1@zendesk.com.broken");
+
+		LocalFile.ZendeskRequestAPI._createRequest(
+			requesterEmail = "zendesk.enduser1@zendesk.com.broken",
+			table = '''| Product                  | prd_liferay_dxp_7_4                              |
+	| Component                | activation_key_project_administration            |
+	| System Status            | production_functioning_with_limited_capabilities |
+	| Subject                  | Request Heat Score Subject                       |
+	| Description              | Request Heat Score Description                   |
+	| Organization External ID | 12345678                                         |''');
+
+		LocalFile.ZendeskTicketAPI._viewMultipleTicketPriorities(
+			priority = "normal",
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._assignTicket(
+			ticketId = ${staticRequestIdList},
+			userEmailAddress = "zendesk.enduser1@zendesk.com.broken");
+
+		LocalFile.ZendeskTicketAPI._changeTicketSubStatus(
+			ticketId = ${staticRequestIdList},
+			ticketSubStatus = "resolution_planning");
+
+		LocalFile.ZendeskTicketAPI._viewTicketStatusSync(
+			status = "new",
+			ticketId = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewMultipleTicketSubStatuses(
+			subStatus = "resolution_planning",
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewMultipleTicketEnvironments(
+			environment = "production",
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewTicketHeatScore(
+			heatScore = 6,
+			ticketId = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._changeTicketStatusAndSubStatusAndLongTermResolution(
+			ticketId = ${staticRequestIdList},
+			ticketLongTermResolution = "bug_fix",
+			ticketStatus = "solved",
+			ticketSubStatus = "solution_proposed");
+
+		LocalFile.ZendeskTicketAPI._viewTicketStatusSync(
+			status = "solved",
+			ticketId = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewMultipleTicketSubStatuses(
+			subStatus = "solution_proposed",
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewTicketHeatScore(
+			heatScore = 5,
+			ticketId = ${staticRequestIdList});
+	}
+
+	@help.center.acceptance = "true"
+	test Viewheatscoreofhighpriorityrequest {
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk Enduser1                    |
+	| Tags             | osb_customer,osb_kb,lxc_sm          |
+	| Password         | ${staticZendeskAdminPassword}       |
+	| Role             | End-user                            |
+	| Access           | Organization                        |
+	| Email            | zendesk.enduser1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                   |
+	| Organization     | Organization Name 1                 |
+	| Language         | English                             |
+	| Time Zone        | Pacific Time (US & Canada)          |
+	| External ID      | Enduser1                            |''');
+
+		LocalFile.ZendeskUserAPI._assignUserToOrganization(
+			organizationExternalId = 12345678,
+			userEmailAddress = "zendesk.enduser1@zendesk.com.broken");
+
+		LocalFile.ZendeskRequestAPI._createLXCSMRequest(
+			requesterEmail = "zendesk.enduser1@zendesk.com.broken",
+			table = '''| Product                  | prd_lxc_sm                              |
+	| Component                | connectivity                            |
+	| Liferay Version          | liferay_version_7_2                     |
+	| Tags                     | escalation_engineer                     |
+	| System Status            | production_severely_impacted_inoperable |
+	| Subject                  | Request Heat Score Subject              |
+	| Description              | Request Heat Score Description          |
+	| Organization External ID | 12345678                                |''');
+
+		LocalFile.ZendeskTicketAPI._viewMultipleTicketPriorities(
+			priority = "high",
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._assignTicket(
+			ticketId = ${staticRequestIdList},
+			userEmailAddress = "zendesk.enduser1@zendesk.com.broken");
+
+		LocalFile.ZendeskTicketAPI._changeTicketSubStatus(
+			ticketId = ${staticRequestIdList},
+			ticketSubStatus = "resolution_planning");
+
+		LocalFile.ZendeskTicketAPI._viewMultipleTicketSubStatuses(
+			subStatus = "resolution_planning",
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewMultipleTicketEnvironments(
+			environment = "production",
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewTicketHeatScore(
+			heatScore = 10,
+			ticketId = ${staticRequestIdList});
+	}
+
+	test Viewheatscoreoflowpriorityrequest {
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk Enduser1                    |
+	| Tags             | osb_customer,osb_kb                 |
+	| Password         | ${staticZendeskAdminPassword}       |
+	| Role             | End-user                            |
+	| Access           | Organization                        |
+	| Email            | zendesk.enduser1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                   |
+	| Organization     | Organization Name 1                 |
+	| Language         | English                             |
+	| Time Zone        | Pacific Time (US & Canada)          |
+	| External ID      | Enduser1                            |''');
+
+		LocalFile.ZendeskUserAPI._assignUserToOrganization(
+			organizationExternalId = 12345678,
+			userEmailAddress = "zendesk.enduser1@zendesk.com.broken");
+
+		LocalFile.ZendeskRequestAPI._createRequest(
+			requesterEmail = "zendesk.enduser1@zendesk.com.broken",
+			table = '''| Product                  | prd_enterprise_search                                |
+	| Component                | monitoring                                           |
+	| System Status            | non-production_fully_functional_with_observed_errors |
+	| Subject                  | Request Heat Score Subject                           |
+	| Description              | Request Heat Score Description                       |
+	| Organization External ID | 12345678                                             |''');
+
+		LocalFile.ZendeskTicketAPI._viewMultipleTicketPriorities(
+			priority = "low",
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._assignTicket(
+			ticketId = ${staticRequestIdList},
+			userEmailAddress = "zendesk.enduser1@zendesk.com.broken");
+
+		LocalFile.ZendeskTicketAPI._changeTicketSubStatus(
+			ticketId = ${staticRequestIdList},
+			ticketSubStatus = "resolution_planning");
+
+		LocalFile.ZendeskTicketAPI._viewMultipleTicketSubStatuses(
+			subStatus = "resolution_planning",
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewMultipleTicketEnvironments(
+			environment = "non-production",
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewTicketHeatScore(
+			heatScore = 3,
+			ticketId = ${staticRequestIdList});
+	}
+
+	@help.center.acceptance = "true"
+	test Viewheatscoreofnormalpriorityrequest {
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk Enduser1                    |
+	| Tags             | osb_customer,osb_kb                 |
+	| Password         | ${staticZendeskAdminPassword}       |
+	| Role             | End-user                            |
+	| Access           | Organization                        |
+	| Email            | zendesk.enduser1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                   |
+	| Organization     | Organization Name 1                 |
+	| Language         | English                             |
+	| Time Zone        | Pacific Time (US & Canada)          |
+	| External ID      | Enduser1                            |''');
+
+		LocalFile.ZendeskUserAPI._assignUserToOrganization(
+			organizationExternalId = 12345678,
+			userEmailAddress = "zendesk.enduser1@zendesk.com.broken");
+
+		LocalFile.ZendeskRequestAPI._createRequest(
+			requesterEmail = "zendesk.enduser1@zendesk.com.broken",
+			table = '''| Product                  | prd_liferay_dxp_7_4                              |
+	| Component                | activation_key_project_administration            |
+	| System Status            | production_functioning_with_limited_capabilities |
+	| Subject                  | Request Heat Score Subject                       |
+	| Description              | Request Heat Score Description                   |
+	| Organization External ID | 12345678                                         |''');
+
+		LocalFile.ZendeskTicketAPI._viewMultipleTicketPriorities(
+			priority = "normal",
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._assignTicket(
+			ticketId = ${staticRequestIdList},
+			userEmailAddress = "zendesk.enduser1@zendesk.com.broken");
+
+		LocalFile.ZendeskTicketAPI._changeTicketSubStatus(
+			ticketId = ${staticRequestIdList},
+			ticketSubStatus = "resolution_planning");
+
+		LocalFile.ZendeskTicketAPI._viewMultipleTicketSubStatuses(
+			subStatus = "resolution_planning",
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewMultipleTicketEnvironments(
+			environment = "production",
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewTicketHeatScore(
+			heatScore = 6,
+			ticketId = ${staticRequestIdList});
+	}
+
+	test Viewheatscoreofreproducedsubstatusandhighpriorityrequest {
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk Enduser1                    |
+	| Tags             | osb_customer,osb_kb,lxc_sm          |
+	| Password         | ${staticZendeskAdminPassword}       |
+	| Role             | End-user                            |
+	| Access           | Organization                        |
+	| Email            | zendesk.enduser1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                   |
+	| Organization     | Organization Name 1                 |
+	| Language         | English                             |
+	| Time Zone        | Pacific Time (US & Canada)          |
+	| External ID      | Enduser1                            |''');
+
+		LocalFile.ZendeskUserAPI._assignUserToOrganization(
+			organizationExternalId = 12345678,
+			userEmailAddress = "zendesk.enduser1@zendesk.com.broken");
+
+		LocalFile.ZendeskRequestAPI._createLXCSMRequest(
+			requesterEmail = "zendesk.enduser1@zendesk.com.broken",
+			table = '''| Product                  | prd_lxc_sm                              |
+	| Component                | connectivity                            |
+	| Liferay Version          | liferay_version_7_2                     |
+	| Tags                     | escalation_engineer                     |
+	| System Status            | production_severely_impacted_inoperable |
+	| Subject                  | Request Heat Score Subject              |
+	| Description              | Request Heat Score Description          |
+	| Organization External ID | 12345678                                |''');
+
+		LocalFile.ZendeskTicketAPI._viewMultipleTicketPriorities(
+			priority = "high",
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._assignTicket(
+			ticketId = ${staticRequestIdList},
+			userEmailAddress = "zendesk.enduser1@zendesk.com.broken");
+
+		LocalFile.ZendeskTicketAPI._changeTicketSubStatus(
+			ticketId = ${staticRequestIdList},
+			ticketSubStatus = "reproduced");
+
+		LocalFile.ZendeskTicketAPI._viewMultipleTicketSubStatuses(
+			subStatus = "reproduced",
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewMultipleTicketEnvironments(
+			environment = "production",
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewTicketHeatScore(
+			heatScore = 10,
+			ticketId = ${staticRequestIdList});
+	}
+
+	test Viewheatscoreofreproducedsubstatusandlowpriorityrequest {
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk Enduser1                    |
+	| Tags             | osb_customer,osb_kb                 |
+	| Password         | ${staticZendeskAdminPassword}       |
+	| Role             | End-user                            |
+	| Access           | Organization                        |
+	| Email            | zendesk.enduser1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                   |
+	| Organization     | Organization Name 1                 |
+	| Language         | English                             |
+	| Time Zone        | Pacific Time (US & Canada)          |
+	| External ID      | Enduser1                            |''');
+
+		LocalFile.ZendeskUserAPI._assignUserToOrganization(
+			organizationExternalId = 12345678,
+			userEmailAddress = "zendesk.enduser1@zendesk.com.broken");
+
+		LocalFile.ZendeskRequestAPI._createRequest(
+			requesterEmail = "zendesk.enduser1@zendesk.com.broken",
+			table = '''| Product                  | prd_enterprise_search                                |
+	| Component                | monitoring                                           |
+	| System Status            | non-production_fully_functional_with_observed_errors |
+	| Subject                  | Request Heat Score Subject                           |
+	| Description              | Request Heat Score Description                       |
+	| Organization External ID | 12345678                                             |''');
+
+		LocalFile.ZendeskTicketAPI._viewMultipleTicketPriorities(
+			priority = "low",
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._assignTicket(
+			ticketId = ${staticRequestIdList},
+			userEmailAddress = "zendesk.enduser1@zendesk.com.broken");
+
+		LocalFile.ZendeskTicketAPI._changeTicketSubStatus(
+			ticketId = ${staticRequestIdList},
+			ticketSubStatus = "reproduced");
+
+		LocalFile.ZendeskTicketAPI._viewMultipleTicketSubStatuses(
+			subStatus = "reproduced",
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewMultipleTicketEnvironments(
+			environment = "non-production",
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewTicketHeatScore(
+			heatScore = 3,
+			ticketId = ${staticRequestIdList});
+	}
+
+	test Viewheatscoreofreproducedsubstatusandnormalpriorityrequest {
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk Enduser1                    |
+	| Tags             | osb_customer,osb_kb                 |
+	| Password         | ${staticZendeskAdminPassword}       |
+	| Role             | End-user                            |
+	| Access           | Organization                        |
+	| Email            | zendesk.enduser1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                   |
+	| Organization     | Organization Name 1                 |
+	| Language         | English                             |
+	| Time Zone        | Pacific Time (US & Canada)          |
+	| External ID      | Enduser1                            |''');
+
+		LocalFile.ZendeskUserAPI._assignUserToOrganization(
+			organizationExternalId = 12345678,
+			userEmailAddress = "zendesk.enduser1@zendesk.com.broken");
+
+		LocalFile.ZendeskRequestAPI._createRequest(
+			requesterEmail = "zendesk.enduser1@zendesk.com.broken",
+			table = '''| Product                  | prd_liferay_dxp_7_4                              |
+	| Component                | activation_key_project_administration            |
+	| System Status            | production_functioning_with_limited_capabilities |
+	| Subject                  | Request Heat Score Subject                       |
+	| Description              | Request Heat Score Description                   |
+	| Organization External ID | 12345678                                         |''');
+
+		LocalFile.ZendeskTicketAPI._viewMultipleTicketPriorities(
+			priority = "normal",
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._assignTicket(
+			ticketId = ${staticRequestIdList},
+			userEmailAddress = "zendesk.enduser1@zendesk.com.broken");
+
+		LocalFile.ZendeskTicketAPI._changeTicketSubStatus(
+			ticketId = ${staticRequestIdList},
+			ticketSubStatus = "reproduced");
+
+		LocalFile.ZendeskTicketAPI._viewMultipleTicketSubStatuses(
+			subStatus = "reproduced",
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewMultipleTicketEnvironments(
+			environment = "production",
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewTicketHeatScore(
+			heatScore = 6,
+			ticketId = ${staticRequestIdList});
+	}
+
+	test Viewheatscoreofreproducedsubstatusandurgentpriorityrequest {
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                       |
+	| Tags             | osb_customer,osb_kb,lxc_sm          |
+	| Password         | ${staticZendeskAdminPassword}       |
+	| Role             | End-user                            |
+	| Access           | Organization                        |
+	| Email            | zendesk.enduser1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                   |
+	| Organization     | Vodafone UK Customer Portal         |
+	| Language         | Portuguese                          |
+	| Time Zone        | Brasilia                            | 
+	| External ID      | Enduser1                            |''');
+
+		LocalFile.ZendeskUserAPI._assignUserToOrganization(
+			organizationExternalId = 83313192,
+			userEmailAddress = "zendesk.enduser1@zendesk.com.broken");
+
+		LocalFile.ZendeskRequestAPI._createLXCSMRequest(
+			requesterEmail = "zendesk.enduser1@zendesk.com.broken",
+			table = '''| Product                  | prd_lxc_sm                     |
+	| Component                | backup_recovery                |
+	| Liferay Version          | liferay_version_7_2            |
+	| System Status            | production_completely_shutdown |
+	| Subject                  | Request Heat Score Subject     |
+	| Description              | Request Heat Score Description |
+	| Organization External ID | 83313192                       |''');
+
+		LocalFile.ZendeskTicketAPI._viewMultipleTicketPriorities(
+			priority = "urgent",
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._assignTicket(
+			ticketId = ${staticRequestIdList},
+			userEmailAddress = "zendesk.enduser1@zendesk.com.broken");
+
+		LocalFile.ZendeskTicketAPI._changeTicketSubStatus(
+			ticketId = ${staticRequestIdList},
+			ticketSubStatus = "reproduced");
+
+		LocalFile.ZendeskTicketAPI._viewMultipleTicketSubStatuses(
+			subStatus = "reproduced",
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewMultipleTicketEnvironments(
+			environment = "production",
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewTicketHeatScore(
+			heatScore = 12,
+			ticketId = ${staticRequestIdList});
+	}
+
+	test Viewheatscoreofsolutionproposedandhighpriorityrequest {
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk Enduser1                    |
+	| Tags             | osb_customer,osb_kb,lxc_sm          |
+	| Password         | ${staticZendeskAdminPassword}       |
+	| Role             | End-user                            |
+	| Access           | Organization                        |
+	| Email            | zendesk.enduser1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                   |
+	| Organization     | Organization Name 1                 |
+	| Language         | English                             |
+	| Time Zone        | Pacific Time (US & Canada)          |
+	| External ID      | Enduser1                            |''');
+
+		LocalFile.ZendeskUserAPI._assignUserToOrganization(
+			organizationExternalId = 12345678,
+			userEmailAddress = "zendesk.enduser1@zendesk.com.broken");
+
+		LocalFile.ZendeskRequestAPI._createLXCSMRequest(
+			requesterEmail = "zendesk.enduser1@zendesk.com.broken",
+			table = '''| Product                  | prd_lxc_sm                              |
+	| Component                | connectivity                            |
+	| Liferay Version          | liferay_version_7_2                     |
+	| Tags                     | escalation_engineer                     |
+	| System Status            | production_severely_impacted_inoperable |
+	| Subject                  | Request Heat Score Subject              |
+	| Description              | Request Heat Score Description          |
+	| Organization External ID | 12345678                                |''');
+
+		LocalFile.ZendeskTicketAPI._viewMultipleTicketPriorities(
+			priority = "high",
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._assignTicket(
+			ticketId = ${staticRequestIdList},
+			userEmailAddress = "zendesk.enduser1@zendesk.com.broken");
+
+		LocalFile.ZendeskTicketAPI._changeTicketSubStatus(
+			ticketId = ${staticRequestIdList},
+			ticketSubStatus = "solution_proposed");
+
+		LocalFile.ZendeskTicketAPI._viewMultipleTicketSubStatuses(
+			subStatus = "solution_proposed",
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewMultipleTicketEnvironments(
+			environment = "production",
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewTicketHeatScore(
+			heatScore = 9,
+			ticketId = ${staticRequestIdList});
+	}
+
+	test Viewheatscoreofsolutionproposedandnormalpriorityrequest {
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk Enduser1                    |
+	| Tags             | osb_customer,osb_kb                 |
+	| Password         | ${staticZendeskAdminPassword}       |
+	| Role             | End-user                            |
+	| Access           | Organization                        |
+	| Email            | zendesk.enduser1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                   |
+	| Organization     | Organization Name 1                 |
+	| Language         | English                             |
+	| Time Zone        | Pacific Time (US & Canada)          |
+	| External ID      | Enduser1                            |''');
+
+		LocalFile.ZendeskUserAPI._assignUserToOrganization(
+			organizationExternalId = 12345678,
+			userEmailAddress = "zendesk.enduser1@zendesk.com.broken");
+
+		LocalFile.ZendeskRequestAPI._createRequest(
+			requesterEmail = "zendesk.enduser1@zendesk.com.broken",
+			table = '''| Product                  | prd_liferay_dxp_7_4                              |
+	| Component                | activation_key_project_administration            |
+	| System Status            | production_functioning_with_limited_capabilities |
+	| Subject                  | Request Heat Score Subject                       |
+	| Description              | Request Heat Score Description                   |
+	| Organization External ID | 12345678                                         |''');
+
+		LocalFile.ZendeskTicketAPI._viewMultipleTicketPriorities(
+			priority = "normal",
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._assignTicket(
+			ticketId = ${staticRequestIdList},
+			userEmailAddress = "zendesk.enduser1@zendesk.com.broken");
+
+		LocalFile.ZendeskTicketAPI._changeTicketSubStatus(
+			ticketId = ${staticRequestIdList},
+			ticketSubStatus = "solution_proposed");
+
+		LocalFile.ZendeskTicketAPI._viewMultipleTicketSubStatuses(
+			subStatus = "solution_proposed",
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewMultipleTicketEnvironments(
+			environment = "production",
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewTicketHeatScore(
+			heatScore = 5,
+			ticketId = ${staticRequestIdList});
+	}
+
+	test Viewheatscoreofsolutionproposedsubstatusandlowpriorityrequest {
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk Enduser1                    |
+	| Tags             | osb_customer,osb_kb                 |
+	| Password         | ${staticZendeskAdminPassword}       |
+	| Role             | End-user                            |
+	| Access           | Organization                        |
+	| Email            | zendesk.enduser1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                   |
+	| Organization     | Organization Name 1                 |
+	| Language         | English                             |
+	| Time Zone        | Pacific Time (US & Canada)          |
+	| External ID      | Enduser1                            |''');
+
+		LocalFile.ZendeskUserAPI._assignUserToOrganization(
+			organizationExternalId = 12345678,
+			userEmailAddress = "zendesk.enduser1@zendesk.com.broken");
+
+		LocalFile.ZendeskRequestAPI._createRequest(
+			requesterEmail = "zendesk.enduser1@zendesk.com.broken",
+			table = '''| Product                  | prd_enterprise_search                                |
+	| Component                | monitoring                                           |
+	| System Status            | non-production_fully_functional_with_observed_errors |
+	| Subject                  | Request Heat Score Subject                           |
+	| Description              | Request Heat Score Description                       |
+	| Organization External ID | 12345678                                             |''');
+
+		LocalFile.ZendeskTicketAPI._viewMultipleTicketPriorities(
+			priority = "low",
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._assignTicket(
+			ticketId = ${staticRequestIdList},
+			userEmailAddress = "zendesk.enduser1@zendesk.com.broken");
+
+		LocalFile.ZendeskTicketAPI._changeTicketSubStatus(
+			ticketId = ${staticRequestIdList},
+			ticketSubStatus = "solution_proposed");
+
+		LocalFile.ZendeskTicketAPI._viewMultipleTicketSubStatuses(
+			subStatus = "solution_proposed",
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewMultipleTicketEnvironments(
+			environment = "non-production",
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewTicketHeatScore(
+			heatScore = 2,
+			ticketId = ${staticRequestIdList});
+	}
+
+	test Viewheatscoreofsolutionproposedsubstatusandurgentpriorityrequest {
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                       |
+	| Tags             | osb_customer,osb_kb,lxc_sm          |
+	| Password         | ${staticZendeskAdminPassword}       |
+	| Role             | End-user                            |
+	| Access           | Organization                        |
+	| Email            | zendesk.enduser1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                   |
+	| Organization     | Vodafone UK Customer Portal         |
+	| Language         | Portuguese                          |
+	| Time Zone        | Brasilia                            | 
+	| External ID      | Enduser1                            |''');
+
+		LocalFile.ZendeskUserAPI._assignUserToOrganization(
+			organizationExternalId = 83313192,
+			userEmailAddress = "zendesk.enduser1@zendesk.com.broken");
+
+		LocalFile.ZendeskRequestAPI._createLXCSMRequest(
+			requesterEmail = "zendesk.enduser1@zendesk.com.broken",
+			table = '''| Product                  | prd_lxc_sm                     |
+	| Component                | backup_recovery                |
+	| Liferay Version          | liferay_version_7_2            |
+	| System Status            | production_completely_shutdown |
+	| Subject                  | Request Heat Score Subject     |
+	| Description              | Request Heat Score Description |
+	| Organization External ID | 83313192                       |''');
+
+		LocalFile.ZendeskTicketAPI._viewMultipleTicketPriorities(
+			priority = "urgent",
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._assignTicket(
+			ticketId = ${staticRequestIdList},
+			userEmailAddress = "zendesk.enduser1@zendesk.com.broken");
+
+		LocalFile.ZendeskTicketAPI._changeTicketSubStatus(
+			ticketId = ${staticRequestIdList},
+			ticketSubStatus = "solution_proposed");
+
+		LocalFile.ZendeskTicketAPI._viewMultipleTicketSubStatuses(
+			subStatus = "solution_proposed",
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewMultipleTicketEnvironments(
+			environment = "production",
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewTicketHeatScore(
+			heatScore = 11,
+			ticketId = ${staticRequestIdList});
+	}
+
+	test Viewheatscoreofurgentpriorityrequest {
+		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                       |
+	| Tags             | osb_customer,osb_kb,lxc_sm          |
+	| Password         | ${staticZendeskAdminPassword}       |
+	| Role             | End-user                            |
+	| Access           | Organization                        |
+	| Email            | zendesk.enduser1@zendesk.com.broken |
+	| Phone Number     | +1 (555) 555-5555                   |
+	| Organization     | Vodafone UK Customer Portal         |
+	| Language         | Portuguese                          |
+	| Time Zone        | Brasilia                            | 
+	| External ID      | Enduser1                            |''');
+
+		LocalFile.ZendeskUserAPI._assignUserToOrganization(
+			organizationExternalId = 83313192,
+			userEmailAddress = "zendesk.enduser1@zendesk.com.broken");
+
+		LocalFile.ZendeskRequestAPI._createLXCSMRequest(
+			requesterEmail = "zendesk.enduser1@zendesk.com.broken",
+			table = '''| Product                  | prd_lxc_sm                     |
+	| Component                | backup_recovery                |
+	| Liferay Version          | liferay_version_7_2            |
+	| System Status            | production_completely_shutdown |
+	| Subject                  | Request Heat Score Subject     |
+	| Description              | Request Heat Score Description |
+	| Organization External ID | 83313192                       |''');
+
+		LocalFile.ZendeskTicketAPI._viewMultipleTicketPriorities(
+			priority = "urgent",
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._assignTicket(
+			ticketId = ${staticRequestIdList},
+			userEmailAddress = "zendesk.enduser1@zendesk.com.broken");
+
+		LocalFile.ZendeskTicketAPI._changeTicketSubStatus(
+			ticketId = ${staticRequestIdList},
+			ticketSubStatus = "resolution_planning");
+
+		LocalFile.ZendeskTicketAPI._viewMultipleTicketSubStatuses(
+			subStatus = "resolution_planning",
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewMultipleTicketEnvironments(
+			environment = "production",
+			ticketIdList = ${staticRequestIdList});
+
+		LocalFile.ZendeskTicketAPI._viewTicketHeatScore(
+			heatScore = 12,
+			ticketId = ${staticRequestIdList});
+	}
+
+}

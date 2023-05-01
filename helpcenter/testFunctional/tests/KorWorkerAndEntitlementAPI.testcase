@@ -1,0 +1,2908 @@
+definition {
+
+	property testray.main.component.name = "Support QA";
+	property type = "koroneiki";
+
+	tearDown {
+		LocalFile.KoroneikiContactAPI._tearDownContactEntitlementDefinitions(table = '''| Entitlement Name  |
+	| Entitlement Name1 |
+	| Entitlement Name2 |''');
+
+		LocalFile.KoroneikiProductAPI._tearDownProducts(table = '''| Liferay Digital Experience Platform |
+	| Liferay Portal Six                  |''');
+
+		LocalFile.KoroneikiAccountAPI._tearDownAccounts(table = '''| Koroneiki Automotive  |
+	| Koroneiki Engineering |''');
+
+		LocalFile.KoroneikiContactAPI._tearDownContacts(table = '''| koroneiki.contact1@lrcustomer.com.broken |
+	| koroneiki.contact2@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiContactRoleAPI._tearDownContactRoles(table = '''| Default Account Worker Role  |
+	| Optional Account Worker Role |''');
+	}
+
+	test Createcontactentitlement {
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | KORAUTO                              | |
+	| Description           | Test automotive account on koroneiki | |
+	| Fax Number            | 555-555-1234                         | |
+	| Name                  | Koroneiki Automotive                 | |
+	| Phone Number          | 555-555-5678                         | |
+	| Region                | United States                        | |
+	| Status                | Active                               | |
+	| Tier                  | T4                                   | |
+	| Website               | www.koroneikiautomotive.com          | |''');
+
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRole(table = '''| Description | This is the default worker role for accounts |
+	| Name        | Default Account Worker Role                  |
+	| Type        | Account Worker                               |''');
+
+		LocalFile.KoroneikiAccountAPI._assignWorkerContacts(
+			accountName = "Koroneiki Automotive",
+			table = '''| koroneiki.contact1@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Default Account Worker Role |''');
+
+		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | Liferay Digital Experience Platform | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Koroneiki Automotive",
+			productName = "Liferay Digital Experience Platform",
+			table = '''| End Date                | ${staticEndDate}   |                |
+	| Perpetual               | true               |                |
+	| Product Field and Value | additionalProp1    | propertyValue1 |
+	| Product Field and Value | additionalProp2    | propertyValue2 |
+	| Product Field and Value | additionalProp3    | propertyValue3 |
+	| Quantity                | 1                  |                |
+	| Start Date              | ${staticStartDate} |                |''');
+
+		LocalFile.KoroneikiContactAPI._createContactEntitlementDefinition(
+			contactRoleName = "Default Account Worker Role",
+			contactRoleType = "Account Worker",
+			productName = "Liferay Digital Experience Platform",
+			table = '''| Description | Entitlement Description |
+	| Name        | Entitlement Name        |
+	| Status      | Approved                |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementDefinition(
+			entitlementDefinitionName = "Entitlement Name",
+			table = '''| Description | Entitlement Description |
+	| Name        | Entitlement Name        |
+	| Status      | Approved                |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementDefinitionViaEntitlementDefinitionKey(
+			entitlementDefinitionName = "Entitlement Name",
+			table = '''| Description | Entitlement Description |
+	| Name        | Entitlement Name        |
+	| Status      | Approved                |''');
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Entitlement Name");
+
+		LocalFile.KoroneikiContactAPI._viewContactViaEmailAddress(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Email Address            | koroneiki.contact1@lrcustomer.com.broken |
+	| Entitlement Nested Field | Entitlement Name                         |
+	| First Name               | Koroneiki                                |
+	| Language                 | English                                  |
+	| Last Name                | Contact1                                 |
+	| Middle Name              | User                                     |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementViaNestedField(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			entitlementDefinitionName = "Entitlement Name");
+	}
+
+	test Createcontactentitlementandviewviauuid {
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | KORAUTO                              | |
+	| Description           | Test automotive account on koroneiki | |
+	| Fax Number            | 555-555-1234                         | |
+	| Name                  | Koroneiki Automotive                 | |
+	| Phone Number          | 555-555-5678                         | |
+	| Region                | United States                        | |
+	| Status                | Active                               | |
+	| Tier                  | T4                                   | |
+	| Website               | www.koroneikiautomotive.com          | |''');
+
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRole(table = '''| Description | This is the default worker role for accounts |
+	| Name        | Default Account Worker Role                  |
+	| Type        | Account Worker                               |''');
+
+		LocalFile.KoroneikiAccountAPI._assignWorkerContacts(
+			accountName = "Koroneiki Automotive",
+			table = '''| koroneiki.contact1@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Default Account Worker Role |''');
+
+		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | Liferay Digital Experience Platform | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Koroneiki Automotive",
+			productName = "Liferay Digital Experience Platform",
+			table = '''| End Date                | ${staticEndDate}   |                |
+	| Perpetual               | true               |                |
+	| Product Field and Value | additionalProp1    | propertyValue1 |
+	| Product Field and Value | additionalProp2    | propertyValue2 |
+	| Product Field and Value | additionalProp3    | propertyValue3 |
+	| Quantity                | 1                  |                |
+	| Start Date              | ${staticStartDate} |                |''');
+
+		LocalFile.KoroneikiContactAPI._createContactEntitlementDefinition(
+			contactRoleName = "Default Account Worker Role",
+			contactRoleType = "Account Worker",
+			productName = "Liferay Digital Experience Platform",
+			table = '''| Description | Entitlement Description |
+	| Name        | Entitlement Name        |
+	| Status      | Approved                |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementDefinition(
+			entitlementDefinitionName = "Entitlement Name",
+			table = '''| Description | Entitlement Description |
+	| Name        | Entitlement Name        |
+	| Status      | Approved                |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementDefinitionViaEntitlementDefinitionKey(
+			entitlementDefinitionName = "Entitlement Name",
+			table = '''| Description | Entitlement Description |
+	| Name        | Entitlement Name        |
+	| Status      | Approved                |''');
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Entitlement Name");
+
+		LocalFile.KoroneikiContactAPI._viewContactViaUuid(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Email Address            | koroneiki.contact1@lrcustomer.com.broken |
+	| Entitlement Nested Field | Entitlement Name                         |
+	| First Name               | Koroneiki                                |
+	| Language                 | English                                  |
+	| Last Name                | Contact1                                 |
+	| Middle Name              | User                                     |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementViaNestedField(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			entitlementDefinitionName = "Entitlement Name");
+	}
+
+	test Createcontactentitlementforworkercontactwithproductpurchaseonly {
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | KORAUTO                              | |
+	| Description           | Test automotive account on koroneiki | |
+	| Fax Number            | 555-555-1234                         | |
+	| Name                  | Koroneiki Automotive                 | |
+	| Phone Number          | 555-555-5678                         | |
+	| Region                | United States                        | |
+	| Status                | Active                               | |
+	| Tier                  | T4                                   | |
+	| Website               | www.koroneikiautomotive.com          | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | KORENGR                               | |
+	| Description           | Test engineering account on koroneiki | |
+	| Fax Number            | 555-555-4321                          | |
+	| Name                  | Koroneiki Engineering                 | |
+	| Phone Number          | 555-555-8765                          | |
+	| Region                | Japan                                 | |
+	| Status                | Active                                | |
+	| Tier                  | T1                                    | |
+	| Website               | www.koroneikiengineering.com          | |''');
+
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact2@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact2                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRole(table = '''| Description | This is the default worker role for accounts |
+	| Name        | Default Account Worker Role                  |
+	| Type        | Account Worker                               |''');
+
+		LocalFile.KoroneikiAccountAPI._assignWorkerContacts(
+			accountName = "Koroneiki Automotive",
+			table = '''| koroneiki.contact1@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiAccountAPI._assignWorkerContacts(
+			accountName = "Koroneiki Engineering",
+			table = '''| koroneiki.contact2@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Default Account Worker Role |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Koroneiki Engineering",
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			table = '''| Default Account Worker Role |''');
+
+		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | Liferay Digital Experience Platform | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Koroneiki Automotive",
+			productName = "Liferay Digital Experience Platform",
+			table = '''| End Date                | ${staticEndDate}   |                |
+	| Perpetual               | true               |                |
+	| Product Field and Value | additionalProp1    | propertyValue1 |
+	| Product Field and Value | additionalProp2    | propertyValue2 |
+	| Product Field and Value | additionalProp3    | propertyValue3 |
+	| Quantity                | 1                  |                |
+	| Start Date              | ${staticStartDate} |                |''');
+
+		LocalFile.KoroneikiContactAPI._createContactEntitlementDefinition(
+			contactRoleName = "Default Account Worker Role",
+			contactRoleType = "Account Worker",
+			productName = "Liferay Digital Experience Platform",
+			table = '''| Description | Entitlement Description |
+	| Name        | Entitlement Name        |
+	| Status      | Approved                |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementDefinition(
+			entitlementDefinitionName = "Entitlement Name",
+			table = '''| Description | Entitlement Description |
+	| Name        | Entitlement Name        |
+	| Status      | Approved                |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementDefinitionViaEntitlementDefinitionKey(
+			entitlementDefinitionName = "Entitlement Name",
+			table = '''| Description | Entitlement Description |
+	| Name        | Entitlement Name        |
+	| Status      | Approved                |''');
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Entitlement Name");
+
+		LocalFile.KoroneikiContactAPI._viewContactViaEmailAddress(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Email Address            | koroneiki.contact1@lrcustomer.com.broken |
+	| Entitlement Nested Field | Entitlement Name                         |
+	| First Name               | Koroneiki                                |
+	| Language                 | English                                  |
+	| Last Name                | Contact1                                 |
+	| Middle Name              | User                                     |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementViaNestedField(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			entitlementDefinitionName = "Entitlement Name");
+
+		LocalFile.KoroneikiContactAPI._viewNoContactEntitlementViaNestedField(
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			entitlementDefinitionName = "Entitlement Name");
+	}
+
+	test Createcontactentitlementforworkercontactwithroleonly {
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | KORAUTO                              | |
+	| Description           | Test automotive account on koroneiki | |
+	| Fax Number            | 555-555-1234                         | |
+	| Name                  | Koroneiki Automotive                 | |
+	| Phone Number          | 555-555-5678                         | |
+	| Region                | United States                        | |
+	| Status                | Active                               | |
+	| Tier                  | T4                                   | |
+	| Website               | www.koroneikiautomotive.com          | |''');
+
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact2@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact2                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRole(table = '''| Description | This is the default worker role for accounts |
+	| Name        | Default Account Worker Role                  |
+	| Type        | Account Worker                               |''');
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRole(table = '''| Description | This is the optional worker role for accounts |
+	| Name        | Optional Account Worker Role                  |
+	| Type        | Account Worker                                |''');
+
+		LocalFile.KoroneikiAccountAPI._assignWorkerContacts(
+			accountName = "Koroneiki Automotive",
+			table = '''| koroneiki.contact1@lrcustomer.com.broken |
+	| koroneiki.contact2@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Default Account Worker Role |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			table = '''| Optional Account Worker Role |''');
+
+		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | Liferay Digital Experience Platform | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Koroneiki Automotive",
+			productName = "Liferay Digital Experience Platform",
+			table = '''| End Date                | ${staticEndDate}   |                |
+	| Perpetual               | true               |                |
+	| Product Field and Value | additionalProp1    | propertyValue1 |
+	| Product Field and Value | additionalProp2    | propertyValue2 |
+	| Product Field and Value | additionalProp3    | propertyValue3 |
+	| Quantity                | 1                  |                |
+	| Start Date              | ${staticStartDate} |                |''');
+
+		LocalFile.KoroneikiContactAPI._createContactEntitlementDefinition(
+			contactRoleName = "Default Account Worker Role",
+			contactRoleType = "Account Worker",
+			productName = "Liferay Digital Experience Platform",
+			table = '''| Description | Entitlement Description |
+	| Name        | Entitlement Name        |
+	| Status      | Approved                |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementDefinition(
+			entitlementDefinitionName = "Entitlement Name",
+			table = '''| Description | Entitlement Description |
+	| Name        | Entitlement Name        |
+	| Status      | Approved                |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementDefinitionViaEntitlementDefinitionKey(
+			entitlementDefinitionName = "Entitlement Name",
+			table = '''| Description | Entitlement Description |
+	| Name        | Entitlement Name        |
+	| Status      | Approved                |''');
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Entitlement Name");
+
+		LocalFile.KoroneikiContactAPI._viewContactViaEmailAddress(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Email Address            | koroneiki.contact1@lrcustomer.com.broken |
+	| Entitlement Nested Field | Entitlement Name                         |
+	| First Name               | Koroneiki                                |
+	| Language                 | English                                  |
+	| Last Name                | Contact1                                 |
+	| Middle Name              | User                                     |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementViaNestedField(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			entitlementDefinitionName = "Entitlement Name");
+
+		LocalFile.KoroneikiContactAPI._viewNoContactEntitlementViaNestedField(
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			entitlementDefinitionName = "Entitlement Name");
+	}
+
+	test Createcontactentitlementsformultipleworkercontacts {
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | KORAUTO                              | |
+	| Description           | Test automotive account on koroneiki | |
+	| Fax Number            | 555-555-1234                         | |
+	| Name                  | Koroneiki Automotive                 | |
+	| Phone Number          | 555-555-5678                         | |
+	| Region                | United States                        | |
+	| Status                | Active                               | |
+	| Tier                  | T4                                   | |
+	| Website               | www.koroneikiautomotive.com          | |''');
+
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact2@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact2                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRole(table = '''| Description | This is the default worker role for accounts |
+	| Name        | Default Account Worker Role                  |
+	| Type        | Account Worker                               |''');
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRole(table = '''| Description | This is the optional worker role for accounts |
+	| Name        | Optional Account Worker Role                  |
+	| Type        | Account Worker                                |''');
+
+		LocalFile.KoroneikiAccountAPI._assignWorkerContacts(
+			accountName = "Koroneiki Automotive",
+			table = '''| koroneiki.contact1@lrcustomer.com.broken |
+	| koroneiki.contact2@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Default Account Worker Role |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			table = '''| Default Account Worker Role |''');
+
+		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | Liferay Digital Experience Platform | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Koroneiki Automotive",
+			productName = "Liferay Digital Experience Platform",
+			table = '''| End Date                | ${staticEndDate}   |                |
+	| Perpetual               | true               |                |
+	| Product Field and Value | additionalProp1    | propertyValue1 |
+	| Product Field and Value | additionalProp2    | propertyValue2 |
+	| Product Field and Value | additionalProp3    | propertyValue3 |
+	| Quantity                | 1                  |                |
+	| Start Date              | ${staticStartDate} |                |''');
+
+		LocalFile.KoroneikiContactAPI._createContactEntitlementDefinition(
+			contactRoleName = "Default Account Worker Role",
+			contactRoleType = "Account Worker",
+			productName = "Liferay Digital Experience Platform",
+			table = '''| Description | Entitlement Description |
+	| Name        | Entitlement Name        |
+	| Status      | Approved                |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementDefinition(
+			entitlementDefinitionName = "Entitlement Name",
+			table = '''| Description | Entitlement Description |
+	| Name        | Entitlement Name        |
+	| Status      | Approved                |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementDefinitionViaEntitlementDefinitionKey(
+			entitlementDefinitionName = "Entitlement Name",
+			table = '''| Description | Entitlement Description |
+	| Name        | Entitlement Name        |
+	| Status      | Approved                |''');
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Entitlement Name");
+
+		LocalFile.KoroneikiContactAPI._viewContactViaEmailAddress(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Email Address            | koroneiki.contact1@lrcustomer.com.broken |
+	| Entitlement Nested Field | Entitlement Name                         |
+	| First Name               | Koroneiki                                |
+	| Language                 | English                                  |
+	| Last Name                | Contact1                                 |
+	| Middle Name              | User                                     |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactViaEmailAddress(
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			table = '''| Email Address            | koroneiki.contact2@lrcustomer.com.broken |
+	| Entitlement Nested Field | Entitlement Name                         |
+	| First Name               | Koroneiki                                |
+	| Language                 | English                                  |
+	| Last Name                | Contact2                                 |
+	| Middle Name              | User                                     |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementViaNestedField(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			entitlementDefinitionName = "Entitlement Name");
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementViaNestedField(
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			entitlementDefinitionName = "Entitlement Name");
+	}
+
+	test Createmultiplecontactentitlementsformultipleworkercontacts {
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | KORAUTO                              | |
+	| Description           | Test automotive account on koroneiki | |
+	| Fax Number            | 555-555-1234                         | |
+	| Name                  | Koroneiki Automotive                 | |
+	| Phone Number          | 555-555-5678                         | |
+	| Region                | United States                        | |
+	| Status                | Active                               | |
+	| Tier                  | T4                                   | |
+	| Website               | www.koroneikiautomotive.com          | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | KORENGR                               | |
+	| Description           | Test engineering account on koroneiki | |
+	| Fax Number            | 555-555-4321                          | |
+	| Name                  | Koroneiki Engineering                 | |
+	| Phone Number          | 555-555-8765                          | |
+	| Region                | Japan                                 | |
+	| Status                | Active                                | |
+	| Tier                  | T1                                    | |
+	| Website               | www.koroneikiengineering.com          | |''');
+
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact2@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact2                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRole(table = '''| Description | This is the default worker role for accounts |
+	| Name        | Default Account Worker Role                  |
+	| Type        | Account Worker                               |''');
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRole(table = '''| Description | This is the optional worker role for accounts |
+	| Name        | Optional Account Worker Role                  |
+	| Type        | Account Worker                                |''');
+
+		LocalFile.KoroneikiAccountAPI._assignWorkerContacts(
+			accountName = "Koroneiki Automotive",
+			table = '''| koroneiki.contact1@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiAccountAPI._assignWorkerContacts(
+			accountName = "Koroneiki Engineering",
+			table = '''| koroneiki.contact2@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Default Account Worker Role |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Koroneiki Engineering",
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			table = '''| Optional Account Worker Role |''');
+
+		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | Liferay Digital Experience Platform | |''');
+
+		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | Liferay Portal Six | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Koroneiki Automotive",
+			productName = "Liferay Digital Experience Platform",
+			table = '''| End Date                | ${staticEndDate}   |                |
+	| Perpetual               | true               |                |
+	| Product Field and Value | additionalProp1    | propertyValue1 |
+	| Product Field and Value | additionalProp2    | propertyValue2 |
+	| Product Field and Value | additionalProp3    | propertyValue3 |
+	| Quantity                | 1                  |                |
+	| Start Date              | ${staticStartDate} |                |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Koroneiki Engineering",
+			productName = "Liferay Portal Six",
+			table = '''| End Date                | ${staticEndDate}   |                |
+	| Perpetual               | true               |                |
+	| Product Field and Value | additionalProp1    | propertyValue1 |
+	| Product Field and Value | additionalProp2    | propertyValue2 |
+	| Product Field and Value | additionalProp3    | propertyValue3 |
+	| Quantity                | 1                  |                |
+	| Start Date              | ${staticStartDate} |                |''');
+
+		LocalFile.KoroneikiContactAPI._createContactEntitlementDefinition(
+			contactRoleName = "Default Account Worker Role",
+			contactRoleType = "Account Worker",
+			productName = "Liferay Digital Experience Platform",
+			table = '''| Description | Entitlement Description1 |
+	| Name        | Entitlement Name1        |
+	| Status      | Approved                 |''');
+
+		LocalFile.KoroneikiContactAPI._createContactEntitlementDefinition(
+			contactRoleName = "Optional Account Worker Role",
+			contactRoleType = "Account Worker",
+			productName = "Liferay Portal Six",
+			table = '''| Description | Entitlement Description2 |
+	| Name        | Entitlement Name2        |
+	| Status      | Approved                 |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementDefinition(
+			entitlementDefinitionName = "Entitlement Name1",
+			table = '''| Description | Entitlement Description1 |
+	| Name        | Entitlement Name1        |
+	| Status      | Approved                 |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementDefinitionViaEntitlementDefinitionKey(
+			entitlementDefinitionName = "Entitlement Name1",
+			table = '''| Description | Entitlement Description1 |
+	| Name        | Entitlement Name1        |
+	| Status      | Approved                 |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementDefinition(
+			entitlementDefinitionName = "Entitlement Name2",
+			table = '''| Description | Entitlement Description2 |
+	| Name        | Entitlement Name2        |
+	| Status      | Approved                 |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementDefinitionViaEntitlementDefinitionKey(
+			entitlementDefinitionName = "Entitlement Name2",
+			table = '''| Description | Entitlement Description2 |
+	| Name        | Entitlement Name2        |
+	| Status      | Approved                 |''');
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Entitlement Name1");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Entitlement Name2");
+
+		LocalFile.KoroneikiContactAPI._viewContactViaEmailAddress(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Email Address            | koroneiki.contact1@lrcustomer.com.broken |
+	| Entitlement Nested Field | Entitlement Name1                        |
+	| First Name               | Koroneiki                                |
+	| Language                 | English                                  |
+	| Last Name                | Contact1                                 |
+	| Middle Name              | User                                     |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactViaEmailAddress(
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			table = '''| Email Address            | koroneiki.contact2@lrcustomer.com.broken |
+	| Entitlement Nested Field | Entitlement Name2                        |
+	| First Name               | Koroneiki                                |
+	| Language                 | English                                  |
+	| Last Name                | Contact2                                 |
+	| Middle Name              | User                                     |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementViaNestedField(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			entitlementDefinitionName = "Entitlement Name1");
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementViaNestedField(
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			entitlementDefinitionName = "Entitlement Name2");
+
+		LocalFile.KoroneikiContactAPI._viewNoContactEntitlementViaNestedField(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			entitlementDefinitionName = "Entitlement Name2");
+
+		LocalFile.KoroneikiContactAPI._viewNoContactEntitlementViaNestedField(
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			entitlementDefinitionName = "Entitlement Name1");
+	}
+
+	test Createmultiplecontactentitlementsforworkercontactbasedonproductpurchases {
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | KORAUTO                              | |
+	| Description           | Test automotive account on koroneiki | |
+	| Fax Number            | 555-555-1234                         | |
+	| Name                  | Koroneiki Automotive                 | |
+	| Phone Number          | 555-555-5678                         | |
+	| Region                | United States                        | |
+	| Status                | Active                               | |
+	| Tier                  | T4                                   | |
+	| Website               | www.koroneikiautomotive.com          | |''');
+
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRole(table = '''| Description | This is the default worker role for accounts |
+	| Name        | Default Account Worker Role                  |
+	| Type        | Account Worker                               |''');
+
+		LocalFile.KoroneikiAccountAPI._assignWorkerContacts(
+			accountName = "Koroneiki Automotive",
+			table = '''| koroneiki.contact1@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Default Account Worker Role |''');
+
+		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | Liferay Digital Experience Platform | |''');
+
+		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | Liferay Portal Six | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Koroneiki Automotive",
+			productName = "Liferay Digital Experience Platform",
+			table = '''| End Date                | ${staticEndDate}   |                |
+	| Perpetual               | true               |                |
+	| Product Field and Value | additionalProp1    | propertyValue1 |
+	| Product Field and Value | additionalProp2    | propertyValue2 |
+	| Product Field and Value | additionalProp3    | propertyValue3 |
+	| Quantity                | 1                  |                |
+	| Start Date              | ${staticStartDate} |                |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Koroneiki Automotive",
+			productName = "Liferay Portal Six",
+			table = '''| End Date                | ${staticEndDate}   |                |
+	| Perpetual               | true               |                |
+	| Product Field and Value | additionalProp1    | propertyValue1 |
+	| Product Field and Value | additionalProp2    | propertyValue2 |
+	| Product Field and Value | additionalProp3    | propertyValue3 |
+	| Quantity                | 1                  |                |
+	| Start Date              | ${staticStartDate} |                |''');
+
+		LocalFile.KoroneikiContactAPI._createContactEntitlementDefinition(
+			contactRoleName = "Default Account Worker Role",
+			contactRoleType = "Account Worker",
+			productName = "Liferay Digital Experience Platform",
+			table = '''| Description | Entitlement Description1 |
+	| Name        | Entitlement Name1        |
+	| Status      | Approved                 |''');
+
+		LocalFile.KoroneikiContactAPI._createContactEntitlementDefinition(
+			contactRoleName = "Default Account Worker Role",
+			contactRoleType = "Account Worker",
+			productName = "Liferay Portal Six",
+			table = '''| Description | Entitlement Description2 |
+	| Name        | Entitlement Name2        |
+	| Status      | Approved                 |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementDefinition(
+			entitlementDefinitionName = "Entitlement Name1",
+			table = '''| Description | Entitlement Description1 |
+	| Name        | Entitlement Name1        |
+	| Status      | Approved                 |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementDefinitionViaEntitlementDefinitionKey(
+			entitlementDefinitionName = "Entitlement Name1",
+			table = '''| Description | Entitlement Description1 |
+	| Name        | Entitlement Name1        |
+	| Status      | Approved                 |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementDefinition(
+			entitlementDefinitionName = "Entitlement Name2",
+			table = '''| Description | Entitlement Description2 |
+	| Name        | Entitlement Name2        |
+	| Status      | Approved                 |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementDefinitionViaEntitlementDefinitionKey(
+			entitlementDefinitionName = "Entitlement Name2",
+			table = '''| Description | Entitlement Description2 |
+	| Name        | Entitlement Name2        |
+	| Status      | Approved                 |''');
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Entitlement Name1");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Entitlement Name2");
+
+		LocalFile.KoroneikiContactAPI._viewContactViaEmailAddress(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Email Address            | koroneiki.contact1@lrcustomer.com.broken |
+	| Entitlement Nested Field | Entitlement Name1                        |
+	| Entitlement Nested Field | Entitlement Name2                        |
+	| First Name               | Koroneiki                                |
+	| Language                 | English                                  |
+	| Last Name                | Contact1                                 |
+	| Middle Name              | User                                     |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementViaNestedField(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			entitlementDefinitionName = "Entitlement Name1");
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementViaNestedField(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			entitlementDefinitionName = "Entitlement Name2");
+	}
+
+	test Createmultiplecontactentitlementsforworkercontactbasedonroles {
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | KORAUTO                              | |
+	| Description           | Test automotive account on koroneiki | |
+	| Fax Number            | 555-555-1234                         | |
+	| Name                  | Koroneiki Automotive                 | |
+	| Phone Number          | 555-555-5678                         | |
+	| Region                | United States                        | |
+	| Status                | Active                               | |
+	| Tier                  | T4                                   | |
+	| Website               | www.koroneikiautomotive.com          | |''');
+
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRole(table = '''| Description | This is the default worker role for accounts |
+	| Name        | Default Account Worker Role                  |
+	| Type        | Account Worker                               |''');
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRole(table = '''| Description | This is the optional worker role for accounts |
+	| Name        | Optional Account Worker Role                  |
+	| Type        | Account Worker                                |''');
+
+		LocalFile.KoroneikiAccountAPI._assignWorkerContacts(
+			accountName = "Koroneiki Automotive",
+			table = '''| koroneiki.contact1@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Default Account Worker Role |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Optional Account Worker Role |''');
+
+		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | Liferay Digital Experience Platform | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Koroneiki Automotive",
+			productName = "Liferay Digital Experience Platform",
+			table = '''| End Date                | ${staticEndDate}   |                |
+	| Perpetual               | true               |                |
+	| Product Field and Value | additionalProp1    | propertyValue1 |
+	| Product Field and Value | additionalProp2    | propertyValue2 |
+	| Product Field and Value | additionalProp3    | propertyValue3 |
+	| Quantity                | 1                  |                |
+	| Start Date              | ${staticStartDate} |                |''');
+
+		LocalFile.KoroneikiContactAPI._createContactEntitlementDefinition(
+			contactRoleName = "Default Account Worker Role",
+			contactRoleType = "Account Worker",
+			productName = "Liferay Digital Experience Platform",
+			table = '''| Description | Entitlement Description1 |
+	| Name        | Entitlement Name1        |
+	| Status      | Approved                 |''');
+
+		LocalFile.KoroneikiContactAPI._createContactEntitlementDefinition(
+			contactRoleName = "Optional Account Worker Role",
+			contactRoleType = "Account Worker",
+			productName = "Liferay Digital Experience Platform",
+			table = '''| Description | Entitlement Description2 |
+	| Name        | Entitlement Name2        |
+	| Status      | Approved                 |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementDefinition(
+			entitlementDefinitionName = "Entitlement Name1",
+			table = '''| Description | Entitlement Description1 |
+	| Name        | Entitlement Name1        |
+	| Status      | Approved                 |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementDefinitionViaEntitlementDefinitionKey(
+			entitlementDefinitionName = "Entitlement Name1",
+			table = '''| Description | Entitlement Description1 |
+	| Name        | Entitlement Name1        |
+	| Status      | Approved                 |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementDefinition(
+			entitlementDefinitionName = "Entitlement Name2",
+			table = '''| Description | Entitlement Description2 |
+	| Name        | Entitlement Name2        |
+	| Status      | Approved                 |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementDefinitionViaEntitlementDefinitionKey(
+			entitlementDefinitionName = "Entitlement Name2",
+			table = '''| Description | Entitlement Description2 |
+	| Name        | Entitlement Name2        |
+	| Status      | Approved                 |''');
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Entitlement Name1");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Entitlement Name2");
+
+		LocalFile.KoroneikiContactAPI._viewContactViaEmailAddress(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Email Address            | koroneiki.contact1@lrcustomer.com.broken |
+	| Entitlement Nested Field | Entitlement Name1                        |
+	| Entitlement Nested Field | Entitlement Name2                        |
+	| First Name               | Koroneiki                                |
+	| Language                 | English                                  |
+	| Last Name                | Contact1                                 |
+	| Middle Name              | User                                     |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementViaNestedField(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			entitlementDefinitionName = "Entitlement Name1");
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementViaNestedField(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			entitlementDefinitionName = "Entitlement Name2");
+	}
+
+	test Deletecontactentitlementdefinition {
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | KORAUTO                              | |
+	| Description           | Test automotive account on koroneiki | |
+	| Fax Number            | 555-555-1234                         | |
+	| Name                  | Koroneiki Automotive                 | |
+	| Phone Number          | 555-555-5678                         | |
+	| Region                | United States                        | |
+	| Status                | Active                               | |
+	| Tier                  | T4                                   | |
+	| Website               | www.koroneikiautomotive.com          | |''');
+
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRole(table = '''| Description | This is the default worker role for accounts |
+	| Name        | Default Account Worker Role                  |
+	| Type        | Account Worker                               |''');
+
+		LocalFile.KoroneikiAccountAPI._assignWorkerContacts(
+			accountName = "Koroneiki Automotive",
+			table = '''| koroneiki.contact1@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Default Account Worker Role |''');
+
+		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | Liferay Digital Experience Platform | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Koroneiki Automotive",
+			productName = "Liferay Digital Experience Platform",
+			table = '''| End Date                | ${staticEndDate}   |                |
+	| Perpetual               | true               |                |
+	| Product Field and Value | additionalProp1    | propertyValue1 |
+	| Product Field and Value | additionalProp2    | propertyValue2 |
+	| Product Field and Value | additionalProp3    | propertyValue3 |
+	| Quantity                | 1                  |                |
+	| Start Date              | ${staticStartDate} |                |''');
+
+		LocalFile.KoroneikiContactAPI._createContactEntitlementDefinition(
+			contactRoleName = "Default Account Worker Role",
+			contactRoleType = "Account Worker",
+			productName = "Liferay Digital Experience Platform",
+			table = '''| Description | Entitlement Description |
+	| Name        | Entitlement Name        |
+	| Status      | Approved                |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementDefinition(
+			entitlementDefinitionName = "Entitlement Name",
+			table = '''| Description | Entitlement Description |
+	| Name        | Entitlement Name        |
+	| Status      | Approved                |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementDefinitionViaEntitlementDefinitionKey(
+			entitlementDefinitionName = "Entitlement Name",
+			table = '''| Description | Entitlement Description |
+	| Name        | Entitlement Name        |
+	| Status      | Approved                |''');
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Entitlement Name");
+
+		LocalFile.KoroneikiContactAPI._deleteContactEntitlementDefinition(entitlementDefinitionName = "Entitlement Name");
+
+		LocalFile.KoroneikiContactAPI._viewNoContactEntitlementDefinition(entitlementDefinitionName = "Entitlement Name");
+
+		LocalFile.KoroneikiContactAPI._viewNoContactEntitlementViaNestedField(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			entitlementDefinitionName = "Entitlement Name");
+	}
+
+	test Removecontactentitlementbyproductpurchase {
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | KORAUTO                              | |
+	| Description           | Test automotive account on koroneiki | |
+	| Fax Number            | 555-555-1234                         | |
+	| Name                  | Koroneiki Automotive                 | |
+	| Phone Number          | 555-555-5678                         | |
+	| Region                | United States                        | |
+	| Status                | Active                               | |
+	| Tier                  | T4                                   | |
+	| Website               | www.koroneikiautomotive.com          | |''');
+
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRole(table = '''| Description | This is the default worker role for accounts |
+	| Name        | Default Account Worker Role                  |
+	| Type        | Account Worker                               |''');
+
+		LocalFile.KoroneikiAccountAPI._assignWorkerContacts(
+			accountName = "Koroneiki Automotive",
+			table = '''| koroneiki.contact1@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Default Account Worker Role |''');
+
+		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | Liferay Digital Experience Platform | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Koroneiki Automotive",
+			productName = "Liferay Digital Experience Platform",
+			table = '''| End Date                | ${staticEndDate}   |                |
+	| Perpetual               | true               |                |
+	| Product Field and Value | additionalProp1    | propertyValue1 |
+	| Product Field and Value | additionalProp2    | propertyValue2 |
+	| Product Field and Value | additionalProp3    | propertyValue3 |
+	| Quantity                | 1                  |                |
+	| Start Date              | ${staticStartDate} |                |''');
+
+		LocalFile.KoroneikiContactAPI._createContactEntitlementDefinition(
+			contactRoleName = "Default Account Worker Role",
+			contactRoleType = "Account Worker",
+			productName = "Liferay Digital Experience Platform",
+			table = '''| Description | Entitlement Description |
+	| Name        | Entitlement Name        |
+	| Status      | Approved                |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementDefinition(
+			entitlementDefinitionName = "Entitlement Name",
+			table = '''| Description | Entitlement Description |
+	| Name        | Entitlement Name        |
+	| Status      | Approved                |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementDefinitionViaEntitlementDefinitionKey(
+			entitlementDefinitionName = "Entitlement Name",
+			table = '''| Description | Entitlement Description |
+	| Name        | Entitlement Name        |
+	| Status      | Approved                |''');
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Entitlement Name");
+
+		LocalFile.KoroneikiProductPurchaseAPI._deleteProductPurchase(
+			accountName = "Koroneiki Automotive",
+			productName = "Liferay Digital Experience Platform");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Entitlement Name");
+
+		LocalFile.KoroneikiContactAPI._viewNoContactEntitlementViaNestedField(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			entitlementDefinitionName = "Entitlement Name");
+	}
+
+	test Removecontactentitlementbyrole {
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | KORAUTO                              | |
+	| Description           | Test automotive account on koroneiki | |
+	| Fax Number            | 555-555-1234                         | |
+	| Name                  | Koroneiki Automotive                 | |
+	| Phone Number          | 555-555-5678                         | |
+	| Region                | United States                        | |
+	| Status                | Active                               | |
+	| Tier                  | T4                                   | |
+	| Website               | www.koroneikiautomotive.com          | |''');
+
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRole(table = '''| Description | This is the default worker role for accounts |
+	| Name        | Default Account Worker Role                  |
+	| Type        | Account Worker                               |''');
+
+		LocalFile.KoroneikiAccountAPI._assignWorkerContacts(
+			accountName = "Koroneiki Automotive",
+			table = '''| koroneiki.contact1@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Default Account Worker Role |''');
+
+		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | Liferay Digital Experience Platform | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Koroneiki Automotive",
+			productName = "Liferay Digital Experience Platform",
+			table = '''| End Date                | ${staticEndDate}   |                |
+	| Perpetual               | true               |                |
+	| Product Field and Value | additionalProp1    | propertyValue1 |
+	| Product Field and Value | additionalProp2    | propertyValue2 |
+	| Product Field and Value | additionalProp3    | propertyValue3 |
+	| Quantity                | 1                  |                |
+	| Start Date              | ${staticStartDate} |                |''');
+
+		LocalFile.KoroneikiContactAPI._createContactEntitlementDefinition(
+			contactRoleName = "Default Account Worker Role",
+			contactRoleType = "Account Worker",
+			productName = "Liferay Digital Experience Platform",
+			table = '''| Description | Entitlement Description |
+	| Name        | Entitlement Name        |
+	| Status      | Approved                |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementDefinition(
+			entitlementDefinitionName = "Entitlement Name",
+			table = '''| Description | Entitlement Description |
+	| Name        | Entitlement Name        |
+	| Status      | Approved                |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementDefinitionViaEntitlementDefinitionKey(
+			entitlementDefinitionName = "Entitlement Name",
+			table = '''| Description | Entitlement Description |
+	| Name        | Entitlement Name        |
+	| Status      | Approved                |''');
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Entitlement Name");
+
+		LocalFile.KoroneikiAccountAPI._removeContactRolesFromContact(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Default Account Worker Role |''');
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Entitlement Name");
+
+		LocalFile.KoroneikiContactAPI._viewNoContactEntitlementViaNestedField(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			entitlementDefinitionName = "Entitlement Name");
+	}
+
+	test Removecontactentitlementfromrelevantworkercontactonlybyrole {
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | KORAUTO                              | |
+	| Description           | Test automotive account on koroneiki | |
+	| Fax Number            | 555-555-1234                         | |
+	| Name                  | Koroneiki Automotive                 | |
+	| Phone Number          | 555-555-5678                         | |
+	| Region                | United States                        | |
+	| Status                | Active                               | |
+	| Tier                  | T4                                   | |
+	| Website               | www.koroneikiautomotive.com          | |''');
+
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact2@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact2                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRole(table = '''| Description | This is the default worker role for accounts |
+	| Name        | Default Account Worker Role                  |
+	| Type        | Account Worker                               |''');
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRole(table = '''| Description | This is the optional worker role for accounts |
+	| Name        | Optional Account Worker Role                  |
+	| Type        | Account Worker                                |''');
+
+		LocalFile.KoroneikiAccountAPI._assignWorkerContacts(
+			accountName = "Koroneiki Automotive",
+			table = '''| koroneiki.contact1@lrcustomer.com.broken |
+	| koroneiki.contact2@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Default Account Worker Role |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			table = '''| Default Account Worker Role |''');
+
+		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | Liferay Digital Experience Platform | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Koroneiki Automotive",
+			productName = "Liferay Digital Experience Platform",
+			table = '''| End Date                | ${staticEndDate}   |                |
+	| Perpetual               | true               |                |
+	| Product Field and Value | additionalProp1    | propertyValue1 |
+	| Product Field and Value | additionalProp2    | propertyValue2 |
+	| Product Field and Value | additionalProp3    | propertyValue3 |
+	| Quantity                | 1                  |                |
+	| Start Date              | ${staticStartDate} |                |''');
+
+		LocalFile.KoroneikiContactAPI._createContactEntitlementDefinition(
+			contactRoleName = "Default Account Worker Role",
+			contactRoleType = "Account Worker",
+			productName = "Liferay Digital Experience Platform",
+			table = '''| Description | Entitlement Description |
+	| Name        | Entitlement Name        |
+	| Status      | Approved                |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementDefinition(
+			entitlementDefinitionName = "Entitlement Name",
+			table = '''| Description | Entitlement Description |
+	| Name        | Entitlement Name        |
+	| Status      | Approved                |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementDefinitionViaEntitlementDefinitionKey(
+			entitlementDefinitionName = "Entitlement Name",
+			table = '''| Description | Entitlement Description |
+	| Name        | Entitlement Name        |
+	| Status      | Approved                |''');
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Entitlement Name");
+
+		LocalFile.KoroneikiAccountAPI._removeContactRolesFromContact(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			table = '''| Default Account Worker Role |''');
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Entitlement Name");
+
+		LocalFile.KoroneikiContactAPI._viewContactViaEmailAddress(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Email Address            | koroneiki.contact1@lrcustomer.com.broken |
+	| Entitlement Nested Field | Entitlement Name                         |
+	| First Name               | Koroneiki                                |
+	| Language                 | English                                  |
+	| Last Name                | Contact1                                 |
+	| Middle Name              | User                                     |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementViaNestedField(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			entitlementDefinitionName = "Entitlement Name");
+
+		LocalFile.KoroneikiContactAPI._viewNoContactEntitlementViaNestedField(
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			entitlementDefinitionName = "Entitlement Name");
+	}
+
+	test Removecontactentitlementsformultipleworkercontactsbyproductpurchase {
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | KORAUTO                              | |
+	| Description           | Test automotive account on koroneiki | |
+	| Fax Number            | 555-555-1234                         | |
+	| Name                  | Koroneiki Automotive                 | |
+	| Phone Number          | 555-555-5678                         | |
+	| Region                | United States                        | |
+	| Status                | Active                               | |
+	| Tier                  | T4                                   | |
+	| Website               | www.koroneikiautomotive.com          | |''');
+
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact2@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact2                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRole(table = '''| Description | This is the default worker role for accounts |
+	| Name        | Default Account Worker Role                  |
+	| Type        | Account Worker                               |''');
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRole(table = '''| Description | This is the optional worker role for accounts |
+	| Name        | Optional Account Worker Role                  |
+	| Type        | Account Worker                                |''');
+
+		LocalFile.KoroneikiAccountAPI._assignWorkerContacts(
+			accountName = "Koroneiki Automotive",
+			table = '''| koroneiki.contact1@lrcustomer.com.broken |
+	| koroneiki.contact2@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Default Account Worker Role |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			table = '''| Default Account Worker Role |''');
+
+		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | Liferay Digital Experience Platform | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Koroneiki Automotive",
+			productName = "Liferay Digital Experience Platform",
+			table = '''| End Date                | ${staticEndDate}   |                |
+	| Perpetual               | true               |                |
+	| Product Field and Value | additionalProp1    | propertyValue1 |
+	| Product Field and Value | additionalProp2    | propertyValue2 |
+	| Product Field and Value | additionalProp3    | propertyValue3 |
+	| Quantity                | 1                  |                |
+	| Start Date              | ${staticStartDate} |                |''');
+
+		LocalFile.KoroneikiContactAPI._createContactEntitlementDefinition(
+			contactRoleName = "Default Account Worker Role",
+			contactRoleType = "Account Worker",
+			productName = "Liferay Digital Experience Platform",
+			table = '''| Description | Entitlement Description |
+	| Name        | Entitlement Name        |
+	| Status      | Approved                |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementDefinition(
+			entitlementDefinitionName = "Entitlement Name",
+			table = '''| Description | Entitlement Description |
+	| Name        | Entitlement Name        |
+	| Status      | Approved                |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementDefinitionViaEntitlementDefinitionKey(
+			entitlementDefinitionName = "Entitlement Name",
+			table = '''| Description | Entitlement Description |
+	| Name        | Entitlement Name        |
+	| Status      | Approved                |''');
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Entitlement Name");
+
+		LocalFile.KoroneikiProductPurchaseAPI._deleteProductPurchase(
+			accountName = "Koroneiki Automotive",
+			productName = "Liferay Digital Experience Platform");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Entitlement Name");
+
+		LocalFile.KoroneikiContactAPI._viewNoContactEntitlementViaNestedField(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			entitlementDefinitionName = "Entitlement Name");
+
+		LocalFile.KoroneikiContactAPI._viewNoContactEntitlementViaNestedField(
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			entitlementDefinitionName = "Entitlement Name");
+	}
+
+	test Removecontactentitlementsformultipleworkercontactsbyrole {
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | KORAUTO                              | |
+	| Description           | Test automotive account on koroneiki | |
+	| Fax Number            | 555-555-1234                         | |
+	| Name                  | Koroneiki Automotive                 | |
+	| Phone Number          | 555-555-5678                         | |
+	| Region                | United States                        | |
+	| Status                | Active                               | |
+	| Tier                  | T4                                   | |
+	| Website               | www.koroneikiautomotive.com          | |''');
+
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact2@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact2                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRole(table = '''| Description | This is the default worker role for accounts |
+	| Name        | Default Account Worker Role                  |
+	| Type        | Account Worker                               |''');
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRole(table = '''| Description | This is the optional worker role for accounts |
+	| Name        | Optional Account Worker Role                  |
+	| Type        | Account Worker                                |''');
+
+		LocalFile.KoroneikiAccountAPI._assignWorkerContacts(
+			accountName = "Koroneiki Automotive",
+			table = '''| koroneiki.contact1@lrcustomer.com.broken |
+	| koroneiki.contact2@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Default Account Worker Role |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			table = '''| Default Account Worker Role |''');
+
+		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | Liferay Digital Experience Platform | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Koroneiki Automotive",
+			productName = "Liferay Digital Experience Platform",
+			table = '''| End Date                | ${staticEndDate}   |                |
+	| Perpetual               | true               |                |
+	| Product Field and Value | additionalProp1    | propertyValue1 |
+	| Product Field and Value | additionalProp2    | propertyValue2 |
+	| Product Field and Value | additionalProp3    | propertyValue3 |
+	| Quantity                | 1                  |                |
+	| Start Date              | ${staticStartDate} |                |''');
+
+		LocalFile.KoroneikiContactAPI._createContactEntitlementDefinition(
+			contactRoleName = "Default Account Worker Role",
+			contactRoleType = "Account Worker",
+			productName = "Liferay Digital Experience Platform",
+			table = '''| Description | Entitlement Description |
+	| Name        | Entitlement Name        |
+	| Status      | Approved                |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementDefinition(
+			entitlementDefinitionName = "Entitlement Name",
+			table = '''| Description | Entitlement Description |
+	| Name        | Entitlement Name        |
+	| Status      | Approved                |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementDefinitionViaEntitlementDefinitionKey(
+			entitlementDefinitionName = "Entitlement Name",
+			table = '''| Description | Entitlement Description |
+	| Name        | Entitlement Name        |
+	| Status      | Approved                |''');
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Entitlement Name");
+
+		LocalFile.KoroneikiAccountAPI._removeContactRolesFromContact(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Default Account Worker Role |''');
+
+		LocalFile.KoroneikiAccountAPI._removeContactRolesFromContact(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			table = '''| Default Account Worker Role |''');
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Entitlement Name");
+
+		LocalFile.KoroneikiContactAPI._viewNoContactEntitlementViaNestedField(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			entitlementDefinitionName = "Entitlement Name");
+
+		LocalFile.KoroneikiContactAPI._viewNoContactEntitlementViaNestedField(
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			entitlementDefinitionName = "Entitlement Name");
+	}
+
+	test Removecontactentitlementsfromworkercontactbasedonrelevantproductpurchases {
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | KORAUTO                              | |
+	| Description           | Test automotive account on koroneiki | |
+	| Fax Number            | 555-555-1234                         | |
+	| Name                  | Koroneiki Automotive                 | |
+	| Phone Number          | 555-555-5678                         | |
+	| Region                | United States                        | |
+	| Status                | Active                               | |
+	| Tier                  | T4                                   | |
+	| Website               | www.koroneikiautomotive.com          | |''');
+
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRole(table = '''| Description | This is the default worker role for accounts |
+	| Name        | Default Account Worker Role                  |
+	| Type        | Account Worker                               |''');
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRole(table = '''| Description | This is the optional worker role for accounts |
+	| Name        | Optional Account Worker Role                  |
+	| Type        | Account Worker                                |''');
+
+		LocalFile.KoroneikiAccountAPI._assignWorkerContacts(
+			accountName = "Koroneiki Automotive",
+			table = '''| koroneiki.contact1@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Default Account Worker Role |''');
+
+		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | Liferay Digital Experience Platform | |''');
+
+		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | Liferay Portal Six | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Koroneiki Automotive",
+			productName = "Liferay Digital Experience Platform",
+			table = '''| End Date                | ${staticEndDate}   |                |
+	| Perpetual               | true               |                |
+	| Product Field and Value | additionalProp1    | propertyValue1 |
+	| Product Field and Value | additionalProp2    | propertyValue2 |
+	| Product Field and Value | additionalProp3    | propertyValue3 |
+	| Quantity                | 1                  |                |
+	| Start Date              | ${staticStartDate} |                |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Koroneiki Automotive",
+			productName = "Liferay Portal Six",
+			table = '''| End Date                | ${staticEndDate}   |                |
+	| Perpetual               | true               |                |
+	| Product Field and Value | additionalProp1    | propertyValue1 |
+	| Product Field and Value | additionalProp2    | propertyValue2 |
+	| Product Field and Value | additionalProp3    | propertyValue3 |
+	| Quantity                | 1                  |                |
+	| Start Date              | ${staticStartDate} |                |''');
+
+		LocalFile.KoroneikiContactAPI._createContactEntitlementDefinition(
+			contactRoleName = "Default Account Worker Role",
+			contactRoleType = "Account Worker",
+			productName = "Liferay Digital Experience Platform",
+			table = '''| Description | Entitlement Description1 |
+	| Name        | Entitlement Name1        |
+	| Status      | Approved                 |''');
+
+		LocalFile.KoroneikiContactAPI._createContactEntitlementDefinition(
+			contactRoleName = "Default Account Worker Role",
+			contactRoleType = "Account Worker",
+			productName = "Liferay Portal Six",
+			table = '''| Description | Entitlement Description2 |
+	| Name        | Entitlement Name2        |
+	| Status      | Approved                 |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementDefinition(
+			entitlementDefinitionName = "Entitlement Name1",
+			table = '''| Description | Entitlement Description1 |
+	| Name        | Entitlement Name1        |
+	| Status      | Approved                 |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementDefinitionViaEntitlementDefinitionKey(
+			entitlementDefinitionName = "Entitlement Name1",
+			table = '''| Description | Entitlement Description1 |
+	| Name        | Entitlement Name1        |
+	| Status      | Approved                 |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementDefinition(
+			entitlementDefinitionName = "Entitlement Name2",
+			table = '''| Description | Entitlement Description2 |
+	| Name        | Entitlement Name2        |
+	| Status      | Approved                 |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementDefinitionViaEntitlementDefinitionKey(
+			entitlementDefinitionName = "Entitlement Name2",
+			table = '''| Description | Entitlement Description2 |
+	| Name        | Entitlement Name2        |
+	| Status      | Approved                 |''');
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Entitlement Name1");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Entitlement Name2");
+
+		LocalFile.KoroneikiProductPurchaseAPI._deleteProductPurchase(
+			accountName = "Koroneiki Automotive",
+			productName = "Liferay Portal Six");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Entitlement Name1");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Entitlement Name2");
+
+		LocalFile.KoroneikiContactAPI._viewContactViaEmailAddress(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Email Address            | koroneiki.contact1@lrcustomer.com.broken |
+	| Entitlement Nested Field | Entitlement Name1                        |
+	| First Name               | Koroneiki                                |
+	| Language                 | English                                  |
+	| Last Name                | Contact1                                 |
+	| Middle Name              | User                                     |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementViaNestedField(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			entitlementDefinitionName = "Entitlement Name1");
+
+		LocalFile.KoroneikiContactAPI._viewNoContactEntitlementViaNestedField(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			entitlementDefinitionName = "Entitlement Name2");
+	}
+
+	test Removecontactentitlementsfromworkercontactbasedonrelevantroles {
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | KORAUTO                              | |
+	| Description           | Test automotive account on koroneiki | |
+	| Fax Number            | 555-555-1234                         | |
+	| Name                  | Koroneiki Automotive                 | |
+	| Phone Number          | 555-555-5678                         | |
+	| Region                | United States                        | |
+	| Status                | Active                               | |
+	| Tier                  | T4                                   | |
+	| Website               | www.koroneikiautomotive.com          | |''');
+
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRole(table = '''| Description | This is the default worker role for accounts |
+	| Name        | Default Account Worker Role                  |
+	| Type        | Account Worker                               |''');
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRole(table = '''| Description | This is the optional worker role for accounts |
+	| Name        | Optional Account Worker Role                  |
+	| Type        | Account Worker                                |''');
+
+		LocalFile.KoroneikiAccountAPI._assignWorkerContacts(
+			accountName = "Koroneiki Automotive",
+			table = '''| koroneiki.contact1@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Default Account Worker Role |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Optional Account Worker Role |''');
+
+		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | Liferay Digital Experience Platform | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Koroneiki Automotive",
+			productName = "Liferay Digital Experience Platform",
+			table = '''| End Date                | ${staticEndDate}   |                |
+	| Perpetual               | true               |                |
+	| Product Field and Value | additionalProp1    | propertyValue1 |
+	| Product Field and Value | additionalProp2    | propertyValue2 |
+	| Product Field and Value | additionalProp3    | propertyValue3 |
+	| Quantity                | 1                  |                |
+	| Start Date              | ${staticStartDate} |                |''');
+
+		LocalFile.KoroneikiContactAPI._createContactEntitlementDefinition(
+			contactRoleName = "Default Account Worker Role",
+			contactRoleType = "Account Worker",
+			productName = "Liferay Digital Experience Platform",
+			table = '''| Description | Entitlement Description1 |
+	| Name        | Entitlement Name1        |
+	| Status      | Approved                 |''');
+
+		LocalFile.KoroneikiContactAPI._createContactEntitlementDefinition(
+			contactRoleName = "Optional Account Worker Role",
+			contactRoleType = "Account Worker",
+			productName = "Liferay Digital Experience Platform",
+			table = '''| Description | Entitlement Description2 |
+	| Name        | Entitlement Name2        |
+	| Status      | Approved                 |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementDefinition(
+			entitlementDefinitionName = "Entitlement Name1",
+			table = '''| Description | Entitlement Description1 |
+	| Name        | Entitlement Name1        |
+	| Status      | Approved                 |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementDefinitionViaEntitlementDefinitionKey(
+			entitlementDefinitionName = "Entitlement Name1",
+			table = '''| Description | Entitlement Description1 |
+	| Name        | Entitlement Name1        |
+	| Status      | Approved                 |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementDefinition(
+			entitlementDefinitionName = "Entitlement Name2",
+			table = '''| Description | Entitlement Description2 |
+	| Name        | Entitlement Name2        |
+	| Status      | Approved                 |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementDefinitionViaEntitlementDefinitionKey(
+			entitlementDefinitionName = "Entitlement Name2",
+			table = '''| Description | Entitlement Description2 |
+	| Name        | Entitlement Name2        |
+	| Status      | Approved                 |''');
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Entitlement Name1");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Entitlement Name2");
+
+		LocalFile.KoroneikiAccountAPI._removeContactRolesFromContact(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Optional Account Worker Role |''');
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Entitlement Name1");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Entitlement Name2");
+
+		LocalFile.KoroneikiContactAPI._viewContactViaEmailAddress(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Email Address            | koroneiki.contact1@lrcustomer.com.broken |
+	| Entitlement Nested Field | Entitlement Name1                        |
+	| First Name               | Koroneiki                                |
+	| Language                 | English                                  |
+	| Last Name                | Contact1                                 |
+	| Middle Name              | User                                     |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementViaNestedField(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			entitlementDefinitionName = "Entitlement Name1");
+
+		LocalFile.KoroneikiContactAPI._viewNoContactEntitlementViaNestedField(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			entitlementDefinitionName = "Entitlement Name2");
+	}
+
+	test Removemultiplecontactentitlementsfrommultipleworkercontacts {
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | KORAUTO                              | |
+	| Description           | Test automotive account on koroneiki | |
+	| Fax Number            | 555-555-1234                         | |
+	| Name                  | Koroneiki Automotive                 | |
+	| Phone Number          | 555-555-5678                         | |
+	| Region                | United States                        | |
+	| Status                | Active                               | |
+	| Tier                  | T4                                   | |
+	| Website               | www.koroneikiautomotive.com          | |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | KORENGR                               | |
+	| Description           | Test engineering account on koroneiki | |
+	| Fax Number            | 555-555-4321                          | |
+	| Name                  | Koroneiki Engineering                 | |
+	| Phone Number          | 555-555-8765                          | |
+	| Region                | Japan                                 | |
+	| Status                | Active                                | |
+	| Tier                  | T1                                    | |
+	| Website               | www.koroneikiengineering.com          | |''');
+
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact2@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact2                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRole(table = '''| Description | This is the default worker role for accounts |
+	| Name        | Default Account Worker Role                  |
+	| Type        | Account Worker                               |''');
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRole(table = '''| Description | This is the optional worker role for accounts |
+	| Name        | Optional Account Worker Role                  |
+	| Type        | Account Worker                                |''');
+
+		LocalFile.KoroneikiAccountAPI._assignWorkerContacts(
+			accountName = "Koroneiki Automotive",
+			table = '''| koroneiki.contact1@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiAccountAPI._assignWorkerContacts(
+			accountName = "Koroneiki Engineering",
+			table = '''| koroneiki.contact2@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Default Account Worker Role |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Koroneiki Engineering",
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			table = '''| Optional Account Worker Role |''');
+
+		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | Liferay Digital Experience Platform | |''');
+
+		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | Liferay Portal Six | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Koroneiki Automotive",
+			productName = "Liferay Digital Experience Platform",
+			table = '''| End Date                | ${staticEndDate}   |                |
+	| Perpetual               | true               |                |
+	| Product Field and Value | additionalProp1    | propertyValue1 |
+	| Product Field and Value | additionalProp2    | propertyValue2 |
+	| Product Field and Value | additionalProp3    | propertyValue3 |
+	| Quantity                | 1                  |                |
+	| Start Date              | ${staticStartDate} |                |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Koroneiki Engineering",
+			productName = "Liferay Portal Six",
+			table = '''| End Date                | ${staticEndDate}   |                |
+	| Perpetual               | true               |                |
+	| Product Field and Value | additionalProp1    | propertyValue1 |
+	| Product Field and Value | additionalProp2    | propertyValue2 |
+	| Product Field and Value | additionalProp3    | propertyValue3 |
+	| Quantity                | 1                  |                |
+	| Start Date              | ${staticStartDate} |                |''');
+
+		LocalFile.KoroneikiContactAPI._createContactEntitlementDefinition(
+			contactRoleName = "Default Account Worker Role",
+			contactRoleType = "Account Worker",
+			productName = "Liferay Digital Experience Platform",
+			table = '''| Description | Entitlement Description1 |
+	| Name        | Entitlement Name1        |
+	| Status      | Approved                 |''');
+
+		LocalFile.KoroneikiContactAPI._createContactEntitlementDefinition(
+			contactRoleName = "Optional Account Worker Role",
+			contactRoleType = "Account Worker",
+			productName = "Liferay Portal Six",
+			table = '''| Description | Entitlement Description2 |
+	| Name        | Entitlement Name2        |
+	| Status      | Approved                 |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementDefinition(
+			entitlementDefinitionName = "Entitlement Name1",
+			table = '''| Description | Entitlement Description1 |
+	| Name        | Entitlement Name1        |
+	| Status      | Approved                 |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementDefinitionViaEntitlementDefinitionKey(
+			entitlementDefinitionName = "Entitlement Name1",
+			table = '''| Description | Entitlement Description1 |
+	| Name        | Entitlement Name1        |
+	| Status      | Approved                 |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementDefinition(
+			entitlementDefinitionName = "Entitlement Name2",
+			table = '''| Description | Entitlement Description2 |
+	| Name        | Entitlement Name2        |
+	| Status      | Approved                 |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementDefinitionViaEntitlementDefinitionKey(
+			entitlementDefinitionName = "Entitlement Name2",
+			table = '''| Description | Entitlement Description2 |
+	| Name        | Entitlement Name2        |
+	| Status      | Approved                 |''');
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Entitlement Name1");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Entitlement Name2");
+
+		LocalFile.KoroneikiAccountAPI._removeContactRolesFromContact(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Default Account Worker Role |''');
+
+		LocalFile.KoroneikiAccountAPI._removeContactRolesFromContact(
+			accountName = "Koroneiki Engineering",
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			table = '''| Optional Account Worker Role |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._deleteProductPurchase(
+			accountName = "Koroneiki Automotive",
+			productName = "Liferay Digital Experience Platform");
+
+		LocalFile.KoroneikiProductPurchaseAPI._deleteProductPurchase(
+			accountName = "Koroneiki Engineering",
+			productName = "Liferay Portal Six");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Entitlement Name1");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Entitlement Name2");
+
+		LocalFile.KoroneikiContactAPI._viewNoContactEntitlementViaNestedField(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			entitlementDefinitionName = "Entitlement Name1");
+
+		LocalFile.KoroneikiContactAPI._viewNoContactEntitlementViaNestedField(
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			entitlementDefinitionName = "Entitlement Name2");
+
+		LocalFile.KoroneikiContactAPI._viewNoContactEntitlementViaNestedField(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			entitlementDefinitionName = "Entitlement Name2");
+
+		LocalFile.KoroneikiContactAPI._viewNoContactEntitlementViaNestedField(
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			entitlementDefinitionName = "Entitlement Name1");
+	}
+
+	test Removemultiplecontactentitlementsfromworkercontactbasedonproductpurchases {
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | KORAUTO                              | |
+	| Description           | Test automotive account on koroneiki | |
+	| Fax Number            | 555-555-1234                         | |
+	| Name                  | Koroneiki Automotive                 | |
+	| Phone Number          | 555-555-5678                         | |
+	| Region                | United States                        | |
+	| Status                | Active                               | |
+	| Tier                  | T4                                   | |
+	| Website               | www.koroneikiautomotive.com          | |''');
+
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRole(table = '''| Description | This is the default worker role for accounts |
+	| Name        | Default Account Worker Role                  |
+	| Type        | Account Worker                               |''');
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRole(table = '''| Description | This is the optional worker role for accounts |
+	| Name        | Optional Account Worker Role                  |
+	| Type        | Account Worker                                |''');
+
+		LocalFile.KoroneikiAccountAPI._assignWorkerContacts(
+			accountName = "Koroneiki Automotive",
+			table = '''| koroneiki.contact1@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Default Account Worker Role |''');
+
+		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | Liferay Digital Experience Platform | |''');
+
+		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | Liferay Portal Six | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Koroneiki Automotive",
+			productName = "Liferay Digital Experience Platform",
+			table = '''| End Date                | ${staticEndDate}   |                |
+	| Perpetual               | true               |                |
+	| Product Field and Value | additionalProp1    | propertyValue1 |
+	| Product Field and Value | additionalProp2    | propertyValue2 |
+	| Product Field and Value | additionalProp3    | propertyValue3 |
+	| Quantity                | 1                  |                |
+	| Start Date              | ${staticStartDate} |                |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Koroneiki Automotive",
+			productName = "Liferay Portal Six",
+			table = '''| End Date                | ${staticEndDate}   |                |
+	| Perpetual               | true               |                |
+	| Product Field and Value | additionalProp1    | propertyValue1 |
+	| Product Field and Value | additionalProp2    | propertyValue2 |
+	| Product Field and Value | additionalProp3    | propertyValue3 |
+	| Quantity                | 1                  |                |
+	| Start Date              | ${staticStartDate} |                |''');
+
+		LocalFile.KoroneikiContactAPI._createContactEntitlementDefinition(
+			contactRoleName = "Default Account Worker Role",
+			contactRoleType = "Account Worker",
+			productName = "Liferay Digital Experience Platform",
+			table = '''| Description | Entitlement Description1 |
+	| Name        | Entitlement Name1        |
+	| Status      | Approved                 |''');
+
+		LocalFile.KoroneikiContactAPI._createContactEntitlementDefinition(
+			contactRoleName = "Default Account Worker Role",
+			contactRoleType = "Account Worker",
+			productName = "Liferay Portal Six",
+			table = '''| Description | Entitlement Description2 |
+	| Name        | Entitlement Name2        |
+	| Status      | Approved                 |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementDefinition(
+			entitlementDefinitionName = "Entitlement Name1",
+			table = '''| Description | Entitlement Description1 |
+	| Name        | Entitlement Name1        |
+	| Status      | Approved                 |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementDefinitionViaEntitlementDefinitionKey(
+			entitlementDefinitionName = "Entitlement Name1",
+			table = '''| Description | Entitlement Description1 |
+	| Name        | Entitlement Name1        |
+	| Status      | Approved                 |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementDefinition(
+			entitlementDefinitionName = "Entitlement Name2",
+			table = '''| Description | Entitlement Description2 |
+	| Name        | Entitlement Name2        |
+	| Status      | Approved                 |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementDefinitionViaEntitlementDefinitionKey(
+			entitlementDefinitionName = "Entitlement Name2",
+			table = '''| Description | Entitlement Description2 |
+	| Name        | Entitlement Name2        |
+	| Status      | Approved                 |''');
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Entitlement Name1");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Entitlement Name2");
+
+		LocalFile.KoroneikiProductPurchaseAPI._deleteProductPurchase(
+			accountName = "Koroneiki Automotive",
+			productName = "Liferay Digital Experience Platform");
+
+		LocalFile.KoroneikiProductPurchaseAPI._deleteProductPurchase(
+			accountName = "Koroneiki Automotive",
+			productName = "Liferay Portal Six");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Entitlement Name1");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Entitlement Name2");
+
+		LocalFile.KoroneikiContactAPI._viewNoContactEntitlementViaNestedField(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			entitlementDefinitionName = "Entitlement Name1");
+
+		LocalFile.KoroneikiContactAPI._viewNoContactEntitlementViaNestedField(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			entitlementDefinitionName = "Entitlement Name2");
+	}
+
+	test Removemultiplecontactentitlementsfromworkercontactbasedonroles {
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | KORAUTO                              | |
+	| Description           | Test automotive account on koroneiki | |
+	| Fax Number            | 555-555-1234                         | |
+	| Name                  | Koroneiki Automotive                 | |
+	| Phone Number          | 555-555-5678                         | |
+	| Region                | United States                        | |
+	| Status                | Active                               | |
+	| Tier                  | T4                                   | |
+	| Website               | www.koroneikiautomotive.com          | |''');
+
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRole(table = '''| Description | This is the default worker role for accounts |
+	| Name        | Default Account Worker Role                  |
+	| Type        | Account Worker                               |''');
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRole(table = '''| Description | This is the optional worker role for accounts |
+	| Name        | Optional Account Worker Role                  |
+	| Type        | Account Worker                                |''');
+
+		LocalFile.KoroneikiAccountAPI._assignWorkerContacts(
+			accountName = "Koroneiki Automotive",
+			table = '''| koroneiki.contact1@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Default Account Worker Role |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Optional Account Worker Role |''');
+
+		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | Liferay Digital Experience Platform | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Koroneiki Automotive",
+			productName = "Liferay Digital Experience Platform",
+			table = '''| End Date                | ${staticEndDate}   |                |
+	| Perpetual               | true               |                |
+	| Product Field and Value | additionalProp1    | propertyValue1 |
+	| Product Field and Value | additionalProp2    | propertyValue2 |
+	| Product Field and Value | additionalProp3    | propertyValue3 |
+	| Quantity                | 1                  |                |
+	| Start Date              | ${staticStartDate} |                |''');
+
+		LocalFile.KoroneikiContactAPI._createContactEntitlementDefinition(
+			contactRoleName = "Default Account Worker Role",
+			contactRoleType = "Account Worker",
+			productName = "Liferay Digital Experience Platform",
+			table = '''| Description | Entitlement Description1 |
+	| Name        | Entitlement Name1        |
+	| Status      | Approved                 |''');
+
+		LocalFile.KoroneikiContactAPI._createContactEntitlementDefinition(
+			contactRoleName = "Optional Account Worker Role",
+			contactRoleType = "Account Worker",
+			productName = "Liferay Digital Experience Platform",
+			table = '''| Description | Entitlement Description2 |
+	| Name        | Entitlement Name2        |
+	| Status      | Approved                 |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementDefinition(
+			entitlementDefinitionName = "Entitlement Name1",
+			table = '''| Description | Entitlement Description1 |
+	| Name        | Entitlement Name1        |
+	| Status      | Approved                 |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementDefinitionViaEntitlementDefinitionKey(
+			entitlementDefinitionName = "Entitlement Name1",
+			table = '''| Description | Entitlement Description1 |
+	| Name        | Entitlement Name1        |
+	| Status      | Approved                 |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementDefinition(
+			entitlementDefinitionName = "Entitlement Name2",
+			table = '''| Description | Entitlement Description2 |
+	| Name        | Entitlement Name2        |
+	| Status      | Approved                 |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementDefinitionViaEntitlementDefinitionKey(
+			entitlementDefinitionName = "Entitlement Name2",
+			table = '''| Description | Entitlement Description2 |
+	| Name        | Entitlement Name2        |
+	| Status      | Approved                 |''');
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Entitlement Name1");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Entitlement Name2");
+
+		LocalFile.KoroneikiAccountAPI._removeContactRolesFromContact(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Default Account Worker Role |''');
+
+		LocalFile.KoroneikiAccountAPI._removeContactRolesFromContact(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Optional Account Worker Role |''');
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Entitlement Name1");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Entitlement Name2");
+
+		LocalFile.KoroneikiContactAPI._viewNoContactEntitlementViaNestedField(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			entitlementDefinitionName = "Entitlement Name1");
+
+		LocalFile.KoroneikiContactAPI._viewNoContactEntitlementViaNestedField(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			entitlementDefinitionName = "Entitlement Name2");
+	}
+
+	test Updateentitiesandverifycontactentitlement {
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | KORAUTO                              | |
+	| Description           | Test automotive account on koroneiki | |
+	| Fax Number            | 555-555-1234                         | |
+	| Name                  | Koroneiki Automotive                 | |
+	| Phone Number          | 555-555-5678                         | |
+	| Region                | United States                        | |
+	| Status                | Active                               | |
+	| Tier                  | T4                                   | |
+	| Website               | www.koroneikiautomotive.com          | |''');
+
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRole(table = '''| Description | This is the default worker role for accounts |
+	| Name        | Default Account Worker Role                  |
+	| Type        | Account Worker                               |''');
+
+		LocalFile.KoroneikiAccountAPI._assignWorkerContacts(
+			accountName = "Koroneiki Automotive",
+			table = '''| koroneiki.contact1@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Default Account Worker Role |''');
+
+		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | Liferay Digital Experience Platform | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Koroneiki Automotive",
+			productName = "Liferay Digital Experience Platform",
+			table = '''| End Date                | ${staticEndDate}   |                |
+	| Perpetual               | true               |                |
+	| Product Field and Value | additionalProp1    | propertyValue1 |
+	| Product Field and Value | additionalProp2    | propertyValue2 |
+	| Product Field and Value | additionalProp3    | propertyValue3 |
+	| Quantity                | 1                  |                |
+	| Start Date              | ${staticStartDate} |                |''');
+
+		LocalFile.KoroneikiContactAPI._createContactEntitlementDefinition(
+			contactRoleName = "Default Account Worker Role",
+			contactRoleType = "Account Worker",
+			productName = "Liferay Digital Experience Platform",
+			table = '''| Description | Entitlement Description |
+	| Name        | Entitlement Name        |
+	| Status      | Approved                |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementDefinition(
+			entitlementDefinitionName = "Entitlement Name",
+			table = '''| Description | Entitlement Description |
+	| Name        | Entitlement Name        |
+	| Status      | Approved                |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementDefinitionViaEntitlementDefinitionKey(
+			entitlementDefinitionName = "Entitlement Name",
+			table = '''| Description | Entitlement Description |
+	| Name        | Entitlement Name        |
+	| Status      | Approved                |''');
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Entitlement Name");
+
+		LocalFile.KoroneikiProductAPI.updateProduct(
+			productName = "Liferay Digital Experience Platform",
+			table = '''| Name | Liferay Portal Six | |''');
+
+		LocalFile.KoroneikiContactAPI._updateContactViaEmailAddress(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Email Address | koroneiki.contact2@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Last Name     | Contact2                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiContactRoleAPI._updateContactRole(
+			contactRoleName = "Default Account Worker Role",
+			table = '''| Description | This is the optional worker role for accounts |
+	| Name        | Optional Account Worker Role                  |
+	| Type        | Account Worker                                |''');
+
+		LocalFile.KoroneikiAccountAPI._updateAccount(
+			accountName = "Koroneiki Automotive",
+			table = '''| Code                  | KORENGR                                  | |
+	| Contact Email Address | koroneiki.contact2@lrcustomer.com.broken | |
+	| Description           | Test engineering account on koroneiki    | |
+	| Fax Number            | 555-555-4321                             | |
+	| Internal              | true                                     | |
+	| Name                  | Koroneiki Engineering                    | |
+	| Phone Number          | 555-555-8765                             | |
+	| Profile Email Address | koroneiki.contact2@lrcustomer.com.broken | |
+	| Region                | Japan                                    | |
+	| Status                | Active                                   | |
+	| Tier                  | T1                                       | |
+	| Website               | www.koroneikiengineering.com             | |''');
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Entitlement Name");
+
+		LocalFile.KoroneikiContactAPI._viewContactViaEmailAddress(
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			table = '''| Email Address            | koroneiki.contact2@lrcustomer.com.broken |
+	| Entitlement Nested Field | Entitlement Name                         |
+	| First Name               | Koroneiki                                |
+	| Language                 | English                                  |
+	| Last Name                | Contact2                                 |
+	| Middle Name              | User                                     |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementViaNestedField(
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			entitlementDefinitionName = "Entitlement Name");
+	}
+
+	test Viewcontactentitlementauditentriesaftercontactroleremoval {
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | KORAUTO                              | |
+	| Description           | Test automotive account on koroneiki | |
+	| Fax Number            | 555-555-1234                         | |
+	| Name                  | Koroneiki Automotive                 | |
+	| Phone Number          | 555-555-5678                         | |
+	| Region                | United States                        | |
+	| Status                | Active                               | |
+	| Tier                  | T4                                   | |
+	| Website               | www.koroneikiautomotive.com          | |''');
+
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRole(table = '''| Description | This is the default worker role for accounts |
+	| Name        | Default Account Worker Role                  |
+	| Type        | Account Worker                               |''');
+
+		LocalFile.KoroneikiAccountAPI._assignWorkerContacts(
+			accountName = "Koroneiki Automotive",
+			table = '''| koroneiki.contact1@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Default Account Worker Role |''');
+
+		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | Liferay Digital Experience Platform | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Koroneiki Automotive",
+			productName = "Liferay Digital Experience Platform",
+			table = '''| End Date                | ${staticEndDate}   |                |
+	| Perpetual               | true               |                |
+	| Product Field and Value | additionalProp1    | propertyValue1 |
+	| Product Field and Value | additionalProp2    | propertyValue2 |
+	| Product Field and Value | additionalProp3    | propertyValue3 |
+	| Quantity                | 1                  |                |
+	| Start Date              | ${staticStartDate} |                |''');
+
+		LocalFile.KoroneikiContactAPI._createContactEntitlementDefinition(
+			contactRoleName = "Default Account Worker Role",
+			contactRoleType = "Account Worker",
+			productName = "Liferay Digital Experience Platform",
+			table = '''| Description | Entitlement Description |
+	| Name        | Entitlement Name        |
+	| Status      | Approved                |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementDefinition(
+			entitlementDefinitionName = "Entitlement Name",
+			table = '''| Description | Entitlement Description |
+	| Name        | Entitlement Name        |
+	| Status      | Approved                |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementDefinitionViaEntitlementDefinitionKey(
+			entitlementDefinitionName = "Entitlement Name",
+			table = '''| Description | Entitlement Description |
+	| Name        | Entitlement Name        |
+	| Status      | Approved                |''');
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Entitlement Name");
+
+		LocalFile.KoroneikiAccountAPI._removeContactRolesFromContact(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Default Account Worker Role |''');
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Entitlement Name");
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryViaUuid(
+			action = "Add",
+			agentName = "Auto",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			field = "Name",
+			newValue = "Entitlement Name",
+			oldValue = "");
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryViaUuid(
+			action = "Delete",
+			agentName = "Auto",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			field = "Name",
+			newValue = "",
+			oldValue = "Entitlement Name");
+	}
+
+	test Viewcontactentitlementauditentriesafterentitlementdefinitiondeletion {
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | KORAUTO                              | |
+	| Description           | Test automotive account on koroneiki | |
+	| Fax Number            | 555-555-1234                         | |
+	| Name                  | Koroneiki Automotive                 | |
+	| Phone Number          | 555-555-5678                         | |
+	| Region                | United States                        | |
+	| Status                | Active                               | |
+	| Tier                  | T4                                   | |
+	| Website               | www.koroneikiautomotive.com          | |''');
+
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRole(table = '''| Description | This is the default worker role for accounts |
+	| Name        | Default Account Worker Role                  |
+	| Type        | Account Worker                               |''');
+
+		LocalFile.KoroneikiAccountAPI._assignWorkerContacts(
+			accountName = "Koroneiki Automotive",
+			table = '''| koroneiki.contact1@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Default Account Worker Role |''');
+
+		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | Liferay Digital Experience Platform | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Koroneiki Automotive",
+			productName = "Liferay Digital Experience Platform",
+			table = '''| End Date                | ${staticEndDate}   |                |
+	| Perpetual               | true               |                |
+	| Product Field and Value | additionalProp1    | propertyValue1 |
+	| Product Field and Value | additionalProp2    | propertyValue2 |
+	| Product Field and Value | additionalProp3    | propertyValue3 |
+	| Quantity                | 1                  |                |
+	| Start Date              | ${staticStartDate} |                |''');
+
+		LocalFile.KoroneikiContactAPI._createContactEntitlementDefinition(
+			contactRoleName = "Default Account Worker Role",
+			contactRoleType = "Account Worker",
+			productName = "Liferay Digital Experience Platform",
+			table = '''| Description | Entitlement Description |
+	| Name        | Entitlement Name        |
+	| Status      | Approved                |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementDefinition(
+			entitlementDefinitionName = "Entitlement Name",
+			table = '''| Description | Entitlement Description |
+	| Name        | Entitlement Name        |
+	| Status      | Approved                |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementDefinitionViaEntitlementDefinitionKey(
+			entitlementDefinitionName = "Entitlement Name",
+			table = '''| Description | Entitlement Description |
+	| Name        | Entitlement Name        |
+	| Status      | Approved                |''');
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Entitlement Name");
+
+		LocalFile.KoroneikiContactAPI._deleteContactEntitlementDefinition(entitlementDefinitionName = "Entitlement Name");
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryViaUuid(
+			action = "Add",
+			agentName = "Auto",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			field = "Name",
+			newValue = "Entitlement Name",
+			oldValue = "");
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryViaUuid(
+			action = "Delete",
+			agentName = "Auto",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			field = "Name",
+			newValue = "",
+			oldValue = "Entitlement Name");
+	}
+
+	test Viewcontactentitlementauditentriesafterentitlementdefinitiondeletionexecutedbyagent {
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | KORAUTO                              | |
+	| Description           | Test automotive account on koroneiki | |
+	| Fax Number            | 555-555-1234                         | |
+	| Name                  | Koroneiki Automotive                 | |
+	| Phone Number          | 555-555-5678                         | |
+	| Region                | United States                        | |
+	| Status                | Active                               | |
+	| Tier                  | T4                                   | |
+	| Website               | www.koroneikiautomotive.com          | |''');
+
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRole(table = '''| Description | This is the default worker role for accounts |
+	| Name        | Default Account Worker Role                  |
+	| Type        | Account Worker                               |''');
+
+		LocalFile.KoroneikiAccountAPI._assignWorkerContacts(
+			accountName = "Koroneiki Automotive",
+			table = '''| koroneiki.contact1@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Default Account Worker Role |''');
+
+		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | Liferay Digital Experience Platform | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Koroneiki Automotive",
+			productName = "Liferay Digital Experience Platform",
+			table = '''| End Date                | ${staticEndDate}   |                |
+	| Perpetual               | true               |                |
+	| Product Field and Value | additionalProp1    | propertyValue1 |
+	| Product Field and Value | additionalProp2    | propertyValue2 |
+	| Product Field and Value | additionalProp3    | propertyValue3 |
+	| Quantity                | 1                  |                |
+	| Start Date              | ${staticStartDate} |                |''');
+
+		LocalFile.KoroneikiContactAPI._createContactEntitlementDefinition(
+			contactRoleName = "Default Account Worker Role",
+			contactRoleType = "Account Worker",
+			productName = "Liferay Digital Experience Platform",
+			table = '''| Description | Entitlement Description |
+	| Name        | Entitlement Name        |
+	| Status      | Approved                |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementDefinition(
+			entitlementDefinitionName = "Entitlement Name",
+			table = '''| Description | Entitlement Description |
+	| Name        | Entitlement Name        |
+	| Status      | Approved                |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementDefinitionViaEntitlementDefinitionKey(
+			entitlementDefinitionName = "Entitlement Name",
+			table = '''| Description | Entitlement Description |
+	| Name        | Entitlement Name        |
+	| Status      | Approved                |''');
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinitionExecutedByAgent(
+			agentName = "Koroneiki User",
+			entitlementDefinitionName = "Entitlement Name");
+
+		LocalFile.KoroneikiContactAPI._deleteContactEntitlementDefinitionExecutedByAgent(
+			agentName = "Koroneiki User",
+			entitlementDefinitionName = "Entitlement Name");
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryViaUuid(
+			action = "Add",
+			agentName = "Auto",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			field = "Name",
+			newValue = "Entitlement Name",
+			oldValue = "");
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryViaUuid(
+			action = "Delete",
+			agentName = "Auto",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			field = "Name",
+			newValue = "",
+			oldValue = "Entitlement Name");
+	}
+
+	test Viewcontactentitlementauditentriesafterentityupdates {
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | KORAUTO                              | |
+	| Description           | Test automotive account on koroneiki | |
+	| Fax Number            | 555-555-1234                         | |
+	| Name                  | Koroneiki Automotive                 | |
+	| Phone Number          | 555-555-5678                         | |
+	| Region                | United States                        | |
+	| Status                | Active                               | |
+	| Tier                  | T4                                   | |
+	| Website               | www.koroneikiautomotive.com          | |''');
+
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRole(table = '''| Description | This is the default worker role for accounts |
+	| Name        | Default Account Worker Role                  |
+	| Type        | Account Worker                               |''');
+
+		LocalFile.KoroneikiAccountAPI._assignWorkerContacts(
+			accountName = "Koroneiki Automotive",
+			table = '''| koroneiki.contact1@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Default Account Worker Role |''');
+
+		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | Liferay Digital Experience Platform | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Koroneiki Automotive",
+			productName = "Liferay Digital Experience Platform",
+			table = '''| End Date                | ${staticEndDate}   |                |
+	| Perpetual               | true               |                |
+	| Product Field and Value | additionalProp1    | propertyValue1 |
+	| Product Field and Value | additionalProp2    | propertyValue2 |
+	| Product Field and Value | additionalProp3    | propertyValue3 |
+	| Quantity                | 1                  |                |
+	| Start Date              | ${staticStartDate} |                |''');
+
+		LocalFile.KoroneikiContactAPI._createContactEntitlementDefinition(
+			contactRoleName = "Default Account Worker Role",
+			contactRoleType = "Account Worker",
+			productName = "Liferay Digital Experience Platform",
+			table = '''| Description | Entitlement Description |
+	| Name        | Entitlement Name        |
+	| Status      | Approved                |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementDefinition(
+			entitlementDefinitionName = "Entitlement Name",
+			table = '''| Description | Entitlement Description |
+	| Name        | Entitlement Name        |
+	| Status      | Approved                |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementDefinitionViaEntitlementDefinitionKey(
+			entitlementDefinitionName = "Entitlement Name",
+			table = '''| Description | Entitlement Description |
+	| Name        | Entitlement Name        |
+	| Status      | Approved                |''');
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Entitlement Name");
+
+		LocalFile.KoroneikiProductAPI.updateProduct(
+			productName = "Liferay Digital Experience Platform",
+			table = '''| Name | Liferay Portal Six | |''');
+
+		LocalFile.KoroneikiContactAPI._updateContactViaEmailAddress(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Email Address | koroneiki.contact2@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Last Name     | Contact2                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiContactRoleAPI._updateContactRole(
+			contactRoleName = "Default Account Worker Role",
+			table = '''| Description | This is the optional worker role for accounts |
+	| Name        | Optional Account Worker Role                  |
+	| Type        | Account Worker                                |''');
+
+		LocalFile.KoroneikiAccountAPI._updateAccount(
+			accountName = "Koroneiki Automotive",
+			table = '''| Code                  | KORENGR                                  | |
+	| Contact Email Address | koroneiki.contact2@lrcustomer.com.broken | |
+	| Description           | Test engineering account on koroneiki    | |
+	| Fax Number            | 555-555-4321                             | |
+	| Internal              | true                                     | |
+	| Name                  | Koroneiki Engineering                    | |
+	| Phone Number          | 555-555-8765                             | |
+	| Profile Email Address | koroneiki.contact2@lrcustomer.com.broken | |
+	| Region                | Japan                                    | |
+	| Status                | Active                                   | |
+	| Tier                  | T1                                       | |
+	| Website               | www.koroneikiengineering.com             | |''');
+
+		LocalFile.KoroneikiContactAPI._deleteContactEntitlementDefinition(entitlementDefinitionName = "Entitlement Name");
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryViaUuid(
+			action = "Add",
+			agentName = "Auto",
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			field = "Name",
+			newValue = "Entitlement Name",
+			oldValue = "");
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryViaUuid(
+			action = "Delete",
+			agentName = "Auto",
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			field = "Name",
+			newValue = "",
+			oldValue = "Entitlement Name");
+	}
+
+	test Viewcontactentitlementauditentriesafterproductpurchaseremoval {
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | KORAUTO                              | |
+	| Description           | Test automotive account on koroneiki | |
+	| Fax Number            | 555-555-1234                         | |
+	| Name                  | Koroneiki Automotive                 | |
+	| Phone Number          | 555-555-5678                         | |
+	| Region                | United States                        | |
+	| Status                | Active                               | |
+	| Tier                  | T4                                   | |
+	| Website               | www.koroneikiautomotive.com          | |''');
+
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRole(table = '''| Description | This is the default worker role for accounts |
+	| Name        | Default Account Worker Role                  |
+	| Type        | Account Worker                               |''');
+
+		LocalFile.KoroneikiAccountAPI._assignWorkerContacts(
+			accountName = "Koroneiki Automotive",
+			table = '''| koroneiki.contact1@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Default Account Worker Role |''');
+
+		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | Liferay Digital Experience Platform | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Koroneiki Automotive",
+			productName = "Liferay Digital Experience Platform",
+			table = '''| End Date                | ${staticEndDate}   |                |
+	| Perpetual               | true               |                |
+	| Product Field and Value | additionalProp1    | propertyValue1 |
+	| Product Field and Value | additionalProp2    | propertyValue2 |
+	| Product Field and Value | additionalProp3    | propertyValue3 |
+	| Quantity                | 1                  |                |
+	| Start Date              | ${staticStartDate} |                |''');
+
+		LocalFile.KoroneikiContactAPI._createContactEntitlementDefinition(
+			contactRoleName = "Default Account Worker Role",
+			contactRoleType = "Account Worker",
+			productName = "Liferay Digital Experience Platform",
+			table = '''| Description | Entitlement Description |
+	| Name        | Entitlement Name        |
+	| Status      | Approved                |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementDefinition(
+			entitlementDefinitionName = "Entitlement Name",
+			table = '''| Description | Entitlement Description |
+	| Name        | Entitlement Name        |
+	| Status      | Approved                |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementDefinitionViaEntitlementDefinitionKey(
+			entitlementDefinitionName = "Entitlement Name",
+			table = '''| Description | Entitlement Description |
+	| Name        | Entitlement Name        |
+	| Status      | Approved                |''');
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Entitlement Name");
+
+		LocalFile.KoroneikiProductPurchaseAPI._deleteProductPurchase(
+			accountName = "Koroneiki Automotive",
+			productName = "Liferay Digital Experience Platform");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Entitlement Name");
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryViaUuid(
+			action = "Add",
+			agentName = "Auto",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			field = "Name",
+			newValue = "Entitlement Name",
+			oldValue = "");
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryViaUuid(
+			action = "Delete",
+			agentName = "Auto",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			field = "Name",
+			newValue = "",
+			oldValue = "Entitlement Name");
+	}
+
+	test Viewcontactentitlementsyncauditentriesexecutedbyagentaftercontactroleremoval {
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | KORAUTO                              | |
+	| Description           | Test automotive account on koroneiki | |
+	| Fax Number            | 555-555-1234                         | |
+	| Name                  | Koroneiki Automotive                 | |
+	| Phone Number          | 555-555-5678                         | |
+	| Region                | United States                        | |
+	| Status                | Active                               | |
+	| Tier                  | T4                                   | |
+	| Website               | www.koroneikiautomotive.com          | |''');
+
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRole(table = '''| Description | This is the default worker role for accounts |
+	| Name        | Default Account Worker Role                  |
+	| Type        | Account Worker                               |''');
+
+		LocalFile.KoroneikiAccountAPI._assignWorkerContacts(
+			accountName = "Koroneiki Automotive",
+			table = '''| koroneiki.contact1@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Default Account Worker Role |''');
+
+		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | Liferay Digital Experience Platform | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Koroneiki Automotive",
+			productName = "Liferay Digital Experience Platform",
+			table = '''| End Date                | ${staticEndDate}   |                |
+	| Perpetual               | true               |                |
+	| Product Field and Value | additionalProp1    | propertyValue1 |
+	| Product Field and Value | additionalProp2    | propertyValue2 |
+	| Product Field and Value | additionalProp3    | propertyValue3 |
+	| Quantity                | 1                  |                |
+	| Start Date              | ${staticStartDate} |                |''');
+
+		LocalFile.KoroneikiContactAPI._createContactEntitlementDefinition(
+			contactRoleName = "Default Account Worker Role",
+			contactRoleType = "Account Worker",
+			productName = "Liferay Digital Experience Platform",
+			table = '''| Description | Entitlement Description |
+	| Name        | Entitlement Name        |
+	| Status      | Approved                |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementDefinition(
+			entitlementDefinitionName = "Entitlement Name",
+			table = '''| Description | Entitlement Description |
+	| Name        | Entitlement Name        |
+	| Status      | Approved                |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementDefinitionViaEntitlementDefinitionKey(
+			entitlementDefinitionName = "Entitlement Name",
+			table = '''| Description | Entitlement Description |
+	| Name        | Entitlement Name        |
+	| Status      | Approved                |''');
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinitionExecutedByAgent(
+			agentName = "Koroneiki User",
+			entitlementDefinitionName = "Entitlement Name");
+
+		LocalFile.KoroneikiAccountAPI._removeContactRolesFromContact(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Default Account Worker Role |''');
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinitionExecutedByAgent(
+			agentName = "Koroneiki User",
+			entitlementDefinitionName = "Entitlement Name");
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryViaUuid(
+			action = "Add",
+			agentName = "Auto",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			field = "Name",
+			newValue = "Entitlement Name",
+			oldValue = "");
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryViaUuid(
+			action = "Delete",
+			agentName = "Auto",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			field = "Name",
+			newValue = "",
+			oldValue = "Entitlement Name");
+	}
+
+	test Viewcontactentitlementsyncauditentriesexecutedbyagentafterproductpurchaseremoval {
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | KORAUTO                              | |
+	| Description           | Test automotive account on koroneiki | |
+	| Fax Number            | 555-555-1234                         | |
+	| Name                  | Koroneiki Automotive                 | |
+	| Phone Number          | 555-555-5678                         | |
+	| Region                | United States                        | |
+	| Status                | Active                               | |
+	| Tier                  | T4                                   | |
+	| Website               | www.koroneikiautomotive.com          | |''');
+
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRole(table = '''| Description | This is the default worker role for accounts |
+	| Name        | Default Account Worker Role                  |
+	| Type        | Account Worker                               |''');
+
+		LocalFile.KoroneikiAccountAPI._assignWorkerContacts(
+			accountName = "Koroneiki Automotive",
+			table = '''| koroneiki.contact1@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			table = '''| Default Account Worker Role |''');
+
+		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | Liferay Digital Experience Platform | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Koroneiki Automotive",
+			productName = "Liferay Digital Experience Platform",
+			table = '''| End Date                | ${staticEndDate}   |                |
+	| Perpetual               | true               |                |
+	| Product Field and Value | additionalProp1    | propertyValue1 |
+	| Product Field and Value | additionalProp2    | propertyValue2 |
+	| Product Field and Value | additionalProp3    | propertyValue3 |
+	| Quantity                | 1                  |                |
+	| Start Date              | ${staticStartDate} |                |''');
+
+		LocalFile.KoroneikiContactAPI._createContactEntitlementDefinition(
+			contactRoleName = "Default Account Worker Role",
+			contactRoleType = "Account Worker",
+			productName = "Liferay Digital Experience Platform",
+			table = '''| Description | Entitlement Description |
+	| Name        | Entitlement Name        |
+	| Status      | Approved                |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementDefinition(
+			entitlementDefinitionName = "Entitlement Name",
+			table = '''| Description | Entitlement Description |
+	| Name        | Entitlement Name        |
+	| Status      | Approved                |''');
+
+		LocalFile.KoroneikiContactAPI._viewContactEntitlementDefinitionViaEntitlementDefinitionKey(
+			entitlementDefinitionName = "Entitlement Name",
+			table = '''| Description | Entitlement Description |
+	| Name        | Entitlement Name        |
+	| Status      | Approved                |''');
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinitionExecutedByAgent(
+			agentName = "Koroneiki User",
+			entitlementDefinitionName = "Entitlement Name");
+
+		LocalFile.KoroneikiProductPurchaseAPI._deleteProductPurchase(
+			accountName = "Koroneiki Automotive",
+			productName = "Liferay Digital Experience Platform");
+
+		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinitionExecutedByAgent(
+			agentName = "Koroneiki User",
+			entitlementDefinitionName = "Entitlement Name");
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryViaUuid(
+			action = "Add",
+			agentName = "Auto",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			field = "Name",
+			newValue = "Entitlement Name",
+			oldValue = "");
+
+		LocalFile.KoroneikiContactAPI._viewContactAuditEntryViaUuid(
+			action = "Delete",
+			agentName = "Auto",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			field = "Name",
+			newValue = "",
+			oldValue = "Entitlement Name");
+	}
+
+}

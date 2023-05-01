@@ -1,0 +1,106 @@
+definition {
+
+	property testray.main.component.name = "Support QA";
+	property type = "provisioning.security";
+
+	setUp {
+		LocalFile.Passwords.getPasswords();
+
+		LocalFile.JSONUser.createViaProvisioning(table = '''| Screen Name   | provisioning.admin                    |
+	| Email Address | provisioning.admin@liferay.com.broken |
+	| First Name    | Provisioning                          |
+	| Last Name     | Admin                                 |''');
+
+		LocalFile.JSONUser.assignUserToProvisioningRole(
+			roleName = "Provisioning Admin",
+			userEmailAddress = "provisioning.admin@liferay.com.broken");
+	}
+
+	tearDown {
+		LocalFile.KoroneikiProductAPI._tearDownProducts(table = '''| A Visible DXP Product    |
+	| A Visible Portal Product |''');
+
+		LocalFile.JSONUser.tearDownUsersViaProvisioning(table = '''| provisioning.admin@liferay.com.broken |''');
+	}
+
+	test Createproducts {
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = "provisioning.admin@liferay.com.broken",
+			userPassword = ${staticProvisioningQaUserPassword});
+
+		LocalFile.UserAccount.updatePasswordUponLogin(userPassword = "test");
+
+		LocalFile.Provisioning.gotoProducts();
+
+		LocalFile.Provisioning.clickNewProductButton();
+
+		LocalFile.ProvisioningProduct.populateProductFormAndSave(table = '''| Name | Input  | A Visible Portal Product |
+	| Type | Select | Primary                  |''');
+
+		LocalFile.Provisioning.searchProducts(keyword = "A");
+
+		LocalFile.Provisioning._viewProductViaIndex(
+			productName = "A Visible Portal Product",
+			table = '''| Name | A Visible Portal Product |''');
+
+		LocalFile.KoroneikiProductAPI._viewProduct(
+			productName = "A Visible Portal Product",
+			table = '''| Name                    | A Visible Portal Product |         |
+	| Product Field and Value | type                     | primary |''');
+	}
+
+	test Deleteproducts {
+		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | A Visible DXP Product | |''');
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = "provisioning.admin@liferay.com.broken",
+			userPassword = ${staticProvisioningQaUserPassword});
+
+		LocalFile.UserAccount.updatePasswordUponLogin(userPassword = "test");
+
+		LocalFile.Provisioning.gotoProducts();
+
+		LocalFile.Provisioning.searchProducts(keyword = "A");
+
+		LocalFile.Provisioning.clickProductDeleteButton(productName = "A Visible DXP Product");
+
+		LocalFile.Provisioning.searchProducts(keyword = "A");
+
+		LocalFile.Provisioning._viewNoProductViaIndex(productName = "A Visible DXP Product");
+
+		LocalFile.KoroneikiProductAPI._viewNoProduct(productName = "A Visible DXP Product");
+	}
+
+	test Updateproducts {
+		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | A Visible DXP Product | |''');
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = "provisioning.admin@liferay.com.broken",
+			userPassword = ${staticProvisioningQaUserPassword});
+
+		LocalFile.UserAccount.updatePasswordUponLogin(userPassword = "test");
+
+		LocalFile.Provisioning.gotoProducts();
+
+		LocalFile.Provisioning.searchProducts(keyword = "A");
+
+		LocalFile.Provisioning.clickProduct(productName = "A Visible DXP Product");
+
+		LocalFile.ProvisioningProduct.populateProductFormAndSave(table = '''| Name | Input  | A Visible Portal Product |
+	| Type | Select | Primary                  |''');
+
+		LocalFile.Provisioning.searchProducts(keyword = "A");
+
+		LocalFile.Provisioning._viewProductViaIndex(
+			productName = "A Visible Portal Product",
+			table = '''| Name | A Visible Portal Product |''');
+
+		LocalFile.Provisioning._viewNoProductViaIndex(productName = "A Visible DXP Product");
+
+		LocalFile.KoroneikiProductAPI._viewProduct(
+			productName = "A Visible Portal Product",
+			table = '''| Name                    | A Visible Portal Product |         |
+	| Product Field and Value | type                     | primary |''');
+	}
+
+}

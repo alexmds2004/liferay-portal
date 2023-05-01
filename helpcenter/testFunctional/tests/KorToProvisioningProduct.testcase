@@ -1,0 +1,657 @@
+definition {
+
+	property testray.main.component.name = "Support QA";
+	property type = "provisioning.product.integration";
+
+	setUp {
+		LocalFile.Passwords.getPasswords();
+
+		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | prd.koroneiki1                       |
+	| Email Address | prd.koroneiki1@lrcustomer.com.broken |
+	| First Name    | PRD                                  |
+	| Last Name     | Koroneiki1                           |''');
+
+		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | prd.koroneiki2                       |
+	| Email Address | prd.koroneiki2@lrcustomer.com.broken |
+	| First Name    | PRD                                  |
+	| Last Name     | Koroneiki2                           |''');
+	}
+
+	tearDown {
+		LocalFile.ZendeskUserAPI._getDefaultUserId(organizationName = "Korprd - ${staticProjectName}");
+
+		LocalFile.ZendeskUserAPI._renameFirstDefaultUserIdVariable();
+
+		LocalFile.ZendeskUserAPI._getDefaultUserId(organizationName = "Prdkor - ${staticCompanyName}");
+
+		LocalFile.ZendeskUserAPI._renameSecondDefaultUserIdVariable();
+
+		LocalFile.KoroneikiProductConsumptionAPI._tearDownProductConsumptions(
+			accountName = "Korprd - ${staticProjectName}",
+			table = '''| A Digital DXP Product     |
+	| A Digital Portal Product  |
+	| An Updated Portal Product |
+	| Platinum Subscription     |''');
+
+		LocalFile.OSBAdminProject.tearDownProjects(table = '''| PRDKORKORPRD |
+	| PRDKOR       |''');
+
+		LocalFile.KoroneikiAccountAPI._tearDownAccounts(table = '''| Korprd - ${staticProjectName} |
+	| Prdkor - ${staticCompanyName} |''');
+
+		LocalFile.KoroneikiAccountAPI._tearDownAccountsViaAccountFieldNameAndValue(
+			fieldName = "Code",
+			table = '''| PRDKORKORPRD |
+	| PRDKOR       |''');
+
+		LocalFile.KoroneikiProductAPI._tearDownProducts(table = '''| A Digital DXP Product     |
+	| A Digital Portal Product  |
+	| An Updated Portal Product |
+	| Bronze Subscription       |
+	| Copper Subscription       |''');
+
+		LocalFile.JSONUser.tearDownUsers(table = '''| prd.koroneiki1@lrcustomer.com.broken |
+	| prd.koroneiki2@lrcustomer.com.broken |''');
+
+		LocalFile.JSONUser.tearDownUsersViaSupport(table = '''| prd.koroneiki1@lrcustomer.com.broken |
+	| prd.koroneiki2@lrcustomer.com.broken |''');
+
+		LocalFile.JSONUser.tearDownUsersViaKoroneiki(table = '''| prd.koroneiki1@lrcustomer.com.broken |
+	| prd.koroneiki2@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiContactAPI._tearDownContacts(table = '''| prd.koroneiki1@lrcustomer.com.broken |
+	| prd.koroneiki2@lrcustomer.com.broken |''');
+
+		LocalFile.JSONOkta.tearDownUsers(table = '''| prd.koroneiki1@lrcustomer.com.broken |
+	| prd.koroneiki2@lrcustomer.com.broken |''');
+
+		LocalFile.ZendeskTicketAPI._tearDownTicketsByKeywords(table = '''| New Subscription(s) for Korprd - ${staticProjectName} |
+	| New Subscription(s) for Prdkor - ${staticCompanyName} |''');
+
+		LocalFile.ZendeskUserAPI._getMultipleUserIdsByEmailAddress(table = '''| prd.koroneiki1@lrcustomer.com.broken |
+	| prd.koroneiki2@lrcustomer.com.broken |''');
+
+		LocalFile.ZendeskUserAPI._tearDownUsersByIdList(userIds = ${staticUserIdList});
+
+		LocalFile.ZendeskOrganizationAPI._getMultipleOrganizationExternalIdsByOrganizationNameIfStillPresent(table = '''| Korprd - ${staticProjectName} |
+	| Prdkor - ${staticCompanyName} |''');
+
+		LocalFile.ZendeskOrganizationAPI._tearDownOrganizationsByExternalIdList(organizationExternalIds = ${staticOrganizationExternalIdList});
+
+		LocalFile.ZendeskUserAPI._tearDownUserById(userId = ${staticDefaultUserId1});
+
+		LocalFile.ZendeskUserAPI._tearDownUserById(userId = ${staticDefaultUserId2});
+	}
+
+	@help.center.acceptance = "true"
+	test Createproducts {
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoProducts();
+
+		LocalFile.Provisioning.clickNewProductButton();
+
+		LocalFile.ProvisioningProduct.populateProductFormAndSave(table = '''| Name | Input  | A Digital Portal Product |
+	| Type | Select | Primary                  |''');
+
+		LocalFile.Provisioning.clickNewProductButton();
+
+		LocalFile.ProvisioningProduct.populateProductFormAndSave(table = '''| Name | Input  | Bronze Subscription |
+	| Type | Select | Add On              |''');
+
+		LocalFile.Provisioning.searchProducts(keyword = "A");
+
+		LocalFile.Provisioning._viewProductViaIndex(
+			productName = "A Digital Portal Product",
+			table = '''| Name | A Digital Portal Product |''');
+
+		LocalFile.Provisioning.searchProducts(keyword = "Bronze");
+
+		LocalFile.Provisioning._viewProductViaIndex(
+			productName = "Bronze Subscription",
+			table = '''| Name | Bronze Subscription |''');
+
+		LocalFile.KoroneikiProductAPI._viewProduct(
+			productName = "A Digital Portal Product",
+			table = '''| Name                    | A Digital Portal Product |         |
+	| Product Field and Value | type                     | primary |''');
+
+		LocalFile.KoroneikiProductAPI._viewProduct(
+			productName = "Bronze Subscription",
+			table = '''| Name                    | Bronze Subscription |        |
+	| Product Field and Value | type                | add-on |''');
+	}
+
+	test Createproductswithduplicatenames {
+		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | A Digital DXP Product | |''');
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoProducts();
+
+		LocalFile.Provisioning.clickNewProductButton();
+
+		LocalFile.ProvisioningProduct.populateProductFormAndSave(table = '''| Name | Input  | A Digital DXP Product |
+	| Type | Select | Primary               |''');
+
+		LocalFile.ProvisioningProduct.viewProductFormDuplicateNameErrorMessage(productName = "A Digital DXP Product");
+
+		LocalFile.ProvisioningProduct.populateProductFormAndSave(table = '''| Name | Input  | A Digital Portal Product |
+	| Type | Select | Primary                  |''');
+
+		LocalFile.Provisioning.clickNewProductButton();
+
+		LocalFile.ProvisioningProduct.populateProductFormAndSave(table = '''| Name | Input  | Platinum Subscription |
+	| Type | Select | Add On                |''');
+
+		LocalFile.ProvisioningProduct.viewProductFormDuplicateNameErrorMessage(productName = "Platinum Subscription");
+
+		LocalFile.ProvisioningProduct.populateProductFormAndSave(table = '''| Name | Input  | Bronze Subscription |
+	| Type | Select | Add On              |''');
+
+		LocalFile.Provisioning.searchProducts(keyword = "A");
+
+		LocalFile.Provisioning._viewProductViaIndex(
+			productName = "A Digital Portal Product",
+			table = '''| Name | A Digital Portal Product |''');
+
+		LocalFile.Provisioning._viewProductViaIndex(
+			productName = "A Digital DXP Product",
+			table = '''| Name | A Digital DXP Product |''');
+
+		LocalFile.Provisioning.searchProducts(keyword = "Bronze");
+
+		LocalFile.Provisioning._viewProductViaIndex(
+			productName = "Bronze Subscription",
+			table = '''| Name | Bronze Subscription |''');
+
+		LocalFile.Provisioning.searchProducts(keyword = "Platinum");
+
+		LocalFile.Provisioning._viewProductViaIndex(
+			productName = "Platinum Subscription",
+			table = '''| Name | Platinum Subscription |''');
+
+		LocalFile.KoroneikiProductAPI._viewProduct(
+			productName = "A Digital Portal Product",
+			table = '''| Name                    | A Digital Portal Product |         |
+	| Product Field and Value | type                     | primary |''');
+
+		LocalFile.KoroneikiProductAPI._viewProduct(
+			productName = "Bronze Subscription",
+			table = '''| Name                    | Bronze Subscription |        |
+	| Product Field and Value | type                | add-on |''');
+
+		LocalFile.KoroneikiProductAPI._viewProduct(
+			productName = "A Digital DXP Product",
+			table = '''| Name | A Digital DXP Product | |''');
+
+		LocalFile.KoroneikiProductAPI._viewProduct(
+			productName = "Platinum Subscription",
+			table = '''| Name | Platinum Subscription | |''');
+	}
+
+	test Deletecreatedproducts {
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoProducts();
+
+		LocalFile.Provisioning.clickNewProductButton();
+
+		LocalFile.ProvisioningProduct.populateProductFormAndSave(table = '''| Name | Input  | A Digital Portal Product |
+	| Type | Select | Primary                  |''');
+
+		LocalFile.Provisioning.searchProducts(keyword = "A");
+
+		LocalFile.Provisioning.clickProductDeleteButton(productName = "A Digital Portal Product");
+
+		LocalFile.Provisioning.searchProducts(keyword = "A");
+
+		LocalFile.Provisioning._viewNoProductViaIndex(productName = "A Digital Portal Product");
+
+		LocalFile.KoroneikiProductAPI._viewNoProduct(productName = "A Digital Portal Product");
+	}
+
+	@help.center.acceptance = "true"
+	test Deleteproducts {
+		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | A Digital DXP Product | |''');
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoProducts();
+
+		LocalFile.Provisioning.searchProducts(keyword = "A");
+
+		LocalFile.Provisioning.clickProductDeleteButton(productName = "A Digital DXP Product");
+
+		LocalFile.Provisioning.searchProducts(keyword = "A");
+
+		LocalFile.Provisioning._viewNoProductViaIndex(productName = "A Digital DXP Product");
+
+		LocalFile.KoroneikiProductAPI._viewNoProduct(productName = "A Digital DXP Product");
+	}
+
+	test Deleteproductswithconsumptions {
+		LocalFile.OSBAdminRabbitMQ.generateStaticVariables();
+
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningCompanyName();
+
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | A Digital DXP Product | |''');
+
+		LocalFile.KoroneikiProductAPI._createProductExternalLink(
+			productName = "A Digital DXP Product",
+			table = '''| Domain      | dossiera              |
+	| Entity Id   | A Digital DXP Product |
+	| Entity Name | product               |''');
+
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Prdkor - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Contact Email Address                  | prd.koroneiki1@lrcustomer.com.broken       |
+	| Contact First Name                     | PRD                                        |
+	| Contact Last Name                      | Koroneiki1                                 |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | prd.koroneiki2@lrcustomer.com.broken       |
+	| Owner First Name                       | PRD                                        |
+	| Owner Last Name                        | Koroneiki2                                 |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | A Digital DXP Product                      |
+	| Project Name                           | Korprd - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccountProductConsumption(
+			accountName = "Korprd - ${staticProjectName}",
+			productName = "A Digital DXP Product",
+			table = '''| Product Field and Value | additionalProp1 | propertyValue1 |
+	| Product Field and Value | additionalProp2 | propertyValue2 |
+	| Product Field and Value | additionalProp3 | propertyValue3 |''');
+
+		LocalFile.KoroneikiProductAPI._generateProductId(productName = "A Digital DXP Product");
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoProducts();
+
+		LocalFile.Provisioning.searchProducts(keyword = "A");
+
+		LocalFile.Provisioning.clickProductDeleteButton(productName = "A Digital DXP Product");
+
+		LocalFile.Provisioning.viewProductIndexProductConsumptionErrorMessage(productId = ${staticProductId});
+
+		LocalFile.Provisioning.searchProducts(keyword = "A");
+
+		LocalFile.Provisioning._viewProductViaIndex(
+			productName = "A Digital DXP Product",
+			table = '''| Name | A Digital DXP Product |''');
+
+		LocalFile.KoroneikiProductAPI._viewProduct(
+			productName = "A Digital DXP Product",
+			table = '''| Name | A Digital DXP Product | |''');
+	}
+
+	test Deleteproductswithpurchases {
+		LocalFile.OSBAdminRabbitMQ.generateStaticVariables();
+
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningCompanyName();
+
+		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | A Digital DXP Product | |''');
+
+		LocalFile.KoroneikiProductAPI._createProductExternalLink(
+			productName = "A Digital DXP Product",
+			table = '''| Domain      | dossiera              |
+	| Entity Id   | A Digital DXP Product |
+	| Entity Name | product               |''');
+
+		LocalFile.OSBAdminRabbitMQ.publishCreateProjectWithNoPartnerMessage(
+			routingKey = "dossiera.provisioning.create",
+			table = '''| Account Name                           | Prdkor - ${staticCompanyName}              |
+	| Address City                           | Diamond Bar                                |
+	| Address Country                        | United States                              |
+	| Address Postal Code                    | 91765                                      |
+	| Address Region                         | California                                 |
+	| Address Street                         | 456 Fake Street                            |
+	| Contact Email Address                  | prd.koroneiki1@lrcustomer.com.broken       |
+	| Contact First Name                     | PRD                                        |
+	| Contact Last Name                      | Koroneiki1                                 |
+	| Dossiera Account Key                   | ${staticDossieraAccountKey}                |
+	| Dossiera Address Key 1                 | ${staticDossieraAddressKey1}               |
+	| Dossiera Address Key 2                 | ${staticDossieraAddressKey2}               |
+	| Dossiera Contact Key                   | ${staticDossieraContactKey}                |
+	| Dossiera Project Key                   | ${staticDossieraProjectKey}                |
+	| End Day                                | ${staticEndDay}                            |
+	| End Month                              | ${staticEndMonth}                          |
+	| End Year                               | ${staticEndYear}                           |
+	| Industry                               | Automotive                                 |
+	| Owner Email Address                    | prd.koroneiki2@lrcustomer.com.broken       |
+	| Owner First Name                       | PRD                                        |
+	| Owner Last Name                        | Koroneiki2                                 |
+	| Partner First Line Support             | false                                      |
+	| Product Type                           | New                                        |
+	| Product Name                           | A Digital DXP Product                      |
+	| Project Name                           | Korprd - ${staticProjectName}              |
+	| Renewal                                | false                                      |
+	| Salesforce Opportunity Key             | ${staticSalesforceOpportunityKey}          |
+	| Salesforce Opportunity Line Item Key 1 | ${staticSalesforceOpportunityLineItemKey1} |
+	| Salesforce Opportunity Line Item Key 2 | ${staticSalesforceOpportunityLineItemKey2} |
+	| Salesforce Opportunity Sold By         | Liferay US                                 |
+	| Salesforce Opportunity Stage Name      | Closed Won                                 |
+	| Salesforce Opportunity Territory       | United States                              |
+	| Salesforce Opportunity Type            | New Business                               |
+	| Salesforce Owner User Key              | ${staticSalesforceOwnerUserKey}            |
+	| Salesforce Project Key                 | ${staticSalesforceProjectKey}              |
+	| Start Day                              | ${staticStartDay}                          |
+	| Start Month                            | ${staticStartMonth}                        |
+	| Start Year                             | ${staticStartYear}                         |
+	| Subscription Level                     | Platinum                                   |
+	| Version Number                         | 7.1                                        |''');
+
+		LocalFile.KoroneikiProductAPI._generateProductId(productName = "A Digital DXP Product");
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoProducts();
+
+		LocalFile.Provisioning.searchProducts(keyword = "A");
+
+		LocalFile.Provisioning.clickProductDeleteButton(productName = "A Digital DXP Product");
+
+		LocalFile.Provisioning.viewProductIndexProductPurchaseErrorMessage(productId = ${staticProductId});
+
+		LocalFile.Provisioning.searchProducts(keyword = "A");
+
+		LocalFile.Provisioning._viewProductViaIndex(
+			productName = "A Digital DXP Product",
+			table = '''| Name | A Digital DXP Product |''');
+
+		LocalFile.KoroneikiProductAPI._viewProduct(
+			productName = "A Digital DXP Product",
+			table = '''| Name | A Digital DXP Product | |''');
+	}
+
+	test Updatecreatedproducts {
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoProducts();
+
+		LocalFile.Provisioning.clickNewProductButton();
+
+		LocalFile.ProvisioningProduct.populateProductFormAndSave(table = '''| Name | Input  | A Digital Portal Product |
+	| Type | Select | Primary                  |''');
+
+		LocalFile.Provisioning.clickNewProductButton();
+
+		LocalFile.ProvisioningProduct.populateProductFormAndSave(table = '''| Name | Input  | Bronze Subscription |
+	| Type | Select | Add On              |''');
+
+		LocalFile.Provisioning.searchProducts(keyword = "A");
+
+		LocalFile.Provisioning.clickProduct(productName = "A Digital Portal Product");
+
+		LocalFile.ProvisioningProduct.populateProductFormAndSave(table = '''| Name | Input  | An Updated Portal Product |
+	| Type | Select | Primary                   |''');
+
+		LocalFile.Provisioning.searchProducts(keyword = "Bronze");
+
+		LocalFile.Provisioning.clickProduct(productName = "Bronze Subscription");
+
+		LocalFile.ProvisioningProduct.populateProductFormAndSave(table = '''| Name | Input  | Copper Subscription |
+	| Type | Select | Add On              |''');
+
+		LocalFile.Provisioning.searchProducts(keyword = "An");
+
+		LocalFile.Provisioning._viewProductViaIndex(
+			productName = "An Updated Portal Product",
+			table = '''| Name | An Updated Portal Product |''');
+
+		LocalFile.Provisioning.searchProducts(keyword = "A");
+
+		LocalFile.Provisioning._viewNoProductViaIndex(productName = "A Digital Portal Product");
+
+		LocalFile.Provisioning.searchProducts(keyword = "Bronze");
+
+		LocalFile.Provisioning._viewNoProductViaIndex(productName = "Bronze Subscription");
+
+		LocalFile.Provisioning.searchProducts(keyword = "Copper");
+
+		LocalFile.Provisioning._viewProductViaIndex(
+			productName = "Copper Subscription",
+			table = '''| Name | Copper Subscription |''');
+
+		LocalFile.KoroneikiProductAPI._viewProduct(
+			productName = "An Updated Portal Product",
+			table = '''| Name                    | An Updated Portal Product |         |
+	| Product Field and Value | type                      | primary |''');
+
+		LocalFile.KoroneikiProductAPI._viewProduct(
+			productName = "Copper Subscription",
+			table = '''| Name                    | Copper Subscription |        |
+	| Product Field and Value | type                | add-on |''');
+
+		LocalFile.KoroneikiProductAPI._viewNoProduct(productName = "A Digital Portal Product");
+
+		LocalFile.KoroneikiProductAPI._viewNoProduct(productName = "Bronze Subscription");
+	}
+
+	test Updatecreatedproductswithduplicatenames {
+		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | A Digital DXP Product | |''');
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoProducts();
+
+		LocalFile.Provisioning.clickNewProductButton();
+
+		LocalFile.ProvisioningProduct.populateProductFormAndSave(table = '''| Name | Input  | A Digital Portal Product |
+	| Type | Select | Primary                  |''');
+
+		LocalFile.Provisioning.clickNewProductButton();
+
+		LocalFile.ProvisioningProduct.populateProductFormAndSave(table = '''| Name | Input  | Bronze Subscription |
+	| Type | Select | Add On              |''');
+
+		LocalFile.Provisioning.searchProducts(keyword = "A");
+
+		LocalFile.Provisioning.clickProduct(productName = "A Digital Portal Product");
+
+		LocalFile.ProvisioningProduct.populateProductFormAndSave(table = '''| Name | Input  | An Updated Portal Product |
+	| Type | Select | Primary                   |''');
+
+		LocalFile.Provisioning.searchProducts(keyword = "Bronze");
+
+		LocalFile.Provisioning.clickProduct(productName = "Bronze Subscription");
+
+		LocalFile.ProvisioningProduct.populateProductFormAndSave(table = '''| Name | Input  | Platinum Subscription |
+	| Type | Select | Add On                |''');
+
+		LocalFile.ProvisioningProduct.viewProductFormDuplicateNameErrorMessage(productName = "Platinum Subscription");
+
+		LocalFile.ProvisioningProduct.populateProductFormAndSave(table = '''| Name | Input  | Copper Subscription |
+	| Type | Select | Add On              |''');
+
+		LocalFile.Provisioning.searchProducts(keyword = "An");
+
+		LocalFile.Provisioning._viewProductViaIndex(
+			productName = "An Updated Portal Product",
+			table = '''| Name | An Updated Portal Product |''');
+
+		LocalFile.Provisioning.searchProducts(keyword = "A");
+
+		LocalFile.Provisioning._viewProductViaIndex(
+			productName = "A Digital DXP Product",
+			table = '''| Name | A Digital DXP Product |''');
+
+		LocalFile.Provisioning._viewNoProductViaIndex(productName = "A Digital Portal Product");
+
+		LocalFile.Provisioning.searchProducts(keyword = "Bronze");
+
+		LocalFile.Provisioning._viewNoProductViaIndex(productName = "Bronze Subscription");
+
+		LocalFile.Provisioning.searchProducts(keyword = "Copper");
+
+		LocalFile.Provisioning._viewProductViaIndex(
+			productName = "Copper Subscription",
+			table = '''| Name | Copper Subscription |''');
+
+		LocalFile.Provisioning.searchProducts(keyword = "Platinum");
+
+		LocalFile.Provisioning._viewProductViaIndex(
+			productName = "Platinum Subscription",
+			table = '''| Name | Platinum Subscription |''');
+
+		LocalFile.KoroneikiProductAPI._viewProduct(
+			productName = "An Updated Portal Product",
+			table = '''| Name                    | An Updated Portal Product |         |
+	| Product Field and Value | type                      | primary |''');
+
+		LocalFile.KoroneikiProductAPI._viewProduct(
+			productName = "Copper Subscription",
+			table = '''| Name                    | Copper Subscription |        |
+	| Product Field and Value | type                | add-on |''');
+
+		LocalFile.KoroneikiProductAPI._viewProduct(
+			productName = "A Digital DXP Product",
+			table = '''| Name | A Digital DXP Product | |''');
+
+		LocalFile.KoroneikiProductAPI._viewProduct(
+			productName = "Platinum Subscription",
+			table = '''| Name | Platinum Subscription | |''');
+
+		LocalFile.KoroneikiProductAPI._viewNoProduct(productName = "A Digital Portal Product");
+
+		LocalFile.KoroneikiProductAPI._viewNoProduct(productName = "Bronze Subscription");
+	}
+
+	@help.center.acceptance = "true"
+	test Updateproducts {
+		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | A Digital DXP Product | |''');
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoProducts();
+
+		LocalFile.Provisioning.searchProducts(keyword = "A");
+
+		LocalFile.Provisioning.clickProduct(productName = "A Digital DXP Product");
+
+		LocalFile.ProvisioningProduct.populateProductFormAndSave(table = '''| Name | Input  | A Digital Portal Product |
+	| Type | Select | Primary                  |''');
+
+		LocalFile.Provisioning.searchProducts(keyword = "A");
+
+		LocalFile.Provisioning._viewProductViaIndex(
+			productName = "A Digital Portal Product",
+			table = '''| Name | A Digital Portal Product |''');
+
+		LocalFile.Provisioning._viewNoProductViaIndex(productName = "A Digital DXP Product");
+
+		LocalFile.KoroneikiProductAPI._viewProduct(
+			productName = "A Digital Portal Product",
+			table = '''| Name                    | A Digital Portal Product |         |
+	| Product Field and Value | type                     | primary |''');
+	}
+
+	test Viewdeletedproduct {
+		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | A Digital DXP Product | |''');
+
+		LocalFile.KoroneikiProductAPI._deleteProduct(productName = "A Digital DXP Product");
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoProducts();
+
+		LocalFile.Provisioning.searchProducts(keyword = "A");
+
+		LocalFile.Provisioning._viewNoProductViaIndex(productName = "A Digital DXP Product");
+	}
+
+	@help.center.acceptance = "true"
+	test Viewproducts {
+		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | A Digital DXP Product | |''');
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoProducts();
+
+		LocalFile.Provisioning.searchProducts(keyword = "A");
+
+		LocalFile.Provisioning._viewProductViaIndex(
+			productName = "A Digital DXP Product",
+			table = '''| Name | A Digital DXP Product |''');
+	}
+
+	test Viewupdatedproduct {
+		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | A Digital DXP Product | |''');
+
+		LocalFile.KoroneikiProductAPI.updateProduct(
+			productName = "A Digital DXP Product",
+			table = '''| Name | A Digital Portal Product | |''');
+
+		LocalFile.OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		LocalFile.Provisioning.gotoProducts();
+
+		LocalFile.Provisioning.searchProducts(keyword = "A");
+
+		LocalFile.Provisioning._viewProductViaIndex(
+			productName = "A Digital Portal Product",
+			table = '''| Name | A Digital Portal Product |''');
+
+		LocalFile.Provisioning._viewNoProductViaIndex(productName = "A Digital DXP Product");
+	}
+
+}

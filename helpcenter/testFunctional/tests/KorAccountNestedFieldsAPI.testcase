@@ -1,0 +1,608 @@
+definition {
+
+	property testray.main.component.name = "Support QA";
+	property type = "koroneiki";
+
+	tearDown {
+		LocalFile.KoroneikiAccountAPI._tearDownAccounts(table = '''| Koroneiki Automotive |''');
+
+		LocalFile.KoroneikiProductAPI._tearDownProducts(table = '''| Liferay Digital Experience Platform |
+	| Liferay Portal Six                  |''');
+
+		LocalFile.KoroneikiContactAPI._tearDownContacts(table = '''| koroneiki.contact1@lrcustomer.com.broken |
+	| koroneiki.contact2@lrcustomer.com.broken |''');
+
+		LocalFile.KoroneikiContactRoleAPI._tearDownContactRoles(table = '''| Default Account Role |
+	| Extra Account Role   |''');
+	}
+
+	@help.center.acceptance = "true"
+	test Createandviewaccountwithnestedfields {
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact2@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact2                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRole(table = '''| Description | This is the default role for accounts |
+	| Name        | Default Account Role                  |
+	| Type        | Account Customer                      |''');
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRole(table = '''| Description | This is the extra role for accounts |
+	| Name        | Extra Account Role                  |
+	| Type        | Account Worker                      |''');
+
+		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | Liferay Digital Experience Platform | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRoleNestedField(contactRoleName = "Default Account Role");
+
+		LocalFile.KoroneikiContactRoleAPI._renameFirstContactRoleNestedFieldVariable();
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRoleNestedField(contactRoleName = "Extra Account Role");
+
+		LocalFile.KoroneikiContactRoleAPI._renameSecondContactRoleNestedFieldVariable();
+
+		LocalFile.KoroneikiContactAPI._createCustomerContactNestedFieldWithContactRoleNestedField(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRolesNestedField = ${staticContactRolesNestedField1});
+
+		LocalFile.KoroneikiContactAPI._renameFirstContactNestedFieldVariable();
+
+		LocalFile.KoroneikiContactAPI._createWorkerContactNestedFieldWithContactRoleNestedField(
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			contactRolesNestedField = ${staticContactRolesNestedField2});
+
+		LocalFile.KoroneikiContactAPI._renameSecondContactNestedFieldVariable();
+
+		LocalFile.KoroneikiAccountAPI._createAccountExternalLinkNestedField(table = '''| Domain      | koroneikiautomotive |
+	| Entity Id   | 1234                |
+	| Entity Name | KoroneikiAutomotive |''');
+
+		LocalFile.KoroneikiPostalAddressAPI._createPostalAddressNestedField(table = '''| Country               | United States   |
+	| Locality              | Diamond Bar     |
+	| Region                | California      |
+	| Type                  | Business        |
+	| Mailing               | True            |
+	| Postal Code           | 91761           |
+	| Primary               | True            |
+	| Street Address Line 1 | 123 Fake Street |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._createProductPurchaseExternalLinkNestedField(table = '''| Domain      | liferaydxppurchase |
+	| Entity Id   | 12345              |
+	| Entity Name | LiferayDXPPurchase |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._createProductPurchaseNestedField(
+			productName = "Liferay Digital Experience Platform",
+			table = '''| End Date                   | ${staticEndDate}                                 |                |
+	| External Link Nested Field | ${staticProductPurchaseExternalLinksNestedField} |                |
+	| Original End Date          | ${staticOriginalEndDate}                         |                |
+	| Perpetual                  | false                                            |                |
+	| Product Field and Value    | additionalProp1                                  | propertyValue1 |
+	| Product Field and Value    | additionalProp3                                  | propertyValue3 |
+	| Product Field and Value    | additionalProp2                                  | propertyValue2 |
+	| Quantity                   | 1                                                |                |
+	| Start Date                 | ${staticStartDate}                               |                |
+	| Status                     | Approved                                         |                |''');
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                          | KORAUTO                                                     | |
+	| Contact Nested Field          | ${staticContactsNestedField1},${staticContactsNestedField2} | |
+	| Description                   | Test automotive account on koroneiki                        | |
+	| External Link Nested Field    | ${staticAccountExternalLinksNestedField}                    | |
+	| Fax Number                    | 555-555-1234                                                | |
+	| Name                          | Koroneiki Automotive                                        | |
+	| Phone Number                  | 555-555-5678                                                | |
+	| Postal Address Nested Field   | ${staticPostalAddressesNestedField}                         | |
+	| Product Purchase Nested Field | ${staticProductPurchasesNestedField}                        | |
+	| Profile Email Address         | koroneiki.contact1@lrcustomer.com.broken                    | |
+	| Region                        | United States                                               | |
+	| Status                        | Active                                                      | |
+	| Tier                          | T4                                                          | |
+	| Website                       | www.koroneikiautomotive.com                                 | |''');
+
+		LocalFile.KoroneikiAccountAPI._viewAccount(
+			accountName = "Koroneiki Automotive",
+			table = '''| Code                          | KORAUTO                                  | |
+	| Customer Contact Nested Field | koroneiki.contact1@lrcustomer.com.broken | |
+	| Description                   | Test automotive account on koroneiki     | |
+	| External Link Nested Field    | koroneikiautomotive                      | |
+	| Fax Number                    | 555-555-1234                             | |
+	| Name                          | Koroneiki Automotive                     | |
+	| Phone Number                  | 555-555-5678                             | |
+	| Postal Address Nested Field   | 123 Fake Street                          | |
+	| Product Purchase Nested Field | Liferay Digital Experience Platform      | |
+	| Profile Email Address         | koroneiki.contact1@lrcustomer.com.broken | |
+	| Region                        | United States                            | |
+	| Status                        | Active                                   | |
+	| Tier                          | T4                                       | |
+	| Website                       | www.koroneikiautomotive.com              | |
+	| Worker Contact Nested Field   | koroneiki.contact2@lrcustomer.com.broken | |''');
+
+		LocalFile.KoroneikiAccountAPI._viewCustomerContact(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken");
+
+		LocalFile.KoroneikiAccountAPI._viewCustomerContactViaNestedField(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken");
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Default Account Role");
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Member");
+
+		LocalFile.KoroneikiAccountAPI._viewWorkerContact(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken");
+
+		LocalFile.KoroneikiAccountAPI._viewWorkerContactViaNestedField(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken");
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			contactRoleName = "Extra Account Role");
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			contactRoleName = "Member");
+
+		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchase(
+			accountName = "Koroneiki Automotive",
+			productName = "Liferay Digital Experience Platform",
+			table = '''| End Date                | ${staticEndDate}         |                |
+	| Original End Date       | ${staticOriginalEndDate} |                |
+	| Perpetual               | false                    |                |
+	| Product Field and Value | additionalProp1          | propertyValue1 |
+	| Product Field and Value | additionalProp3          | propertyValue3 |
+	| Product Field and Value | additionalProp2          | propertyValue2 |
+	| Quantity                | 1                        |                |
+	| Start Date              | ${staticStartDate}       |                |
+	| Status                  | Approved                 |                |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchaseViaNestedField(
+			accountName = "Koroneiki Automotive",
+			productName = "Liferay Digital Experience Platform",
+			table = '''| End Date                | ${staticEndDate}         |                |
+	| Original End Date       | ${staticOriginalEndDate} |                |
+	| Perpetual               | false                    |                |
+	| Product Field and Value | additionalProp1          | propertyValue1 |
+	| Product Field and Value | additionalProp3          | propertyValue3 |
+	| Product Field and Value | additionalProp2          | propertyValue2 |
+	| Quantity                | 1                        |                |
+	| Start Date              | ${staticStartDate}       |                |
+	| Status                  | Approved                 |                |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchaseExternalLink(
+			accountName = "Koroneiki Automotive",
+			entityId = 12345,
+			productName = "Liferay Digital Experience Platform",
+			table = '''| Domain      | liferaydxppurchase |
+	| Entity Id   | 12345              |
+	| Entity Name | LiferayDXPPurchase |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchaseExternalLinkViaExternalLinkKey(
+			accountName = "Koroneiki Automotive",
+			entityId = 12345,
+			productName = "Liferay Digital Experience Platform",
+			table = '''| Domain      | liferaydxppurchase |
+	| Entity Id   | 12345              |
+	| Entity Name | LiferayDXPPurchase |''');
+
+		LocalFile.KoroneikiAccountAPI._viewAccountExternalLink(
+			accountName = "Koroneiki Automotive",
+			entityId = 1234,
+			table = '''| Domain      | koroneikiautomotive |
+	| Entity Id   | 1234                |
+	| Entity Name | KoroneikiAutomotive |''');
+
+		LocalFile.KoroneikiAccountAPI._viewAccountExternalLinkViaExternalLinkKey(
+			accountName = "Koroneiki Automotive",
+			entityId = 1234,
+			table = '''| Domain      | koroneikiautomotive |
+	| Entity Id   | 1234                |
+	| Entity Name | KoroneikiAutomotive |''');
+
+		LocalFile.KoroneikiPostalAddressAPI._viewPostalAddress(
+			accountName = "Koroneiki Automotive",
+			streetAddressLine1 = "123 Fake Street",
+			table = '''| Country               | United States   |
+	| Locality              | Diamond Bar     |
+	| Region                | California      |
+	| Type                  | Business        |
+	| Mailing               | True            |
+	| Postal Code           | 91761           |
+	| Primary               | True            |
+	| Street Address Line 1 | 123 Fake Street |''');
+	}
+
+	@help.center.acceptance = "true"
+	test Createandviewaccountwithnestedfieldscontainingmultipleentities {
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact1@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact1                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiContactAPI._createContact(table = '''| Email Address | koroneiki.contact2@lrcustomer.com.broken |
+	| First Name    | Koroneiki                                |
+	| Language      | English                                  |
+	| Last Name     | Contact2                                 |
+	| Middle Name   | User                                     |''');
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRole(table = '''| Description | This is the default role for accounts |
+	| Name        | Default Account Role                  |
+	| Type        | Account Customer                      |''');
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRole(table = '''| Description | This is the extra role for accounts |
+	| Name        | Extra Account Role                  |
+	| Type        | Account Customer                    |''');
+
+		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | Liferay Digital Experience Platform | |''');
+
+		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | Liferay Portal Six | |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRoleNestedField(contactRoleName = "Default Account Role");
+
+		LocalFile.KoroneikiContactRoleAPI._renameFirstContactRoleNestedFieldVariable();
+
+		LocalFile.KoroneikiContactRoleAPI._createContactRoleNestedField(contactRoleName = "Extra Account Role");
+
+		LocalFile.KoroneikiContactRoleAPI._renameSecondContactRoleNestedFieldVariable();
+
+		LocalFile.KoroneikiContactAPI._createCustomerContactNestedFieldWithContactRoleNestedField(
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRolesNestedField = "${staticContactRolesNestedField1},${staticContactRolesNestedField2}");
+
+		LocalFile.KoroneikiContactAPI._renameFirstContactNestedFieldVariable();
+
+		LocalFile.KoroneikiContactAPI._createCustomerContactNestedFieldWithContactRoleNestedField(
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			contactRolesNestedField = "${staticContactRolesNestedField1},${staticContactRolesNestedField2}");
+
+		LocalFile.KoroneikiContactAPI._renameSecondContactNestedFieldVariable();
+
+		LocalFile.KoroneikiAccountAPI._createAccountExternalLinkNestedField(table = '''| Domain      | koroneikiautomotive1 |
+	| Entity Id   | 1234                 |
+	| Entity Name | KoroneikiAutomotive1 |''');
+
+		LocalFile.KoroneikiAccountAPI._renameFirstAccountExternalLinkNestedFieldVariable();
+
+		LocalFile.KoroneikiAccountAPI._createAccountExternalLinkNestedField(table = '''| Domain      | koroneikiautomotive2 |
+	| Entity Id   | 5678                 |
+	| Entity Name | KoroneikiAutomotive2 |''');
+
+		LocalFile.KoroneikiAccountAPI._renameSecondAccountExternalLinkNestedFieldVariable();
+
+		LocalFile.KoroneikiPostalAddressAPI._createPostalAddressNestedField(table = '''| Country               | United States   |
+	| Locality              | Diamond Bar     |
+	| Region                | California      |
+	| Type                  | Business        |
+	| Mailing               | True            |
+	| Postal Code           | 91761           |
+	| Primary               | True            |
+	| Street Address Line 1 | 123 Fake Street |''');
+
+		LocalFile.KoroneikiAccountAPI._renameFirstPostalAddressNestedFieldVariable();
+
+		LocalFile.KoroneikiPostalAddressAPI._createPostalAddressNestedField(table = '''| Country               | Canada           |
+	| Locality              | Vancouver        |
+	| Region                | British Columbia |
+	| Type                  | Other            |
+	| Mailing               | False            |
+	| Postal Code           | V5Y 0C9          |
+	| Primary               | False            |
+	| Street Address Line 1 | 456 Main Street  |''');
+
+		LocalFile.KoroneikiAccountAPI._renameSecondPostalAddressNestedFieldVariable();
+
+		LocalFile.KoroneikiProductPurchaseAPI._createProductPurchaseExternalLinkNestedField(table = '''| Domain      | liferaypurchase1 |
+	| Entity Id   | 12345            |
+	| Entity Name | LiferayPurchase1 |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._renameFirstProductPurchaseExternalLinkNestedFieldVariable();
+
+		LocalFile.KoroneikiProductPurchaseAPI._createProductPurchaseExternalLinkNestedField(table = '''| Domain      | liferaypurchase2 |
+	| Entity Id   | 67890            |
+	| Entity Name | LiferayPurchase2 |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._renameSecondProductPurchaseExternalLinkNestedFieldVariable();
+
+		LocalFile.KoroneikiProductPurchaseAPI._createProductPurchaseNestedField(
+			productName = "Liferay Digital Experience Platform",
+			table = '''| End Date                   | ${staticEndDate}                                                                                    |                |
+	| External Link Nested Field | ${staticProductPurchaseExternalLinksNestedField1},${staticProductPurchaseExternalLinksNestedField2} |                |
+	| Original End Date          | ${staticOriginalEndDate}                                                                            |                |
+	| Perpetual                  | false                                                                                               |                |
+	| Product Field and Value    | additionalProp1                                                                                     | propertyValue1 |
+	| Product Field and Value    | additionalProp3                                                                                     | propertyValue3 |
+	| Product Field and Value    | additionalProp2                                                                                     | propertyValue2 |
+	| Quantity                   | 1                                                                                                   |                |
+	| Start Date                 | ${staticStartDate}                                                                                  |                |
+	| Status                     | Approved                                                                                            |                |''');
+
+		LocalFile.KoroneikiAccountAPI._renameFirstProductPurchaseNestedFieldVariable();
+
+		LocalFile.KoroneikiProductPurchaseAPI._createProductPurchaseNestedField(
+			productName = "Liferay Portal Six",
+			table = '''| End Date                   | ${staticEndDate}                                                                                    |                |
+	| External Link Nested Field | ${staticProductPurchaseExternalLinksNestedField1},${staticProductPurchaseExternalLinksNestedField2} |                |
+	| Original End Date          | ${staticOriginalEndDate}                                                                            |                |
+	| Perpetual                  | false                                                                                               |                |
+	| Product Field and Value    | additionalProp5                                                                                     | propertyValue5 |
+	| Product Field and Value    | additionalProp4                                                                                     | propertyValue4 |
+	| Product Field and Value    | additionalProp6                                                                                     | propertyValue6 |
+	| Quantity                   | 1                                                                                                   |                |
+	| Start Date                 | ${staticStartDate}                                                                                  |                |
+	| Status                     | Approved                                                                                            |                |''');
+
+		LocalFile.KoroneikiAccountAPI._renameSecondProductPurchaseNestedFieldVariable();
+
+		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                          | KORAUTO                                                                             | |
+	| Contact Nested Field          | ${staticContactsNestedField1},${staticContactsNestedField2}                         | |
+	| Description                   | Test automotive account on koroneiki                                                | |
+	| External Link Nested Field    | ${staticAccountExternalLinksNestedField1},${staticAccountExternalLinksNestedField2} | |
+	| Fax Number                    | 555-555-1234                                                                        | |
+	| Name                          | Koroneiki Automotive                                                                | |
+	| Phone Number                  | 555-555-5678                                                                        | |
+	| Postal Address Nested Field   | ${staticPostalAddressesNestedField1},${staticPostalAddressesNestedField2}           | |
+	| Product Purchase Nested Field | ${staticProductPurchasesNestedField1},${staticProductPurchasesNestedField2}         | |
+	| Profile Email Address         | koroneiki.contact1@lrcustomer.com.broken                                            | |
+	| Region                        | United States                                                                       | |
+	| Status                        | Active                                                                              | |
+	| Tier                          | T4                                                                                  | |
+	| Website                       | www.koroneikiautomotive.com                                                         | |''');
+
+		LocalFile.KoroneikiAccountAPI._viewAccount(
+			accountName = "Koroneiki Automotive",
+			table = '''| Code                          | KORAUTO                                  | |
+	| Customer Contact Nested Field | koroneiki.contact1@lrcustomer.com.broken | |
+	| Customer Contact Nested Field | koroneiki.contact2@lrcustomer.com.broken | |
+	| Description                   | Test automotive account on koroneiki     | |
+	| External Link Nested Field    | koroneikiautomotive1                     | |
+	| External Link Nested Field    | koroneikiautomotive2                     | |
+	| Fax Number                    | 555-555-1234                             | |
+	| Name                          | Koroneiki Automotive                     | |
+	| Phone Number                  | 555-555-5678                             | |
+	| Postal Address Nested Field   | 123 Fake Street                          | |
+	| Postal Address Nested Field   | 456 Main Street                          | |
+	| Product Purchase Nested Field | Liferay Digital Experience Platform      | |
+	| Product Purchase Nested Field | Liferay Portal Six                       | |
+	| Profile Email Address         | koroneiki.contact1@lrcustomer.com.broken | |
+	| Region                        | United States                            | |
+	| Status                        | Active                                   | |
+	| Tier                          | T4                                       | |
+	| Website                       | www.koroneikiautomotive.com              | |''');
+
+		LocalFile.KoroneikiAccountAPI._viewCustomerContact(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken");
+
+		LocalFile.KoroneikiAccountAPI._viewCustomerContactViaNestedField(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken");
+
+		LocalFile.KoroneikiAccountAPI._viewCustomerContact(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken");
+
+		LocalFile.KoroneikiAccountAPI._viewCustomerContactViaNestedField(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken");
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Default Account Role");
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Extra Account Role");
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact1@lrcustomer.com.broken",
+			contactRoleName = "Member");
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			contactRoleName = "Default Account Role");
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			contactRoleName = "Extra Account Role");
+
+		LocalFile.KoroneikiAccountAPI._viewContactRole(
+			accountName = "Koroneiki Automotive",
+			contactEmailAddress = "koroneiki.contact2@lrcustomer.com.broken",
+			contactRoleName = "Member");
+
+		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchase(
+			accountName = "Koroneiki Automotive",
+			productName = "Liferay Digital Experience Platform",
+			table = '''| End Date                | ${staticEndDate}         |                |
+	| Original End Date       | ${staticOriginalEndDate} |                |
+	| Perpetual               | false                    |                |
+	| Product Field and Value | additionalProp1          | propertyValue1 |
+	| Product Field and Value | additionalProp3          | propertyValue3 |
+	| Product Field and Value | additionalProp2          | propertyValue2 |
+	| Quantity                | 1                        |                |
+	| Start Date              | ${staticStartDate}       |                |
+	| Status                  | Approved                 |                |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchaseViaNestedField(
+			accountName = "Koroneiki Automotive",
+			productName = "Liferay Digital Experience Platform",
+			table = '''| End Date                | ${staticEndDate}         |                |
+	| Original End Date       | ${staticOriginalEndDate} |                |
+	| Perpetual               | false                    |                |
+	| Product Field and Value | additionalProp1          | propertyValue1 |
+	| Product Field and Value | additionalProp3          | propertyValue3 |
+	| Product Field and Value | additionalProp2          | propertyValue2 |
+	| Quantity                | 1                        |                |
+	| Start Date              | ${staticStartDate}       |                |
+	| Status                  | Approved                 |                |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchase(
+			accountName = "Koroneiki Automotive",
+			productName = "Liferay Portal Six",
+			table = '''| End Date                | ${staticEndDate}         |                |
+	| Original End Date       | ${staticOriginalEndDate} |                |
+	| Perpetual               | false                    |                |
+	| Product Field and Value | additionalProp5          | propertyValue5 |
+	| Product Field and Value | additionalProp4          | propertyValue4 |
+	| Product Field and Value | additionalProp6          | propertyValue6 |
+	| Quantity                | 1                        |                |
+	| Start Date              | ${staticStartDate}       |                |
+	| Status                  | Approved                 |                |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchaseViaNestedField(
+			accountName = "Koroneiki Automotive",
+			productName = "Liferay Portal Six",
+			table = '''| End Date                | ${staticEndDate}         |                |
+	| Original End Date       | ${staticOriginalEndDate} |                |
+	| Perpetual               | false                    |                |
+	| Product Field and Value | additionalProp5          | propertyValue5 |
+	| Product Field and Value | additionalProp4          | propertyValue4 |
+	| Product Field and Value | additionalProp6          | propertyValue6 |
+	| Quantity                | 1                        |                |
+	| Start Date              | ${staticStartDate}       |                |
+	| Status                  | Approved                 |                |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchaseExternalLink(
+			accountName = "Koroneiki Automotive",
+			entityId = 12345,
+			productName = "Liferay Digital Experience Platform",
+			table = '''| Domain      | liferaypurchase1 |
+	| Entity Id   | 12345            |
+	| Entity Name | LiferayPurchase1 |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchaseExternalLinkViaExternalLinkKey(
+			accountName = "Koroneiki Automotive",
+			entityId = 12345,
+			productName = "Liferay Digital Experience Platform",
+			table = '''| Domain      | liferaypurchase1 |
+	| Entity Id   | 12345            |
+	| Entity Name | LiferayPurchase1 |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchaseExternalLink(
+			accountName = "Koroneiki Automotive",
+			entityId = 67890,
+			productName = "Liferay Digital Experience Platform",
+			table = '''| Domain      | liferaypurchase2 |
+	| Entity Id   | 67890            |
+	| Entity Name | LiferayPurchase2 |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchaseExternalLinkViaExternalLinkKey(
+			accountName = "Koroneiki Automotive",
+			entityId = 67890,
+			productName = "Liferay Digital Experience Platform",
+			table = '''| Domain      | liferaypurchase2 |
+	| Entity Id   | 67890            |
+	| Entity Name | LiferayPurchase2 |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchaseExternalLink(
+			accountName = "Koroneiki Automotive",
+			entityId = 12345,
+			productName = "Liferay Portal Six",
+			table = '''| Domain      | liferaypurchase1 |
+	| Entity Id   | 12345            |
+	| Entity Name | LiferayPurchase1 |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchaseExternalLinkViaExternalLinkKey(
+			accountName = "Koroneiki Automotive",
+			entityId = 12345,
+			productName = "Liferay Portal Six",
+			table = '''| Domain      | liferaypurchase1 |
+	| Entity Id   | 12345            |
+	| Entity Name | LiferayPurchase1 |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchaseExternalLink(
+			accountName = "Koroneiki Automotive",
+			entityId = 67890,
+			productName = "Liferay Portal Six",
+			table = '''| Domain      | liferaypurchase2 |
+	| Entity Id   | 67890            |
+	| Entity Name | LiferayPurchase2 |''');
+
+		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchaseExternalLinkViaExternalLinkKey(
+			accountName = "Koroneiki Automotive",
+			entityId = 67890,
+			productName = "Liferay Portal Six",
+			table = '''| Domain      | liferaypurchase2 |
+	| Entity Id   | 67890            |
+	| Entity Name | LiferayPurchase2 |''');
+
+		LocalFile.KoroneikiAccountAPI._viewAccountExternalLink(
+			accountName = "Koroneiki Automotive",
+			entityId = 1234,
+			table = '''| Domain      | koroneikiautomotive1 |
+	| Entity Id   | 1234                 |
+	| Entity Name | KoroneikiAutomotive1 |''');
+
+		LocalFile.KoroneikiAccountAPI._viewAccountExternalLinkViaExternalLinkKey(
+			accountName = "Koroneiki Automotive",
+			entityId = 1234,
+			table = '''| Domain      | koroneikiautomotive1 |
+	| Entity Id   | 1234                 |
+	| Entity Name | KoroneikiAutomotive1 |''');
+
+		LocalFile.KoroneikiAccountAPI._viewAccountExternalLink(
+			accountName = "Koroneiki Automotive",
+			entityId = 5678,
+			table = '''| Domain      | koroneikiautomotive2 |
+	| Entity Id   | 5678                 |
+	| Entity Name | KoroneikiAutomotive2 |''');
+
+		LocalFile.KoroneikiAccountAPI._viewAccountExternalLinkViaExternalLinkKey(
+			accountName = "Koroneiki Automotive",
+			entityId = 5678,
+			table = '''| Domain      | koroneikiautomotive2 |
+	| Entity Id   | 5678                 |
+	| Entity Name | KoroneikiAutomotive2 |''');
+
+		LocalFile.KoroneikiPostalAddressAPI._viewPostalAddress(
+			accountName = "Koroneiki Automotive",
+			streetAddressLine1 = "123 Fake Street",
+			table = '''| Country               | United States   |
+	| Locality              | Diamond Bar     |
+	| Region                | California      |
+	| Type                  | Business        |
+	| Mailing               | True            |
+	| Postal Code           | 91761           |
+	| Primary               | True            |
+	| Street Address Line 1 | 123 Fake Street |''');
+
+		LocalFile.KoroneikiPostalAddressAPI._viewPostalAddress(
+			accountName = "Koroneiki Automotive",
+			streetAddressLine1 = "456 Main Street",
+			table = '''| Country               | Canada           |
+	| Locality              | Vancouver        |
+	| Region                | British Columbia |
+	| Type                  | Other            |
+	| Mailing               | False            |
+	| Postal Code           | V5Y 0C9          |
+	| Primary               | False            |
+	| Street Address Line 1 | 456 Main Street  |''');
+	}
+
+}
