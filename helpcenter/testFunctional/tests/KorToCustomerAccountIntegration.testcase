@@ -4,76 +4,76 @@ definition {
 	property type = "customer.integration";
 
 	setUp {
-		LocalFile.Passwords.getPasswords();
+		Passwords.getPasswords();
 
-		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+		KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
 
-		LocalFile.KoroneikiProductPurchaseAPI.generateStaticPastStartAndEndDate();
+		KoroneikiProductPurchaseAPI.generateStaticPastStartAndEndDate();
 
-		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFutureStartAndEndDate();
+		KoroneikiProductPurchaseAPI.generateStaticFutureStartAndEndDate();
 
-		LocalFile.OSBAdminRabbitMQ.generateProvisioningCompanyName();
+		OSBAdminRabbitMQ.generateProvisioningCompanyName();
 
-		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+		OSBAdminRabbitMQ.generateProvisioningProjectName();
 
-		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | cstm.customer1                       |
+		JSONOkta.createOktaUser(table = '''| Screen Name   | cstm.customer1                       |
 	| Email Address | cstm.customer1@lrcustomer.com.broken |
 	| First Name    | CSTM                                 |
 	| Last Name     | Customer1                            |''');
 
-		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | cstm.customer2                       |
+		JSONOkta.createOktaUser(table = '''| Screen Name   | cstm.customer2                       |
 	| Email Address | cstm.customer2@lrcustomer.com.broken |
 	| First Name    | CSTM                                 |
 	| Last Name     | Customer2                            |''');
 
-		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code   | KORCSTKORCST                  | |
+		KoroneikiAccountAPI._createAccount(table = '''| Code   | KORCSTKORCST                  | |
 	| Name   | Korcst - ${staticProjectName} | |
 	| Region | United States                 | |
 	| Status | Active                        | |
 	| Tier   | T1                            | |''');
 
-		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+		KoroneikiAccountAPI._assignContactRolesToContact(
 			accountName = "Korcst - ${staticProjectName}",
 			contactEmailAddress = "cstm.customer1@lrcustomer.com.broken",
 			table = '''| Support Requester |''');
 
-		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+		KoroneikiAccountAPI._assignContactRolesToContact(
 			accountName = "Korcst - ${staticProjectName}",
 			contactEmailAddress = "cstm.customer2@lrcustomer.com.broken",
 			table = '''| Support User |''');
 	}
 
 	tearDown {
-		LocalFile.KoroneikiTeamAPI._tearDownTeams(table = '''| CSTM Customer |''');
+		KoroneikiTeamAPI._tearDownTeams(table = '''| CSTM Customer |''');
 
-		LocalFile.OSBAdminProject.tearDownProjects(table = '''| KORCSTKORCST |
+		OSBAdminProject.tearDownProjects(table = '''| KORCSTKORCST |
 	| KORCT2KORCT2 |''');
 
-		LocalFile.KoroneikiAccountAPI._tearDownAccounts(table = '''| Korcst - ${staticProjectName} |''');
+		KoroneikiAccountAPI._tearDownAccounts(table = '''| Korcst - ${staticProjectName} |''');
 
-		LocalFile.KoroneikiAccountAPI._tearDownAccountsViaAccountFieldNameAndValue(
+		KoroneikiAccountAPI._tearDownAccountsViaAccountFieldNameAndValue(
 			fieldName = "Code",
 			table = '''| KORCSTKORCST |
 	| KORCT2KORCT2 |''');
 
-		LocalFile.JSONUser.tearDownUsers(table = '''| cstm.customer1@lrcustomer.com.broken |
+		JSONUser.tearDownUsers(table = '''| cstm.customer1@lrcustomer.com.broken |
 	| cstm.customer2@lrcustomer.com.broken |''');
 
-		LocalFile.JSONUser.tearDownUsersViaSupport(table = '''| cstm.customer1@lrcustomer.com.broken |
+		JSONUser.tearDownUsersViaSupport(table = '''| cstm.customer1@lrcustomer.com.broken |
 	| cstm.customer2@lrcustomer.com.broken |''');
 
-		LocalFile.JSONUser.tearDownUsersViaKoroneiki(table = '''| cstm.customer1@lrcustomer.com.broken |
+		JSONUser.tearDownUsersViaKoroneiki(table = '''| cstm.customer1@lrcustomer.com.broken |
 	| cstm.customer2@lrcustomer.com.broken |''');
 
-		LocalFile.KoroneikiContactAPI._tearDownContacts(table = '''| cstm.customer1@lrcustomer.com.broken |
+		KoroneikiContactAPI._tearDownContacts(table = '''| cstm.customer1@lrcustomer.com.broken |
 	| cstm.customer2@lrcustomer.com.broken |''');
 
-		LocalFile.JSONOkta.tearDownUsers(table = '''| cstm.customer1@lrcustomer.com.broken |
+		JSONOkta.tearDownUsers(table = '''| cstm.customer1@lrcustomer.com.broken |
 	| cstm.customer2@lrcustomer.com.broken |''');
 	}
 
 	test ViewActiveaccountonCustomeraccountpage {
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Korcst - ${staticProjectName}",
 			productName = "DXP Production",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -83,7 +83,7 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Korcst - ${staticProjectName}",
 			productName = "Platinum Subscription",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -93,29 +93,29 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+		KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
 
-		LocalFile.OSBAdmin.loginToProvisioning(
+		OSBAdmin.loginToProvisioning(
 			userEmailAddress = ${staticProvisioningAdminEmailAddress},
 			userPassword = ${staticProvisioningAdminPassword});
 
-		LocalFile.Provisioning.gotoAccounts();
+		Provisioning.gotoAccounts();
 
-		LocalFile.Provisioning.searchAccounts(keyword = "Korcst");
+		Provisioning.searchAccounts(keyword = "Korcst");
 
-		LocalFile.Provisioning.clickAccount(accountName = "Korcst - ${staticProjectName}");
+		Provisioning.clickAccount(accountName = "Korcst - ${staticProjectName}");
 
-		LocalFile.ProvisioningAccount.clickSyncToCustomerPortalButton();
+		ProvisioningAccount.clickSyncToCustomerPortalButton();
 
-		LocalFile.CustomerLogin.loginToCustomer(
+		CustomerLogin.loginToCustomer(
 			userEmailAddress = ${staticCustomerAdminEmailAddress},
 			userPassword = ${staticCustomerAdminPassword});
 
-		LocalFile.CustomerProjects.searchCustomerProject(keyword = "Korcst");
+		CustomerProjects.searchCustomerProject(keyword = "Korcst");
 
-		LocalFile.CustomerProjects.clickCustomerProject(projectName = "Korcst - ${staticProjectName}");
+		CustomerProjects.clickCustomerProject(projectName = "Korcst - ${staticProjectName}");
 
-		LocalFile.CustomerProjects._viewCustomerProjectDetails(
+		CustomerProjects._viewCustomerProjectDetails(
 			projectName = "Korcst - ${staticProjectName}",
 			table = '''| Name           | Korcst - ${staticProjectName} |
 	| Code           | KORCSTKORCST                  |
@@ -128,13 +128,13 @@ definition {
 	}
 
 	test ViewAustraliaSupportRegionaccountonCustomeraccountpage {
-		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code   | KORCT2KORCT2                  | |
+		KoroneikiAccountAPI._createAccount(table = '''| Code   | KORCT2KORCT2                  | |
 	| Name   | Korcp3 - ${staticProjectName} | |
 	| Region | Australia                     | |
 	| Status | Active                        | |
 	| Tier   | T1                            | |''');
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Korcp3 - ${staticProjectName}",
 			productName = "Platinum Subscription",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -144,29 +144,29 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+		KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
 
-		LocalFile.OSBAdmin.loginToProvisioning(
+		OSBAdmin.loginToProvisioning(
 			userEmailAddress = ${staticProvisioningAdminEmailAddress},
 			userPassword = ${staticProvisioningAdminPassword});
 
-		LocalFile.Provisioning.gotoAccounts();
+		Provisioning.gotoAccounts();
 
-		LocalFile.Provisioning.searchAccounts(keyword = "Korcp3");
+		Provisioning.searchAccounts(keyword = "Korcp3");
 
-		LocalFile.Provisioning.clickAccount(accountName = "Korcp3 - ${staticProjectName}");
+		Provisioning.clickAccount(accountName = "Korcp3 - ${staticProjectName}");
 
-		LocalFile.ProvisioningAccount.clickSyncToCustomerPortalButton();
+		ProvisioningAccount.clickSyncToCustomerPortalButton();
 
-		LocalFile.CustomerLogin.loginToCustomer(
+		CustomerLogin.loginToCustomer(
 			userEmailAddress = ${staticCustomerAdminEmailAddress},
 			userPassword = ${staticCustomerAdminPassword});
 
-		LocalFile.CustomerProjects.searchCustomerProject(keyword = "Korcp3");
+		CustomerProjects.searchCustomerProject(keyword = "Korcp3");
 
-		LocalFile.CustomerProjects.clickCustomerProject(projectName = "Korcp3 - ${staticProjectName}");
+		CustomerProjects.clickCustomerProject(projectName = "Korcp3 - ${staticProjectName}");
 
-		LocalFile.CustomerProjects._viewCustomerProjectDetails(
+		CustomerProjects._viewCustomerProjectDetails(
 			projectName = "Korcp3 - ${staticProjectName}",
 			table = '''| Name           | Korcp3 - ${staticProjectName} |
 	| Code           | KORCT2KORCT2                  |
@@ -179,13 +179,13 @@ definition {
 	}
 
 	test ViewBrazilSupportRegionaccountonCustomeraccountpage {
-		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code   | KORCT2KORCT2                  | |
+		KoroneikiAccountAPI._createAccount(table = '''| Code   | KORCT2KORCT2                  | |
 	| Name   | Korcp3 - ${staticProjectName} | |
 	| Region | Brazil                        | |
 	| Status | Active                        | |
 	| Tier   | T1                            | |''');
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Korcp3 - ${staticProjectName}",
 			productName = "Platinum Subscription",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -195,29 +195,29 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+		KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
 
-		LocalFile.OSBAdmin.loginToProvisioning(
+		OSBAdmin.loginToProvisioning(
 			userEmailAddress = ${staticProvisioningAdminEmailAddress},
 			userPassword = ${staticProvisioningAdminPassword});
 
-		LocalFile.Provisioning.gotoAccounts();
+		Provisioning.gotoAccounts();
 
-		LocalFile.Provisioning.searchAccounts(keyword = "Korcp3");
+		Provisioning.searchAccounts(keyword = "Korcp3");
 
-		LocalFile.Provisioning.clickAccount(accountName = "Korcp3 - ${staticProjectName}");
+		Provisioning.clickAccount(accountName = "Korcp3 - ${staticProjectName}");
 
-		LocalFile.ProvisioningAccount.clickSyncToCustomerPortalButton();
+		ProvisioningAccount.clickSyncToCustomerPortalButton();
 
-		LocalFile.CustomerLogin.loginToCustomer(
+		CustomerLogin.loginToCustomer(
 			userEmailAddress = ${staticCustomerAdminEmailAddress},
 			userPassword = ${staticCustomerAdminPassword});
 
-		LocalFile.CustomerProjects.searchCustomerProject(keyword = "Korcp3");
+		CustomerProjects.searchCustomerProject(keyword = "Korcp3");
 
-		LocalFile.CustomerProjects.clickCustomerProject(projectName = "Korcp3 - ${staticProjectName}");
+		CustomerProjects.clickCustomerProject(projectName = "Korcp3 - ${staticProjectName}");
 
-		LocalFile.CustomerProjects._viewCustomerProjectDetails(
+		CustomerProjects._viewCustomerProjectDetails(
 			projectName = "Korcp3 - ${staticProjectName}",
 			table = '''| Name           | Korcp3 - ${staticProjectName} |
 	| Code           | KORCT2KORCT2                  |
@@ -230,7 +230,7 @@ definition {
 	}
 
 	test ViewCanceledaccountonCustomeraccountpage {
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Korcst - ${staticProjectName}",
 			productName = "DXP Production",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -240,7 +240,7 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Cancelled                | |''');
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Korcst - ${staticProjectName}",
 			productName = "Platinum Subscription",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -250,29 +250,29 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+		KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
 
-		LocalFile.OSBAdmin.loginToProvisioning(
+		OSBAdmin.loginToProvisioning(
 			userEmailAddress = ${staticProvisioningAdminEmailAddress},
 			userPassword = ${staticProvisioningAdminPassword});
 
-		LocalFile.Provisioning.gotoAccounts();
+		Provisioning.gotoAccounts();
 
-		LocalFile.Provisioning.searchAccounts(keyword = "Korcst");
+		Provisioning.searchAccounts(keyword = "Korcst");
 
-		LocalFile.Provisioning.clickAccount(accountName = "Korcst - ${staticProjectName}");
+		Provisioning.clickAccount(accountName = "Korcst - ${staticProjectName}");
 
-		LocalFile.ProvisioningAccount.clickSyncToCustomerPortalButton();
+		ProvisioningAccount.clickSyncToCustomerPortalButton();
 
-		LocalFile.CustomerLogin.loginToCustomer(
+		CustomerLogin.loginToCustomer(
 			userEmailAddress = ${staticCustomerAdminEmailAddress},
 			userPassword = ${staticCustomerAdminPassword});
 
-		LocalFile.CustomerProjects.searchCustomerProject(keyword = "Korcst");
+		CustomerProjects.searchCustomerProject(keyword = "Korcst");
 
-		LocalFile.CustomerProjects.clickCustomerProject(projectName = "Korcst - ${staticProjectName}");
+		CustomerProjects.clickCustomerProject(projectName = "Korcst - ${staticProjectName}");
 
-		LocalFile.CustomerProjects._viewCustomerProjectDetails(
+		CustomerProjects._viewCustomerProjectDetails(
 			projectName = "Korcst - ${staticProjectName}",
 			table = '''| Name           | Korcst - ${staticProjectName} |
 	| Code           | KORCSTKORCST                  |
@@ -285,13 +285,13 @@ definition {
 	}
 
 	test ViewChinaSupportRegionaccountonCustomeraccountpage {
-		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code   | KORCT2KORCT2                  | |
+		KoroneikiAccountAPI._createAccount(table = '''| Code   | KORCT2KORCT2                  | |
 	| Name   | Korcp3 - ${staticProjectName} | |
 	| Region | China                         | |
 	| Status | Active                        | |
 	| Tier   | T1                            | |''');
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Korcp3 - ${staticProjectName}",
 			productName = "Platinum Subscription",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -301,29 +301,29 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+		KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
 
-		LocalFile.OSBAdmin.loginToProvisioning(
+		OSBAdmin.loginToProvisioning(
 			userEmailAddress = ${staticProvisioningAdminEmailAddress},
 			userPassword = ${staticProvisioningAdminPassword});
 
-		LocalFile.Provisioning.gotoAccounts();
+		Provisioning.gotoAccounts();
 
-		LocalFile.Provisioning.searchAccounts(keyword = "Korcp3");
+		Provisioning.searchAccounts(keyword = "Korcp3");
 
-		LocalFile.Provisioning.clickAccount(accountName = "Korcp3 - ${staticProjectName}");
+		Provisioning.clickAccount(accountName = "Korcp3 - ${staticProjectName}");
 
-		LocalFile.ProvisioningAccount.clickSyncToCustomerPortalButton();
+		ProvisioningAccount.clickSyncToCustomerPortalButton();
 
-		LocalFile.CustomerLogin.loginToCustomer(
+		CustomerLogin.loginToCustomer(
 			userEmailAddress = ${staticCustomerAdminEmailAddress},
 			userPassword = ${staticCustomerAdminPassword});
 
-		LocalFile.CustomerProjects.searchCustomerProject(keyword = "Korcp3");
+		CustomerProjects.searchCustomerProject(keyword = "Korcp3");
 
-		LocalFile.CustomerProjects.clickCustomerProject(projectName = "Korcp3 - ${staticProjectName}");
+		CustomerProjects.clickCustomerProject(projectName = "Korcp3 - ${staticProjectName}");
 
-		LocalFile.CustomerProjects._viewCustomerProjectDetails(
+		CustomerProjects._viewCustomerProjectDetails(
 			projectName = "Korcp3 - ${staticProjectName}",
 			table = '''| Name           | Korcp3 - ${staticProjectName} |
 	| Code           | KORCT2KORCT2                  |
@@ -336,7 +336,7 @@ definition {
 	}
 
 	test ViewDXPProductionaccountonCustomeraccountpage {
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Korcst - ${staticProjectName}",
 			productName = "DXP Production",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -346,43 +346,43 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+		KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
 
-		LocalFile.OSBAdmin.loginToProvisioning(
+		OSBAdmin.loginToProvisioning(
 			userEmailAddress = ${staticProvisioningAdminEmailAddress},
 			userPassword = ${staticProvisioningAdminPassword});
 
-		LocalFile.Provisioning.gotoAccounts();
+		Provisioning.gotoAccounts();
 
-		LocalFile.Provisioning.searchAccounts(keyword = "Korcst");
+		Provisioning.searchAccounts(keyword = "Korcst");
 
-		LocalFile.Provisioning.clickAccount(accountName = "Korcst - ${staticProjectName}");
+		Provisioning.clickAccount(accountName = "Korcst - ${staticProjectName}");
 
-		LocalFile.ProvisioningAccount._viewAccountProduct(
+		ProvisioningAccount._viewAccountProduct(
 			productName = "DXP Production",
 			table = '''| Name                | DXP Production |
 	| Current Provisioned | 0              |
 	| Current Purchased   | 1              |
 	| State               | ACTIVE         |''');
 
-		LocalFile.ProvisioningAccount.clickSyncToCustomerPortalButton();
+		ProvisioningAccount.clickSyncToCustomerPortalButton();
 
-		LocalFile.CustomerLogin.loginToCustomer(
+		CustomerLogin.loginToCustomer(
 			userEmailAddress = ${staticCustomerAdminEmailAddress},
 			userPassword = ${staticCustomerAdminPassword});
 
-		LocalFile.CustomerProjects.searchCustomerProject(keyword = "Korcst");
+		CustomerProjects.searchCustomerProject(keyword = "Korcst");
 
-		LocalFile.CustomerProjects.clickCustomerProject(projectName = "Korcst - ${staticProjectName}");
+		CustomerProjects.clickCustomerProject(projectName = "Korcst - ${staticProjectName}");
 
-		LocalFile.CustomerProjects._viewCustomerProjectDetails(
+		CustomerProjects._viewCustomerProjectDetails(
 			projectName = "Korcst - ${staticProjectName}",
 			table = '''| Name                   | Korcst - ${staticProjectName}                                  |
 	| Support Level          | Platinum                                                       |
 	| State                  | CURRENT                                                        |
 	| Support Level Duration | ${staticMmDdYyyyStartDate} - ${staticMmDdYyyyOriginalEndDate}  |''');
 
-		LocalFile.CustomerProjectOverview.viewCustomerSubscriptionPurchaseDetails(
+		CustomerProjectOverview.viewCustomerSubscriptionPurchaseDetails(
 			subscriptionName = "DXP",
 			table = '''| Type                   | Production                                                     |
 	| Instance Size          | 0                                                              |
@@ -391,7 +391,7 @@ definition {
 	}
 
 	test ViewDXPProductionaccountwithCommerceonCustomeraccountpage {
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Korcst - ${staticProjectName}",
 			productName = "DXP Production",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -401,7 +401,7 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Korcst - ${staticProjectName}",
 			productName = "Commerce Subscription Production",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -411,7 +411,7 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Korcst - ${staticProjectName}",
 			productName = "Platinum Subscription",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -421,29 +421,29 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+		KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
 
-		LocalFile.OSBAdmin.loginToProvisioning(
+		OSBAdmin.loginToProvisioning(
 			userEmailAddress = ${staticProvisioningAdminEmailAddress},
 			userPassword = ${staticProvisioningAdminPassword});
 
-		LocalFile.Provisioning.gotoAccounts();
+		Provisioning.gotoAccounts();
 
-		LocalFile.Provisioning.searchAccounts(keyword = "Korcst");
+		Provisioning.searchAccounts(keyword = "Korcst");
 
-		LocalFile.Provisioning.clickAccount(accountName = "Korcst - ${staticProjectName}");
+		Provisioning.clickAccount(accountName = "Korcst - ${staticProjectName}");
 
-		LocalFile.ProvisioningAccount.clickSyncToCustomerPortalButton();
+		ProvisioningAccount.clickSyncToCustomerPortalButton();
 
-		LocalFile.CustomerLogin.loginToCustomer(
+		CustomerLogin.loginToCustomer(
 			userEmailAddress = ${staticCustomerAdminEmailAddress},
 			userPassword = ${staticCustomerAdminPassword});
 
-		LocalFile.CustomerProjects.searchCustomerProject(keyword = "Korcst");
+		CustomerProjects.searchCustomerProject(keyword = "Korcst");
 
-		LocalFile.CustomerProjects.clickCustomerProject(projectName = "Korcst - ${staticProjectName}");
+		CustomerProjects.clickCustomerProject(projectName = "Korcst - ${staticProjectName}");
 
-		LocalFile.CustomerProjects._viewCustomerProjectDetails(
+		CustomerProjects._viewCustomerProjectDetails(
 			projectName = "Korcst - ${staticProjectName}",
 			table = '''| Name           | Korcst - ${staticProjectName} |
 	| Code           | KORCSTKORCST                  |
@@ -456,7 +456,7 @@ definition {
 	}
 
 	test ViewDXPProductionaccountwithEnterpriseSearchonCustomeraccountpage {
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Korcst - ${staticProjectName}",
 			productName = "DXP Production",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -466,7 +466,7 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Korcst - ${staticProjectName}",
 			productName = "Enterprise Search - Production",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -476,7 +476,7 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Korcst - ${staticProjectName}",
 			productName = "Platinum Subscription",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -486,36 +486,36 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+		KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
 
-		LocalFile.OSBAdmin.loginToProvisioning(
+		OSBAdmin.loginToProvisioning(
 			userEmailAddress = ${staticProvisioningAdminEmailAddress},
 			userPassword = ${staticProvisioningAdminPassword});
 
-		LocalFile.Provisioning.gotoAccounts();
+		Provisioning.gotoAccounts();
 
-		LocalFile.Provisioning.searchAccounts(keyword = "Korcst");
+		Provisioning.searchAccounts(keyword = "Korcst");
 
-		LocalFile.Provisioning.clickAccount(accountName = "Korcst - ${staticProjectName}");
+		Provisioning.clickAccount(accountName = "Korcst - ${staticProjectName}");
 
-		LocalFile.ProvisioningAccount._viewAccountProduct(
+		ProvisioningAccount._viewAccountProduct(
 			productName = "DXP Production",
 			table = '''| Name                | DXP Production        |
 	| Current Provisioned | 1                     |
 	| Current Purchased   | 1                     |
 	| State               | ACTIVE                |''');
 
-		LocalFile.ProvisioningAccount.clickSyncToCustomerPortalButton();
+		ProvisioningAccount.clickSyncToCustomerPortalButton();
 
-		LocalFile.CustomerLogin.loginToCustomer(
+		CustomerLogin.loginToCustomer(
 			userEmailAddress = ${staticCustomerAdminEmailAddress},
 			userPassword = ${staticCustomerAdminPassword});
 
-		LocalFile.CustomerProjects.searchCustomerProject(keyword = "Korcst");
+		CustomerProjects.searchCustomerProject(keyword = "Korcst");
 
-		LocalFile.CustomerProjects.clickCustomerProject(projectName = "Korcst - ${staticProjectName}");
+		CustomerProjects.clickCustomerProject(projectName = "Korcst - ${staticProjectName}");
 
-		LocalFile.CustomerProjects._viewCustomerProjectDetails(
+		CustomerProjects._viewCustomerProjectDetails(
 			projectName = "Korcst - ${staticProjectName}",
 			table = '''| Name           | Korcst - ${staticProjectName} |
 	| Code           | KORCSTKORCST                  |
@@ -528,7 +528,7 @@ definition {
 	}
 
 	test ViewExpiredaccountonCustomeraccountpage {
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Korcst - ${staticProjectName}",
 			productName = "DXP Production",
 			table = '''| End Date                | ${staticPastEndDate}         | |
@@ -538,7 +538,7 @@ definition {
 	| Start Date              | ${staticPastStartDate}       | |
 	| Status                  | Approved                     | |''');
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Korcst - ${staticProjectName}",
 			productName = "Platinum Subscription",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -548,29 +548,29 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+		KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
 
-		LocalFile.OSBAdmin.loginToProvisioning(
+		OSBAdmin.loginToProvisioning(
 			userEmailAddress = ${staticProvisioningAdminEmailAddress},
 			userPassword = ${staticProvisioningAdminPassword});
 
-		LocalFile.Provisioning.gotoAccounts();
+		Provisioning.gotoAccounts();
 
-		LocalFile.Provisioning.searchAccounts(keyword = "Korcst");
+		Provisioning.searchAccounts(keyword = "Korcst");
 
-		LocalFile.Provisioning.clickAccount(accountName = "Korcst - ${staticProjectName}");
+		Provisioning.clickAccount(accountName = "Korcst - ${staticProjectName}");
 
-		LocalFile.ProvisioningAccount.clickSyncToCustomerPortalButton();
+		ProvisioningAccount.clickSyncToCustomerPortalButton();
 
-		LocalFile.CustomerLogin.loginToCustomer(
+		CustomerLogin.loginToCustomer(
 			userEmailAddress = ${staticCustomerAdminEmailAddress},
 			userPassword = ${staticCustomerAdminPassword});
 
-		LocalFile.CustomerProjects.searchCustomerProject(keyword = "Korcst");
+		CustomerProjects.searchCustomerProject(keyword = "Korcst");
 
-		LocalFile.CustomerProjects.clickCustomerProject(projectName = "Korcst - ${staticProjectName}");
+		CustomerProjects.clickCustomerProject(projectName = "Korcst - ${staticProjectName}");
 
-		LocalFile.CustomerProjects._viewCustomerProjectDetails(
+		CustomerProjects._viewCustomerProjectDetails(
 			projectName = "Korcst - ${staticProjectName}",
 			table = '''| Name           | Korcst - ${staticProjectName} |
 	| Code           | KORCSTKORCST                  |
@@ -583,7 +583,7 @@ definition {
 	}
 
 	test ViewFutureaccountonCustomeraccountpage {
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Korcst - ${staticProjectName}",
 			productName = "DXP Production",
 			table = '''| End Date                | ${staticFutureEndDate}         | |
@@ -593,7 +593,7 @@ definition {
 	| Start Date              | ${staticFutureStartDate}       | |
 	| Status                  | Approved                       | |''');
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Korcst - ${staticProjectName}",
 			productName = "Platinum Subscription",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -603,21 +603,21 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+		KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
 
-		LocalFile.OSBAdmin.loginToProvisioning(
+		OSBAdmin.loginToProvisioning(
 			userEmailAddress = ${staticProvisioningAdminEmailAddress},
 			userPassword = ${staticProvisioningAdminPassword});
 
-		LocalFile.Provisioning.gotoAccounts();
+		Provisioning.gotoAccounts();
 
-		LocalFile.Provisioning.searchAccounts(keyword = "Korcst");
+		Provisioning.searchAccounts(keyword = "Korcst");
 
-		LocalFile.Provisioning.clickAccount(accountName = "Korcst - ${staticProjectName}");
+		Provisioning.clickAccount(accountName = "Korcst - ${staticProjectName}");
 
-		LocalFile.ProvisioningAccount.clickProductTab(tabName = "Future");
+		ProvisioningAccount.clickProductTab(tabName = "Future");
 
-		LocalFile.ProvisioningAccount._viewAccountProduct(
+		ProvisioningAccount._viewAccountProduct(
 			productName = "DXP Production",
 			table = '''| Name                  | DXP Production                                                    |
 	| Support Life          | ${staticFullFutureStartDate} - ${staticFullFutureOriginalEndDate} |
@@ -626,17 +626,17 @@ definition {
 	| Latest Purchased      | 1                                                                 |
 	| State                 | FUTURE                                                            |''');
 
-		LocalFile.ProvisioningAccount.clickSyncToCustomerPortalButton();
+		ProvisioningAccount.clickSyncToCustomerPortalButton();
 
-		LocalFile.CustomerLogin.loginToCustomer(
+		CustomerLogin.loginToCustomer(
 			userEmailAddress = ${staticCustomerAdminEmailAddress},
 			userPassword = ${staticCustomerAdminPassword});
 
-		LocalFile.CustomerProjects.searchCustomerProject(keyword = "Korcst");
+		CustomerProjects.searchCustomerProject(keyword = "Korcst");
 
-		LocalFile.CustomerProjects.clickCustomerProject(projectName = "Korcst - ${staticProjectName}");
+		CustomerProjects.clickCustomerProject(projectName = "Korcst - ${staticProjectName}");
 
-		LocalFile.CustomerProjects._viewCustomerProjectDetails(
+		CustomerProjects._viewCustomerProjectDetails(
 			projectName = "Korcst - ${staticProjectName}",
 			table = '''| Name           | Korcst - ${staticProjectName} |
 	| Code           | KORCSTKORCST                  |
@@ -649,13 +649,13 @@ definition {
 	}
 
 	test ViewHungarySupportRegionaccountonCustomeraccountpage {
-		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code   | KORCT2KORCT2                  | |
+		KoroneikiAccountAPI._createAccount(table = '''| Code   | KORCT2KORCT2                  | |
 	| Name   | Korcp3 - ${staticProjectName} | |
 	| Region | Hungary                       | |
 	| Status | Active                        | |
 	| Tier   | T1                            | |''');
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Korcp3 - ${staticProjectName}",
 			productName = "Platinum Subscription",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -665,29 +665,29 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+		KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
 
-		LocalFile.OSBAdmin.loginToProvisioning(
+		OSBAdmin.loginToProvisioning(
 			userEmailAddress = ${staticProvisioningAdminEmailAddress},
 			userPassword = ${staticProvisioningAdminPassword});
 
-		LocalFile.Provisioning.gotoAccounts();
+		Provisioning.gotoAccounts();
 
-		LocalFile.Provisioning.searchAccounts(keyword = "Korcp3");
+		Provisioning.searchAccounts(keyword = "Korcp3");
 
-		LocalFile.Provisioning.clickAccount(accountName = "Korcp3 - ${staticProjectName}");
+		Provisioning.clickAccount(accountName = "Korcp3 - ${staticProjectName}");
 
-		LocalFile.ProvisioningAccount.clickSyncToCustomerPortalButton();
+		ProvisioningAccount.clickSyncToCustomerPortalButton();
 
-		LocalFile.CustomerLogin.loginToCustomer(
+		CustomerLogin.loginToCustomer(
 			userEmailAddress = ${staticCustomerAdminEmailAddress},
 			userPassword = ${staticCustomerAdminPassword});
 
-		LocalFile.CustomerProjects.searchCustomerProject(keyword = "Korcp3");
+		CustomerProjects.searchCustomerProject(keyword = "Korcp3");
 
-		LocalFile.CustomerProjects.clickCustomerProject(projectName = "Korcp3 - ${staticProjectName}");
+		CustomerProjects.clickCustomerProject(projectName = "Korcp3 - ${staticProjectName}");
 
-		LocalFile.CustomerProjects._viewCustomerProjectDetails(
+		CustomerProjects._viewCustomerProjectDetails(
 			projectName = "Korcp3 - ${staticProjectName}",
 			table = '''| Name           | Korcp3 - ${staticProjectName} |
 	| Code           | KORCT2KORCT2                  |
@@ -700,13 +700,13 @@ definition {
 	}
 
 	test ViewIndiaSupportRegionaccountonCustomeraccountpage {
-		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code   | KORCT2KORCT2                  | |
+		KoroneikiAccountAPI._createAccount(table = '''| Code   | KORCT2KORCT2                  | |
 	| Name   | Korcp3 - ${staticProjectName} | |
 	| Region | India                         | |
 	| Status | Active                        | |
 	| Tier   | T1                            | |''');
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Korcp3 - ${staticProjectName}",
 			productName = "Platinum Subscription",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -716,29 +716,29 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+		KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
 
-		LocalFile.OSBAdmin.loginToProvisioning(
+		OSBAdmin.loginToProvisioning(
 			userEmailAddress = ${staticProvisioningAdminEmailAddress},
 			userPassword = ${staticProvisioningAdminPassword});
 
-		LocalFile.Provisioning.gotoAccounts();
+		Provisioning.gotoAccounts();
 
-		LocalFile.Provisioning.searchAccounts(keyword = "Korcp3");
+		Provisioning.searchAccounts(keyword = "Korcp3");
 
-		LocalFile.Provisioning.clickAccount(accountName = "Korcp3 - ${staticProjectName}");
+		Provisioning.clickAccount(accountName = "Korcp3 - ${staticProjectName}");
 
-		LocalFile.ProvisioningAccount.clickSyncToCustomerPortalButton();
+		ProvisioningAccount.clickSyncToCustomerPortalButton();
 
-		LocalFile.CustomerLogin.loginToCustomer(
+		CustomerLogin.loginToCustomer(
 			userEmailAddress = ${staticCustomerAdminEmailAddress},
 			userPassword = ${staticCustomerAdminPassword});
 
-		LocalFile.CustomerProjects.searchCustomerProject(keyword = "Korcp3");
+		CustomerProjects.searchCustomerProject(keyword = "Korcp3");
 
-		LocalFile.CustomerProjects.clickCustomerProject(projectName = "Korcp3 - ${staticProjectName}");
+		CustomerProjects.clickCustomerProject(projectName = "Korcp3 - ${staticProjectName}");
 
-		LocalFile.CustomerProjects._viewCustomerProjectDetails(
+		CustomerProjects._viewCustomerProjectDetails(
 			projectName = "Korcp3 - ${staticProjectName}",
 			table = '''| Name           | Korcp3 - ${staticProjectName} |
 	| Code           | KORCT2KORCT2                  |
@@ -751,7 +751,7 @@ definition {
 	}
 
 	test ViewLimitedaccountonCustomeraccountpage {
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Korcst - ${staticProjectName}",
 			productName = "Limited Subscription",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -761,29 +761,29 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "limited Subscription");
+		KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "limited Subscription");
 
-		LocalFile.OSBAdmin.loginToProvisioning(
+		OSBAdmin.loginToProvisioning(
 			userEmailAddress = ${staticProvisioningAdminEmailAddress},
 			userPassword = ${staticProvisioningAdminPassword});
 
-		LocalFile.Provisioning.gotoAccounts();
+		Provisioning.gotoAccounts();
 
-		LocalFile.Provisioning.searchAccounts(keyword = "Korcst");
+		Provisioning.searchAccounts(keyword = "Korcst");
 
-		LocalFile.Provisioning.clickAccount(accountName = "Korcst - ${staticProjectName}");
+		Provisioning.clickAccount(accountName = "Korcst - ${staticProjectName}");
 
-		LocalFile.ProvisioningAccount.clickSyncToCustomerPortalButton();
+		ProvisioningAccount.clickSyncToCustomerPortalButton();
 
-		LocalFile.CustomerLogin.loginToCustomer(
+		CustomerLogin.loginToCustomer(
 			userEmailAddress = ${staticCustomerAdminEmailAddress},
 			userPassword = ${staticCustomerAdminPassword});
 
-		LocalFile.CustomerProjects.searchCustomerProject(keyword = "Korcst");
+		CustomerProjects.searchCustomerProject(keyword = "Korcst");
 
-		LocalFile.CustomerProjects.clickCustomerProject(projectName = "Korcst - ${staticProjectName}");
+		CustomerProjects.clickCustomerProject(projectName = "Korcst - ${staticProjectName}");
 
-		LocalFile.CustomerProjects._viewCustomerProjectDetails(
+		CustomerProjects._viewCustomerProjectDetails(
 			projectName = "Korcst - ${staticProjectName}",
 			table = '''| Name           | Korcst - ${staticProjectName} |
 	| Code           | KORCSTKORCST                  |
@@ -796,7 +796,7 @@ definition {
 	}
 
 	test ViewPlatinumaccountonCustomeraccountpage {
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Korcst - ${staticProjectName}",
 			productName = "Platinum Subscription",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -806,29 +806,29 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+		KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
 
-		LocalFile.OSBAdmin.loginToProvisioning(
+		OSBAdmin.loginToProvisioning(
 			userEmailAddress = ${staticProvisioningAdminEmailAddress},
 			userPassword = ${staticProvisioningAdminPassword});
 
-		LocalFile.Provisioning.gotoAccounts();
+		Provisioning.gotoAccounts();
 
-		LocalFile.Provisioning.searchAccounts(keyword = "Korcst");
+		Provisioning.searchAccounts(keyword = "Korcst");
 
-		LocalFile.Provisioning.clickAccount(accountName = "Korcst - ${staticProjectName}");
+		Provisioning.clickAccount(accountName = "Korcst - ${staticProjectName}");
 
-		LocalFile.ProvisioningAccount.clickSyncToCustomerPortalButton();
+		ProvisioningAccount.clickSyncToCustomerPortalButton();
 
-		LocalFile.CustomerLogin.loginToCustomer(
+		CustomerLogin.loginToCustomer(
 			userEmailAddress = ${staticCustomerAdminEmailAddress},
 			userPassword = ${staticCustomerAdminPassword});
 
-		LocalFile.CustomerProjects.searchCustomerProject(keyword = "Korcst");
+		CustomerProjects.searchCustomerProject(keyword = "Korcst");
 
-		LocalFile.CustomerProjects.clickCustomerProject(projectName = "Korcst - ${staticProjectName}");
+		CustomerProjects.clickCustomerProject(projectName = "Korcst - ${staticProjectName}");
 
-		LocalFile.CustomerProjects._viewCustomerProjectDetails(
+		CustomerProjects._viewCustomerProjectDetails(
 			projectName = "Korcst - ${staticProjectName}",
 			table = '''| Name           | Korcst - ${staticProjectName} |
 	| Code           | KORCSTKORCST                  |
@@ -841,7 +841,7 @@ definition {
 	}
 
 	test ViewPortalProductionaccountonCustomeraccountpage {
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Korcst - ${staticProjectName}",
 			productName = "Portal Production",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -851,7 +851,7 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Korcst - ${staticProjectName}",
 			productName = "Platinum Subscription",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -861,36 +861,36 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+		KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
 
-		LocalFile.OSBAdmin.loginToProvisioning(
+		OSBAdmin.loginToProvisioning(
 			userEmailAddress = ${staticProvisioningAdminEmailAddress},
 			userPassword = ${staticProvisioningAdminPassword});
 
-		LocalFile.Provisioning.gotoAccounts();
+		Provisioning.gotoAccounts();
 
-		LocalFile.Provisioning.searchAccounts(keyword = "Korcst");
+		Provisioning.searchAccounts(keyword = "Korcst");
 
-		LocalFile.Provisioning.clickAccount(accountName = "Korcst - ${staticProjectName}");
+		Provisioning.clickAccount(accountName = "Korcst - ${staticProjectName}");
 
-		LocalFile.ProvisioningAccount._viewAccountProduct(
+		ProvisioningAccount._viewAccountProduct(
 			productName = "DXP Production",
 			table = '''| Name                | DXP Production        |
 	| Current Provisioned | 1                     |
 	| Current Purchased   | 1                     |
 	| State               | ACTIVE                |''');
 
-		LocalFile.ProvisioningAccount.clickSyncToCustomerPortalButton();
+		ProvisioningAccount.clickSyncToCustomerPortalButton();
 
-		LocalFile.CustomerLogin.loginToCustomer(
+		CustomerLogin.loginToCustomer(
 			userEmailAddress = ${staticCustomerAdminEmailAddress},
 			userPassword = ${staticCustomerAdminPassword});
 
-		LocalFile.CustomerProjects.searchCustomerProject(keyword = "Korcst");
+		CustomerProjects.searchCustomerProject(keyword = "Korcst");
 
-		LocalFile.CustomerProjects.clickCustomerProject(projectName = "Korcst - ${staticProjectName}");
+		CustomerProjects.clickCustomerProject(projectName = "Korcst - ${staticProjectName}");
 
-		LocalFile.CustomerProjects._viewCustomerProjectDetails(
+		CustomerProjects._viewCustomerProjectDetails(
 			projectName = "Korcst - ${staticProjectName}",
 			table = '''| Name                   | Korcst - ${staticProjectName}                                 |
 	| Support Level          | Platinum                                                      |
@@ -899,13 +899,13 @@ definition {
 	}
 
 	test ViewSpainSupportRegionaccountonCustomeraccountpage {
-		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code   | KORCT2KORCT2                  | |
+		KoroneikiAccountAPI._createAccount(table = '''| Code   | KORCT2KORCT2                  | |
 	| Name   | Korcp3 - ${staticProjectName} | |
 	| Region | Spain                         | |
 	| Status | Active                        | |
 	| Tier   | T1                            | |''');
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Korcp3 - ${staticProjectName}",
 			productName = "Platinum Subscription",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -915,31 +915,31 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+		KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
 
-		LocalFile.OSBAdmin.loginToProvisioning(
+		OSBAdmin.loginToProvisioning(
 			userEmailAddress = ${staticProvisioningAdminEmailAddress},
 			userPassword = ${staticProvisioningAdminPassword});
 
-		LocalFile.Provisioning.gotoAccounts();
+		Provisioning.gotoAccounts();
 
-		LocalFile.Provisioning.searchAccounts(keyword = "Korcp3");
+		Provisioning.searchAccounts(keyword = "Korcp3");
 
-		LocalFile.Provisioning.clickAccount(accountName = "Korcp3 - ${staticProjectName}");
+		Provisioning.clickAccount(accountName = "Korcp3 - ${staticProjectName}");
 
-		LocalFile.ProvisioningAccount.clickSyncToCustomerPortalButton();
+		ProvisioningAccount.clickSyncToCustomerPortalButton();
 
-		LocalFile.CustomerLogin.loginToCustomer(
+		CustomerLogin.loginToCustomer(
 			userEmailAddress = ${staticCustomerAdminEmailAddress},
 			userPassword = ${staticCustomerAdminPassword});
 
-		LocalFile.CustomerProjects.searchCustomerProject(keyword = "Korcp3");
+		CustomerProjects.searchCustomerProject(keyword = "Korcp3");
 
-		LocalFile.CustomerProjects.clickCustomerProject(projectName = "Korcp3 - ${staticProjectName}");
+		CustomerProjects.clickCustomerProject(projectName = "Korcp3 - ${staticProjectName}");
 
-		LocalFile.CustomerProjects.clickCustomerProject(projectName = "Korcp3 - ${staticProjectName}");
+		CustomerProjects.clickCustomerProject(projectName = "Korcp3 - ${staticProjectName}");
 
-		LocalFile.CustomerProjects._viewCustomerProjectDetails(
+		CustomerProjects._viewCustomerProjectDetails(
 			projectName = "Korcp3 - ${staticProjectName}",
 			table = '''| Name           | Korcp3 - ${staticProjectName} |
 	| Code           | KORCT2KORCT2                  |
@@ -952,7 +952,7 @@ definition {
 	}
 
 	test ViewSupportSeatscountonProjectwithAnalyticsCloudwithManagedServicespurchase {
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Korcst - ${staticProjectName}",
 			productName = "Analytics Cloud Basic",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -962,7 +962,7 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Korcst - ${staticProjectName}",
 			productName = "Managed Services for Liferay Experience Cloud - Self Managed",
 			table = '''| End Date                | ${staticEndDate}         |   |
@@ -975,7 +975,7 @@ definition {
 	| Start Date              | ${staticStartDate}       |   |
 	| Status                  | Approved                 |   |''');
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Korcst - ${staticProjectName}",
 			productName = "Platinum Subscription",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -985,31 +985,31 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+		KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
 
-		LocalFile.OSBAdmin.loginToProvisioning(
+		OSBAdmin.loginToProvisioning(
 			userEmailAddress = ${staticProvisioningAdminEmailAddress},
 			userPassword = ${staticProvisioningAdminPassword});
 
-		LocalFile.Provisioning.gotoAccounts();
+		Provisioning.gotoAccounts();
 
-		LocalFile.Provisioning.searchAccounts(keyword = "Korcst");
+		Provisioning.searchAccounts(keyword = "Korcst");
 
-		LocalFile.Provisioning.clickAccount(accountName = "Korcst - ${staticProjectName}");
+		Provisioning.clickAccount(accountName = "Korcst - ${staticProjectName}");
 
-		LocalFile.ProvisioningAccount.clickSyncToCustomerPortalButton();
+		ProvisioningAccount.clickSyncToCustomerPortalButton();
 
-		LocalFile.CustomerLogin.loginToCustomer(
+		CustomerLogin.loginToCustomer(
 			userEmailAddress = ${staticCustomerAdminEmailAddress},
 			userPassword = ${staticCustomerAdminPassword});
 
-		LocalFile.CustomerProjects.searchCustomerProject(keyword = "Korcst");
+		CustomerProjects.searchCustomerProject(keyword = "Korcst");
 
-		LocalFile.CustomerProjects.clickCustomerProject(projectName = "Korcst - ${staticProjectName}");
+		CustomerProjects.clickCustomerProject(projectName = "Korcst - ${staticProjectName}");
 	}
 
 	test ViewSupportSeatsonProjectwithAnalyticsCloudandLimitedpurchase {
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Korcst - ${staticProjectName}",
 			productName = "Analytics Cloud Basic",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -1019,7 +1019,7 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Korcst - ${staticProjectName}",
 			productName = "Limited Subscription",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -1029,33 +1029,33 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Limited Subscription");
+		KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Limited Subscription");
 
-		LocalFile.OSBAdmin.loginToProvisioning(
+		OSBAdmin.loginToProvisioning(
 			userEmailAddress = ${staticProvisioningAdminEmailAddress},
 			userPassword = ${staticProvisioningAdminPassword});
 
-		LocalFile.Provisioning.gotoAccounts();
+		Provisioning.gotoAccounts();
 
-		LocalFile.Provisioning.searchAccounts(keyword = "Korcst");
+		Provisioning.searchAccounts(keyword = "Korcst");
 
-		LocalFile.Provisioning.clickAccount(accountName = "Korcst - ${staticProjectName}");
+		Provisioning.clickAccount(accountName = "Korcst - ${staticProjectName}");
 
-		LocalFile.ProvisioningAccount.clickSyncToCustomerPortalButton();
+		ProvisioningAccount.clickSyncToCustomerPortalButton();
 
-		LocalFile.CustomerLogin.loginToCustomer(
+		CustomerLogin.loginToCustomer(
 			userEmailAddress = ${staticCustomerAdminEmailAddress},
 			userPassword = ${staticCustomerAdminPassword});
 
-		LocalFile.CustomerProjects.searchCustomerProject(keyword = "Korcst");
+		CustomerProjects.searchCustomerProject(keyword = "Korcst");
 
-		LocalFile.CustomerProjects.clickCustomerProject(projectName = "Korcst - ${staticProjectName}");
+		CustomerProjects.clickCustomerProject(projectName = "Korcst - ${staticProjectName}");
 
-		LocalFile.CustomerProjectNavigation.clickOnTab(tab = "Team Members");
+		CustomerProjectNavigation.clickOnTab(tab = "Team Members");
 	}
 
 	test ViewSupportSeatsonProjectwithAnalyticsCloudandPlatinumandDXPProductionpurchase {
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Korcst - ${staticProjectName}",
 			productName = "Analytics Cloud Basic",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -1065,7 +1065,7 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Korcst - ${staticProjectName}",
 			productName = "DXP Production",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -1075,7 +1075,7 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Korcst - ${staticProjectName}",
 			productName = "Platinum Subscription",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -1085,33 +1085,33 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+		KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
 
-		LocalFile.OSBAdmin.loginToProvisioning(
+		OSBAdmin.loginToProvisioning(
 			userEmailAddress = ${staticProvisioningAdminEmailAddress},
 			userPassword = ${staticProvisioningAdminPassword});
 
-		LocalFile.Provisioning.gotoAccounts();
+		Provisioning.gotoAccounts();
 
-		LocalFile.Provisioning.searchAccounts(keyword = "Korcst");
+		Provisioning.searchAccounts(keyword = "Korcst");
 
-		LocalFile.Provisioning.clickAccount(accountName = "Korcst - ${staticProjectName}");
+		Provisioning.clickAccount(accountName = "Korcst - ${staticProjectName}");
 
-		LocalFile.ProvisioningAccount.clickSyncToCustomerPortalButton();
+		ProvisioningAccount.clickSyncToCustomerPortalButton();
 
-		LocalFile.CustomerLogin.loginToCustomer(
+		CustomerLogin.loginToCustomer(
 			userEmailAddress = ${staticCustomerAdminEmailAddress},
 			userPassword = ${staticCustomerAdminPassword});
 
-		LocalFile.CustomerProjects.searchCustomerProject(keyword = "Korcst");
+		CustomerProjects.searchCustomerProject(keyword = "Korcst");
 
-		LocalFile.CustomerProjects.clickCustomerProject(projectName = "Korcst - ${staticProjectName}");
+		CustomerProjects.clickCustomerProject(projectName = "Korcst - ${staticProjectName}");
 
-		LocalFile.CustomerProjectNavigation.clickOnTab(tab = "Team Members");
+		CustomerProjectNavigation.clickOnTab(tab = "Team Members");
 	}
 
 	test ViewSupportSeatsonProjectwithAnalyticsCloudandPlatinumandLXCSMpurchase {
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Korcst - ${staticProjectName}",
 			productName = "Analytics Cloud Basic",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -1121,7 +1121,7 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Korcst - ${staticProjectName}",
 			productName = "LXC SM Subscription HA Production",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -1130,7 +1130,7 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Korcst - ${staticProjectName}",
 			productName = "Platinum Subscription",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -1140,33 +1140,33 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+		KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
 
-		LocalFile.OSBAdmin.loginToProvisioning(
+		OSBAdmin.loginToProvisioning(
 			userEmailAddress = ${staticProvisioningAdminEmailAddress},
 			userPassword = ${staticProvisioningAdminPassword});
 
-		LocalFile.Provisioning.gotoAccounts();
+		Provisioning.gotoAccounts();
 
-		LocalFile.Provisioning.searchAccounts(keyword = "Korcst");
+		Provisioning.searchAccounts(keyword = "Korcst");
 
-		LocalFile.Provisioning.clickAccount(accountName = "Korcst - ${staticProjectName}");
+		Provisioning.clickAccount(accountName = "Korcst - ${staticProjectName}");
 
-		LocalFile.ProvisioningAccount.clickSyncToCustomerPortalButton();
+		ProvisioningAccount.clickSyncToCustomerPortalButton();
 
-		LocalFile.CustomerLogin.loginToCustomer(
+		CustomerLogin.loginToCustomer(
 			userEmailAddress = ${staticCustomerAdminEmailAddress},
 			userPassword = ${staticCustomerAdminPassword});
 
-		LocalFile.CustomerProjects.searchCustomerProject(keyword = "Korcst");
+		CustomerProjects.searchCustomerProject(keyword = "Korcst");
 
-		LocalFile.CustomerProjects.clickCustomerProject(projectName = "Korcst - ${staticProjectName}");
+		CustomerProjects.clickCustomerProject(projectName = "Korcst - ${staticProjectName}");
 
-		LocalFile.CustomerProjectNavigation.clickOnTab(tab = "Team Members");
+		CustomerProjectNavigation.clickOnTab(tab = "Team Members");
 	}
 
 	test ViewSupportSeatsonProjectwithAnalyticsCloudandPlatinumpurchase {
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Korcst - ${staticProjectName}",
 			productName = "Analytics Cloud Basic",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -1176,7 +1176,7 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Korcst - ${staticProjectName}",
 			productName = "Platinum Subscription",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -1186,39 +1186,39 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+		KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
 
-		LocalFile.OSBAdmin.loginToProvisioning(
+		OSBAdmin.loginToProvisioning(
 			userEmailAddress = ${staticProvisioningAdminEmailAddress},
 			userPassword = ${staticProvisioningAdminPassword});
 
-		LocalFile.Provisioning.gotoAccounts();
+		Provisioning.gotoAccounts();
 
-		LocalFile.Provisioning.searchAccounts(keyword = "Korcst");
+		Provisioning.searchAccounts(keyword = "Korcst");
 
-		LocalFile.Provisioning.clickAccount(accountName = "Korcst - ${staticProjectName}");
+		Provisioning.clickAccount(accountName = "Korcst - ${staticProjectName}");
 
-		LocalFile.ProvisioningAccount.clickSyncToCustomerPortalButton();
+		ProvisioningAccount.clickSyncToCustomerPortalButton();
 
-		LocalFile.CustomerLogin.loginToCustomer(
+		CustomerLogin.loginToCustomer(
 			userEmailAddress = ${staticCustomerAdminEmailAddress},
 			userPassword = ${staticCustomerAdminPassword});
 
-		LocalFile.CustomerProjects.searchCustomerProject(keyword = "Korcst");
+		CustomerProjects.searchCustomerProject(keyword = "Korcst");
 
-		LocalFile.CustomerProjects.clickCustomerProject(projectName = "Korcst - ${staticProjectName}");
+		CustomerProjects.clickCustomerProject(projectName = "Korcst - ${staticProjectName}");
 
-		LocalFile.CustomerProjectNavigation.clickOnTab(tab = "Team Members");
+		CustomerProjectNavigation.clickOnTab(tab = "Team Members");
 	}
 
 	test ViewT1accountonCustomeraccountpage {
-		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code   | KORCT2KORCT2                  | |
+		KoroneikiAccountAPI._createAccount(table = '''| Code   | KORCT2KORCT2                  | |
 	| Name   | Korcp3 - ${staticProjectName} | |
 	| Region | United States                 | |
 	| Status | Active                        | |
 	| Tier   | T1                            | |''');
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Korcp3 - ${staticProjectName}",
 			productName = "Platinum Subscription",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -1228,29 +1228,29 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+		KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
 
-		LocalFile.OSBAdmin.loginToProvisioning(
+		OSBAdmin.loginToProvisioning(
 			userEmailAddress = ${staticProvisioningAdminEmailAddress},
 			userPassword = ${staticProvisioningAdminPassword});
 
-		LocalFile.Provisioning.gotoAccounts();
+		Provisioning.gotoAccounts();
 
-		LocalFile.Provisioning.searchAccounts(keyword = "Korcp3");
+		Provisioning.searchAccounts(keyword = "Korcp3");
 
-		LocalFile.Provisioning.clickAccount(accountName = "Korcp3 - ${staticProjectName}");
+		Provisioning.clickAccount(accountName = "Korcp3 - ${staticProjectName}");
 
-		LocalFile.ProvisioningAccount.clickSyncToCustomerPortalButton();
+		ProvisioningAccount.clickSyncToCustomerPortalButton();
 
-		LocalFile.CustomerLogin.loginToCustomer(
+		CustomerLogin.loginToCustomer(
 			userEmailAddress = ${staticCustomerAdminEmailAddress},
 			userPassword = ${staticCustomerAdminPassword});
 
-		LocalFile.CustomerProjects.searchCustomerProject(keyword = "Korcp3");
+		CustomerProjects.searchCustomerProject(keyword = "Korcp3");
 
-		LocalFile.CustomerProjects.clickCustomerProject(projectName = "Korcp3 - ${staticProjectName}");
+		CustomerProjects.clickCustomerProject(projectName = "Korcp3 - ${staticProjectName}");
 
-		LocalFile.CustomerProjects._viewCustomerProjectDetails(
+		CustomerProjects._viewCustomerProjectDetails(
 			projectName = "Korcst - ${staticProjectName}",
 			table = '''| Name           | Korcp3 - ${staticProjectName} |
 	| Code           | KORCT2KORCT2                  |
@@ -1263,13 +1263,13 @@ definition {
 	}
 
 	test ViewT2accountonCustomeraccountpage {
-		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code   | KORCT2KORCT2                  | |
+		KoroneikiAccountAPI._createAccount(table = '''| Code   | KORCT2KORCT2                  | |
 	| Name   | Korcp3 - ${staticProjectName} | |
 	| Region | United States                 | |
 	| Status | Active                        | |
 	| Tier   | T2                            | |''');
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Korcp3 - ${staticProjectName}",
 			productName = "Platinum Subscription",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -1279,29 +1279,29 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+		KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
 
-		LocalFile.OSBAdmin.loginToProvisioning(
+		OSBAdmin.loginToProvisioning(
 			userEmailAddress = ${staticProvisioningAdminEmailAddress},
 			userPassword = ${staticProvisioningAdminPassword});
 
-		LocalFile.Provisioning.gotoAccounts();
+		Provisioning.gotoAccounts();
 
-		LocalFile.Provisioning.searchAccounts(keyword = "Korcp3");
+		Provisioning.searchAccounts(keyword = "Korcp3");
 
-		LocalFile.Provisioning.clickAccount(accountName = "Korcp3 - ${staticProjectName}");
+		Provisioning.clickAccount(accountName = "Korcp3 - ${staticProjectName}");
 
-		LocalFile.ProvisioningAccount.clickSyncToCustomerPortalButton();
+		ProvisioningAccount.clickSyncToCustomerPortalButton();
 
-		LocalFile.CustomerLogin.loginToCustomer(
+		CustomerLogin.loginToCustomer(
 			userEmailAddress = ${staticCustomerAdminEmailAddress},
 			userPassword = ${staticCustomerAdminPassword});
 
-		LocalFile.CustomerProjects.searchCustomerProject(keyword = "Korcp3");
+		CustomerProjects.searchCustomerProject(keyword = "Korcp3");
 
-		LocalFile.CustomerProjects.clickCustomerProject(projectName = "Korcp3 - ${staticProjectName}");
+		CustomerProjects.clickCustomerProject(projectName = "Korcp3 - ${staticProjectName}");
 
-		LocalFile.CustomerProjects._viewCustomerProjectDetails(
+		CustomerProjects._viewCustomerProjectDetails(
 			projectName = "Korcp3 - ${staticProjectName}",
 			table = '''| Name           | Korcp3 - ${staticProjectName} |
 	| Code           | KORCT2KORCT2                  |
@@ -1314,13 +1314,13 @@ definition {
 	}
 
 	test ViewT3accountonCustomeraccountpage {
-		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code   | KORCT2KORCT2                  | |
+		KoroneikiAccountAPI._createAccount(table = '''| Code   | KORCT2KORCT2                  | |
 	| Name   | Korcp3 - ${staticProjectName} | |
 	| Region | United States                 | |
 	| Status | Active                        | |
 	| Tier   | T3                            | |''');
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Korcp3 - ${staticProjectName}",
 			productName = "Platinum Subscription",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -1330,29 +1330,29 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+		KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
 
-		LocalFile.OSBAdmin.loginToProvisioning(
+		OSBAdmin.loginToProvisioning(
 			userEmailAddress = ${staticProvisioningAdminEmailAddress},
 			userPassword = ${staticProvisioningAdminPassword});
 
-		LocalFile.Provisioning.gotoAccounts();
+		Provisioning.gotoAccounts();
 
-		LocalFile.Provisioning.searchAccounts(keyword = "Korcp3");
+		Provisioning.searchAccounts(keyword = "Korcp3");
 
-		LocalFile.Provisioning.clickAccount(accountName = "Korcp3 - ${staticProjectName}");
+		Provisioning.clickAccount(accountName = "Korcp3 - ${staticProjectName}");
 
-		LocalFile.ProvisioningAccount.clickSyncToCustomerPortalButton();
+		ProvisioningAccount.clickSyncToCustomerPortalButton();
 
-		LocalFile.CustomerLogin.loginToCustomer(
+		CustomerLogin.loginToCustomer(
 			userEmailAddress = ${staticCustomerAdminEmailAddress},
 			userPassword = ${staticCustomerAdminPassword});
 
-		LocalFile.CustomerProjects.searchCustomerProject(keyword = "Korcp3");
+		CustomerProjects.searchCustomerProject(keyword = "Korcp3");
 
-		LocalFile.CustomerProjects.clickCustomerProject(projectName = "Korcp3 - ${staticProjectName}");
+		CustomerProjects.clickCustomerProject(projectName = "Korcp3 - ${staticProjectName}");
 
-		LocalFile.CustomerProjects._viewCustomerProjectDetails(
+		CustomerProjects._viewCustomerProjectDetails(
 			projectName = "Korcp3 - ${staticProjectName}",
 			table = '''| Name           | Korcp3 - ${staticProjectName} |
 	| Code           | KORCT2KORCT2                  |
@@ -1365,13 +1365,13 @@ definition {
 	}
 
 	test ViewT4accountonCustomeraccountpage {
-		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code   | KORCT2KORCT2                  | |
+		KoroneikiAccountAPI._createAccount(table = '''| Code   | KORCT2KORCT2                  | |
 	| Name   | Korcp3 - ${staticProjectName} | |
 	| Region | United States                 | |
 	| Status | Active                        | |
 	| Tier   | T4                            | |''');
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Korcp3 - ${staticProjectName}",
 			productName = "Platinum Subscription",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -1381,29 +1381,29 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+		KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
 
-		LocalFile.OSBAdmin.loginToProvisioning(
+		OSBAdmin.loginToProvisioning(
 			userEmailAddress = ${staticProvisioningAdminEmailAddress},
 			userPassword = ${staticProvisioningAdminPassword});
 
-		LocalFile.Provisioning.gotoAccounts();
+		Provisioning.gotoAccounts();
 
-		LocalFile.Provisioning.searchAccounts(keyword = "Korcp3");
+		Provisioning.searchAccounts(keyword = "Korcp3");
 
-		LocalFile.Provisioning.clickAccount(accountName = "Korcp3 - ${staticProjectName}");
+		Provisioning.clickAccount(accountName = "Korcp3 - ${staticProjectName}");
 
-		LocalFile.ProvisioningAccount.clickSyncToCustomerPortalButton();
+		ProvisioningAccount.clickSyncToCustomerPortalButton();
 
-		LocalFile.CustomerLogin.loginToCustomer(
+		CustomerLogin.loginToCustomer(
 			userEmailAddress = ${staticCustomerAdminEmailAddress},
 			userPassword = ${staticCustomerAdminPassword});
 
-		LocalFile.CustomerProjects.searchCustomerProject(keyword = "Korcp3");
+		CustomerProjects.searchCustomerProject(keyword = "Korcp3");
 
-		LocalFile.CustomerProjects.clickCustomerProject(projectName = "Korcp3 - ${staticProjectName}");
+		CustomerProjects.clickCustomerProject(projectName = "Korcp3 - ${staticProjectName}");
 
-		LocalFile.CustomerProjects._viewCustomerProjectDetails(
+		CustomerProjects._viewCustomerProjectDetails(
 			projectName = "Korcp3 - ${staticProjectName}",
 			table = '''| Name           | Korcp3 - ${staticProjectName} |
 	| Code           | KORCT2KORCT2                  |
@@ -1416,7 +1416,7 @@ definition {
 	}
 
 	test ViewUSSupportRegionaccountonCustomeraccountpage {
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Korcst - ${staticProjectName}",
 			productName = "Platinum Subscription",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -1426,29 +1426,29 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
+		KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
 
-		LocalFile.OSBAdmin.loginToProvisioning(
+		OSBAdmin.loginToProvisioning(
 			userEmailAddress = ${staticProvisioningAdminEmailAddress},
 			userPassword = ${staticProvisioningAdminPassword});
 
-		LocalFile.Provisioning.gotoAccounts();
+		Provisioning.gotoAccounts();
 
-		LocalFile.Provisioning.searchAccounts(keyword = "Korcst");
+		Provisioning.searchAccounts(keyword = "Korcst");
 
-		LocalFile.Provisioning.clickAccount(accountName = "Korcst - ${staticProjectName}");
+		Provisioning.clickAccount(accountName = "Korcst - ${staticProjectName}");
 
-		LocalFile.ProvisioningAccount.clickSyncToCustomerPortalButton();
+		ProvisioningAccount.clickSyncToCustomerPortalButton();
 
-		LocalFile.CustomerLogin.loginToCustomer(
+		CustomerLogin.loginToCustomer(
 			userEmailAddress = ${staticCustomerAdminEmailAddress},
 			userPassword = ${staticCustomerAdminPassword});
 
-		LocalFile.CustomerProjects.searchCustomerProject(keyword = "Korcst");
+		CustomerProjects.searchCustomerProject(keyword = "Korcst");
 
-		LocalFile.CustomerProjects.clickCustomerProject(projectName = "Korcst - ${staticProjectName}");
+		CustomerProjects.clickCustomerProject(projectName = "Korcst - ${staticProjectName}");
 
-		LocalFile.CustomerProjects._viewCustomerProjectDetails(
+		CustomerProjects._viewCustomerProjectDetails(
 			projectName = "Korcst - ${staticProjectName}",
 			table = '''| Name           | Korcst - ${staticProjectName} |
 	| Code           | KORCSTKORCST                  |

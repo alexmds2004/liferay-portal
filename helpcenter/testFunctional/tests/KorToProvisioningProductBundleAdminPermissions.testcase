@@ -4,136 +4,136 @@ definition {
 	property type = "provisioning.security";
 
 	setUp {
-		LocalFile.Passwords.getPasswords();
+		Passwords.getPasswords();
 
-		LocalFile.JSONUser.createViaProvisioning(table = '''| Screen Name   | provisioning.admin                    |
+		JSONUser.createViaProvisioning(table = '''| Screen Name   | provisioning.admin                    |
 	| Email Address | provisioning.admin@liferay.com.broken |
 	| First Name    | Provisioning                          |
 	| Last Name     | Admin                                 |''');
 
-		LocalFile.JSONUser.assignUserToProvisioningRole(
+		JSONUser.assignUserToProvisioningRole(
 			roleName = "Provisioning Admin",
 			userEmailAddress = "provisioning.admin@liferay.com.broken");
 	}
 
 	tearDown {
-		LocalFile.OSBAdmin.logoutAndLoginToProvisioning(
+		OSBAdmin.logoutAndLoginToProvisioning(
 			userEmailAddress = ${staticProvisioningAdminEmailAddress},
 			userPassword = ${staticProvisioningAdminPassword});
 
-		LocalFile.Provisioning.gotoProductBundles();
+		Provisioning.gotoProductBundles();
 
-		LocalFile.Provisioning.tearDownProductBundles(table = '''| Visible Products |
+		Provisioning.tearDownProductBundles(table = '''| Visible Products |
 	| Changed Products |''');
 
-		LocalFile.KoroneikiProductAPI._tearDownProducts(table = '''| A Visible Product        |
+		KoroneikiProductAPI._tearDownProducts(table = '''| A Visible Product        |
 	| A Visible Second Product |
 	| A Visible Third Product  |
 	| A Visible Fourth Product |''');
 
-		LocalFile.JSONUser.tearDownUsersViaProvisioning(table = '''| provisioning.admin@liferay.com.broken |''');
+		JSONUser.tearDownUsersViaProvisioning(table = '''| provisioning.admin@liferay.com.broken |''');
 	}
 
 	test Createproductbundle {
-		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | A Visible Product | |''');
+		KoroneikiProductAPI._createProduct(table = '''| Name | A Visible Product | |''');
 
-		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | A Visible Second Product | |''');
+		KoroneikiProductAPI._createProduct(table = '''| Name | A Visible Second Product | |''');
 
-		LocalFile.OSBAdmin.loginToProvisioning(
+		OSBAdmin.loginToProvisioning(
 			userEmailAddress = "provisioning.admin@liferay.com.broken",
 			userPassword = ${staticProvisioningQaUserPassword});
 
-		LocalFile.UserAccount.updatePasswordUponLogin(userPassword = "test");
+		UserAccount.updatePasswordUponLogin(userPassword = "test");
 
-		LocalFile.Provisioning.gotoProductBundles();
+		Provisioning.gotoProductBundles();
 
-		LocalFile.Provisioning.clickNewProductBundleButton();
+		Provisioning.clickNewProductBundleButton();
 
-		LocalFile.ProvisioningProductBundle.populateProductBundleFormAndSave(table = '''| Name        | Input | Visible Products         |
+		ProvisioningProductBundle.populateProductBundleFormAndSave(table = '''| Name        | Input | Visible Products         |
 	| Add Product |       | A Visible Product        |
 	| Add Product |       | A Visible Second Product |''');
 
-		LocalFile.Provisioning._viewProductBundleViaIndex(
+		Provisioning._viewProductBundleViaIndex(
 			productBundleName = "Visible Products",
 			table = '''| Name | Visible Products |''');
 
-		LocalFile.Provisioning.clickProductBundle(productBundleName = "Visible Products");
+		Provisioning.clickProductBundle(productBundleName = "Visible Products");
 
-		LocalFile.ProvisioningProductBundle.viewProductViaProductBundle(productName = "A Visible Product");
+		ProvisioningProductBundle.viewProductViaProductBundle(productName = "A Visible Product");
 
-		LocalFile.ProvisioningProductBundle.viewProductViaProductBundle(productName = "A Visible Second Product");
+		ProvisioningProductBundle.viewProductViaProductBundle(productName = "A Visible Second Product");
 	}
 
 	test Deleteproductbundle {
-		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | A Visible Product | |''');
+		KoroneikiProductAPI._createProduct(table = '''| Name | A Visible Product | |''');
 
-		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | A Visible Second Product | |''');
+		KoroneikiProductAPI._createProduct(table = '''| Name | A Visible Second Product | |''');
 
-		LocalFile.OSBAdmin.loginToProvisioning(
+		OSBAdmin.loginToProvisioning(
 			userEmailAddress = "provisioning.admin@liferay.com.broken",
 			userPassword = ${staticProvisioningQaUserPassword});
 
-		LocalFile.UserAccount.updatePasswordUponLogin(userPassword = "test");
+		UserAccount.updatePasswordUponLogin(userPassword = "test");
 
-		LocalFile.Provisioning.gotoProductBundles();
+		Provisioning.gotoProductBundles();
 
-		LocalFile.Provisioning.clickNewProductBundleButton();
+		Provisioning.clickNewProductBundleButton();
 
-		LocalFile.ProvisioningProductBundle.populateProductBundleFormAndSave(table = '''| Name        | Input | Visible Products         |
+		ProvisioningProductBundle.populateProductBundleFormAndSave(table = '''| Name        | Input | Visible Products         |
 	| Add Product |       | A Visible Product        |
 	| Add Product |       | A Visible Second Product |''');
 
-		LocalFile.Provisioning.clickProductBundleDeleteButton(productBundleName = "Visible Products");
+		Provisioning.clickProductBundleDeleteButton(productBundleName = "Visible Products");
 
-		LocalFile.Provisioning._viewNoProductBundleViaIndex(productBundleName = "Visible Products");
+		Provisioning._viewNoProductBundleViaIndex(productBundleName = "Visible Products");
 	}
 
 	test Updateproductbundle {
-		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | A Visible Product | |''');
+		KoroneikiProductAPI._createProduct(table = '''| Name | A Visible Product | |''');
 
-		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | A Visible Second Product | |''');
+		KoroneikiProductAPI._createProduct(table = '''| Name | A Visible Second Product | |''');
 
-		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | A Visible Third Product | |''');
+		KoroneikiProductAPI._createProduct(table = '''| Name | A Visible Third Product | |''');
 
-		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | A Visible Fourth Product | |''');
+		KoroneikiProductAPI._createProduct(table = '''| Name | A Visible Fourth Product | |''');
 
-		LocalFile.OSBAdmin.loginToProvisioning(
+		OSBAdmin.loginToProvisioning(
 			userEmailAddress = "provisioning.admin@liferay.com.broken",
 			userPassword = ${staticProvisioningQaUserPassword});
 
-		LocalFile.UserAccount.updatePasswordUponLogin(userPassword = "test");
+		UserAccount.updatePasswordUponLogin(userPassword = "test");
 
-		LocalFile.Provisioning.gotoProductBundles();
+		Provisioning.gotoProductBundles();
 
-		LocalFile.Provisioning.clickNewProductBundleButton();
+		Provisioning.clickNewProductBundleButton();
 
-		LocalFile.ProvisioningProductBundle.populateProductBundleFormAndSave(table = '''| Name        | Input | Visible Products         |
+		ProvisioningProductBundle.populateProductBundleFormAndSave(table = '''| Name        | Input | Visible Products         |
 	| Add Product |       | A Visible Product        |
 	| Add Product |       | A Visible Second Product |''');
 
-		LocalFile.Provisioning.clickProductBundle(productBundleName = "Visible Products");
+		Provisioning.clickProductBundle(productBundleName = "Visible Products");
 
-		LocalFile.ProvisioningProductBundle.populateProductBundleFormAndSave(table = '''| Name           | Input | Changed Products         |
+		ProvisioningProductBundle.populateProductBundleFormAndSave(table = '''| Name           | Input | Changed Products         |
 	| Remove Product |       | A Visible Second Product |
 	| Add Product    |       | A Visible Third Product  |
 	| Remove Product |       | A Visible Product        |
 	| Add Product    |       | A Visible Fourth Product |''');
 
-		LocalFile.Provisioning._viewProductBundleViaIndex(
+		Provisioning._viewProductBundleViaIndex(
 			productBundleName = "Changed Products",
 			table = '''| Name | Changed Products |''');
 
-		LocalFile.Provisioning._viewNoProductBundleViaIndex(productBundleName = "Visible Products");
+		Provisioning._viewNoProductBundleViaIndex(productBundleName = "Visible Products");
 
-		LocalFile.Provisioning.clickProductBundle(productBundleName = "Changed Products");
+		Provisioning.clickProductBundle(productBundleName = "Changed Products");
 
-		LocalFile.ProvisioningProductBundle.viewProductViaProductBundle(productName = "A Visible Third Product");
+		ProvisioningProductBundle.viewProductViaProductBundle(productName = "A Visible Third Product");
 
-		LocalFile.ProvisioningProductBundle.viewProductViaProductBundle(productName = "A Visible Fourth Product");
+		ProvisioningProductBundle.viewProductViaProductBundle(productName = "A Visible Fourth Product");
 
-		LocalFile.ProvisioningProductBundle.viewNoProductViaProductBundle(productName = "A Visible Product");
+		ProvisioningProductBundle.viewNoProductViaProductBundle(productName = "A Visible Product");
 
-		LocalFile.ProvisioningProductBundle.viewNoProductViaProductBundle(productName = "A Visible Second Product");
+		ProvisioningProductBundle.viewNoProductViaProductBundle(productName = "A Visible Second Product");
 	}
 
 }

@@ -4,19 +4,19 @@ definition {
 	property type = "zendesk.api";
 
 	setUp {
-		LocalFile.Passwords.getPasswords();
+		Passwords.getPasswords();
 	}
 
 	tearDown {
-		LocalFile.ZendeskTicketAPI._tearDownTicketByIds(ticketIdList = ${staticRequestIdList});
+		ZendeskTicketAPI._tearDownTicketByIds(ticketIdList = ${staticRequestIdList});
 
-		LocalFile.ZendeskUserAPI._tearDownUsersByExternalIdTable(table = '''| User1 |''');
+		ZendeskUserAPI._tearDownUsersByExternalIdTable(table = '''| User1 |''');
 
-		LocalFile.ZendeskOrganizationAPI._tearDownOrganizationsByExternalIdTable(table = '''| 12345678 |''');
+		ZendeskOrganizationAPI._tearDownOrganizationsByExternalIdTable(table = '''| 12345678 |''');
 	}
 
 	test SelfServiceRouting {
-		LocalFile.ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved            |
+		ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved            |
 	| Name             | Organization Name 1 |
 	| Shared Tickets   | true                |
 	| Shared Comments  | true                |
@@ -26,11 +26,11 @@ definition {
 	| Support Language | English             | 
 	| External ID      | 12345678            |''');
 
-		LocalFile.ZendeskOrganizationAPI._assignTagsToOrganizationViaOrganizationExternalID(
+		ZendeskOrganizationAPI._assignTagsToOrganizationViaOrganizationExternalID(
 			organizationExternalId = 12345678,
 			table = '''| liferay_dxp |''');
 
-		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
+		ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
 	| Tags             | osb_customer,osb_kb              |
 	| Password         | ${staticZendeskAdminPassword}    |
 	| Role             | End-user                         |
@@ -42,7 +42,7 @@ definition {
 	| Time Zone        | Pacific Time (US & Canada)       |
 	| External ID      | User1                            |''');
 
-		LocalFile.ZendeskRequestAPI._createRequest(
+		ZendeskRequestAPI._createRequest(
 			requesterEmail = "zendesk.user1@zendesk.com.broken",
 			table = '''| Product                  | prd_liferay_dxp_7_4                              |
 	| Component                | activation_key_project_administration            |
@@ -52,7 +52,7 @@ definition {
 	| Description              | Request Description                              |
 	| Organization External ID | 12345678                                         |''');
 
-		LocalFile.ZendeskTicketAPI._viewMultipleTicketGroupAssignees(
+		ZendeskTicketAPI._viewMultipleTicketGroupAssignees(
 			groupAssignee = "Self Service",
 			ticketIdList = ${staticRequestIdList});
 	}

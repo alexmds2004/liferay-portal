@@ -4,27 +4,27 @@ definition {
 	property type = "zendesk.integration";
 
 	setUp {
-		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+		OSBAdminRabbitMQ.generateProvisioningProjectName();
 
-		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | zen.phonenumber1                       |
+		JSONOkta.createOktaUser(table = '''| Screen Name   | zen.phonenumber1                       |
 	| Email Address | zen.phonenumber1@lrcustomer.com.broken |
 	| First Name    | ZEN                                    |
 	| Last Name     | Phonenumber1                           |''');
 
-		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+		KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
 
-		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code   | PHONEZPHONEZ                  | |
+		KoroneikiAccountAPI._createAccount(table = '''| Code   | PHONEZPHONEZ                  | |
 	| Name   | Phonez - ${staticProjectName} | |
 	| Region | United States                 | |
 	| Status | Active                        | |
 	| Tier   | T1                            | |''');
 
-		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+		KoroneikiAccountAPI._assignContactRolesToContact(
 			accountName = "Phonez - ${staticProjectName}",
 			contactEmailAddress = "zen.phonenumber1@lrcustomer.com.broken",
 			table = '''| Support Requester |''');
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Phonez - ${staticProjectName}",
 			productName = "Portal Production",
 			table = '''| End Date                | ${staticEndDate}         |   |
@@ -37,7 +37,7 @@ definition {
 	| Start Date              | ${staticStartDate}       |   |
 	| Status                  | Approved                 |   |''');
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Phonez - ${staticProjectName}",
 			productName = "Gold Subscription",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -47,258 +47,258 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Gold Subscription");
+		KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Gold Subscription");
 
-		LocalFile.JSONOSBAccount.viewSupportOrganizationSync(accountCode = "PHONEZPHONEZ");
+		JSONOSBAccount.viewSupportOrganizationSync(accountCode = "PHONEZPHONEZ");
 
-		LocalFile.ZendeskOrganizationAPI._viewOrganizationSyncFromOsb(organizationName = "Phonez - ${staticProjectName}");
+		ZendeskOrganizationAPI._viewOrganizationSyncFromOsb(organizationName = "Phonez - ${staticProjectName}");
 
-		LocalFile.ZendeskUserAPI._viewUserSyncFromOsb(userEmailAddress = "zen.phonenumber1@lrcustomer.com.broken");
+		ZendeskUserAPI._viewUserSyncFromOsb(userEmailAddress = "zen.phonenumber1@lrcustomer.com.broken");
 
-		LocalFile.ZendeskUserAPI._viewUserSyncFromOsbViaSearchByExternalIdApi(userEmailAddress = "zen.phonenumber1@lrcustomer.com.broken");
+		ZendeskUserAPI._viewUserSyncFromOsbViaSearchByExternalIdApi(userEmailAddress = "zen.phonenumber1@lrcustomer.com.broken");
 	}
 
 	tearDown {
-		LocalFile.JSONOkta.updateOktaUser(
+		JSONOkta.updateOktaUser(
 			table = '''| Primary Number | |
 	| Mobile Number  | |''',
 			userOriginalEmailAddress = "zen.phonenumber1@lrcustomer.com.broken");
 
-		LocalFile.ZendeskHomepage.pause(timeInSeconds = 30);
+		ZendeskHomepage.pause(timeInSeconds = 30);
 
-		LocalFile.ZendeskUserAPI._getDefaultUserId(organizationName = "Phonez - ${staticProjectName}");
+		ZendeskUserAPI._getDefaultUserId(organizationName = "Phonez - ${staticProjectName}");
 
-		LocalFile.OSBAdminProject.tearDownProjects(table = '''| PHONEZPHONEZ |''');
+		OSBAdminProject.tearDownProjects(table = '''| PHONEZPHONEZ |''');
 
-		LocalFile.KoroneikiAccountAPI._tearDownAccounts(table = '''| Phonez - ${staticProjectName} |''');
+		KoroneikiAccountAPI._tearDownAccounts(table = '''| Phonez - ${staticProjectName} |''');
 
-		LocalFile.KoroneikiAccountAPI._tearDownAccountsViaAccountFieldNameAndValue(
+		KoroneikiAccountAPI._tearDownAccountsViaAccountFieldNameAndValue(
 			fieldName = "Code",
 			table = '''| PHONEZPHONEZ |''');
 
-		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Gold Subscription");
+		KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Gold Subscription");
 
-		LocalFile.JSONOkta.tearDownUsersByScreenName(table = '''| zen.phonenumber1 |''');
+		JSONOkta.tearDownUsersByScreenName(table = '''| zen.phonenumber1 |''');
 
-		LocalFile.JSONUser.tearDownUsers(table = '''| zen.phonenumber1@lrcustomer.com.broken |''');
+		JSONUser.tearDownUsers(table = '''| zen.phonenumber1@lrcustomer.com.broken |''');
 
-		LocalFile.JSONUser.tearDownUsersViaSupport(table = '''| zen.phonenumber1@lrcustomer.com.broken |''');
+		JSONUser.tearDownUsersViaSupport(table = '''| zen.phonenumber1@lrcustomer.com.broken |''');
 
-		LocalFile.JSONUser.tearDownUsersViaKoroneiki(table = '''| zen.phonenumber1@lrcustomer.com.broken |''');
+		JSONUser.tearDownUsersViaKoroneiki(table = '''| zen.phonenumber1@lrcustomer.com.broken |''');
 
-		LocalFile.JSONUser.tearDownUsersByScreenNameViaKoroneiki(table = '''| zen.phonenumber1 |''');
+		JSONUser.tearDownUsersByScreenNameViaKoroneiki(table = '''| zen.phonenumber1 |''');
 
-		LocalFile.KoroneikiContactAPI._tearDownContacts(table = '''| zen.phonenumber1@lrcustomer.com.broken |''');
+		KoroneikiContactAPI._tearDownContacts(table = '''| zen.phonenumber1@lrcustomer.com.broken |''');
 
-		LocalFile.JSONOkta.tearDownUsers(table = '''| zen.phonenumber1@lrcustomer.com.broken |''');
+		JSONOkta.tearDownUsers(table = '''| zen.phonenumber1@lrcustomer.com.broken |''');
 
-		LocalFile.ZendeskUserAPI._getMultipleUserIdsByEmailAddress(table = '''| zen.phonenumber1@lrcustomer.com.broken |''');
+		ZendeskUserAPI._getMultipleUserIdsByEmailAddress(table = '''| zen.phonenumber1@lrcustomer.com.broken |''');
 
-		LocalFile.ZendeskUserAPI._tearDownUsersByIdList(userIds = ${staticUserIdList});
+		ZendeskUserAPI._tearDownUsersByIdList(userIds = ${staticUserIdList});
 
-		LocalFile.ZendeskOrganizationAPI._getMultipleOrganizationExternalIdsByOrganizationNameIfStillPresent(table = '''| Phonez - ${staticProjectName} |''');
+		ZendeskOrganizationAPI._getMultipleOrganizationExternalIdsByOrganizationNameIfStillPresent(table = '''| Phonez - ${staticProjectName} |''');
 
-		LocalFile.ZendeskOrganizationAPI._tearDownOrganizationsByExternalIdList(organizationExternalIds = ${staticOrganizationExternalIdList});
+		ZendeskOrganizationAPI._tearDownOrganizationsByExternalIdList(organizationExternalIds = ${staticOrganizationExternalIdList});
 
-		LocalFile.ZendeskUserAPI._tearDownUserById(userId = ${staticDefaultUserId});
+		ZendeskUserAPI._tearDownUserById(userId = ${staticDefaultUserId});
 	}
 
 	test Viewuserphonenumberdelete {
-		LocalFile.JSONOkta.updateOktaUser(
+		JSONOkta.updateOktaUser(
 			table = '''| Primary Number | +15558402834 |''',
 			userOriginalEmailAddress = "zen.phonenumber1@lrcustomer.com.broken");
 
-		LocalFile.ZendeskHomepage.pause(timeInSeconds = 30);
+		ZendeskHomepage.pause(timeInSeconds = 30);
 
-		LocalFile.ZendeskUserAPI._viewUserPhoneNumberByEmailAddress(
+		ZendeskUserAPI._viewUserPhoneNumberByEmailAddress(
 			userEmailAddress = "zen.phonenumber1@lrcustomer.com.broken",
 			userPhoneNumber = "+15558402834");
 
-		LocalFile.JSONOkta.updateOktaUser(
+		JSONOkta.updateOktaUser(
 			table = '''| Primary Number | |''',
 			userOriginalEmailAddress = "zen.phonenumber1@lrcustomer.com.broken");
 
-		LocalFile.ZendeskHomepage.pause(timeInSeconds = 30);
+		ZendeskHomepage.pause(timeInSeconds = 30);
 
-		LocalFile.ZendeskUserAPI._viewNoUserPhoneNumberByEmailAddress(
+		ZendeskUserAPI._viewNoUserPhoneNumberByEmailAddress(
 			userEmailAddress = "zen.phonenumber1@lrcustomer.com.broken",
 			userPhoneNumber = "+15558402834");
 	}
 
 	test Viewuserphonenumberfromcountrycodetodeletiontonocountrycodeupdate {
-		LocalFile.JSONOkta.updateOktaUser(
+		JSONOkta.updateOktaUser(
 			table = '''| Primary Number | +15554394671 |''',
 			userOriginalEmailAddress = "zen.phonenumber1@lrcustomer.com.broken");
 
-		LocalFile.ZendeskHomepage.pause(timeInSeconds = 30);
+		ZendeskHomepage.pause(timeInSeconds = 30);
 
-		LocalFile.ZendeskUserAPI._viewUserPhoneNumberByEmailAddress(
+		ZendeskUserAPI._viewUserPhoneNumberByEmailAddress(
 			userEmailAddress = "zen.phonenumber1@lrcustomer.com.broken",
 			userPhoneNumber = "+15554394671");
 
-		LocalFile.JSONOkta.updateOktaUser(
+		JSONOkta.updateOktaUser(
 			table = '''| Primary Number | |''',
 			userOriginalEmailAddress = "zen.phonenumber1@lrcustomer.com.broken");
 
-		LocalFile.ZendeskHomepage.pause(timeInSeconds = 30);
+		ZendeskHomepage.pause(timeInSeconds = 30);
 
-		LocalFile.ZendeskUserAPI._viewNoUserPhoneNumberByEmailAddress(
+		ZendeskUserAPI._viewNoUserPhoneNumberByEmailAddress(
 			userEmailAddress = "zen.phonenumber1@lrcustomer.com.broken",
 			userPhoneNumber = "+15554394671");
 
-		LocalFile.JSONOkta.updateOktaUser(
+		JSONOkta.updateOktaUser(
 			table = '''| Primary Number | 5558402834 |''',
 			userOriginalEmailAddress = "zen.phonenumber1@lrcustomer.com.broken");
 
-		LocalFile.ZendeskHomepage.pause(timeInSeconds = 30);
+		ZendeskHomepage.pause(timeInSeconds = 30);
 
-		LocalFile.ZendeskUserAPI._viewNoUserPhoneNumberByEmailAddress(
+		ZendeskUserAPI._viewNoUserPhoneNumberByEmailAddress(
 			userEmailAddress = "zen.phonenumber1@lrcustomer.com.broken",
 			userPhoneNumber = 5558402834);
 	}
 
 	test Viewuserphonenumberfromnocountrycodetocountrycodeupdate {
-		LocalFile.JSONOkta.updateOktaUser(
+		JSONOkta.updateOktaUser(
 			table = '''| Primary Number | 5558402834 |''',
 			userOriginalEmailAddress = "zen.phonenumber1@lrcustomer.com.broken");
 
-		LocalFile.ZendeskHomepage.pause(timeInSeconds = 30);
+		ZendeskHomepage.pause(timeInSeconds = 30);
 
-		LocalFile.ZendeskUserAPI._viewNoUserPhoneNumberByEmailAddress(
+		ZendeskUserAPI._viewNoUserPhoneNumberByEmailAddress(
 			userEmailAddress = "zen.phonenumber1@lrcustomer.com.broken",
 			userPhoneNumber = 5558402834);
 
-		LocalFile.JSONOkta.updateOktaUser(
+		JSONOkta.updateOktaUser(
 			table = '''| Primary Number | +15554394671 |''',
 			userOriginalEmailAddress = "zen.phonenumber1@lrcustomer.com.broken");
 
-		LocalFile.ZendeskHomepage.pause(timeInSeconds = 30);
+		ZendeskHomepage.pause(timeInSeconds = 30);
 
-		LocalFile.ZendeskUserAPI._viewUserPhoneNumberByEmailAddress(
+		ZendeskUserAPI._viewUserPhoneNumberByEmailAddress(
 			userEmailAddress = "zen.phonenumber1@lrcustomer.com.broken",
 			userPhoneNumber = "+15554394671");
 
-		LocalFile.ZendeskUserAPI._viewNoUserPhoneNumberByEmailAddress(
+		ZendeskUserAPI._viewNoUserPhoneNumberByEmailAddress(
 			userEmailAddress = "zen.phonenumber1@lrcustomer.com.broken",
 			userPhoneNumber = 5558402834);
 	}
 
 	test Viewuserphonenumberfromnocountrycodetodeletiontocountrycodeupdate {
-		LocalFile.JSONOkta.updateOktaUser(
+		JSONOkta.updateOktaUser(
 			table = '''| Primary Number | 5558402834 |''',
 			userOriginalEmailAddress = "zen.phonenumber1@lrcustomer.com.broken");
 
-		LocalFile.ZendeskHomepage.pause(timeInSeconds = 30);
+		ZendeskHomepage.pause(timeInSeconds = 30);
 
-		LocalFile.ZendeskUserAPI._viewNoUserPhoneNumberByEmailAddress(
+		ZendeskUserAPI._viewNoUserPhoneNumberByEmailAddress(
 			userEmailAddress = "zen.phonenumber1@lrcustomer.com.broken",
 			userPhoneNumber = 5558402834);
 
-		LocalFile.JSONOkta.updateOktaUser(
+		JSONOkta.updateOktaUser(
 			table = '''| Primary Number | |''',
 			userOriginalEmailAddress = "zen.phonenumber1@lrcustomer.com.broken");
 
-		LocalFile.ZendeskHomepage.pause(timeInSeconds = 30);
+		ZendeskHomepage.pause(timeInSeconds = 30);
 
-		LocalFile.ZendeskUserAPI._viewNoUserPhoneNumberByEmailAddress(
+		ZendeskUserAPI._viewNoUserPhoneNumberByEmailAddress(
 			userEmailAddress = "zen.phonenumber1@lrcustomer.com.broken",
 			userPhoneNumber = 5558402834);
 
-		LocalFile.JSONOkta.updateOktaUser(
+		JSONOkta.updateOktaUser(
 			table = '''| Primary Number | +15554394671 |''',
 			userOriginalEmailAddress = "zen.phonenumber1@lrcustomer.com.broken");
 
-		LocalFile.ZendeskHomepage.pause(timeInSeconds = 30);
+		ZendeskHomepage.pause(timeInSeconds = 30);
 
-		LocalFile.ZendeskUserAPI._viewUserPhoneNumberByEmailAddress(
+		ZendeskUserAPI._viewUserPhoneNumberByEmailAddress(
 			userEmailAddress = "zen.phonenumber1@lrcustomer.com.broken",
 			userPhoneNumber = "+15554394671");
 	}
 
 	test Viewuserphonenumberupdate {
-		LocalFile.JSONOkta.updateOktaUser(
+		JSONOkta.updateOktaUser(
 			table = '''| Primary Number | +15558402834 |''',
 			userOriginalEmailAddress = "zen.phonenumber1@lrcustomer.com.broken");
 
-		LocalFile.ZendeskHomepage.pause(timeInSeconds = 30);
+		ZendeskHomepage.pause(timeInSeconds = 30);
 
-		LocalFile.ZendeskUserAPI._viewUserPhoneNumberByEmailAddress(
+		ZendeskUserAPI._viewUserPhoneNumberByEmailAddress(
 			userEmailAddress = "zen.phonenumber1@lrcustomer.com.broken",
 			userPhoneNumber = "+15558402834");
 
-		LocalFile.JSONOkta.updateOktaUser(
+		JSONOkta.updateOktaUser(
 			table = '''| Primary Number | 5559873461 |''',
 			userOriginalEmailAddress = "zen.phonenumber1@lrcustomer.com.broken");
 
-		LocalFile.ZendeskHomepage.pause(timeInSeconds = 30);
+		ZendeskHomepage.pause(timeInSeconds = 30);
 
-		LocalFile.ZendeskUserAPI._viewUserPhoneNumberByEmailAddress(
+		ZendeskUserAPI._viewUserPhoneNumberByEmailAddress(
 			userEmailAddress = "zen.phonenumber1@lrcustomer.com.broken",
 			userPhoneNumber = "+15558402834");
 
-		LocalFile.JSONOkta.updateOktaUser(
+		JSONOkta.updateOktaUser(
 			table = '''| Primary Number | +15554394671 |''',
 			userOriginalEmailAddress = "zen.phonenumber1@lrcustomer.com.broken");
 
-		LocalFile.ZendeskHomepage.pause(timeInSeconds = 30);
+		ZendeskHomepage.pause(timeInSeconds = 30);
 
-		LocalFile.ZendeskUserAPI._viewUserPhoneNumberByEmailAddress(
+		ZendeskUserAPI._viewUserPhoneNumberByEmailAddress(
 			userEmailAddress = "zen.phonenumber1@lrcustomer.com.broken",
 			userPhoneNumber = "+15554394671");
 	}
 
 	test Viewuserphonenumberwithnocountrycodeupdate {
-		LocalFile.JSONOkta.updateOktaUser(
+		JSONOkta.updateOktaUser(
 			table = '''| Primary Number | 5558402834 |''',
 			userOriginalEmailAddress = "zen.phonenumber1@lrcustomer.com.broken");
 
-		LocalFile.ZendeskHomepage.pause(timeInSeconds = 30);
+		ZendeskHomepage.pause(timeInSeconds = 30);
 
-		LocalFile.ZendeskUserAPI._viewNoUserPhoneNumberByEmailAddress(
+		ZendeskUserAPI._viewNoUserPhoneNumberByEmailAddress(
 			userEmailAddress = "zen.phonenumber1@lrcustomer.com.broken",
 			userPhoneNumber = 5558402834);
 	}
 
 	test Viewuserphonenumberwithtwocountrycodeupdates {
-		LocalFile.JSONOkta.updateOktaUser(
+		JSONOkta.updateOktaUser(
 			table = '''| Primary Number | +15558402834 |''',
 			userOriginalEmailAddress = "zen.phonenumber1@lrcustomer.com.broken");
 
-		LocalFile.ZendeskHomepage.pause(timeInSeconds = 30);
+		ZendeskHomepage.pause(timeInSeconds = 30);
 
-		LocalFile.ZendeskUserAPI._viewUserPhoneNumberByEmailAddress(
+		ZendeskUserAPI._viewUserPhoneNumberByEmailAddress(
 			userEmailAddress = "zen.phonenumber1@lrcustomer.com.broken",
 			userPhoneNumber = "+15558402834");
 
-		LocalFile.JSONOkta.updateOktaUser(
+		JSONOkta.updateOktaUser(
 			table = '''| Primary Number | +15554394671 |''',
 			userOriginalEmailAddress = "zen.phonenumber1@lrcustomer.com.broken");
 
-		LocalFile.ZendeskHomepage.pause(timeInSeconds = 30);
+		ZendeskHomepage.pause(timeInSeconds = 30);
 
-		LocalFile.ZendeskUserAPI._viewUserPhoneNumberByEmailAddress(
+		ZendeskUserAPI._viewUserPhoneNumberByEmailAddress(
 			userEmailAddress = "zen.phonenumber1@lrcustomer.com.broken",
 			userPhoneNumber = "+15554394671");
 	}
 
 	test Viewuserphonenumberwithtwononcountrycodeupdates {
-		LocalFile.JSONOkta.updateOktaUser(
+		JSONOkta.updateOktaUser(
 			table = '''| Primary Number | 5558402834 |''',
 			userOriginalEmailAddress = "zen.phonenumber1@lrcustomer.com.broken");
 
-		LocalFile.ZendeskHomepage.pause(timeInSeconds = 30);
+		ZendeskHomepage.pause(timeInSeconds = 30);
 
-		LocalFile.ZendeskUserAPI._viewNoUserPhoneNumberByEmailAddress(
+		ZendeskUserAPI._viewNoUserPhoneNumberByEmailAddress(
 			userEmailAddress = "zen.phonenumber1@lrcustomer.com.broken",
 			userPhoneNumber = 5558402834);
 
-		LocalFile.JSONOkta.updateOktaUser(
+		JSONOkta.updateOktaUser(
 			table = '''| Primary Number | 5557496334 |''',
 			userOriginalEmailAddress = "zen.phonenumber1@lrcustomer.com.broken");
 
-		LocalFile.ZendeskHomepage.pause(timeInSeconds = 30);
+		ZendeskHomepage.pause(timeInSeconds = 30);
 
-		LocalFile.ZendeskUserAPI._viewNoUserPhoneNumberByEmailAddress(
+		ZendeskUserAPI._viewNoUserPhoneNumberByEmailAddress(
 			userEmailAddress = "zen.phonenumber1@lrcustomer.com.broken",
 			userPhoneNumber = 5557496334);
 	}

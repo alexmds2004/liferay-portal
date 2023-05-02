@@ -4,35 +4,35 @@ definition {
 	property type = "customer.integration";
 
 	setUp {
-		LocalFile.Passwords.getPasswords();
+		Passwords.getPasswords();
 
-		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+		KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
 
-		LocalFile.KoroneikiProductPurchaseAPI.generateStaticPastStartAndEndDate();
+		KoroneikiProductPurchaseAPI.generateStaticPastStartAndEndDate();
 
-		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFutureStartAndEndDate();
+		KoroneikiProductPurchaseAPI.generateStaticFutureStartAndEndDate();
 
-		LocalFile.OSBAdminRabbitMQ.generateProvisioningCompanyName();
+		OSBAdminRabbitMQ.generateProvisioningCompanyName();
 
-		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+		OSBAdminRabbitMQ.generateProvisioningProjectName();
 
-		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | cstm.partner1                      |
+		JSONOkta.createOktaUser(table = '''| Screen Name   | cstm.partner1                      |
 	| Email Address | cstm.partner1@lrpartner.com.broken |
 	| First Name    | CSTM                               |
 	| Last Name     | Partner1                           |''');
 
-		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | cstm.partner2                      |
+		JSONOkta.createOktaUser(table = '''| Screen Name   | cstm.partner2                      |
 	| Email Address | cstm.partner2@lrpartner.com.broken |
 	| First Name    | CSTM                               |
 	| Last Name     | Partner2                           |''');
 
-		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code   | CSTPARCSTPAR                  | |
+		KoroneikiAccountAPI._createAccount(table = '''| Code   | CSTPARCSTPAR                  | |
 	| Name   | Cstpar - ${staticProjectName} | |
 	| Region | United States                 | |
 	| Status | Active                        | |
 	| Tier   | T1                            | |''');
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Cstpar - ${staticProjectName}",
 			productName = "Service Partnership",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -42,65 +42,65 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+		KoroneikiAccountAPI._assignContactRolesToContact(
 			accountName = "Cstpar - ${staticProjectName}",
 			contactEmailAddress = "cstm.partner1@lrpartner.com.broken",
 			table = '''| Partner Member |''');
 
-		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+		KoroneikiAccountAPI._assignContactRolesToContact(
 			accountName = "Cstpar - ${staticProjectName}",
 			contactEmailAddress = "cstm.partner2@lrpartner.com.broken",
 			table = '''| Partner Manager |''');
 
-		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Partner");
+		KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Partner");
 
-		LocalFile.KoroneikiAccountAPI._createAssignedTeamNestedField(
+		KoroneikiAccountAPI._createAssignedTeamNestedField(
 			accountName = "Osbzen - ${staticProjectName}",
 			teamName = "Cstpar - ${staticProjectName}");
 	}
 
 	tearDown {
-		LocalFile.ZendeskUserAPI._getDefaultUserId(organizationName = "Korcst - ${staticProjectName}");
+		ZendeskUserAPI._getDefaultUserId(organizationName = "Korcst - ${staticProjectName}");
 
-		LocalFile.ZendeskUserAPI._renameFirstDefaultUserIdVariable();
+		ZendeskUserAPI._renameFirstDefaultUserIdVariable();
 
-		LocalFile.ZendeskUserAPI._getDefaultUserId(organizationName = "Cstpar - ${staticProjectName}");
+		ZendeskUserAPI._getDefaultUserId(organizationName = "Cstpar - ${staticProjectName}");
 
-		LocalFile.ZendeskUserAPI._renameSecondDefaultUserIdVariable();
+		ZendeskUserAPI._renameSecondDefaultUserIdVariable();
 
-		LocalFile.KoroneikiTeamAPI._tearDownTeams(table = '''| CSTM Partner1  |
+		KoroneikiTeamAPI._tearDownTeams(table = '''| CSTM Partner1  |
 	| CSTM Partner2  |''');
 
-		LocalFile.OSBAdminProject.tearDownProjects(table = '''| CSTPARCSTPAR |
+		OSBAdminProject.tearDownProjects(table = '''| CSTPARCSTPAR |
 	| KORCSTKORCST |''');
 
-		LocalFile.KoroneikiAccountAPI._tearDownAccounts(table = '''| Cstpar - ${staticProjectName} |''');
+		KoroneikiAccountAPI._tearDownAccounts(table = '''| Cstpar - ${staticProjectName} |''');
 
-		LocalFile.KoroneikiAccountAPI._tearDownAccountsViaAccountFieldNameAndValue(
+		KoroneikiAccountAPI._tearDownAccountsViaAccountFieldNameAndValue(
 			fieldName = "Code",
 			table = '''| CSTPARCSTPAR |
 	| KORCSTKORCST |''');
 
-		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Gold Subscription");
+		KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Gold Subscription");
 
-		LocalFile.JSONUser.tearDownUsers(table = '''| cstm.partner1@lrpartner.com.broken   |
+		JSONUser.tearDownUsers(table = '''| cstm.partner1@lrpartner.com.broken   |
 	| cstm.partner2@lrpartner.com.broken   |''');
 
-		LocalFile.JSONUser.tearDownUsersViaSupport(table = '''| cstm.partner1@lrpartner.com.broken   |
+		JSONUser.tearDownUsersViaSupport(table = '''| cstm.partner1@lrpartner.com.broken   |
 	| cstm.partner2@lrpartner.com.broken   |''');
 
-		LocalFile.JSONUser.tearDownUsersViaKoroneiki(table = '''| cstm.partner1@lrpartner.com.broken   |
+		JSONUser.tearDownUsersViaKoroneiki(table = '''| cstm.partner1@lrpartner.com.broken   |
 	| cstm.partner2@lrpartner.com.broken   |''');
 
-		LocalFile.KoroneikiContactAPI._tearDownContacts(table = '''| cstm.partner1@lrpartner.com.broken   |
+		KoroneikiContactAPI._tearDownContacts(table = '''| cstm.partner1@lrpartner.com.broken   |
 	| cstm.partner2@lrpartner.com.broken   |''');
 
-		LocalFile.JSONOkta.tearDownUsers(table = '''| cstm.partner1@lrpartner.com.broken   |
+		JSONOkta.tearDownUsers(table = '''| cstm.partner1@lrpartner.com.broken   |
 	| cstm.partner2@lrpartner.com.broken   |''');
 	}
 
 	test ViewpartnerfirstlinesupportandcustomeronCustomer {
-		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Assigned Team Nested Field | ${staticAssignedTeamNestedField} | |
+		KoroneikiAccountAPI._createAccount(table = '''| Assigned Team Nested Field | ${staticAssignedTeamNestedField} | |
 	| Code                       | KORCSTKORCST                     | |
 	| Language                   | English                          | |
 	| Name                       | Korcst - ${staticProjectName}    | |
@@ -108,17 +108,17 @@ definition {
 	| Status                     | Active                           | |
 	| Tier                       | T1                               | |''');
 
-		LocalFile.KoroneikiAccountAPI._assignTeamRolesToTeam(
+		KoroneikiAccountAPI._assignTeamRolesToTeam(
 			accountName = "Korcst - ${staticProjectName}",
 			table = '''| Partner |''',
 			teamName = "Cstpar - ${staticProjectName}");
 
-		LocalFile.KoroneikiAccountAPI._assignTeamRolesToTeam(
+		KoroneikiAccountAPI._assignTeamRolesToTeam(
 			accountName = "Korcst - ${staticProjectName}",
 			table = '''| First Line Support |''',
 			teamName = "Cstpar - ${staticProjectName}");
 
-		LocalFile.KoroneikiAccountAPI._createAccountPostalAddress(
+		KoroneikiAccountAPI._createAccountPostalAddress(
 			accountName = "Korcst - ${staticProjectName}",
 			table = '''| Country               | United States   |
 	| Locality              | Diamond Bar     |
@@ -129,7 +129,7 @@ definition {
 	| Primary               | True            |
 	| Street Address Line 1 | 123 Main Street |''');
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Korcst - ${staticProjectName}",
 			productName = "Portal Production",
 			table = '''| End Date                | ${staticEndDate}         |   |
@@ -142,7 +142,7 @@ definition {
 	| Start Date              | ${staticStartDate}       |   |
 	| Status                  | Approved                 |   |''');
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Korcst - ${staticProjectName}",
 			productName = "Gold Subscription",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -152,9 +152,9 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Gold Subscription");
+		KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Gold Subscription");
 
-		LocalFile.CustomerLogin.loginToCustomer(
+		CustomerLogin.loginToCustomer(
 			userEmailAddress = ${staticCustomerAdminEmailAddress},
 			userPassword = ${staticCustomerAdminPassword});
 	}

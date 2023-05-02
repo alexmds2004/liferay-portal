@@ -4,330 +4,330 @@ definition {
 	property type = "provisioning.security";
 
 	setUp {
-		LocalFile.Passwords.getPasswords();
+		Passwords.getPasswords();
 	}
 
 	tearDown {
-		LocalFile.KoroneikiContactAPI._tearDownContacts(table = '''| svg.koroneiki1@lrcustomer.com.broken |''');
+		KoroneikiContactAPI._tearDownContacts(table = '''| svg.koroneiki1@lrcustomer.com.broken |''');
 
-		LocalFile.OSBAdmin.logoutAndLoginToProvisioning(
+		OSBAdmin.logoutAndLoginToProvisioning(
 			userEmailAddress = ${staticProvisioningAdminEmailAddress},
 			userPassword = ${staticProvisioningAdminPassword});
 
-		LocalFile.Provisioning.gotoProductBundles();
+		Provisioning.gotoProductBundles();
 
-		LocalFile.Provisioning.tearDownProductBundles(table = '''| ><svg /onload=alert(/bundle/)> |''');
+		Provisioning.tearDownProductBundles(table = '''| ><svg /onload=alert(/bundle/)> |''');
 
-		LocalFile.OSBAdmin.logoutAndLoginToKoroneiki(
+		OSBAdmin.logoutAndLoginToKoroneiki(
 			userEmailAddress = ${staticKoroneikiAdminEmailAddress},
 			userPassword = ${staticKoroneikiAdminPassword});
 
-		LocalFile.Koroneiki.gotoProductPurchases();
+		Koroneiki.gotoProductPurchases();
 
-		LocalFile.Koroneiki.tearDownProductPurchases(table = '''| ><svg /onload=alert(/product/)> |''');
+		Koroneiki.tearDownProductPurchases(table = '''| ><svg /onload=alert(/product/)> |''');
 
-		LocalFile.Koroneiki.gotoProducts();
+		Koroneiki.gotoProducts();
 
-		LocalFile.Koroneiki.tearDownProducts(table = '''| ><svg /onload=alert(/product/)> |''');
+		Koroneiki.tearDownProducts(table = '''| ><svg /onload=alert(/product/)> |''');
 
-		LocalFile.Koroneiki.gotoTeams();
+		Koroneiki.gotoTeams();
 
-		LocalFile.Koroneiki.tearDownTeams(table = '''| ><svg /onload=alert(/team/)> |''');
+		Koroneiki.tearDownTeams(table = '''| ><svg /onload=alert(/team/)> |''');
 
-		LocalFile.Koroneiki.gotoAccounts();
+		Koroneiki.gotoAccounts();
 
-		LocalFile.Koroneiki.tearDownAccounts(table = '''| ><svg /onload=alert(/child/)>  |
+		Koroneiki.tearDownAccounts(table = '''| ><svg /onload=alert(/child/)>  |
 	| ><svg /onload=alert(/parent/)> |''');
 	}
 
 	test ViewaccountandproductXSS {
-		LocalFile.OSBAdmin.loginToProvisioning(
+		OSBAdmin.loginToProvisioning(
 			userEmailAddress = ${staticProvisioningAdminEmailAddress},
 			userPassword = ${staticProvisioningAdminPassword});
 
-		LocalFile.Provisioning.gotoAccounts();
+		Provisioning.gotoAccounts();
 
-		LocalFile.Provisioning.clickNewAccountButton();
+		Provisioning.clickNewAccountButton();
 
-		LocalFile.ProvisioningAccount.populateAccountFormAndSave(table = '''| Name           | Input  | '"><svg /onload=alert(/parent/)> |
+		ProvisioningAccount.populateAccountFormAndSave(table = '''| Name           | Input  | '"><svg /onload=alert(/parent/)> |
 	| Code           | Input  | '"><svg /onload=alert(/parent/)> |
 	| Tier           | Select | T4                               |
 	| Support Region | Select | United States                    |''');
 
-		LocalFile.Provisioning.assertNoAlert();
+		Provisioning.assertNoAlert();
 
-		LocalFile.Provisioning.gotoProducts();
+		Provisioning.gotoProducts();
 
-		LocalFile.Provisioning.clickNewProductButton();
+		Provisioning.clickNewProductButton();
 
-		LocalFile.ProvisioningProduct.populateProductFormAndSave(table = '''| Name | Input  | '"><svg /onload=alert(/product/)> |
+		ProvisioningProduct.populateProductFormAndSave(table = '''| Name | Input  | '"><svg /onload=alert(/product/)> |
 	| Type | Select | Primary                           |''');
 
-		LocalFile.Provisioning.assertNoAlert();
+		Provisioning.assertNoAlert();
 
-		LocalFile.Provisioning.gotoProductBundles();
+		Provisioning.gotoProductBundles();
 
-		LocalFile.Provisioning.clickNewProductBundleButton();
+		Provisioning.clickNewProductBundleButton();
 
-		LocalFile.ProvisioningProductBundle.populateProductBundleFormAndSave(table = '''| Name        | Input | '"><svg /onload=alert(/bundle/)> |
+		ProvisioningProductBundle.populateProductBundleFormAndSave(table = '''| Name        | Input | '"><svg /onload=alert(/bundle/)> |
 	| Add Product |       | ><svg /onload=alert(/product/)>  |''');
 
-		LocalFile.Provisioning.assertNoAlert();
+		Provisioning.assertNoAlert();
 
-		LocalFile.Provisioning.gotoAccounts();
+		Provisioning.gotoAccounts();
 
-		LocalFile.Provisioning.searchAccounts(keyword = "><svg /onload=alert(/parent/)>");
+		Provisioning.searchAccounts(keyword = "><svg /onload=alert(/parent/)>");
 
-		LocalFile.Provisioning.removeAdvancedSearchFilters(table = '''| Subscription State: Active      |
+		Provisioning.removeAdvancedSearchFilters(table = '''| Subscription State: Active      |
 	| Subscription State: Cancelled   |
 	| Subscription State: Expired     |
 	| Subscription State: Unactivated |''');
 
-		LocalFile.Provisioning.clickAccount(accountName = "><svg /onload=alert(/parent/)>");
+		Provisioning.clickAccount(accountName = "><svg /onload=alert(/parent/)>");
 
-		LocalFile.ProvisioningAccount.clickAddSubscriptionsButton();
+		ProvisioningAccount.clickAddSubscriptionsButton();
 
-		LocalFile.ProvisioningSubscription.selectProductViaSubscriptionSelectWindow(productName = "><svg /onload=alert(/product/)>");
+		ProvisioningSubscription.selectProductViaSubscriptionSelectWindow(productName = "><svg /onload=alert(/product/)>");
 
-		LocalFile.KoroneikiProductPurchaseAPI.generateStaticYyyyMmDdStartAndEndDate();
+		KoroneikiProductPurchaseAPI.generateStaticYyyyMmDdStartAndEndDate();
 
-		LocalFile.ProvisioningSubscription.populateSubscriptionFormAndSave(table = '''| ><svg /onload=alert(/product/)> | Salesforce Opportunity Key | a1b2c3d4e5f6g7h8i9j0             |
+		ProvisioningSubscription.populateSubscriptionFormAndSave(table = '''| ><svg /onload=alert(/product/)> | Salesforce Opportunity Key | a1b2c3d4e5f6g7h8i9j0             |
 	| ><svg /onload=alert(/product/)> | Start Date                 | ${staticYyyyMmDdStartDate}       |
 	| ><svg /onload=alert(/product/)> | End Date                   | ${staticYyyyMmDdOriginalEndDate} |''');
 
-		LocalFile.Provisioning.gotoAccounts();
+		Provisioning.gotoAccounts();
 
-		LocalFile.Provisioning.searchAccounts(keyword = "><svg /onload=alert(/parent/)>");
+		Provisioning.searchAccounts(keyword = "><svg /onload=alert(/parent/)>");
 
-		LocalFile.Provisioning.removeAdvancedSearchFilters(table = '''| Subscription State: Active      |
+		Provisioning.removeAdvancedSearchFilters(table = '''| Subscription State: Active      |
 	| Subscription State: Cancelled   |
 	| Subscription State: Expired     |
 	| Subscription State: Unactivated |''');
 
-		LocalFile.Provisioning.clickAccount(accountName = "><svg /onload=alert(/parent/)>");
+		Provisioning.clickAccount(accountName = "><svg /onload=alert(/parent/)>");
 
-		LocalFile.Provisioning.clickTab(tabName = "History");
+		Provisioning.clickTab(tabName = "History");
 
-		LocalFile.Provisioning.assertNoAlert();
+		Provisioning.assertNoAlert();
 
-		LocalFile.Provisioning.clickTab(tabName = "Subscriptions");
+		Provisioning.clickTab(tabName = "Subscriptions");
 
-		LocalFile.Provisioning.assertNoAlert();
+		Provisioning.assertNoAlert();
 
-		LocalFile.ProvisioningAccount.clickProductTab(tabName = "Future");
+		ProvisioningAccount.clickProductTab(tabName = "Future");
 
-		LocalFile.Provisioning.assertNoAlert();
+		Provisioning.assertNoAlert();
 
-		LocalFile.ProvisioningAccount.clickProductTab(tabName = "Complimentary");
+		ProvisioningAccount.clickProductTab(tabName = "Complimentary");
 
-		LocalFile.Provisioning.assertNoAlert();
+		Provisioning.assertNoAlert();
 
-		LocalFile.ProvisioningAccount.clickProductTab(tabName = "Expired");
+		ProvisioningAccount.clickProductTab(tabName = "Expired");
 
-		LocalFile.Provisioning.assertNoAlert();
+		Provisioning.assertNoAlert();
 
-		LocalFile.ProvisioningAccount.clickProductTab(tabName = "Cancelled");
+		ProvisioningAccount.clickProductTab(tabName = "Cancelled");
 
-		LocalFile.Provisioning.assertNoAlert();
+		Provisioning.assertNoAlert();
 
-		LocalFile.ProvisioningAccount.clickProductTab(tabName = "All");
+		ProvisioningAccount.clickProductTab(tabName = "All");
 
-		LocalFile.Provisioning.assertNoAlert();
+		Provisioning.assertNoAlert();
 
-		LocalFile.ProvisioningAccount.clickSubscriptionLink(productName = "><svg /onload=alert(/product/)>");
+		ProvisioningAccount.clickSubscriptionLink(productName = "><svg /onload=alert(/product/)>");
 
-		LocalFile.Provisioning.assertNoAlert();
+		Provisioning.assertNoAlert();
 
-		LocalFile.Provisioning.gotoProducts();
+		Provisioning.gotoProducts();
 
-		LocalFile.Provisioning.searchProducts(keyword = "svg");
+		Provisioning.searchProducts(keyword = "svg");
 
-		LocalFile.Provisioning.assertNoAlert();
+		Provisioning.assertNoAlert();
 
-		LocalFile.Provisioning.clickProduct(productName = "><svg /onload=alert(/product/)>");
+		Provisioning.clickProduct(productName = "><svg /onload=alert(/product/)>");
 
-		LocalFile.Provisioning.assertNoAlert();
+		Provisioning.assertNoAlert();
 
-		LocalFile.Provisioning.gotoProductBundles();
+		Provisioning.gotoProductBundles();
 
-		LocalFile.Provisioning.assertNoAlert();
+		Provisioning.assertNoAlert();
 
-		LocalFile.Provisioning.clickProductBundle(productBundleName = "><svg /onload=alert(/bundle/)>");
+		Provisioning.clickProductBundle(productBundleName = "><svg /onload=alert(/bundle/)>");
 
-		LocalFile.Provisioning.assertNoAlert();
+		Provisioning.assertNoAlert();
 	}
 
 	test ViewaccountanduserandteamXSS {
-		LocalFile.OSBAdmin.loginToKoroneiki(
+		OSBAdmin.loginToKoroneiki(
 			userEmailAddress = ${staticKoroneikiAdminEmailAddress},
 			userPassword = ${staticKoroneikiAdminPassword});
 
-		LocalFile.Koroneiki.gotoContacts();
+		Koroneiki.gotoContacts();
 
-		LocalFile.Koroneiki.clickNewEntityButton();
+		Koroneiki.clickNewEntityButton();
 
-		LocalFile.KoroneikiEntity.populateAddAddressFormAndSave(table = '''| First Name    | Input | '"><svg /onload=alert(/contact/)>    |
+		KoroneikiEntity.populateAddAddressFormAndSave(table = '''| First Name    | Input | '"><svg /onload=alert(/contact/)>    |
 	| Middle Name   | Input | '"><svg /onload=alert(/contact/)>    |
 	| Last Name     | Input | '"><svg /onload=alert(/contact/)>    |
 	| Email Address | Input | svg.koroneiki1@lrcustomer.com.broken |''');
 
-		LocalFile.Passwords.getPasswords();
+		Passwords.getPasswords();
 
-		LocalFile.OSBAdmin.loginToProvisioning(
+		OSBAdmin.loginToProvisioning(
 			userEmailAddress = ${staticProvisioningAdminEmailAddress},
 			userPassword = ${staticProvisioningAdminPassword});
 
-		LocalFile.Provisioning.gotoAccounts();
+		Provisioning.gotoAccounts();
 
-		LocalFile.Provisioning.clickNewAccountButton();
+		Provisioning.clickNewAccountButton();
 
-		LocalFile.ProvisioningAccount.populateAccountFormAndSave(table = '''| Name           | Input  | '"><svg /onload=alert(/parent/)> |
+		ProvisioningAccount.populateAccountFormAndSave(table = '''| Name           | Input  | '"><svg /onload=alert(/parent/)> |
 	| Code           | Input  | '"><svg /onload=alert(/parent/)> |
 	| Tier           | Select | T4                               |
 	| Support Region | Select | United States                    |''');
 
-		LocalFile.Provisioning.gotoAccounts();
+		Provisioning.gotoAccounts();
 
-		LocalFile.Provisioning.clickNewAccountButton();
+		Provisioning.clickNewAccountButton();
 
-		LocalFile.ProvisioningAccount.populateAccountFormAndSave(table = '''| Name           | Input  | '"><svg /onload=alert(/child/)> |
+		ProvisioningAccount.populateAccountFormAndSave(table = '''| Name           | Input  | '"><svg /onload=alert(/child/)> |
 	| Code           | Input  | '"><svg /onload=alert(/child/)> |
 	| Tier           | Select | T4                              |
 	| Support Region | Select | United States                   |''');
 
-		LocalFile.Provisioning.searchAccounts(keyword = "><svg /onload=alert(/child/)>");
+		Provisioning.searchAccounts(keyword = "><svg /onload=alert(/child/)>");
 
-		LocalFile.Provisioning.removeAdvancedSearchFilters(table = '''| Subscription State: Active      |
+		Provisioning.removeAdvancedSearchFilters(table = '''| Subscription State: Active      |
 	| Subscription State: Cancelled   |
 	| Subscription State: Expired     |
 	| Subscription State: Unactivated |''');
 
-		LocalFile.Provisioning.clickAccount(accountName = "><svg /onload=alert(/child/)>");
+		Provisioning.clickAccount(accountName = "><svg /onload=alert(/child/)>");
 
-		LocalFile.ProvisioningAccount.expandSidePanel();
+		ProvisioningAccount.expandSidePanel();
 
-		LocalFile.ProvisioningAccount.clickSidePanelTab(tabName = "Notes");
+		ProvisioningAccount.clickSidePanelTab(tabName = "Notes");
 
-		LocalFile.ProvisioningAccount.createNote(content = "><svg /onload=alert(/note/)>");
+		ProvisioningAccount.createNote(content = "><svg /onload=alert(/note/)>");
 
-		LocalFile.Provisioning.assertNoAlert();
+		Provisioning.assertNoAlert();
 
-		LocalFile.ProvisioningAccount.clickSidePanelTab(tabName = "Sales Info");
+		ProvisioningAccount.clickSidePanelTab(tabName = "Sales Info");
 
-		LocalFile.ProvisioningAccount.createSalesInfo(content = "><svg /onload=alert(/salesinfo/)>");
+		ProvisioningAccount.createSalesInfo(content = "><svg /onload=alert(/salesinfo/)>");
 
-		LocalFile.Provisioning.assertNoAlert();
+		Provisioning.assertNoAlert();
 
-		LocalFile.Provisioning.clickTab(tabName = "Contacts");
+		Provisioning.clickTab(tabName = "Contacts");
 
-		LocalFile.ProvisioningAccount.clickAssignContactButton();
+		ProvisioningAccount.clickAssignContactButton();
 
-		LocalFile.ProvisioningAccount.populateAssignContactFormAndSave(table = '''| Email Address | svg.koroneiki1@lrcustomer.com.broken |
+		ProvisioningAccount.populateAssignContactFormAndSave(table = '''| Email Address | svg.koroneiki1@lrcustomer.com.broken |
 	| Assign Role   | Member                               |''');
 
-		LocalFile.Provisioning.clickTab(tabName = "Liferay Workers");
+		Provisioning.clickTab(tabName = "Liferay Workers");
 
-		LocalFile.ProvisioningAccount.clickAssignLiferayWorkerButton();
+		ProvisioningAccount.clickAssignLiferayWorkerButton();
 
-		LocalFile.ProvisioningAccount.populateAssignWorkerFormAndSave(table = '''| Email Address | svg.koroneiki1@lrcustomer.com.broken |
+		ProvisioningAccount.populateAssignWorkerFormAndSave(table = '''| Email Address | svg.koroneiki1@lrcustomer.com.broken |
 	| Assign Role   | Member                               |''');
 
-		LocalFile.Provisioning.clickTab(tabName = "Details");
+		Provisioning.clickTab(tabName = "Details");
 
-		LocalFile.ProvisioningAccount.editAccountDetails(table = '''| Parent | Select Entity | ><svg /onload=alert(/parent/)> | |''');
+		ProvisioningAccount.editAccountDetails(table = '''| Parent | Select Entity | ><svg /onload=alert(/parent/)> | |''');
 
-		LocalFile.Provisioning.clickTab(tabName = "Teams");
+		Provisioning.clickTab(tabName = "Teams");
 
-		LocalFile.ProvisioningAccount.clickNewTeamButton();
+		ProvisioningAccount.clickNewTeamButton();
 
-		LocalFile.ProvisioningTeam.populateTeamFormAndSave(teamName = "'><svg /onload=alert(/team/)>");
+		ProvisioningTeam.populateTeamFormAndSave(teamName = "'><svg /onload=alert(/team/)>");
 
-		LocalFile.ProvisioningTeam.clickAssignMembersButton();
+		ProvisioningTeam.clickAssignMembersButton();
 
-		LocalFile.ProvisioningTeam.assignMember(memberEmailAddress = "svg.koroneiki1@lrcustomer.com.broken");
+		ProvisioningTeam.assignMember(memberEmailAddress = "svg.koroneiki1@lrcustomer.com.broken");
 
-		LocalFile.Provisioning.assertNoAlert();
+		Provisioning.assertNoAlert();
 
-		LocalFile.Provisioning.gotoAccounts();
+		Provisioning.gotoAccounts();
 
-		LocalFile.Provisioning.searchAccounts(keyword = "><svg /onload=alert(/child/)>");
+		Provisioning.searchAccounts(keyword = "><svg /onload=alert(/child/)>");
 
-		LocalFile.Provisioning.removeAdvancedSearchFilters(table = '''| Subscription State: Active      |
+		Provisioning.removeAdvancedSearchFilters(table = '''| Subscription State: Active      |
 	| Subscription State: Cancelled   |
 	| Subscription State: Expired     |
 	| Subscription State: Unactivated |''');
 
-		LocalFile.Provisioning.assertNoAlert();
+		Provisioning.assertNoAlert();
 
-		LocalFile.Provisioning.clickAccount(accountName = "><svg /onload=alert(/child/)>");
+		Provisioning.clickAccount(accountName = "><svg /onload=alert(/child/)>");
 
-		LocalFile.Provisioning.assertNoAlert();
+		Provisioning.assertNoAlert();
 
-		LocalFile.Provisioning.clickTab(tabName = "Details");
+		Provisioning.clickTab(tabName = "Details");
 
-		LocalFile.Provisioning.assertNoAlert();
+		Provisioning.assertNoAlert();
 
-		LocalFile.Provisioning.clickTab(tabName = "Contacts");
+		Provisioning.clickTab(tabName = "Contacts");
 
-		LocalFile.Provisioning.assertNoAlert();
+		Provisioning.assertNoAlert();
 
-		LocalFile.Provisioning.clickTab(tabName = "Liferay Workers");
+		Provisioning.clickTab(tabName = "Liferay Workers");
 
-		LocalFile.Provisioning.assertNoAlert();
+		Provisioning.assertNoAlert();
 
-		LocalFile.Provisioning.clickTab(tabName = "Teams");
+		Provisioning.clickTab(tabName = "Teams");
 
-		LocalFile.Provisioning.assertNoAlert();
+		Provisioning.assertNoAlert();
 
-		LocalFile.Provisioning.clickTab(tabName = "Related Accounts");
+		Provisioning.clickTab(tabName = "Related Accounts");
 
-		LocalFile.Provisioning.assertNoAlert();
+		Provisioning.assertNoAlert();
 
-		LocalFile.ProvisioningAccount.clickRelatedAccountTab(tabName = "Active");
+		ProvisioningAccount.clickRelatedAccountTab(tabName = "Active");
 
-		LocalFile.Provisioning.assertNoAlert();
+		Provisioning.assertNoAlert();
 
-		LocalFile.ProvisioningAccount.clickRelatedAccountTab(tabName = "Closed");
+		ProvisioningAccount.clickRelatedAccountTab(tabName = "Closed");
 
-		LocalFile.Provisioning.assertNoAlert();
+		Provisioning.assertNoAlert();
 
-		LocalFile.Provisioning.clickTab(tabName = "History");
+		Provisioning.clickTab(tabName = "History");
 
-		LocalFile.Provisioning.assertNoAlert();
+		Provisioning.assertNoAlert();
 
-		LocalFile.ProvisioningAccount.clickSidePanelTab(tabName = "Notes");
+		ProvisioningAccount.clickSidePanelTab(tabName = "Notes");
 
-		LocalFile.Provisioning.assertNoAlert();
+		Provisioning.assertNoAlert();
 
-		LocalFile.ProvisioningAccount.clickSidePanelTab(tabName = "Sales Info");
+		ProvisioningAccount.clickSidePanelTab(tabName = "Sales Info");
 
-		LocalFile.Provisioning.assertNoAlert();
+		Provisioning.assertNoAlert();
 
-		LocalFile.Provisioning.clickTab(tabName = "Teams");
+		Provisioning.clickTab(tabName = "Teams");
 
-		LocalFile.ProvisioningAccount.clickTeamLink(teamName = "><svg /onload=alert(/child/)>");
+		ProvisioningAccount.clickTeamLink(teamName = "><svg /onload=alert(/child/)>");
 
-		LocalFile.Provisioning.assertNoAlert();
+		Provisioning.assertNoAlert();
 
-		LocalFile.Provisioning.gotoUsers();
+		Provisioning.gotoUsers();
 
-		LocalFile.Provisioning.gotoUsers();
+		Provisioning.gotoUsers();
 
-		LocalFile.Provisioning.searchUsers(keyword = "svg.koroneiki1");
+		Provisioning.searchUsers(keyword = "svg.koroneiki1");
 
-		LocalFile.Provisioning.assertNoAlert();
+		Provisioning.assertNoAlert();
 
-		LocalFile.Provisioning.clickUser(userName = "><svg /onload=alert(/contact/)>");
+		Provisioning.clickUser(userName = "><svg /onload=alert(/contact/)>");
 
-		LocalFile.Provisioning.assertNoAlert();
+		Provisioning.assertNoAlert();
 
-		LocalFile.Provisioning.clickTab(tabName = "General");
+		Provisioning.clickTab(tabName = "General");
 
-		LocalFile.Provisioning.assertNoAlert();
+		Provisioning.assertNoAlert();
 
-		LocalFile.Provisioning.clickTab(tabName = "Entitlements");
+		Provisioning.clickTab(tabName = "Entitlements");
 
-		LocalFile.Provisioning.assertNoAlert();
+		Provisioning.assertNoAlert();
 	}
 
 }

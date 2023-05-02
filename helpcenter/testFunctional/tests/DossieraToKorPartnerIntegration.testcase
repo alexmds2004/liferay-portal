@@ -4,54 +4,54 @@ definition {
 	property type = "provisioning.integration";
 
 	setUp {
-		LocalFile.OSBAdminRabbitMQ.generateStaticVariables();
+		OSBAdminRabbitMQ.generateStaticVariables();
 
-		LocalFile.OSBAdminRabbitMQ.generateProvisioningCompanyName();
+		OSBAdminRabbitMQ.generateProvisioningCompanyName();
 
-		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+		OSBAdminRabbitMQ.generateProvisioningProjectName();
 
-		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | par.koroneiki1                       |
+		JSONOkta.createOktaUser(table = '''| Screen Name   | par.koroneiki1                       |
 	| Email Address | par.koroneiki1@lrcustomer.com.broken |
 	| First Name    | PAR                                  |
 	| Last Name     | Koroneiki1                           |''');
 	}
 
 	tearDown {
-		LocalFile.ZendeskUserAPI._getDefaultUserId(organizationName = "Korpar - ${staticCompanyName}");
+		ZendeskUserAPI._getDefaultUserId(organizationName = "Korpar - ${staticCompanyName}");
 
-		LocalFile.OSBAdminProject.tearDownProjects(table = '''| KORPAR |''');
+		OSBAdminProject.tearDownProjects(table = '''| KORPAR |''');
 
-		LocalFile.KoroneikiAccountAPI._tearDownAccounts(table = '''| Korpar - ${staticCompanyName} |''');
+		KoroneikiAccountAPI._tearDownAccounts(table = '''| Korpar - ${staticCompanyName} |''');
 
-		LocalFile.KoroneikiAccountAPI._tearDownAccountsViaAccountFieldNameAndValue(
+		KoroneikiAccountAPI._tearDownAccountsViaAccountFieldNameAndValue(
 			fieldName = "Code",
 			table = '''| KORPAR |''');
 
-		LocalFile.JSONUser.tearDownUsers(table = '''| par.koroneiki1@lrcustomer.com.broken |''');
+		JSONUser.tearDownUsers(table = '''| par.koroneiki1@lrcustomer.com.broken |''');
 
-		LocalFile.JSONUser.tearDownUsersViaSupport(table = '''| par.koroneiki1@lrcustomer.com.broken |''');
+		JSONUser.tearDownUsersViaSupport(table = '''| par.koroneiki1@lrcustomer.com.broken |''');
 
-		LocalFile.JSONUser.tearDownUsersViaKoroneiki(table = '''| par.koroneiki1@lrcustomer.com.broken |''');
+		JSONUser.tearDownUsersViaKoroneiki(table = '''| par.koroneiki1@lrcustomer.com.broken |''');
 
-		LocalFile.KoroneikiContactAPI._tearDownContacts(table = '''| par.koroneiki1@lrcustomer.com.broken |''');
+		KoroneikiContactAPI._tearDownContacts(table = '''| par.koroneiki1@lrcustomer.com.broken |''');
 
-		LocalFile.JSONOkta.tearDownUsers(table = '''| par.koroneiki1@lrcustomer.com.broken |''');
+		JSONOkta.tearDownUsers(table = '''| par.koroneiki1@lrcustomer.com.broken |''');
 
-		LocalFile.ZendeskTicketAPI._tearDownTicketsByKeywords(table = '''| New Subscription(s) for Korpar - ${staticCompanyName} |''');
+		ZendeskTicketAPI._tearDownTicketsByKeywords(table = '''| New Subscription(s) for Korpar - ${staticCompanyName} |''');
 
-		LocalFile.ZendeskUserAPI._getMultipleUserIdsByEmailAddress(table = '''| par.koroneiki1@lrcustomer.com.broken |''');
+		ZendeskUserAPI._getMultipleUserIdsByEmailAddress(table = '''| par.koroneiki1@lrcustomer.com.broken |''');
 
-		LocalFile.ZendeskUserAPI._tearDownUsersByIdList(userIds = ${staticUserIdList});
+		ZendeskUserAPI._tearDownUsersByIdList(userIds = ${staticUserIdList});
 
-		LocalFile.ZendeskOrganizationAPI._getMultipleOrganizationExternalIdsByOrganizationNameIfStillPresent(table = '''| Korpar - ${staticCompanyName} |''');
+		ZendeskOrganizationAPI._getMultipleOrganizationExternalIdsByOrganizationNameIfStillPresent(table = '''| Korpar - ${staticCompanyName} |''');
 
-		LocalFile.ZendeskOrganizationAPI._tearDownOrganizationsByExternalIdList(organizationExternalIds = ${staticOrganizationExternalIdList});
+		ZendeskOrganizationAPI._tearDownOrganizationsByExternalIdList(organizationExternalIds = ${staticOrganizationExternalIdList});
 
-		LocalFile.ZendeskUserAPI._tearDownUserById(userId = ${staticDefaultUserId});
+		ZendeskUserAPI._tearDownUserById(userId = ${staticDefaultUserId});
 	}
 
 	test Createpartneraccount {
-		LocalFile.OSBAdminRabbitMQ.publishCreatePartnerAccountMessage(
+		OSBAdminRabbitMQ.publishCreatePartnerAccountMessage(
 			routingKey = "dossiera.provisioning.create",
 			table = '''| Account Name                           | Korpar - ${staticCompanyName}              |
 	| Address City                           | Diamond Bar                                |
@@ -83,7 +83,7 @@ definition {
 	| Start Month                            | ${staticStartMonth}                        |
 	| Start Year                             | ${staticStartYear}                         |''');
 
-		LocalFile.KoroneikiAccountAPI._viewAccount(
+		KoroneikiAccountAPI._viewAccount(
 			accountName = "Korpar - ${staticCompanyName}",
 			table = '''| Code                  | KORPAR                               | |
 	| Contact Email Address | par.koroneiki1@lrcustomer.com.broken | |
@@ -91,7 +91,7 @@ definition {
 	| Region                | United States                        | |
 	| Status                | Active                               | |''');
 
-		LocalFile.KoroneikiPostalAddressAPI._viewPostalAddress(
+		KoroneikiPostalAddressAPI._viewPostalAddress(
 			accountName = "Korpar - ${staticCompanyName}",
 			streetAddressLine1 = "456 Fake Street",
 			table = '''| Country               | United States   |
@@ -100,7 +100,7 @@ definition {
 	| Postal Code           | 91765           |
 	| Street Address Line 1 | 456 Fake Street |''');
 
-		LocalFile.KoroneikiAccountAPI._viewAccountExternalLinkViaIdAndDomain(
+		KoroneikiAccountAPI._viewAccountExternalLinkViaIdAndDomain(
 			accountName = "Korpar - ${staticCompanyName}",
 			domain = "salesforce",
 			entityId = ${staticDossieraAccountKey},
@@ -108,7 +108,7 @@ definition {
 	| Entity Id   | ${staticDossieraAccountKey} |
 	| Entity Name | account                     |''');
 
-		LocalFile.KoroneikiAccountAPI._viewAccountExternalLinkViaIdAndDomain(
+		KoroneikiAccountAPI._viewAccountExternalLinkViaIdAndDomain(
 			accountName = "Korpar - ${staticCompanyName}",
 			domain = "dossiera",
 			entityId = ${staticDossieraAccountKey},
@@ -116,7 +116,7 @@ definition {
 	| Entity Id   | ${staticDossieraAccountKey} |
 	| Entity Name | account                     |''');
 
-		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchaseExternalLink(
+		KoroneikiProductPurchaseAPI._viewProductPurchaseExternalLink(
 			accountName = "Korpar - ${staticCompanyName}",
 			entityId = ${staticSalesforceOpportunityKey},
 			productName = "Service Partnership",
@@ -124,18 +124,18 @@ definition {
 	| Entity Id   | ${staticSalesforceOpportunityKey} |
 	| Entity Name | opportunity                       |''');
 
-		LocalFile.KoroneikiProductAPI._viewProduct(
+		KoroneikiProductAPI._viewProduct(
 			productName = "Service Partnership",
 			table = '''| Name | Service Partnership | |''');
 
-		LocalFile.KoroneikiProductAPI._viewProductExternalLink(
+		KoroneikiProductAPI._viewProductExternalLink(
 			entityId = "Service Partnership",
 			productName = "Service Partnership",
 			table = '''| Domain      | dossiera            |
 	| Entity Id   | Service Partnership |
 	| Entity Name | product             |''');
 
-		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchase(
+		KoroneikiProductPurchaseAPI._viewProductPurchase(
 			accountName = "Korpar - ${staticCompanyName}",
 			productName = "Service Partnership",
 			table = '''| Quantity | 1        | |
@@ -143,7 +143,7 @@ definition {
 	}
 
 	test Createpartneraccountwithadditionalproduct {
-		LocalFile.OSBAdminRabbitMQ.publishCreatePartnerAccountWithAdditionalProductMessage(
+		OSBAdminRabbitMQ.publishCreatePartnerAccountWithAdditionalProductMessage(
 			routingKey = "dossiera.provisioning.create",
 			table = '''| Account Name                           | Korpar - ${staticCompanyName}              |
 	| Address City                           | Diamond Bar                                |
@@ -177,7 +177,7 @@ definition {
 	| Start Month                            | ${staticStartMonth}                        |
 	| Start Year                             | ${staticStartYear}                         |''');
 
-		LocalFile.KoroneikiAccountAPI._viewAccount(
+		KoroneikiAccountAPI._viewAccount(
 			accountName = "Korpar - ${staticCompanyName}",
 			table = '''| Code                  | KORPAR                               | |
 	| Contact Email Address | par.koroneiki1@lrcustomer.com.broken | |
@@ -185,7 +185,7 @@ definition {
 	| Region                | United States                        | |
 	| Status                | Active                               | |''');
 
-		LocalFile.KoroneikiPostalAddressAPI._viewPostalAddress(
+		KoroneikiPostalAddressAPI._viewPostalAddress(
 			accountName = "Korpar - ${staticCompanyName}",
 			streetAddressLine1 = "456 Fake Street",
 			table = '''| Country               | United States   |
@@ -194,7 +194,7 @@ definition {
 	| Postal Code           | 91765           |
 	| Street Address Line 1 | 456 Fake Street |''');
 
-		LocalFile.KoroneikiAccountAPI._viewAccountExternalLinkViaIdAndDomain(
+		KoroneikiAccountAPI._viewAccountExternalLinkViaIdAndDomain(
 			accountName = "Korpar - ${staticCompanyName}",
 			domain = "salesforce",
 			entityId = ${staticDossieraAccountKey},
@@ -202,7 +202,7 @@ definition {
 	| Entity Id   | ${staticDossieraAccountKey} |
 	| Entity Name | account                     |''');
 
-		LocalFile.KoroneikiAccountAPI._viewAccountExternalLinkViaIdAndDomain(
+		KoroneikiAccountAPI._viewAccountExternalLinkViaIdAndDomain(
 			accountName = "Korpar - ${staticCompanyName}",
 			domain = "dossiera",
 			entityId = ${staticDossieraAccountKey},
@@ -210,7 +210,7 @@ definition {
 	| Entity Id   | ${staticDossieraAccountKey} |
 	| Entity Name | account                     |''');
 
-		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchaseExternalLink(
+		KoroneikiProductPurchaseAPI._viewProductPurchaseExternalLink(
 			accountName = "Korpar - ${staticCompanyName}",
 			entityId = ${staticSalesforceOpportunityKey},
 			productName = "Service Partnership",
@@ -218,7 +218,7 @@ definition {
 	| Entity Id   | ${staticSalesforceOpportunityKey} |
 	| Entity Name | opportunity                       |''');
 
-		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchaseExternalLink(
+		KoroneikiProductPurchaseAPI._viewProductPurchaseExternalLink(
 			accountName = "Korpar - ${staticCompanyName}",
 			entityId = ${staticSalesforceOpportunityKey},
 			productName = "DXP Production",
@@ -226,35 +226,35 @@ definition {
 	| Entity Id   | ${staticSalesforceOpportunityKey} |
 	| Entity Name | opportunity                       |''');
 
-		LocalFile.KoroneikiProductAPI._viewProduct(
+		KoroneikiProductAPI._viewProduct(
 			productName = "Service Partnership",
 			table = '''| Name | Service Partnership | |''');
 
-		LocalFile.KoroneikiProductAPI._viewProduct(
+		KoroneikiProductAPI._viewProduct(
 			productName = "DXP Production",
 			table = '''| Name | DXP Production | |''');
 
-		LocalFile.KoroneikiProductAPI._viewProductExternalLink(
+		KoroneikiProductAPI._viewProductExternalLink(
 			entityId = "Service Partnership",
 			productName = "Service Partnership",
 			table = '''| Domain      | dossiera            |
 	| Entity Id   | Service Partnership |
 	| Entity Name | product             |''');
 
-		LocalFile.KoroneikiProductAPI._viewProductExternalLink(
+		KoroneikiProductAPI._viewProductExternalLink(
 			entityId = "DXP Production",
 			productName = "DXP Production",
 			table = '''| Domain      | dossiera       |
 	| Entity Id   | DXP Production |
 	| Entity Name | product        |''');
 
-		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchase(
+		KoroneikiProductPurchaseAPI._viewProductPurchase(
 			accountName = "Korpar - ${staticCompanyName}",
 			productName = "Service Partnership",
 			table = '''| Quantity | 1        | |
 	| Status   | Approved | |''');
 
-		LocalFile.KoroneikiProductPurchaseAPI._viewProductPurchase(
+		KoroneikiProductPurchaseAPI._viewProductPurchase(
 			accountName = "Korpar - ${staticCompanyName}",
 			productName = "DXP Production",
 			table = '''| Quantity | 1        | |

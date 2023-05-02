@@ -4,22 +4,22 @@ definition {
 	property type = "zendesk.api";
 
 	setUp {
-		LocalFile.Passwords.getPasswords();
+		Passwords.getPasswords();
 	}
 
 	tearDown {
-		LocalFile.ZendeskTicketAPI._tearDownTicketByIds(ticketIdList = ${staticRequestIdList});
+		ZendeskTicketAPI._tearDownTicketByIds(ticketIdList = ${staticRequestIdList});
 
-		LocalFile.ZendeskUserAPI._tearDownUsersByExternalIdTable(table = '''| User1  |
+		ZendeskUserAPI._tearDownUsersByExternalIdTable(table = '''| User1  |
 	| Agent1 |''');
 
-		LocalFile.ZendeskOrganizationAPI._tearDownOrganizationsByExternalIdTable(table = '''| 12345678 |''');
+		ZendeskOrganizationAPI._tearDownOrganizationsByExternalIdTable(table = '''| 12345678 |''');
 
-		LocalFile.ZendeskHomepage.pause(timeInSeconds = 3);
+		ZendeskHomepage.pause(timeInSeconds = 3);
 	}
 
 	test Notifyassigneeofassignment {
-		LocalFile.ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved            |
+		ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved            |
 	| Name             | Organization Name 1 |
 	| Tags             | liferay_dxp         |
 	| Shared Tickets   | true                |
@@ -30,7 +30,7 @@ definition {
 	| Support Language | Spanish             |
 	| External ID      | 12345678            |''');
 
-		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
+		ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
 	| Tags             | osb_customer,osb_kb              |
 	| Password         | ${staticZendeskAdminPassword}    |
 	| Role             | End-user                         |
@@ -42,7 +42,7 @@ definition {
 	| Time Zone        | Madrid                           |
 	| External ID      | User1                            |''');
 
-		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk Agent1                    |
+		ZendeskUserAPI._createUser(table = '''| Name             | Zendesk Agent1                    |
 	| Password         | ${staticZendeskAdminPassword}     |
 	| Role             | Agent                             |
 	| Email            | zendesk.agent1@liferay.com.broken |
@@ -51,11 +51,11 @@ definition {
 	| Time Zone        | Pacific Time (US & Canada)        |
 	| External ID      | Agent1                            |''');
 
-		LocalFile.ZendeskUserAPI._assignUserToGroup(
+		ZendeskUserAPI._assignUserToGroup(
 			groupName = "CSE - US",
 			userEmailAddress = "zendesk.agent1@liferay.com.broken");
 
-		LocalFile.ZendeskRequestAPI._createRequest(
+		ZendeskRequestAPI._createRequest(
 			requesterEmail = "zendesk.user1@zendesk.com.broken",
 			table = '''| Product                  | prd_liferay_dxp_7_4                              |
 	| Component                | authentication                                   |
@@ -64,11 +64,11 @@ definition {
 	| Description              | Request Description                              |
 	| Organization External ID | 12345678                                         |''');
 
-		LocalFile.ZendeskTicketAPI._assignTicket(
+		ZendeskTicketAPI._assignTicket(
 			ticketId = ${staticRequestIdList},
 			userEmailAddress = "zendesk.agent1@liferay.com.broken");
 
-		LocalFile.ZendeskTicketAPI._viewTicketAssignmentEmailToAssignee(
+		ZendeskTicketAPI._viewTicketAssignmentEmailToAssignee(
 			supportLanguage = "Spanish",
 			table = '''| Recipients | Zendesk Agent1                                                                    |
 	| Subject    | [{{ticket.organization.name}}] ({{ticket.priority}}) Asignación: {{ticket.title}} |
@@ -79,7 +79,7 @@ definition {
 	}
 
 	test Notifyassigneeofcommentupdate {
-		LocalFile.ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved            |
+		ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved            |
 	| Name             | Organization Name 1 |
 	| Tags             | liferay_dxp         |
 	| Shared Tickets   | true                |
@@ -90,7 +90,7 @@ definition {
 	| Support Language | Spanish             |
 	| External ID      | 12345678            |''');
 
-		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
+		ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
 	| Tags             | osb_customer,osb_kb              |
 	| Password         | ${staticZendeskAdminPassword}    |
 	| Role             | End-user                         |
@@ -102,7 +102,7 @@ definition {
 	| Time Zone        | Madrid                           |
 	| External ID      | User1                            |''');
 
-		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk Agent1                    |
+		ZendeskUserAPI._createUser(table = '''| Name             | Zendesk Agent1                    |
 	| Password         | ${staticZendeskAdminPassword}     |
 	| Role             | Agent                             |
 	| Email            | zendesk.agent1@liferay.com.broken |
@@ -111,11 +111,11 @@ definition {
 	| Time Zone        | Pacific Time (US & Canada)        |
 	| External ID      | Agent1                            |''');
 
-		LocalFile.ZendeskUserAPI._assignUserToGroup(
+		ZendeskUserAPI._assignUserToGroup(
 			groupName = "CSE - US",
 			userEmailAddress = "zendesk.agent1@liferay.com.broken");
 
-		LocalFile.ZendeskRequestAPI._createRequest(
+		ZendeskRequestAPI._createRequest(
 			requesterEmail = "zendesk.user1@zendesk.com.broken",
 			table = '''| Product                  | prd_liferay_dxp_7_4                              |
 	| Component                | authentication                                   |
@@ -124,16 +124,16 @@ definition {
 	| Description              | Request Description                              |
 	| Organization External ID | 12345678                                         |''');
 
-		LocalFile.ZendeskTicketAPI._assignTicket(
+		ZendeskTicketAPI._assignTicket(
 			ticketId = ${staticRequestIdList},
 			userEmailAddress = "zendesk.agent1@liferay.com.broken");
 
-		LocalFile.ZendeskRequestAPI._createRequestComment(
+		ZendeskRequestAPI._createRequestComment(
 			commentAuthorEmail = "zendesk.user1@zendesk.com.broken",
 			commentBody = "Comment Body",
 			ticketId = ${staticRequestIdList});
 
-		LocalFile.ZendeskTicketAPI._viewTicketCommentEmailToAssignee(
+		ZendeskTicketAPI._viewTicketCommentEmailToAssignee(
 			commentBody = "Comment Body",
 			supportLanguage = "Spanish",
 			table = '''| Recipients | Zendesk Agent1                                                            |
@@ -145,7 +145,7 @@ definition {
 	}
 
 	test Notifyassigneeofreopenedticket {
-		LocalFile.ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved            |
+		ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved            |
 	| Name             | Organization Name 1 |
 	| Tags             | liferay_dxp         |
 	| Shared Tickets   | true                |
@@ -156,7 +156,7 @@ definition {
 	| Support Language | Spanish             |
 	| External ID      | 12345678            |''');
 
-		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
+		ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
 	| Tags             | osb_customer,osb_kb              |
 	| Password         | ${staticZendeskAdminPassword}    |
 	| Role             | End-user                         |
@@ -168,7 +168,7 @@ definition {
 	| Time Zone        | Madrid                           |
 	| External ID      | User1                            |''');
 
-		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk Agent1                    |
+		ZendeskUserAPI._createUser(table = '''| Name             | Zendesk Agent1                    |
 	| Password         | ${staticZendeskAdminPassword}     |
 	| Role             | Agent                             |
 	| Email            | zendesk.agent1@liferay.com.broken |
@@ -177,11 +177,11 @@ definition {
 	| Time Zone        | Pacific Time (US & Canada)        |
 	| External ID      | Agent1                            |''');
 
-		LocalFile.ZendeskUserAPI._assignUserToGroup(
+		ZendeskUserAPI._assignUserToGroup(
 			groupName = "CSE - US",
 			userEmailAddress = "zendesk.agent1@liferay.com.broken");
 
-		LocalFile.ZendeskRequestAPI._createRequest(
+		ZendeskRequestAPI._createRequest(
 			requesterEmail = "zendesk.user1@zendesk.com.broken",
 			table = '''| Product                  | prd_liferay_dxp_7_4                              |
 	| Component                | authentication                                   |
@@ -190,21 +190,21 @@ definition {
 	| Description              | Request Description                              |
 	| Organization External ID | 12345678                                         |''');
 
-		LocalFile.ZendeskTicketAPI._assignTicket(
+		ZendeskTicketAPI._assignTicket(
 			ticketId = ${staticRequestIdList},
 			userEmailAddress = "zendesk.agent1@liferay.com.broken");
 
-		LocalFile.ZendeskTicketAPI._changeTicketStatusAndSubStatusAndLongTermResolution(
+		ZendeskTicketAPI._changeTicketStatusAndSubStatusAndLongTermResolution(
 			ticketId = ${staticRequestIdList},
 			ticketLongTermResolution = "bug_fix",
 			ticketStatus = "solved",
 			ticketSubStatus = "completed");
 
-		LocalFile.ZendeskTicketAPI._changeTicketStatus(
+		ZendeskTicketAPI._changeTicketStatus(
 			ticketId = ${staticRequestIdList},
 			ticketStatus = "open");
 
-		LocalFile.ZendeskTicketAPI._viewReopenedTicketEmailToAssignee(
+		ZendeskTicketAPI._viewReopenedTicketEmailToAssignee(
 			supportLanguage = "Spanish",
 			table = '''| Recipients | Zendesk Agent1                                      |
 	| Subject    | [{{ticket.organization.name}}] Re: {{ticket.title}} |
@@ -215,7 +215,7 @@ definition {
 	}
 
 	test Notifyrequesterofcommentupdate {
-		LocalFile.ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved            |
+		ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved            |
 	| Name             | Organization Name 1 |
 	| Tags             | liferay_dxp         |
 	| Shared Tickets   | true                |
@@ -226,7 +226,7 @@ definition {
 	| Support Language | Spanish             |
 	| External ID      | 12345678            |''');
 
-		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
+		ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
 	| Tags             | osb_customer,osb_kb              |
 	| Password         | ${staticZendeskAdminPassword}    |
 	| Role             | End-user                         |
@@ -238,7 +238,7 @@ definition {
 	| Time Zone        | Madrid                           |
 	| External ID      | User1                            |''');
 
-		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk Agent1                    |
+		ZendeskUserAPI._createUser(table = '''| Name             | Zendesk Agent1                    |
 	| Password         | ${staticZendeskAdminPassword}     |
 	| Role             | Agent                             |
 	| Email            | zendesk.agent1@liferay.com.broken |
@@ -247,11 +247,11 @@ definition {
 	| Time Zone        | Pacific Time (US & Canada)        |
 	| External ID      | Agent1                            |''');
 
-		LocalFile.ZendeskUserAPI._assignUserToGroup(
+		ZendeskUserAPI._assignUserToGroup(
 			groupName = "CSE - US",
 			userEmailAddress = "zendesk.agent1@liferay.com.broken");
 
-		LocalFile.ZendeskRequestAPI._createRequest(
+		ZendeskRequestAPI._createRequest(
 			requesterEmail = "zendesk.user1@zendesk.com.broken",
 			table = '''| Product                  | prd_liferay_dxp_7_4                              |
 	| Component                | authentication                                   |
@@ -260,16 +260,16 @@ definition {
 	| Description              | Request Description                              |
 	| Organization External ID | 12345678                                         |''');
 
-		LocalFile.ZendeskTicketAPI._assignTicket(
+		ZendeskTicketAPI._assignTicket(
 			ticketId = ${staticRequestIdList},
 			userEmailAddress = "zendesk.agent1@liferay.com.broken");
 
-		LocalFile.ZendeskRequestAPI._createRequestComment(
+		ZendeskRequestAPI._createRequestComment(
 			commentAuthorEmail = "zendesk.agent1@liferay.com.broken",
 			commentBody = "Comment Body",
 			ticketId = ${staticRequestIdList});
 
-		LocalFile.ZendeskTicketAPI._viewTicketCommentEmailToRequester(
+		ZendeskTicketAPI._viewTicketCommentEmailToRequester(
 			commentBody = "Comment Body",
 			supportLanguage = "Spanish",
 			table = '''| Recipients | Zendesk User1                                                                         |
@@ -282,7 +282,7 @@ definition {
 	}
 
 	test Notifyrequesterofreceivedrequest {
-		LocalFile.ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved            |
+		ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved            |
 	| Name             | Organization Name 1 |
 	| Shared Tickets   | true                |
 	| Shared Comments  | true                |
@@ -292,7 +292,7 @@ definition {
 	| Support Language | Spanish             |
 	| External ID      | 12345678            |''');
 
-		LocalFile.ZendeskOrganizationAPI._assignTagsToOrganizationViaOrganizationExternalID(
+		ZendeskOrganizationAPI._assignTagsToOrganizationViaOrganizationExternalID(
 			organizationExternalId = 12345678,
 			table = '''| developer_tools         |
 	| enterprise_search       |
@@ -306,7 +306,7 @@ definition {
 	| productivity_tools_sync |
 	| social_office           |''');
 
-		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
+		ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
 	| Tags             | osb_customer,osb_kb              |
 	| Password         | ${staticZendeskAdminPassword}    |
 	| Role             | End-user                         |
@@ -318,7 +318,7 @@ definition {
 	| Time Zone        | Madrid                           |
 	| External ID      | User1                            |''');
 
-		LocalFile.ZendeskRequestAPI._createMultipleRequestsWithProductAndComponentValues(
+		ZendeskRequestAPI._createMultipleRequestsWithProductAndComponentValues(
 			requesterEmail = "zendesk.user1@zendesk.com.broken",
 			table = '''| prd_developer_tools         |                                       |
 	| prd_enterprise_search       | monitoring                            |
@@ -340,9 +340,9 @@ definition {
 	| prd_productivity_tools_sync |                                       |
 	| prd_social_office           |                                       |''');
 
-		LocalFile.ZendeskHomepage.pause(timeInSeconds = 60);
+		ZendeskHomepage.pause(timeInSeconds = 60);
 
-		LocalFile.ZendeskTicketAPI._viewMultipleTicketReceptionEmails(
+		ZendeskTicketAPI._viewMultipleTicketReceptionEmails(
 			supportLanguage = "Spanish",
 			table = '''| Recipients | Zendesk User1                                                                                                                           |
 	| Subject    | [Soporte de Liferay] {{ticket.organization.name}} {{ticket.id}}: {{ticket.title}}                                                       |
@@ -356,29 +356,29 @@ definition {
 	| Body       | El Equipo de Soporte de Liferay                                                                                                         |''',
 			ticketIdList = ${staticRequestIdList});
 
-		LocalFile.ZendeskTicketAPI._viewNoMultipleLegacyVersionTicketReceptionEmails(
+		ZendeskTicketAPI._viewNoMultipleLegacyVersionTicketReceptionEmails(
 			portalLegacyVersion = "6.2",
 			supportLanguage = "Spanish",
 			ticketIdList = ${staticRequestIdList});
 
-		LocalFile.ZendeskTicketAPI._viewNoMultipleLegacyVersionTicketReceptionEmails(
+		ZendeskTicketAPI._viewNoMultipleLegacyVersionTicketReceptionEmails(
 			portalLegacyVersion = "6.1",
 			supportLanguage = "Spanish",
 			ticketIdList = ${staticRequestIdList});
 
-		LocalFile.ZendeskTicketAPI._viewNoMultipleLegacyVersionTicketReceptionEmails(
+		ZendeskTicketAPI._viewNoMultipleLegacyVersionTicketReceptionEmails(
 			portalLegacyVersion = "6.0",
 			supportLanguage = "Spanish",
 			ticketIdList = ${staticRequestIdList});
 
-		LocalFile.ZendeskTicketAPI._viewNoMultipleLegacyVersionTicketReceptionEmails(
+		ZendeskTicketAPI._viewNoMultipleLegacyVersionTicketReceptionEmails(
 			portalLegacyVersion = "5.2",
 			supportLanguage = "Spanish",
 			ticketIdList = ${staticRequestIdList});
 	}
 
 	test Notifyrequesterofreceivedrequestand52EOSLPolicy {
-		LocalFile.ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved            |
+		ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved            |
 	| Name             | Organization Name 1 |
 	| Tags             | liferay_portal      |
 	| Shared Tickets   | true                |
@@ -389,7 +389,7 @@ definition {
 	| Support Language | Spanish             |
 	| External ID      | 12345678            |''');
 
-		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
+		ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
 	| Tags             | osb_customer,osb_kb              |
 	| Password         | ${staticZendeskAdminPassword}    |
 	| Role             | End-user                         |
@@ -401,14 +401,14 @@ definition {
 	| Time Zone        | Madrid                           |
 	| External ID      | User1                            |''');
 
-		LocalFile.ZendeskRequestAPI._createMultipleRequestsWithProductAndComponentValues(
+		ZendeskRequestAPI._createMultipleRequestsWithProductAndComponentValues(
 			requesterEmail = "zendesk.user1@zendesk.com.broken",
 			table = '''| prd_liferay_portal_5_2 | activation_key_project_administration |
 	| prd_liferay_portal_5_2 | authentication                        |''');
 
-		LocalFile.ZendeskHomepage.pause(timeInSeconds = 60);
+		ZendeskHomepage.pause(timeInSeconds = 60);
 
-		LocalFile.ZendeskTicketAPI._viewMultipleLegacyVersionTicketReceptionEmails(
+		ZendeskTicketAPI._viewMultipleLegacyVersionTicketReceptionEmails(
 			portalLegacyVersion = "5.2",
 			supportLanguage = "Spanish",
 			table = '''| Recipients | Zendesk User1                                                                                                                           |
@@ -424,13 +424,13 @@ definition {
 	| Body       | El Equipo de Soporte de Liferay                                                                                                         |''',
 			ticketIdList = ${staticRequestIdList});
 
-		LocalFile.ZendeskTicketAPI._viewNoMultipleTicketReceptionEmails(
+		ZendeskTicketAPI._viewNoMultipleTicketReceptionEmails(
 			supportLanguage = "Spanish",
 			ticketIdList = ${staticRequestIdList});
 	}
 
 	test Notifyrequesterofreceivedrequestand60EOSLPolicy {
-		LocalFile.ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved            |
+		ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved            |
 	| Name             | Organization Name 1 |
 	| Tags             | liferay_portal      |
 	| Shared Tickets   | true                |
@@ -441,7 +441,7 @@ definition {
 	| Support Language | Spanish             |
 	| External ID      | 12345678            |''');
 
-		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
+		ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
 	| Tags             | osb_customer,osb_kb              |
 	| Password         | ${staticZendeskAdminPassword}    |
 	| Role             | End-user                         |
@@ -453,14 +453,14 @@ definition {
 	| Time Zone        | Madrid                           |
 	| External ID      | User1                            |''');
 
-		LocalFile.ZendeskRequestAPI._createMultipleRequestsWithProductAndComponentValues(
+		ZendeskRequestAPI._createMultipleRequestsWithProductAndComponentValues(
 			requesterEmail = "zendesk.user1@zendesk.com.broken",
 			table = '''| prd_liferay_portal_6_0 | activation_key_project_administration |
 	| prd_liferay_portal_6_0 | authentication                        |''');
 
-		LocalFile.ZendeskHomepage.pause(timeInSeconds = 60);
+		ZendeskHomepage.pause(timeInSeconds = 60);
 
-		LocalFile.ZendeskTicketAPI._viewMultipleLegacyVersionTicketReceptionEmails(
+		ZendeskTicketAPI._viewMultipleLegacyVersionTicketReceptionEmails(
 			portalLegacyVersion = "6.0",
 			supportLanguage = "Spanish",
 			table = '''| Recipients | Zendesk User1                                                                                                                           |
@@ -476,13 +476,13 @@ definition {
 	| Body       | El Equipo de Soporte de Liferay                                                                                                         |''',
 			ticketIdList = ${staticRequestIdList});
 
-		LocalFile.ZendeskTicketAPI._viewNoMultipleTicketReceptionEmails(
+		ZendeskTicketAPI._viewNoMultipleTicketReceptionEmails(
 			supportLanguage = "Spanish",
 			ticketIdList = ${staticRequestIdList});
 	}
 
 	test Notifyrequesterofreceivedrequestand61EOSLPolicy {
-		LocalFile.ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved            |
+		ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved            |
 	| Name             | Organization Name 1 |
 	| Tags             | liferay_portal      |
 	| Shared Tickets   | true                |
@@ -493,7 +493,7 @@ definition {
 	| Support Language | Spanish             |
 	| External ID      | 12345678            |''');
 
-		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
+		ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
 	| Tags             | osb_customer,osb_kb              |
 	| Password         | ${staticZendeskAdminPassword}    |
 	| Role             | End-user                         |
@@ -505,14 +505,14 @@ definition {
 	| Time Zone        | Madrid                           |
 	| External ID      | User1                            |''');
 
-		LocalFile.ZendeskRequestAPI._createMultipleRequestsWithProductAndComponentValues(
+		ZendeskRequestAPI._createMultipleRequestsWithProductAndComponentValues(
 			requesterEmail = "zendesk.user1@zendesk.com.broken",
 			table = '''| prd_liferay_portal_6_1 | activation_key_project_administration |
 	| prd_liferay_portal_6_1 | authentication                        |''');
 
-		LocalFile.ZendeskHomepage.pause(timeInSeconds = 60);
+		ZendeskHomepage.pause(timeInSeconds = 60);
 
-		LocalFile.ZendeskTicketAPI._viewMultipleLegacyVersionTicketReceptionEmails(
+		ZendeskTicketAPI._viewMultipleLegacyVersionTicketReceptionEmails(
 			portalLegacyVersion = "6.1",
 			supportLanguage = "Spanish",
 			table = '''| Recipients | Zendesk User1                                                                                                                           |
@@ -528,13 +528,13 @@ definition {
 	| Body       | El Equipo de Soporte de Liferay                                                                                                         |''',
 			ticketIdList = ${staticRequestIdList});
 
-		LocalFile.ZendeskTicketAPI._viewNoMultipleTicketReceptionEmails(
+		ZendeskTicketAPI._viewNoMultipleTicketReceptionEmails(
 			supportLanguage = "Spanish",
 			ticketIdList = ${staticRequestIdList});
 	}
 
 	test Notifyrequesterofreceivedrequestand62EOSLPolicy {
-		LocalFile.ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved            |
+		ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved            |
 	| Name             | Organization Name 1 |
 	| Tags             | liferay_portal      |
 	| Shared Tickets   | true                |
@@ -545,7 +545,7 @@ definition {
 	| Support Language | Spanish             |
 	| External ID      | 12345678            |''');
 
-		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
+		ZendeskUserAPI._createUser(table = '''| Name             | Zendesk User1                    |
 	| Tags             | osb_customer,osb_kb              |
 	| Password         | ${staticZendeskAdminPassword}    |
 	| Role             | End-user                         |
@@ -557,14 +557,14 @@ definition {
 	| Time Zone        | Madrid                           |
 	| External ID      | User1                            |''');
 
-		LocalFile.ZendeskRequestAPI._createMultipleRequestsWithProductAndComponentValues(
+		ZendeskRequestAPI._createMultipleRequestsWithProductAndComponentValues(
 			requesterEmail = "zendesk.user1@zendesk.com.broken",
 			table = '''| prd_liferay_portal_6_2 | activation_key_project_administration |
 	| prd_liferay_portal_6_2 | authentication                        |''');
 
-		LocalFile.ZendeskHomepage.pause(timeInSeconds = 60);
+		ZendeskHomepage.pause(timeInSeconds = 60);
 
-		LocalFile.ZendeskTicketAPI._viewMultipleLegacyVersionTicketReceptionEmails(
+		ZendeskTicketAPI._viewMultipleLegacyVersionTicketReceptionEmails(
 			portalLegacyVersion = "6.2",
 			supportLanguage = "Spanish",
 			table = '''| Recipients | Zendesk User1                                                                                                                           |
@@ -580,7 +580,7 @@ definition {
 	| Body       | El Equipo de Soporte de Liferay                                                                                                         |''',
 			ticketIdList = ${staticRequestIdList});
 
-		LocalFile.ZendeskTicketAPI._viewNoMultipleTicketReceptionEmails(
+		ZendeskTicketAPI._viewNoMultipleTicketReceptionEmails(
 			supportLanguage = "Spanish",
 			ticketIdList = ${staticRequestIdList});
 	}

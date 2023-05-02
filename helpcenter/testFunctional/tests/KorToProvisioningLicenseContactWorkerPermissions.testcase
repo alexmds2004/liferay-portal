@@ -4,48 +4,48 @@ definition {
 	property type = "provisioning.security";
 
 	setUp {
-		LocalFile.Passwords.getPasswords();
+		Passwords.getPasswords();
 
-		LocalFile.JSONUser.createViaProvisioning(table = '''| Screen Name   | licensing.contact.worker                    |
+		JSONUser.createViaProvisioning(table = '''| Screen Name   | licensing.contact.worker                    |
 	| Email Address | licensing.contact.worker@liferay.com.broken |
 	| First Name    | Licensing                                   |
 	| Last Name     | Contact Worker                              |''');
 
-		LocalFile.JSONUser.assignUserToProvisioningRole(
+		JSONUser.assignUserToProvisioningRole(
 			roleName = "Provisioning Contact Worker",
 			userEmailAddress = "licensing.contact.worker@liferay.com.broken");
 	}
 
 	tearDown {
-		LocalFile.ZendeskUserAPI._getDefaultUserId(organizationName = "Perlic - ${staticProjectName}");
+		ZendeskUserAPI._getDefaultUserId(organizationName = "Perlic - ${staticProjectName}");
 
-		LocalFile.KoroneikiProductConsumptionAPI._tearDownProductConsumptionList(
+		KoroneikiProductConsumptionAPI._tearDownProductConsumptionList(
 			accountName = "Perlic - ${staticProjectName}",
 			table = '''| DXP Production |''');
 
-		LocalFile.OSBAdminProject.tearDownProjects(table = '''| PERLICPERLIC |''');
+		OSBAdminProject.tearDownProjects(table = '''| PERLICPERLIC |''');
 
-		LocalFile.KoroneikiAccountAPI._tearDownAccounts(table = '''| Perlic - ${staticProjectName} |''');
+		KoroneikiAccountAPI._tearDownAccounts(table = '''| Perlic - ${staticProjectName} |''');
 
-		LocalFile.KoroneikiAccountAPI._tearDownAccountsViaAccountFieldNameAndValue(
+		KoroneikiAccountAPI._tearDownAccountsViaAccountFieldNameAndValue(
 			fieldName = "Code",
 			table = '''| PERLICPERLIC |''');
 
-		LocalFile.ZendeskOrganizationAPI._getMultipleOrganizationExternalIdsByOrganizationNameIfStillPresent(table = '''| Perlic - ${staticProjectName} |''');
+		ZendeskOrganizationAPI._getMultipleOrganizationExternalIdsByOrganizationNameIfStillPresent(table = '''| Perlic - ${staticProjectName} |''');
 
-		LocalFile.ZendeskOrganizationAPI._tearDownOrganizationsByExternalIdList(organizationExternalIds = ${staticOrganizationExternalIdList});
+		ZendeskOrganizationAPI._tearDownOrganizationsByExternalIdList(organizationExternalIds = ${staticOrganizationExternalIdList});
 
-		LocalFile.ZendeskUserAPI._tearDownUserById(userId = ${staticDefaultUserId});
+		ZendeskUserAPI._tearDownUserById(userId = ${staticDefaultUserId});
 
-		LocalFile.JSONUser.tearDownUsersViaProvisioning(table = '''| licensing.contact.worker@liferay.com.broken |''');
+		JSONUser.tearDownUsersViaProvisioning(table = '''| licensing.contact.worker@liferay.com.broken |''');
 
-		LocalFile.Downloads.teardownDownloadedListedFiles(list = ${staticDownloadedListName});
+		Downloads.teardownDownloadedListedFiles(list = ${staticDownloadedListName});
 	}
 
 	test DownloadDXPlicense {
-		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+		OSBAdminRabbitMQ.generateProvisioningProjectName();
 
-		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | PERLICPERLIC                         | |
+		KoroneikiAccountAPI._createAccount(table = '''| Code                  | PERLICPERLIC                         | |
 	| Contact Email Address | lic.koroneiki1@lrcustomer.com.broken | |
 	| Description           | Test osb account on koroneiki        | |
 	| Fax Number            | 555-555-1234                         | |
@@ -57,17 +57,17 @@ definition {
 	| Tier                  | T4                                   | |
 	| Website               | www.koroneikicorporation.com         | |''');
 
-		LocalFile.KoroneikiAccountAPI._generateAccountKey(accountName = "Perlic - ${staticProjectName}");
+		KoroneikiAccountAPI._generateAccountKey(accountName = "Perlic - ${staticProjectName}");
 
-		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+		KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
 
-		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFullStartAndEndDate();
+		KoroneikiProductPurchaseAPI.generateStaticFullStartAndEndDate();
 
-		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFutureStartAndEndDate();
+		KoroneikiProductPurchaseAPI.generateStaticFutureStartAndEndDate();
 
-		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFullFutureStartAndEndDate();
+		KoroneikiProductPurchaseAPI.generateStaticFullFutureStartAndEndDate();
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Perlic - ${staticProjectName}",
 			productName = "DXP Production",
 			table = '''| End Date                | ${staticEndDate}         |   |
@@ -80,11 +80,11 @@ definition {
 	| Start Date              | ${staticStartDate}       |   |
 	| Status                  | Approved                 |   |''');
 
-		LocalFile.KoroneikiProductPurchaseAPI._generateProductPurchaseId(
+		KoroneikiProductPurchaseAPI._generateProductPurchaseId(
 			accountName = "Perlic - ${staticProjectName}",
 			productName = "DXP Production");
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Perlic - ${staticProjectName}",
 			productName = "Platinum Subscription",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -94,45 +94,45 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.OSBAdmin.loginToProvisioning(
+		OSBAdmin.loginToProvisioning(
 			userEmailAddress = ${staticProvisioningAdminEmailAddress},
 			userPassword = ${staticProvisioningAdminPassword});
 
-		LocalFile.Provisioning.gotoLicenses();
+		Provisioning.gotoLicenses();
 
-		LocalFile.Provisioning.clickGenerateLicenseButton();
+		Provisioning.clickGenerateLicenseButton();
 
-		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Account | Select Entity | Perlic - ${staticProjectName} | |
+		ProvisioningLicense.populateGenerateLicenseForm(table = '''| Account | Select Entity | Perlic - ${staticProjectName} | |
 	| Product | Select        | DXP Production                | |
 	| Version | Select        | 7.2                           | |
 	| Type    | Select        | DXP Production                | |''');
 
-		LocalFile.ProvisioningLicense.clickChooseProductPurchaseButton(positionValue = 1);
+		ProvisioningLicense.clickChooseProductPurchaseButton(positionValue = 1);
 
-		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Host Name     | Input    | localhost         | |
+		ProvisioningLicense.populateGenerateLicenseForm(table = '''| Host Name     | Input    | localhost         | |
 	| IP Addresses  | Textarea | 123.45.67.89      | |
 	| MAC Addresses | Textarea | 0A-1B-2C-3D-4E-5F | |''');
 
-		LocalFile.ProvisioningLicense.clickGenerateLicenseButton();
+		ProvisioningLicense.clickGenerateLicenseButton();
 
-		LocalFile.ProvisioningLicense.viewLicense(table = '''| Header  | Perlic - ${staticProjectName} | |
+		ProvisioningLicense.viewLicense(table = '''| Header  | Perlic - ${staticProjectName} | |
 	| Product | DXP Production                | |''');
 
-		LocalFile.OSBAdmin.logoutAndLoginToProvisioning(
+		OSBAdmin.logoutAndLoginToProvisioning(
 			userEmailAddress = "licensing.contact.worker@liferay.com.broken",
 			userPassword = ${staticProvisioningQaUserPassword});
 
-		LocalFile.UserAccount.updatePasswordUponLogin(userPassword = "test");
+		UserAccount.updatePasswordUponLogin(userPassword = "test");
 
-		LocalFile.Provisioning.gotoLicenses();
+		Provisioning.gotoLicenses();
 
-		LocalFile.Provisioning.searchLicenses(keyword = ${staticAccountKey});
+		Provisioning.searchLicenses(keyword = ${staticAccountKey});
 
-		LocalFile.Provisioning.clickLicense(licenseKeyword = "Perlic - ${staticProjectName}");
+		Provisioning.clickLicense(licenseKeyword = "Perlic - ${staticProjectName}");
 
-		LocalFile.ProvisioningLicense.downloadLicense(positionValue = 1);
+		ProvisioningLicense.downloadLicense(positionValue = 1);
 
-		LocalFile.ProvisioningLicense.assertDownloadedLicensePresent(
+		ProvisioningLicense.assertDownloadedLicensePresent(
 			fileType = "xml",
 			table = '''| License Type | activation-key                |
 	| Product      | DXP Production                |
@@ -141,9 +141,9 @@ definition {
 	}
 
 	test DownloadDXPsinglelicenseaggregate {
-		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+		OSBAdminRabbitMQ.generateProvisioningProjectName();
 
-		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | PERLICPERLIC                         | |
+		KoroneikiAccountAPI._createAccount(table = '''| Code                  | PERLICPERLIC                         | |
 	| Contact Email Address | lic.koroneiki1@lrcustomer.com.broken | |
 	| Description           | Test osb account on koroneiki        | |
 	| Fax Number            | 555-555-1234                         | |
@@ -155,17 +155,17 @@ definition {
 	| Tier                  | T4                                   | |
 	| Website               | www.koroneikicorporation.com         | |''');
 
-		LocalFile.KoroneikiAccountAPI._generateAccountKey(accountName = "Perlic - ${staticProjectName}");
+		KoroneikiAccountAPI._generateAccountKey(accountName = "Perlic - ${staticProjectName}");
 
-		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+		KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
 
-		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFullStartAndEndDate();
+		KoroneikiProductPurchaseAPI.generateStaticFullStartAndEndDate();
 
-		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFutureStartAndEndDate();
+		KoroneikiProductPurchaseAPI.generateStaticFutureStartAndEndDate();
 
-		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFullFutureStartAndEndDate();
+		KoroneikiProductPurchaseAPI.generateStaticFullFutureStartAndEndDate();
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Perlic - ${staticProjectName}",
 			productName = "DXP Production",
 			table = '''| End Date                | ${staticEndDate}         |   |
@@ -178,11 +178,11 @@ definition {
 	| Start Date              | ${staticStartDate}       |   |
 	| Status                  | Approved                 |   |''');
 
-		LocalFile.KoroneikiProductPurchaseAPI._generateProductPurchaseId(
+		KoroneikiProductPurchaseAPI._generateProductPurchaseId(
 			accountName = "Perlic - ${staticProjectName}",
 			productName = "DXP Production");
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Perlic - ${staticProjectName}",
 			productName = "Platinum Subscription",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -192,53 +192,53 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.OSBAdmin.loginToProvisioning(
+		OSBAdmin.loginToProvisioning(
 			userEmailAddress = ${staticProvisioningAdminEmailAddress},
 			userPassword = ${staticProvisioningAdminPassword});
 
-		LocalFile.Provisioning.gotoLicenses();
+		Provisioning.gotoLicenses();
 
-		LocalFile.Provisioning.clickGenerateLicenseButton();
+		Provisioning.clickGenerateLicenseButton();
 
-		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Account | Select Entity | Perlic - ${staticProjectName} | |
+		ProvisioningLicense.populateGenerateLicenseForm(table = '''| Account | Select Entity | Perlic - ${staticProjectName} | |
 	| Product | Select        | DXP Production                | |
 	| Version | Select        | 7.2                           | |
 	| Type    | Select        | DXP Production                | |''');
 
-		LocalFile.ProvisioningLicense.clickChooseProductPurchaseButton(positionValue = 1);
+		ProvisioningLicense.clickChooseProductPurchaseButton(positionValue = 1);
 
-		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Host Name     | Input    | localhost         | |
+		ProvisioningLicense.populateGenerateLicenseForm(table = '''| Host Name     | Input    | localhost         | |
 	| IP Addresses  | Textarea | 123.45.67.89      | |
 	| MAC Addresses | Textarea | 0A-1B-2C-3D-4E-5F | |''');
 
-		LocalFile.ProvisioningLicense.clickGenerateLicenseButton();
+		ProvisioningLicense.clickGenerateLicenseButton();
 
-		LocalFile.ProvisioningLicense.viewLicense(table = '''| Header  | Perlic - ${staticProjectName} | |
+		ProvisioningLicense.viewLicense(table = '''| Header  | Perlic - ${staticProjectName} | |
 	| Product | DXP Production                | |''');
 
-		LocalFile.ProvisioningLicense.getLicenseKeyIdViaLicenseDetails();
+		ProvisioningLicense.getLicenseKeyIdViaLicenseDetails();
 
-		LocalFile.OSBAdmin.logoutAndLoginToProvisioning(
+		OSBAdmin.logoutAndLoginToProvisioning(
 			userEmailAddress = "licensing.contact.worker@liferay.com.broken",
 			userPassword = ${staticProvisioningQaUserPassword});
 
-		LocalFile.UserAccount.updatePasswordUponLogin(userPassword = "test");
+		UserAccount.updatePasswordUponLogin(userPassword = "test");
 
-		LocalFile.Provisioning.gotoAccounts();
+		Provisioning.gotoAccounts();
 
-		LocalFile.Provisioning.searchAccounts(keyword = "Perlic");
+		Provisioning.searchAccounts(keyword = "Perlic");
 
-		LocalFile.Provisioning.clickAccount(accountName = "Perlic - ${staticProjectName}");
+		Provisioning.clickAccount(accountName = "Perlic - ${staticProjectName}");
 
-		LocalFile.Provisioning.clickTab(tabName = "Licenses");
+		Provisioning.clickTab(tabName = "Licenses");
 
-		LocalFile.ProvisioningAccount.selectLicensesViaLicensesTab(table = '''| Perlic - ${staticProjectName} |''');
+		ProvisioningAccount.selectLicensesViaLicensesTab(table = '''| Perlic - ${staticProjectName} |''');
 
-		LocalFile.ProvisioningAccount.clickLicensesActionDropdownButton(action = "Download");
+		ProvisioningAccount.clickLicensesActionDropdownButton(action = "Download");
 
-		LocalFile.ProvisioningLicense.downloadLicenseViaDownloadLicensePage(table = '''| ${staticLicenseKeyId} |''');
+		ProvisioningLicense.downloadLicenseViaDownloadLicensePage(table = '''| ${staticLicenseKeyId} |''');
 
-		LocalFile.ProvisioningLicense.assertDownloadedLicensePresent(
+		ProvisioningLicense.assertDownloadedLicensePresent(
 			fileType = "xml",
 			table = '''| License Type | activation-key                |
 	| Product      | DXP Production                |
@@ -247,9 +247,9 @@ definition {
 	}
 
 	test DownloadnewDXPaggregatelicense {
-		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+		OSBAdminRabbitMQ.generateProvisioningProjectName();
 
-		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | PERLICPERLIC                         | |
+		KoroneikiAccountAPI._createAccount(table = '''| Code                  | PERLICPERLIC                         | |
 	| Contact Email Address | lic.koroneiki1@lrcustomer.com.broken | |
 	| Description           | Test osb account on koroneiki        | |
 	| Fax Number            | 555-555-1234                         | |
@@ -261,17 +261,17 @@ definition {
 	| Tier                  | T4                                   | |
 	| Website               | www.koroneikicorporation.com         | |''');
 
-		LocalFile.KoroneikiAccountAPI._generateAccountKey(accountName = "Perlic - ${staticProjectName}");
+		KoroneikiAccountAPI._generateAccountKey(accountName = "Perlic - ${staticProjectName}");
 
-		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+		KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
 
-		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFullStartAndEndDate();
+		KoroneikiProductPurchaseAPI.generateStaticFullStartAndEndDate();
 
-		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFutureStartAndEndDate();
+		KoroneikiProductPurchaseAPI.generateStaticFutureStartAndEndDate();
 
-		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFullFutureStartAndEndDate();
+		KoroneikiProductPurchaseAPI.generateStaticFullFutureStartAndEndDate();
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Perlic - ${staticProjectName}",
 			productName = "DXP Production",
 			table = '''| End Date                | ${staticEndDate}         |   |
@@ -284,11 +284,11 @@ definition {
 	| Start Date              | ${staticStartDate}       |   |
 	| Status                  | Approved                 |   |''');
 
-		LocalFile.KoroneikiProductPurchaseAPI._generateProductPurchaseId(
+		KoroneikiProductPurchaseAPI._generateProductPurchaseId(
 			accountName = "Perlic - ${staticProjectName}",
 			productName = "DXP Production");
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Perlic - ${staticProjectName}",
 			productName = "Platinum Subscription",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -298,87 +298,87 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.OSBAdmin.loginToProvisioning(
+		OSBAdmin.loginToProvisioning(
 			userEmailAddress = ${staticProvisioningAdminEmailAddress},
 			userPassword = ${staticProvisioningAdminPassword});
 
-		LocalFile.Provisioning.gotoLicenses();
+		Provisioning.gotoLicenses();
 
-		LocalFile.Provisioning.clickGenerateLicenseButton();
+		Provisioning.clickGenerateLicenseButton();
 
-		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Account | Select Entity | Perlic - ${staticProjectName} | |
+		ProvisioningLicense.populateGenerateLicenseForm(table = '''| Account | Select Entity | Perlic - ${staticProjectName} | |
 	| Product | Select        | DXP Production                | |
 	| Version | Select        | 7.2                           | |
 	| Type    | Select        | DXP Production                | |''');
 
-		LocalFile.ProvisioningLicense.clickChooseProductPurchaseButton(positionValue = 1);
+		ProvisioningLicense.clickChooseProductPurchaseButton(positionValue = 1);
 
-		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Name          | Input    | Perlic - ${staticProjectName} License1 Name        | |
+		ProvisioningLicense.populateGenerateLicenseForm(table = '''| Name          | Input    | Perlic - ${staticProjectName} License1 Name        | |
 	| Description   | Input    | Perlic - ${staticProjectName} License1 Description | |
 	| Host Name     | Input    | localhost                                          | |
 	| IP Addresses  | Textarea | 123.45.67.89                                       | |
 	| MAC Addresses | Textarea | 0A-1B-2C-3D-4E-5F                                  | |''');
 
-		LocalFile.ProvisioningLicense.clickGenerateLicenseButton();
+		ProvisioningLicense.clickGenerateLicenseButton();
 
-		LocalFile.ProvisioningLicense.viewLicense(table = '''| Header  | Perlic - ${staticProjectName} | |
+		ProvisioningLicense.viewLicense(table = '''| Header  | Perlic - ${staticProjectName} | |
 	| Product | DXP Production                | |''');
 
-		LocalFile.ProvisioningLicense.getLicenseKeyIdViaLicenseDetails();
+		ProvisioningLicense.getLicenseKeyIdViaLicenseDetails();
 
-		LocalFile.ProvisioningLicense._renameFirstLicenseKeyIdVariable();
+		ProvisioningLicense._renameFirstLicenseKeyIdVariable();
 
-		LocalFile.Provisioning.gotoLicenses();
+		Provisioning.gotoLicenses();
 
-		LocalFile.Provisioning.searchLicenses(keyword = ${staticAccountKey});
+		Provisioning.searchLicenses(keyword = ${staticAccountKey});
 
-		LocalFile.Provisioning.clickGenerateLicenseButton();
+		Provisioning.clickGenerateLicenseButton();
 
-		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Account | Select Entity | Perlic - ${staticProjectName} | |
+		ProvisioningLicense.populateGenerateLicenseForm(table = '''| Account | Select Entity | Perlic - ${staticProjectName} | |
 	| Product | Select        | DXP Production                | |
 	| Version | Select        | 7.2                           | |
 	| Type    | Select        | DXP Production                | |''');
 
-		LocalFile.ProvisioningLicense.clickChooseProductPurchaseButton(positionValue = 1);
+		ProvisioningLicense.clickChooseProductPurchaseButton(positionValue = 1);
 
-		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Name          | Input    | Perlic - ${staticProjectName} License2 Name        | |
+		ProvisioningLicense.populateGenerateLicenseForm(table = '''| Name          | Input    | Perlic - ${staticProjectName} License2 Name        | |
 	| Description   | Input    | Perlic - ${staticProjectName} License2 Description | |
 	| Host Name     | Input    | localhost                                          | |
 	| IP Addresses  | Textarea | 123.45.67.89                                       | |
 	| MAC Addresses | Textarea | 0A-1B-2C-3D-4E-5F                                  | |''');
 
-		LocalFile.ProvisioningLicense.clickGenerateLicenseButton();
+		ProvisioningLicense.clickGenerateLicenseButton();
 
-		LocalFile.ProvisioningLicense.viewLicense(table = '''| Header  | Perlic - ${staticProjectName} | |
+		ProvisioningLicense.viewLicense(table = '''| Header  | Perlic - ${staticProjectName} | |
 	| Product | DXP Production                | |''');
 
-		LocalFile.ProvisioningLicense.getLicenseKeyIdViaLicenseDetails();
+		ProvisioningLicense.getLicenseKeyIdViaLicenseDetails();
 
-		LocalFile.ProvisioningLicense._renameSecondLicenseKeyIdVariable();
+		ProvisioningLicense._renameSecondLicenseKeyIdVariable();
 
-		LocalFile.OSBAdmin.logoutAndLoginToProvisioning(
+		OSBAdmin.logoutAndLoginToProvisioning(
 			userEmailAddress = "licensing.contact.worker@liferay.com.broken",
 			userPassword = ${staticProvisioningQaUserPassword});
 
-		LocalFile.UserAccount.updatePasswordUponLogin(userPassword = "test");
+		UserAccount.updatePasswordUponLogin(userPassword = "test");
 
-		LocalFile.Provisioning.gotoAccounts();
+		Provisioning.gotoAccounts();
 
-		LocalFile.Provisioning.searchAccounts(keyword = "Perlic");
+		Provisioning.searchAccounts(keyword = "Perlic");
 
-		LocalFile.Provisioning.clickAccount(accountName = "Perlic - ${staticProjectName}");
+		Provisioning.clickAccount(accountName = "Perlic - ${staticProjectName}");
 
-		LocalFile.Provisioning.clickTab(tabName = "Licenses");
+		Provisioning.clickTab(tabName = "Licenses");
 
-		LocalFile.ProvisioningAccount.selectLicensesViaLicensesTab(table = '''| Perlic - ${staticProjectName} License1 Name |
+		ProvisioningAccount.selectLicensesViaLicensesTab(table = '''| Perlic - ${staticProjectName} License1 Name |
 	| Perlic - ${staticProjectName} License2 Name |''');
 
-		LocalFile.ProvisioningAccount.clickLicensesActionDropdownButton(action = "Download");
+		ProvisioningAccount.clickLicensesActionDropdownButton(action = "Download");
 
-		LocalFile.ProvisioningLicense.downloadLicenseViaDownloadLicensePage(table = '''| ${staticLicenseKeyId2} |
+		ProvisioningLicense.downloadLicenseViaDownloadLicensePage(table = '''| ${staticLicenseKeyId2} |
 	| ${staticLicenseKeyId1} |''');
 
-		LocalFile.ProvisioningLicense.assertDownloadedLicensePresent(
+		ProvisioningLicense.assertDownloadedLicensePresent(
 			fileType = "xml",
 			table = '''| License Type | activation-key                              |
 	| Product      | DXP Production                              |
@@ -387,9 +387,9 @@ definition {
 	}
 
 	test GeneratenewDXPaggregatelicense {
-		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+		OSBAdminRabbitMQ.generateProvisioningProjectName();
 
-		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | PERLICPERLIC                         | |
+		KoroneikiAccountAPI._createAccount(table = '''| Code                  | PERLICPERLIC                         | |
 	| Contact Email Address | lic.koroneiki1@lrcustomer.com.broken | |
 	| Description           | Test osb account on koroneiki        | |
 	| Fax Number            | 555-555-1234                         | |
@@ -401,17 +401,17 @@ definition {
 	| Tier                  | T4                                   | |
 	| Website               | www.koroneikicorporation.com         | |''');
 
-		LocalFile.KoroneikiAccountAPI._generateAccountKey(accountName = "Perlic - ${staticProjectName}");
+		KoroneikiAccountAPI._generateAccountKey(accountName = "Perlic - ${staticProjectName}");
 
-		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+		KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
 
-		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFullStartAndEndDate();
+		KoroneikiProductPurchaseAPI.generateStaticFullStartAndEndDate();
 
-		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFutureStartAndEndDate();
+		KoroneikiProductPurchaseAPI.generateStaticFutureStartAndEndDate();
 
-		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFullFutureStartAndEndDate();
+		KoroneikiProductPurchaseAPI.generateStaticFullFutureStartAndEndDate();
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Perlic - ${staticProjectName}",
 			productName = "DXP Production",
 			table = '''| End Date                | ${staticEndDate}         |   |
@@ -424,11 +424,11 @@ definition {
 	| Start Date              | ${staticStartDate}       |   |
 	| Status                  | Approved                 |   |''');
 
-		LocalFile.KoroneikiProductPurchaseAPI._generateProductPurchaseId(
+		KoroneikiProductPurchaseAPI._generateProductPurchaseId(
 			accountName = "Perlic - ${staticProjectName}",
 			productName = "DXP Production");
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Perlic - ${staticProjectName}",
 			productName = "Platinum Subscription",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -438,41 +438,41 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.OSBAdmin.loginToProvisioning(
+		OSBAdmin.loginToProvisioning(
 			userEmailAddress = ${staticProvisioningAdminEmailAddress},
 			userPassword = ${staticProvisioningAdminPassword});
 
-		LocalFile.Provisioning.gotoLicenses();
+		Provisioning.gotoLicenses();
 
-		LocalFile.Provisioning.clickGenerateLicenseButton();
+		Provisioning.clickGenerateLicenseButton();
 
-		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Account | Select Entity | Perlic - ${staticProjectName} | |
+		ProvisioningLicense.populateGenerateLicenseForm(table = '''| Account | Select Entity | Perlic - ${staticProjectName} | |
 	| Product | Select        | DXP Production                | |
 	| Version | Select        | 7.2                           | |
 	| Type    | Select        | DXP Production                | |''');
 
-		LocalFile.ProvisioningLicense.clickChooseProductPurchaseButton(positionValue = 1);
+		ProvisioningLicense.clickChooseProductPurchaseButton(positionValue = 1);
 
-		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Name          | Input    | Perlic - ${staticProjectName} License1 Name        | |
+		ProvisioningLicense.populateGenerateLicenseForm(table = '''| Name          | Input    | Perlic - ${staticProjectName} License1 Name        | |
 	| Description   | Input    | Perlic - ${staticProjectName} License1 Description | |
 	| Host Name     | Input    | localhost                                          | |
 	| IP Addresses  | Textarea | 123.45.67.89                                       | |
 	| MAC Addresses | Textarea | 0A-1B-2C-3D-4E-5F                                  | |''');
 
-		LocalFile.ProvisioningLicense.clickGenerateLicenseButton();
+		ProvisioningLicense.clickGenerateLicenseButton();
 
-		LocalFile.ProvisioningLicense.viewLicense(table = '''| Header  | Perlic - ${staticProjectName} | |
+		ProvisioningLicense.viewLicense(table = '''| Header  | Perlic - ${staticProjectName} | |
 	| Product | DXP Production                | |''');
 
-		LocalFile.ProvisioningLicense.getLicenseKeyIdViaLicenseDetails();
+		ProvisioningLicense.getLicenseKeyIdViaLicenseDetails();
 
-		LocalFile.ProvisioningLicense._renameFirstLicenseKeyIdVariable();
+		ProvisioningLicense._renameFirstLicenseKeyIdVariable();
 
-		LocalFile.Provisioning.gotoLicenses();
+		Provisioning.gotoLicenses();
 
-		LocalFile.Provisioning.searchLicenses(keyword = ${staticAccountKey});
+		Provisioning.searchLicenses(keyword = ${staticAccountKey});
 
-		LocalFile.Provisioning._viewLicenseViaIndex(
+		Provisioning._viewLicenseViaIndex(
 			licenseKeyword = "Perlic - ${staticProjectName} License1 Name",
 			table = '''| Name        	| Perlic - ${staticProjectName} License1 Name        |
 	| Description 	| Perlic - ${staticProjectName} License1 Description |
@@ -485,50 +485,50 @@ definition {
 	| Status        | ACTIVE                         					 |
 	| Complimentary | false                          					 |''');
 
-		LocalFile.Provisioning.clickGenerateLicenseButton();
+		Provisioning.clickGenerateLicenseButton();
 
-		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Account | Select Entity | Perlic - ${staticProjectName} | |
+		ProvisioningLicense.populateGenerateLicenseForm(table = '''| Account | Select Entity | Perlic - ${staticProjectName} | |
 	| Product | Select        | DXP Production                | |
 	| Version | Select        | 7.2                           | |
 	| Type    | Select        | DXP Production                | |''');
 
-		LocalFile.ProvisioningLicense.clickChooseProductPurchaseButton(positionValue = 1);
+		ProvisioningLicense.clickChooseProductPurchaseButton(positionValue = 1);
 
-		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Name          | Input    | Perlic - ${staticProjectName} License2 Name        | |
+		ProvisioningLicense.populateGenerateLicenseForm(table = '''| Name          | Input    | Perlic - ${staticProjectName} License2 Name        | |
 	| Description   | Input    | Perlic - ${staticProjectName} License2 Description | |
 	| Host Name     | Input    | localhost                                          | |
 	| IP Addresses  | Textarea | 123.45.67.89                                       | |
 	| MAC Addresses | Textarea | 0A-1B-2C-3D-4E-5F                                  | |''');
 
-		LocalFile.ProvisioningLicense.clickGenerateLicenseButton();
+		ProvisioningLicense.clickGenerateLicenseButton();
 
-		LocalFile.ProvisioningLicense.viewLicense(table = '''| Header  | Perlic - ${staticProjectName} | |
+		ProvisioningLicense.viewLicense(table = '''| Header  | Perlic - ${staticProjectName} | |
 	| Product | DXP Production                | |''');
 
-		LocalFile.ProvisioningLicense.getLicenseKeyIdViaLicenseDetails();
+		ProvisioningLicense.getLicenseKeyIdViaLicenseDetails();
 
-		LocalFile.ProvisioningLicense._renameSecondLicenseKeyIdVariable();
+		ProvisioningLicense._renameSecondLicenseKeyIdVariable();
 
-		LocalFile.OSBAdmin.logoutAndLoginToProvisioning(
+		OSBAdmin.logoutAndLoginToProvisioning(
 			userEmailAddress = "licensing.contact.worker@liferay.com.broken",
 			userPassword = ${staticProvisioningQaUserPassword});
 
-		LocalFile.UserAccount.updatePasswordUponLogin(userPassword = "test");
+		UserAccount.updatePasswordUponLogin(userPassword = "test");
 
-		LocalFile.Provisioning.gotoAccounts();
+		Provisioning.gotoAccounts();
 
-		LocalFile.Provisioning.searchAccounts(keyword = "Perlic");
+		Provisioning.searchAccounts(keyword = "Perlic");
 
-		LocalFile.Provisioning.clickAccount(accountName = "Perlic - ${staticProjectName}");
+		Provisioning.clickAccount(accountName = "Perlic - ${staticProjectName}");
 
-		LocalFile.Provisioning.clickTab(tabName = "Licenses");
+		Provisioning.clickTab(tabName = "Licenses");
 
-		LocalFile.ProvisioningAccount.selectLicensesViaLicensesTab(table = '''| Perlic - ${staticProjectName} License1 Name |
+		ProvisioningAccount.selectLicensesViaLicensesTab(table = '''| Perlic - ${staticProjectName} License1 Name |
 	| Perlic - ${staticProjectName} License2 Name |''');
 
-		LocalFile.ProvisioningAccount.clickLicensesActionDropdownButton(action = "Download");
+		ProvisioningAccount.clickLicensesActionDropdownButton(action = "Download");
 
-		LocalFile.ProvisioningLicense._viewLicenseViaDownloadLicensePage(
+		ProvisioningLicense._viewLicenseViaDownloadLicensePage(
 			licenseKeyword = "Perlic - ${staticProjectName} License1 Name",
 			table = '''| Name        | Perlic - ${staticProjectName} License1 Name        |
 	| Description | Perlic - ${staticProjectName} License1 Description |
@@ -537,7 +537,7 @@ definition {
 	| Type        | DXP Production                                     |
 	| Status      | ACTIVE                                             |''');
 
-		LocalFile.ProvisioningLicense._viewLicenseViaDownloadLicensePage(
+		ProvisioningLicense._viewLicenseViaDownloadLicensePage(
 			licenseKeyword = "Perlic - ${staticProjectName} License2 Name",
 			table = '''| Name        | Perlic - ${staticProjectName} License2 Name        |
 	| Description | Perlic - ${staticProjectName} License2 Description |
@@ -546,14 +546,14 @@ definition {
 	| Type        | DXP Production                                     |
 	| Status      | ACTIVE                                             |''');
 
-		LocalFile.ProvisioningLicense.viewDownloadLicenseButtonViaDownloadLicensePage(table = '''| ${staticLicenseKeyId2} |
+		ProvisioningLicense.viewDownloadLicenseButtonViaDownloadLicensePage(table = '''| ${staticLicenseKeyId2} |
 	| ${staticLicenseKeyId1} |''');
 	}
 
 	test GeneratenewDXPaggregatelicenseviadownloadbutton {
-		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+		OSBAdminRabbitMQ.generateProvisioningProjectName();
 
-		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | PERLICPERLIC                         | |
+		KoroneikiAccountAPI._createAccount(table = '''| Code                  | PERLICPERLIC                         | |
 	| Contact Email Address | lic.koroneiki1@lrcustomer.com.broken | |
 	| Description           | Test osb account on koroneiki        | |
 	| Fax Number            | 555-555-1234                         | |
@@ -565,17 +565,17 @@ definition {
 	| Tier                  | T4                                   | |
 	| Website               | www.koroneikicorporation.com         | |''');
 
-		LocalFile.KoroneikiAccountAPI._generateAccountKey(accountName = "Perlic - ${staticProjectName}");
+		KoroneikiAccountAPI._generateAccountKey(accountName = "Perlic - ${staticProjectName}");
 
-		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+		KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
 
-		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFullStartAndEndDate();
+		KoroneikiProductPurchaseAPI.generateStaticFullStartAndEndDate();
 
-		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFutureStartAndEndDate();
+		KoroneikiProductPurchaseAPI.generateStaticFutureStartAndEndDate();
 
-		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFullFutureStartAndEndDate();
+		KoroneikiProductPurchaseAPI.generateStaticFullFutureStartAndEndDate();
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Perlic - ${staticProjectName}",
 			productName = "DXP Production",
 			table = '''| End Date                | ${staticEndDate}         |   |
@@ -588,11 +588,11 @@ definition {
 	| Start Date              | ${staticStartDate}       |   |
 	| Status                  | Approved                 |   |''');
 
-		LocalFile.KoroneikiProductPurchaseAPI._generateProductPurchaseId(
+		KoroneikiProductPurchaseAPI._generateProductPurchaseId(
 			accountName = "Perlic - ${staticProjectName}",
 			productName = "DXP Production");
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Perlic - ${staticProjectName}",
 			productName = "Platinum Subscription",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -602,41 +602,41 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.OSBAdmin.loginToProvisioning(
+		OSBAdmin.loginToProvisioning(
 			userEmailAddress = ${staticProvisioningAdminEmailAddress},
 			userPassword = ${staticProvisioningAdminPassword});
 
-		LocalFile.Provisioning.gotoLicenses();
+		Provisioning.gotoLicenses();
 
-		LocalFile.Provisioning.clickGenerateLicenseButton();
+		Provisioning.clickGenerateLicenseButton();
 
-		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Account | Select Entity | Perlic - ${staticProjectName} | |
+		ProvisioningLicense.populateGenerateLicenseForm(table = '''| Account | Select Entity | Perlic - ${staticProjectName} | |
 	| Product | Select        | DXP Production                | |
 	| Version | Select        | 7.2                           | |
 	| Type    | Select        | DXP Production                | |''');
 
-		LocalFile.ProvisioningLicense.clickChooseProductPurchaseButton(positionValue = 1);
+		ProvisioningLicense.clickChooseProductPurchaseButton(positionValue = 1);
 
-		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Name          | Input    | Perlic - ${staticProjectName} License1 Name        | |
+		ProvisioningLicense.populateGenerateLicenseForm(table = '''| Name          | Input    | Perlic - ${staticProjectName} License1 Name        | |
 	| Description   | Input    | Perlic - ${staticProjectName} License1 Description | |
 	| Host Name     | Input    | localhost                                          | |
 	| IP Addresses  | Textarea | 123.45.67.89                                       | |
 	| MAC Addresses | Textarea | 0A-1B-2C-3D-4E-5F                                  | |''');
 
-		LocalFile.ProvisioningLicense.clickGenerateLicenseButton();
+		ProvisioningLicense.clickGenerateLicenseButton();
 
-		LocalFile.ProvisioningLicense.viewLicense(table = '''| Header  | Perlic - ${staticProjectName} | |
+		ProvisioningLicense.viewLicense(table = '''| Header  | Perlic - ${staticProjectName} | |
 	| Product | DXP Production                | |''');
 
-		LocalFile.ProvisioningLicense.getLicenseKeyIdViaLicenseDetails();
+		ProvisioningLicense.getLicenseKeyIdViaLicenseDetails();
 
-		LocalFile.ProvisioningLicense._renameFirstLicenseKeyIdVariable();
+		ProvisioningLicense._renameFirstLicenseKeyIdVariable();
 
-		LocalFile.Provisioning.gotoLicenses();
+		Provisioning.gotoLicenses();
 
-		LocalFile.Provisioning.searchLicenses(keyword = ${staticAccountKey});
+		Provisioning.searchLicenses(keyword = ${staticAccountKey});
 
-		LocalFile.Provisioning._viewLicenseViaIndex(
+		Provisioning._viewLicenseViaIndex(
 			licenseKeyword = "Perlic - ${staticProjectName} License1 Name",
 			table = '''| Name        	| Perlic - ${staticProjectName} License1 Name        |
 	| Description 	| Perlic - ${staticProjectName} License1 Description |
@@ -649,50 +649,50 @@ definition {
 	| Status        | ACTIVE                         					 |
 	| Complimentary | false                          					 |''');
 
-		LocalFile.Provisioning.clickGenerateLicenseButton();
+		Provisioning.clickGenerateLicenseButton();
 
-		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Account | Select Entity | Perlic - ${staticProjectName} | |
+		ProvisioningLicense.populateGenerateLicenseForm(table = '''| Account | Select Entity | Perlic - ${staticProjectName} | |
 	| Product | Select        | DXP Production                | |
 	| Version | Select        | 7.2                           | |
 	| Type    | Select        | DXP Production                | |''');
 
-		LocalFile.ProvisioningLicense.clickChooseProductPurchaseButton(positionValue = 1);
+		ProvisioningLicense.clickChooseProductPurchaseButton(positionValue = 1);
 
-		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Name          | Input    | Perlic - ${staticProjectName} License2 Name        | |
+		ProvisioningLicense.populateGenerateLicenseForm(table = '''| Name          | Input    | Perlic - ${staticProjectName} License2 Name        | |
 	| Description   | Input    | Perlic - ${staticProjectName} License2 Description | |
 	| Host Name     | Input    | localhost                                          | |
 	| IP Addresses  | Textarea | 123.45.67.89                                       | |
 	| MAC Addresses | Textarea | 0A-1B-2C-3D-4E-5F                                  | |''');
 
-		LocalFile.ProvisioningLicense.clickGenerateLicenseButton();
+		ProvisioningLicense.clickGenerateLicenseButton();
 
-		LocalFile.ProvisioningLicense.viewLicense(table = '''| Header  | Perlic - ${staticProjectName} | |
+		ProvisioningLicense.viewLicense(table = '''| Header  | Perlic - ${staticProjectName} | |
 	| Product | DXP Production                | |''');
 
-		LocalFile.ProvisioningLicense.getLicenseKeyIdViaLicenseDetails();
+		ProvisioningLicense.getLicenseKeyIdViaLicenseDetails();
 
-		LocalFile.ProvisioningLicense._renameSecondLicenseKeyIdVariable();
+		ProvisioningLicense._renameSecondLicenseKeyIdVariable();
 
-		LocalFile.OSBAdmin.logoutAndLoginToProvisioning(
+		OSBAdmin.logoutAndLoginToProvisioning(
 			userEmailAddress = "licensing.contact.worker@liferay.com.broken",
 			userPassword = ${staticProvisioningQaUserPassword});
 
-		LocalFile.UserAccount.updatePasswordUponLogin(userPassword = "test");
+		UserAccount.updatePasswordUponLogin(userPassword = "test");
 
-		LocalFile.Provisioning.gotoAccounts();
+		Provisioning.gotoAccounts();
 
-		LocalFile.Provisioning.searchAccounts(keyword = "Perlic");
+		Provisioning.searchAccounts(keyword = "Perlic");
 
-		LocalFile.Provisioning.clickAccount(accountName = "Perlic - ${staticProjectName}");
+		Provisioning.clickAccount(accountName = "Perlic - ${staticProjectName}");
 
-		LocalFile.Provisioning.clickTab(tabName = "Licenses");
+		Provisioning.clickTab(tabName = "Licenses");
 
-		LocalFile.ProvisioningAccount.selectLicensesViaLicensesTab(table = '''| Perlic - ${staticProjectName} License1 Name |
+		ProvisioningAccount.selectLicensesViaLicensesTab(table = '''| Perlic - ${staticProjectName} License1 Name |
 	| Perlic - ${staticProjectName} License2 Name |''');
 
-		LocalFile.ProvisioningAccount.clickLicensesDownloadButton();
+		ProvisioningAccount.clickLicensesDownloadButton();
 
-		LocalFile.ProvisioningLicense._viewLicenseViaDownloadLicensePage(
+		ProvisioningLicense._viewLicenseViaDownloadLicensePage(
 			licenseKeyword = "Perlic - ${staticProjectName} License1 Name",
 			table = '''| Name        | Perlic - ${staticProjectName} License1 Name        |
 	| Description | Perlic - ${staticProjectName} License1 Description |
@@ -701,7 +701,7 @@ definition {
 	| Type        | DXP Production                                     |
 	| Status      | ACTIVE                                             |''');
 
-		LocalFile.ProvisioningLicense._viewLicenseViaDownloadLicensePage(
+		ProvisioningLicense._viewLicenseViaDownloadLicensePage(
 			licenseKeyword = "Perlic - ${staticProjectName} License2 Name",
 			table = '''| Name        | Perlic - ${staticProjectName} License2 Name        |
 	| Description | Perlic - ${staticProjectName} License2 Description |
@@ -710,14 +710,14 @@ definition {
 	| Type        | DXP Production                                     |
 	| Status      | ACTIVE                                             |''');
 
-		LocalFile.ProvisioningLicense.viewDownloadLicenseButtonViaDownloadLicensePage(table = '''| ${staticLicenseKeyId2} |
+		ProvisioningLicense.viewDownloadLicenseButtonViaDownloadLicensePage(table = '''| ${staticLicenseKeyId2} |
 	| ${staticLicenseKeyId1} |''');
 	}
 
 	test GeneratenewDXPaggregatelicenseviadownloadbuttonviasubscriptiondetails {
-		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+		OSBAdminRabbitMQ.generateProvisioningProjectName();
 
-		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | PERLICPERLIC                         | |
+		KoroneikiAccountAPI._createAccount(table = '''| Code                  | PERLICPERLIC                         | |
 	| Contact Email Address | lic.koroneiki1@lrcustomer.com.broken | |
 	| Description           | Test osb account on koroneiki        | |
 	| Fax Number            | 555-555-1234                         | |
@@ -729,17 +729,17 @@ definition {
 	| Tier                  | T4                                   | |
 	| Website               | www.koroneikicorporation.com         | |''');
 
-		LocalFile.KoroneikiAccountAPI._generateAccountKey(accountName = "Perlic - ${staticProjectName}");
+		KoroneikiAccountAPI._generateAccountKey(accountName = "Perlic - ${staticProjectName}");
 
-		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+		KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
 
-		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFullStartAndEndDate();
+		KoroneikiProductPurchaseAPI.generateStaticFullStartAndEndDate();
 
-		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFutureStartAndEndDate();
+		KoroneikiProductPurchaseAPI.generateStaticFutureStartAndEndDate();
 
-		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFullFutureStartAndEndDate();
+		KoroneikiProductPurchaseAPI.generateStaticFullFutureStartAndEndDate();
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Perlic - ${staticProjectName}",
 			productName = "DXP Production",
 			table = '''| End Date                | ${staticEndDate}         |   |
@@ -752,11 +752,11 @@ definition {
 	| Start Date              | ${staticStartDate}       |   |
 	| Status                  | Approved                 |   |''');
 
-		LocalFile.KoroneikiProductPurchaseAPI._generateProductPurchaseId(
+		KoroneikiProductPurchaseAPI._generateProductPurchaseId(
 			accountName = "Perlic - ${staticProjectName}",
 			productName = "DXP Production");
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Perlic - ${staticProjectName}",
 			productName = "Platinum Subscription",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -766,41 +766,41 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.OSBAdmin.loginToProvisioning(
+		OSBAdmin.loginToProvisioning(
 			userEmailAddress = ${staticProvisioningAdminEmailAddress},
 			userPassword = ${staticProvisioningAdminPassword});
 
-		LocalFile.Provisioning.gotoLicenses();
+		Provisioning.gotoLicenses();
 
-		LocalFile.Provisioning.clickGenerateLicenseButton();
+		Provisioning.clickGenerateLicenseButton();
 
-		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Account | Select Entity | Perlic - ${staticProjectName} | |
+		ProvisioningLicense.populateGenerateLicenseForm(table = '''| Account | Select Entity | Perlic - ${staticProjectName} | |
 	| Product | Select        | DXP Production                | |
 	| Version | Select        | 7.2                           | |
 	| Type    | Select        | DXP Production                | |''');
 
-		LocalFile.ProvisioningLicense.clickChooseProductPurchaseButton(positionValue = 1);
+		ProvisioningLicense.clickChooseProductPurchaseButton(positionValue = 1);
 
-		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Name          | Input    | Perlic - ${staticProjectName} License1 Name        | |
+		ProvisioningLicense.populateGenerateLicenseForm(table = '''| Name          | Input    | Perlic - ${staticProjectName} License1 Name        | |
 	| Description   | Input    | Perlic - ${staticProjectName} License1 Description | |
 	| Host Name     | Input    | localhost                                          | |
 	| IP Addresses  | Textarea | 123.45.67.89                                       | |
 	| MAC Addresses | Textarea | 0A-1B-2C-3D-4E-5F                                  | |''');
 
-		LocalFile.ProvisioningLicense.clickGenerateLicenseButton();
+		ProvisioningLicense.clickGenerateLicenseButton();
 
-		LocalFile.ProvisioningLicense.viewLicense(table = '''| Header  | Perlic - ${staticProjectName} | |
+		ProvisioningLicense.viewLicense(table = '''| Header  | Perlic - ${staticProjectName} | |
 	| Product | DXP Production                | |''');
 
-		LocalFile.ProvisioningLicense.getLicenseKeyIdViaLicenseDetails();
+		ProvisioningLicense.getLicenseKeyIdViaLicenseDetails();
 
-		LocalFile.ProvisioningLicense._renameFirstLicenseKeyIdVariable();
+		ProvisioningLicense._renameFirstLicenseKeyIdVariable();
 
-		LocalFile.Provisioning.gotoLicenses();
+		Provisioning.gotoLicenses();
 
-		LocalFile.Provisioning.searchLicenses(keyword = ${staticAccountKey});
+		Provisioning.searchLicenses(keyword = ${staticAccountKey});
 
-		LocalFile.Provisioning._viewLicenseViaIndex(
+		Provisioning._viewLicenseViaIndex(
 			licenseKeyword = "Perlic - ${staticProjectName} License1 Name",
 			table = '''| Name        	| Perlic - ${staticProjectName} License1 Name        |
 	| Description 	| Perlic - ${staticProjectName} License1 Description |
@@ -813,52 +813,52 @@ definition {
 	| Status        | ACTIVE                         					 |
 	| Complimentary | false                          					 |''');
 
-		LocalFile.Provisioning.clickGenerateLicenseButton();
+		Provisioning.clickGenerateLicenseButton();
 
-		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Account | Select Entity | Perlic - ${staticProjectName} | |
+		ProvisioningLicense.populateGenerateLicenseForm(table = '''| Account | Select Entity | Perlic - ${staticProjectName} | |
 	| Product | Select        | DXP Production                | |
 	| Version | Select        | 7.2                           | |
 	| Type    | Select        | DXP Production                | |''');
 
-		LocalFile.ProvisioningLicense.clickChooseProductPurchaseButton(positionValue = 1);
+		ProvisioningLicense.clickChooseProductPurchaseButton(positionValue = 1);
 
-		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Name          | Input    | Perlic - ${staticProjectName} License2 Name        | |
+		ProvisioningLicense.populateGenerateLicenseForm(table = '''| Name          | Input    | Perlic - ${staticProjectName} License2 Name        | |
 	| Description   | Input    | Perlic - ${staticProjectName} License2 Description | |
 	| Host Name     | Input    | localhost                                          | |
 	| IP Addresses  | Textarea | 123.45.67.89                                       | |
 	| MAC Addresses | Textarea | 0A-1B-2C-3D-4E-5F                                  | |''');
 
-		LocalFile.ProvisioningLicense.clickGenerateLicenseButton();
+		ProvisioningLicense.clickGenerateLicenseButton();
 
-		LocalFile.ProvisioningLicense.viewLicense(table = '''| Header  | Perlic - ${staticProjectName} | |
+		ProvisioningLicense.viewLicense(table = '''| Header  | Perlic - ${staticProjectName} | |
 	| Product | DXP Production                | |''');
 
-		LocalFile.ProvisioningLicense.getLicenseKeyIdViaLicenseDetails();
+		ProvisioningLicense.getLicenseKeyIdViaLicenseDetails();
 
-		LocalFile.ProvisioningLicense._renameSecondLicenseKeyIdVariable();
+		ProvisioningLicense._renameSecondLicenseKeyIdVariable();
 
-		LocalFile.OSBAdmin.logoutAndLoginToProvisioning(
+		OSBAdmin.logoutAndLoginToProvisioning(
 			userEmailAddress = "licensing.contact.worker@liferay.com.broken",
 			userPassword = ${staticProvisioningQaUserPassword});
 
-		LocalFile.UserAccount.updatePasswordUponLogin(userPassword = "test");
+		UserAccount.updatePasswordUponLogin(userPassword = "test");
 
-		LocalFile.Provisioning.gotoAccounts();
+		Provisioning.gotoAccounts();
 
-		LocalFile.Provisioning.searchAccounts(keyword = "Perlic");
+		Provisioning.searchAccounts(keyword = "Perlic");
 
-		LocalFile.Provisioning.clickAccount(accountName = "Perlic - ${staticProjectName}");
+		Provisioning.clickAccount(accountName = "Perlic - ${staticProjectName}");
 
-		LocalFile.ProvisioningAccount.clickSubscriptionLink(productName = "DXP Production");
+		ProvisioningAccount.clickSubscriptionLink(productName = "DXP Production");
 
-		LocalFile.Provisioning.clickTab(tabName = "Licenses");
+		Provisioning.clickTab(tabName = "Licenses");
 
-		LocalFile.ProvisioningSubscription.selectLicensesViaLicensesTab(table = '''| Perlic - ${staticProjectName} License1 Name |
+		ProvisioningSubscription.selectLicensesViaLicensesTab(table = '''| Perlic - ${staticProjectName} License1 Name |
 	| Perlic - ${staticProjectName} License2 Name |''');
 
-		LocalFile.ProvisioningSubscription.clickLicensesDownloadButton();
+		ProvisioningSubscription.clickLicensesDownloadButton();
 
-		LocalFile.ProvisioningLicense._viewLicenseViaDownloadLicensePage(
+		ProvisioningLicense._viewLicenseViaDownloadLicensePage(
 			licenseKeyword = "Perlic - ${staticProjectName} License1 Name",
 			table = '''| Name        | Perlic - ${staticProjectName} License1 Name        |
 	| Description | Perlic - ${staticProjectName} License1 Description |
@@ -867,7 +867,7 @@ definition {
 	| Type        | DXP Production                                     |
 	| Status      | ACTIVE                                             |''');
 
-		LocalFile.ProvisioningLicense._viewLicenseViaDownloadLicensePage(
+		ProvisioningLicense._viewLicenseViaDownloadLicensePage(
 			licenseKeyword = "Perlic - ${staticProjectName} License2 Name",
 			table = '''| Name        | Perlic - ${staticProjectName} License2 Name        |
 	| Description | Perlic - ${staticProjectName} License2 Description |
@@ -876,14 +876,14 @@ definition {
 	| Type        | DXP Production                                     |
 	| Status      | ACTIVE                                             |''');
 
-		LocalFile.ProvisioningLicense.viewDownloadLicenseButtonViaDownloadLicensePage(table = '''| ${staticLicenseKeyId2} |
+		ProvisioningLicense.viewDownloadLicenseButtonViaDownloadLicensePage(table = '''| ${staticLicenseKeyId2} |
 	| ${staticLicenseKeyId1} |''');
 	}
 
 	test GeneratenewDXPaggregatelicenseviasubscriptiondetails {
-		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+		OSBAdminRabbitMQ.generateProvisioningProjectName();
 
-		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | PERLICPERLIC                         | |
+		KoroneikiAccountAPI._createAccount(table = '''| Code                  | PERLICPERLIC                         | |
 	| Contact Email Address | lic.koroneiki1@lrcustomer.com.broken | |
 	| Description           | Test osb account on koroneiki        | |
 	| Fax Number            | 555-555-1234                         | |
@@ -895,17 +895,17 @@ definition {
 	| Tier                  | T4                                   | |
 	| Website               | www.koroneikicorporation.com         | |''');
 
-		LocalFile.KoroneikiAccountAPI._generateAccountKey(accountName = "Perlic - ${staticProjectName}");
+		KoroneikiAccountAPI._generateAccountKey(accountName = "Perlic - ${staticProjectName}");
 
-		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+		KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
 
-		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFullStartAndEndDate();
+		KoroneikiProductPurchaseAPI.generateStaticFullStartAndEndDate();
 
-		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFutureStartAndEndDate();
+		KoroneikiProductPurchaseAPI.generateStaticFutureStartAndEndDate();
 
-		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFullFutureStartAndEndDate();
+		KoroneikiProductPurchaseAPI.generateStaticFullFutureStartAndEndDate();
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Perlic - ${staticProjectName}",
 			productName = "DXP Production",
 			table = '''| End Date                | ${staticEndDate}         |   |
@@ -918,11 +918,11 @@ definition {
 	| Start Date              | ${staticStartDate}       |   |
 	| Status                  | Approved                 |   |''');
 
-		LocalFile.KoroneikiProductPurchaseAPI._generateProductPurchaseId(
+		KoroneikiProductPurchaseAPI._generateProductPurchaseId(
 			accountName = "Perlic - ${staticProjectName}",
 			productName = "DXP Production");
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Perlic - ${staticProjectName}",
 			productName = "Platinum Subscription",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -932,41 +932,41 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.OSBAdmin.loginToProvisioning(
+		OSBAdmin.loginToProvisioning(
 			userEmailAddress = ${staticProvisioningAdminEmailAddress},
 			userPassword = ${staticProvisioningAdminPassword});
 
-		LocalFile.Provisioning.gotoLicenses();
+		Provisioning.gotoLicenses();
 
-		LocalFile.Provisioning.clickGenerateLicenseButton();
+		Provisioning.clickGenerateLicenseButton();
 
-		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Account | Select Entity | Perlic - ${staticProjectName} | |
+		ProvisioningLicense.populateGenerateLicenseForm(table = '''| Account | Select Entity | Perlic - ${staticProjectName} | |
 	| Product | Select        | DXP Production                | |
 	| Version | Select        | 7.2                           | |
 	| Type    | Select        | DXP Production                | |''');
 
-		LocalFile.ProvisioningLicense.clickChooseProductPurchaseButton(positionValue = 1);
+		ProvisioningLicense.clickChooseProductPurchaseButton(positionValue = 1);
 
-		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Name          | Input    | Perlic - ${staticProjectName} License1 Name        | |
+		ProvisioningLicense.populateGenerateLicenseForm(table = '''| Name          | Input    | Perlic - ${staticProjectName} License1 Name        | |
 	| Description   | Input    | Perlic - ${staticProjectName} License1 Description | |
 	| Host Name     | Input    | localhost                                          | |
 	| IP Addresses  | Textarea | 123.45.67.89                                       | |
 	| MAC Addresses | Textarea | 0A-1B-2C-3D-4E-5F                                  | |''');
 
-		LocalFile.ProvisioningLicense.clickGenerateLicenseButton();
+		ProvisioningLicense.clickGenerateLicenseButton();
 
-		LocalFile.ProvisioningLicense.viewLicense(table = '''| Header  | Perlic - ${staticProjectName} | |
+		ProvisioningLicense.viewLicense(table = '''| Header  | Perlic - ${staticProjectName} | |
 	| Product | DXP Production                | |''');
 
-		LocalFile.ProvisioningLicense.getLicenseKeyIdViaLicenseDetails();
+		ProvisioningLicense.getLicenseKeyIdViaLicenseDetails();
 
-		LocalFile.ProvisioningLicense._renameFirstLicenseKeyIdVariable();
+		ProvisioningLicense._renameFirstLicenseKeyIdVariable();
 
-		LocalFile.Provisioning.gotoLicenses();
+		Provisioning.gotoLicenses();
 
-		LocalFile.Provisioning.searchLicenses(keyword = ${staticAccountKey});
+		Provisioning.searchLicenses(keyword = ${staticAccountKey});
 
-		LocalFile.Provisioning._viewLicenseViaIndex(
+		Provisioning._viewLicenseViaIndex(
 			licenseKeyword = "Perlic - ${staticProjectName} License1 Name",
 			table = '''| Name        	| Perlic - ${staticProjectName} License1 Name        |
 	| Description 	| Perlic - ${staticProjectName} License1 Description |
@@ -979,52 +979,52 @@ definition {
 	| Status        | ACTIVE                         					 |
 	| Complimentary | false                          					 |''');
 
-		LocalFile.Provisioning.clickGenerateLicenseButton();
+		Provisioning.clickGenerateLicenseButton();
 
-		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Account | Select Entity | Perlic - ${staticProjectName} | |
+		ProvisioningLicense.populateGenerateLicenseForm(table = '''| Account | Select Entity | Perlic - ${staticProjectName} | |
 	| Product | Select        | DXP Production                | |
 	| Version | Select        | 7.2                           | |
 	| Type    | Select        | DXP Production                | |''');
 
-		LocalFile.ProvisioningLicense.clickChooseProductPurchaseButton(positionValue = 1);
+		ProvisioningLicense.clickChooseProductPurchaseButton(positionValue = 1);
 
-		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Name          | Input    | Perlic - ${staticProjectName} License2 Name        | |
+		ProvisioningLicense.populateGenerateLicenseForm(table = '''| Name          | Input    | Perlic - ${staticProjectName} License2 Name        | |
 	| Description   | Input    | Perlic - ${staticProjectName} License2 Description | |
 	| Host Name     | Input    | localhost                                          | |
 	| IP Addresses  | Textarea | 123.45.67.89                                       | |
 	| MAC Addresses | Textarea | 0A-1B-2C-3D-4E-5F                                  | |''');
 
-		LocalFile.ProvisioningLicense.clickGenerateLicenseButton();
+		ProvisioningLicense.clickGenerateLicenseButton();
 
-		LocalFile.ProvisioningLicense.viewLicense(table = '''| Header  | Perlic - ${staticProjectName} | |
+		ProvisioningLicense.viewLicense(table = '''| Header  | Perlic - ${staticProjectName} | |
 	| Product | DXP Production                | |''');
 
-		LocalFile.ProvisioningLicense.getLicenseKeyIdViaLicenseDetails();
+		ProvisioningLicense.getLicenseKeyIdViaLicenseDetails();
 
-		LocalFile.ProvisioningLicense._renameSecondLicenseKeyIdVariable();
+		ProvisioningLicense._renameSecondLicenseKeyIdVariable();
 
-		LocalFile.OSBAdmin.logoutAndLoginToProvisioning(
+		OSBAdmin.logoutAndLoginToProvisioning(
 			userEmailAddress = "licensing.contact.worker@liferay.com.broken",
 			userPassword = ${staticProvisioningQaUserPassword});
 
-		LocalFile.UserAccount.updatePasswordUponLogin(userPassword = "test");
+		UserAccount.updatePasswordUponLogin(userPassword = "test");
 
-		LocalFile.Provisioning.gotoAccounts();
+		Provisioning.gotoAccounts();
 
-		LocalFile.Provisioning.searchAccounts(keyword = "Perlic");
+		Provisioning.searchAccounts(keyword = "Perlic");
 
-		LocalFile.Provisioning.clickAccount(accountName = "Perlic - ${staticProjectName}");
+		Provisioning.clickAccount(accountName = "Perlic - ${staticProjectName}");
 
-		LocalFile.ProvisioningAccount.clickSubscriptionLink(productName = "DXP Production");
+		ProvisioningAccount.clickSubscriptionLink(productName = "DXP Production");
 
-		LocalFile.Provisioning.clickTab(tabName = "Licenses");
+		Provisioning.clickTab(tabName = "Licenses");
 
-		LocalFile.ProvisioningSubscription.selectLicensesViaLicensesTab(table = '''| Perlic - ${staticProjectName} License1 Name |
+		ProvisioningSubscription.selectLicensesViaLicensesTab(table = '''| Perlic - ${staticProjectName} License1 Name |
 	| Perlic - ${staticProjectName} License2 Name |''');
 
-		LocalFile.ProvisioningSubscription.clickLicensesActionDropdownButton(action = "Download");
+		ProvisioningSubscription.clickLicensesActionDropdownButton(action = "Download");
 
-		LocalFile.ProvisioningLicense._viewLicenseViaDownloadLicensePage(
+		ProvisioningLicense._viewLicenseViaDownloadLicensePage(
 			licenseKeyword = "Perlic - ${staticProjectName} License1 Name",
 			table = '''| Name        | Perlic - ${staticProjectName} License1 Name        |
 	| Description | Perlic - ${staticProjectName} License1 Description |
@@ -1033,7 +1033,7 @@ definition {
 	| Type        | DXP Production                                     |
 	| Status      | ACTIVE                                             |''');
 
-		LocalFile.ProvisioningLicense._viewLicenseViaDownloadLicensePage(
+		ProvisioningLicense._viewLicenseViaDownloadLicensePage(
 			licenseKeyword = "Perlic - ${staticProjectName} License2 Name",
 			table = '''| Name        | Perlic - ${staticProjectName} License2 Name        |
 	| Description | Perlic - ${staticProjectName} License2 Description |
@@ -1042,14 +1042,14 @@ definition {
 	| Type        | DXP Production                                     |
 	| Status      | ACTIVE                                             |''');
 
-		LocalFile.ProvisioningLicense.viewDownloadLicenseButtonViaDownloadLicensePage(table = '''| ${staticLicenseKeyId2} |
+		ProvisioningLicense.viewDownloadLicenseButtonViaDownloadLicensePage(table = '''| ${staticLicenseKeyId2} |
 	| ${staticLicenseKeyId1} |''');
 	}
 
 	test Viewcomplimentarylicense {
-		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+		OSBAdminRabbitMQ.generateProvisioningProjectName();
 
-		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | PERLICPERLIC                         | |
+		KoroneikiAccountAPI._createAccount(table = '''| Code                  | PERLICPERLIC                         | |
 	| Contact Email Address | lic.koroneiki1@lrcustomer.com.broken | |
 	| Description           | Test osb account on koroneiki        | |
 	| Fax Number            | 555-555-1234                         | |
@@ -1061,17 +1061,17 @@ definition {
 	| Tier                  | T4                                   | |
 	| Website               | www.koroneikicorporation.com         | |''');
 
-		LocalFile.KoroneikiAccountAPI._generateAccountKey(accountName = "Perlic - ${staticProjectName}");
+		KoroneikiAccountAPI._generateAccountKey(accountName = "Perlic - ${staticProjectName}");
 
-		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+		KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
 
-		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFullStartAndEndDate();
+		KoroneikiProductPurchaseAPI.generateStaticFullStartAndEndDate();
 
-		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFutureStartAndEndDate();
+		KoroneikiProductPurchaseAPI.generateStaticFutureStartAndEndDate();
 
-		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFullFutureStartAndEndDate();
+		KoroneikiProductPurchaseAPI.generateStaticFullFutureStartAndEndDate();
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Perlic - ${staticProjectName}",
 			productName = "DXP Production",
 			table = '''| End Date                | ${staticEndDate}         |   |
@@ -1084,11 +1084,11 @@ definition {
 	| Start Date              | ${staticStartDate}       |   |
 	| Status                  | Approved                 |   |''');
 
-		LocalFile.KoroneikiProductPurchaseAPI._generateProductPurchaseId(
+		KoroneikiProductPurchaseAPI._generateProductPurchaseId(
 			accountName = "Perlic - ${staticProjectName}",
 			productName = "DXP Production");
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Perlic - ${staticProjectName}",
 			productName = "Platinum Subscription",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -1098,45 +1098,45 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.OSBAdmin.loginToProvisioning(
+		OSBAdmin.loginToProvisioning(
 			userEmailAddress = ${staticProvisioningAdminEmailAddress},
 			userPassword = ${staticProvisioningAdminPassword});
 
-		LocalFile.Provisioning.gotoLicenses();
+		Provisioning.gotoLicenses();
 
-		LocalFile.Provisioning.clickGenerateLicenseButton();
+		Provisioning.clickGenerateLicenseButton();
 
-		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Account | Select Entity | Perlic - ${staticProjectName} | |
+		ProvisioningLicense.populateGenerateLicenseForm(table = '''| Account | Select Entity | Perlic - ${staticProjectName} | |
 	| Product | Select        | DXP Production                | |
 	| Version | Select        | 7.2                           | |
 	| Type    | Select        | DXP Production                | |''');
 
-		LocalFile.ProvisioningLicense.clickChooseProductPurchaseButton(positionValue = 1);
+		ProvisioningLicense.clickChooseProductPurchaseButton(positionValue = 1);
 
-		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Host Name     | Input    | localhost         | |
+		ProvisioningLicense.populateGenerateLicenseForm(table = '''| Host Name     | Input    | localhost         | |
 	| IP Addresses  | Textarea | 123.45.67.89      | |
 	| MAC Addresses | Textarea | 0A-1B-2C-3D-4E-5F | |
 	| Complimentary | Checkbox | true              | |''');
 
-		LocalFile.ProvisioningLicense.clickGenerateLicenseButton();
+		ProvisioningLicense.clickGenerateLicenseButton();
 
-		LocalFile.ProvisioningLicense.viewLicense(table = '''| Header        | Perlic - ${staticProjectName} | |
+		ProvisioningLicense.viewLicense(table = '''| Header        | Perlic - ${staticProjectName} | |
 	| Product       | DXP Production                | |
 	| Complimentary | Yes                           | |''');
 
-		LocalFile.OSBAdmin.logoutAndLoginToProvisioning(
+		OSBAdmin.logoutAndLoginToProvisioning(
 			userEmailAddress = "licensing.contact.worker@liferay.com.broken",
 			userPassword = ${staticProvisioningQaUserPassword});
 
-		LocalFile.UserAccount.updatePasswordUponLogin(userPassword = "test");
+		UserAccount.updatePasswordUponLogin(userPassword = "test");
 
-		LocalFile.Provisioning.gotoLicenses();
+		Provisioning.gotoLicenses();
 
-		LocalFile.Provisioning.searchLicenses(keyword = ${staticAccountKey});
+		Provisioning.searchLicenses(keyword = ${staticAccountKey});
 
-		LocalFile.Provisioning.clickLicense(licenseKeyword = "Perlic - ${staticProjectName}");
+		Provisioning.clickLicense(licenseKeyword = "Perlic - ${staticProjectName}");
 
-		LocalFile.ProvisioningLicense.viewLicense(table = '''| Header        | Perlic - ${staticProjectName} | |
+		ProvisioningLicense.viewLicense(table = '''| Header        | Perlic - ${staticProjectName} | |
 	| Product       | DXP Production                | |
 	| Version       | 7.2                           | |
 	| Type          | Production                    | |
@@ -1149,37 +1149,37 @@ definition {
 	| Status        | ACTIVE                        | |
 	| Created By    | Test Test                     | |''');
 
-		LocalFile.ProvisioningLicense.viewDownloadLicenseButton(positionValue = 1);
+		ProvisioningLicense.viewDownloadLicenseButton(positionValue = 1);
 
-		LocalFile.ProvisioningLicense.viewNoMoveLicenseButton(positionValue = 1);
+		ProvisioningLicense.viewNoMoveLicenseButton(positionValue = 1);
 
-		LocalFile.ProvisioningLicense.viewNoDeactivateLicenseButton(positionValue = 1);
+		ProvisioningLicense.viewNoDeactivateLicenseButton(positionValue = 1);
 
-		LocalFile.ProvisioningLicense.viewNoRemoveComplimentaryLicenseButton(positionValue = 1);
+		ProvisioningLicense.viewNoRemoveComplimentaryLicenseButton(positionValue = 1);
 
-		LocalFile.ProvisioningLicense.viewNoReplaceLicenseButton(positionValue = 1);
+		ProvisioningLicense.viewNoReplaceLicenseButton(positionValue = 1);
 
-		LocalFile.ProvisioningLicense.viewNoMakeComplimentaryLicenseButton(positionValue = 1);
+		ProvisioningLicense.viewNoMakeComplimentaryLicenseButton(positionValue = 1);
 
-		LocalFile.ProvisioningLicense.viewNoActivateLicenseButton(positionValue = 1);
+		ProvisioningLicense.viewNoActivateLicenseButton(positionValue = 1);
 
-		LocalFile.ProvisioningLicense.viewNoExtendLicenseButton(positionValue = 1);
+		ProvisioningLicense.viewNoExtendLicenseButton(positionValue = 1);
 
-		LocalFile.Provisioning.gotoAccounts();
+		Provisioning.gotoAccounts();
 
-		LocalFile.Provisioning.searchAccounts(keyword = "Perlic");
+		Provisioning.searchAccounts(keyword = "Perlic");
 
-		LocalFile.Provisioning.clickAccount(accountName = "Perlic - ${staticProjectName}");
+		Provisioning.clickAccount(accountName = "Perlic - ${staticProjectName}");
 
-		LocalFile.ProvisioningAccount._viewAccountProduct(
+		ProvisioningAccount._viewAccountProduct(
 			productName = "DXP Production",
 			table = '''| Name                | DXP Production |
 	| Current Provisioned | 0              |
 	| State               | ACTIVE         |''');
 
-		LocalFile.ProvisioningAccount.clickSubscriptionProvisionedLink(productName = "DXP Production");
+		ProvisioningAccount.clickSubscriptionProvisionedLink(productName = "DXP Production");
 
-		LocalFile.ProvisioningSubscription._viewSubscriptionLicense(
+		ProvisioningSubscription._viewSubscriptionLicense(
 			licenseKeyword = "Perlic - ${staticProjectName}",
 			table = '''| Name          | Perlic - ${staticProjectName}  |
 	| Description   | Perlic - ${staticProjectName}  |
@@ -1191,17 +1191,17 @@ definition {
 	| Status        | ACTIVE                         |
 	| Complimentary | true                           |''');
 
-		LocalFile.Provisioning.gotoAccounts();
+		Provisioning.gotoAccounts();
 
-		LocalFile.Provisioning.searchAccounts(keyword = "Perlic");
+		Provisioning.searchAccounts(keyword = "Perlic");
 
-		LocalFile.Provisioning.clickAccount(accountName = "Perlic - ${staticProjectName}");
+		Provisioning.clickAccount(accountName = "Perlic - ${staticProjectName}");
 
-		LocalFile.ProvisioningAccount.clickSubscriptionLink(productName = "DXP Production");
+		ProvisioningAccount.clickSubscriptionLink(productName = "DXP Production");
 
-		LocalFile.ProvisioningSubscription.clickSubscriptionProvisionedLink();
+		ProvisioningSubscription.clickSubscriptionProvisionedLink();
 
-		LocalFile.ProvisioningSubscription._viewSubscriptionLicense(
+		ProvisioningSubscription._viewSubscriptionLicense(
 			licenseKeyword = "Perlic - ${staticProjectName}",
 			table = '''| Name          | Perlic - ${staticProjectName}  |
 	| Description   | Perlic - ${staticProjectName}  |
@@ -1213,17 +1213,17 @@ definition {
 	| Status        | ACTIVE                         |
 	| Complimentary | true                           |''');
 
-		LocalFile.Provisioning.gotoAccounts();
+		Provisioning.gotoAccounts();
 
-		LocalFile.Provisioning.searchAccounts(keyword = "Perlic");
+		Provisioning.searchAccounts(keyword = "Perlic");
 
-		LocalFile.Provisioning.clickAccount(accountName = "Perlic - ${staticProjectName}");
+		Provisioning.clickAccount(accountName = "Perlic - ${staticProjectName}");
 
-		LocalFile.ProvisioningAccount.clickSubscriptionLink(productName = "DXP Production");
+		ProvisioningAccount.clickSubscriptionLink(productName = "DXP Production");
 
-		LocalFile.ProvisioningSubscription.clickSubscriptionTermProvisionedLink(startDateEndDate = "${staticFullStartDate} - ${staticFullEndDate}");
+		ProvisioningSubscription.clickSubscriptionTermProvisionedLink(startDateEndDate = "${staticFullStartDate} - ${staticFullEndDate}");
 
-		LocalFile.ProvisioningSubscription._viewSubscriptionLicense(
+		ProvisioningSubscription._viewSubscriptionLicense(
 			licenseKeyword = "Perlic - ${staticProjectName}",
 			table = '''| Name          | Perlic - ${staticProjectName}  |
 	| Description   | Perlic - ${staticProjectName}  |
@@ -1235,15 +1235,15 @@ definition {
 	| Status        | ACTIVE                         |
 	| Complimentary | true                           |''');
 
-		LocalFile.Provisioning.gotoAccounts();
+		Provisioning.gotoAccounts();
 
-		LocalFile.Provisioning.searchAccounts(keyword = "Perlic");
+		Provisioning.searchAccounts(keyword = "Perlic");
 
-		LocalFile.Provisioning.clickAccount(accountName = "Perlic - ${staticProjectName}");
+		Provisioning.clickAccount(accountName = "Perlic - ${staticProjectName}");
 
-		LocalFile.Provisioning.clickTab(tabName = "Licenses");
+		Provisioning.clickTab(tabName = "Licenses");
 
-		LocalFile.ProvisioningAccount._viewAccountLicense(
+		ProvisioningAccount._viewAccountLicense(
 			licenseKeyword = "Perlic - ${staticProjectName}",
 			table = '''| Name          | Perlic - ${staticProjectName}  |
 	| Description   | Perlic - ${staticProjectName}  |
@@ -1255,47 +1255,47 @@ definition {
 	| Status        | ACTIVE                         |
 	| Complimentary | true                           |''');
 
-		LocalFile.ProvisioningAccount.selectLicensesViaLicensesTab(table = '''| Perlic - ${staticProjectName} |''');
+		ProvisioningAccount.selectLicensesViaLicensesTab(table = '''| Perlic - ${staticProjectName} |''');
 
-		LocalFile.ProvisioningAccount.viewNoLicensesReplaceButton();
+		ProvisioningAccount.viewNoLicensesReplaceButton();
 
-		LocalFile.ProvisioningAccount.viewNoLicensesExtendButton();
+		ProvisioningAccount.viewNoLicensesExtendButton();
 
-		LocalFile.ProvisioningAccount.viewNoLicensesActionDropdownButton(action = "Replace");
+		ProvisioningAccount.viewNoLicensesActionDropdownButton(action = "Replace");
 
-		LocalFile.ProvisioningAccount.viewNoLicensesActionDropdownButton(action = "Extend");
+		ProvisioningAccount.viewNoLicensesActionDropdownButton(action = "Extend");
 
-		LocalFile.ProvisioningAccount.viewNoLicensesActionDropdownButton(action = "Make Complimentary");
+		ProvisioningAccount.viewNoLicensesActionDropdownButton(action = "Make Complimentary");
 
-		LocalFile.ProvisioningAccount.viewNoLicensesActionDropdownButton(action = "Active");
+		ProvisioningAccount.viewNoLicensesActionDropdownButton(action = "Active");
 
-		LocalFile.ProvisioningAccount.viewLicenseTabCount(
+		ProvisioningAccount.viewLicenseTabCount(
 			countValue = 1,
 			tabName = "Active");
 
-		LocalFile.ProvisioningAccount.viewLicenseTabCount(
+		ProvisioningAccount.viewLicenseTabCount(
 			countValue = 0,
 			tabName = "Expired");
 
-		LocalFile.ProvisioningAccount.viewLicenseTabCount(
+		ProvisioningAccount.viewLicenseTabCount(
 			countValue = 0,
 			tabName = "Deactivated");
 
-		LocalFile.ProvisioningAccount.viewLicenseTabCount(
+		ProvisioningAccount.viewLicenseTabCount(
 			countValue = 1,
 			tabName = "All");
 
-		LocalFile.ProvisioningAccount.clickLicenseTab(tabName = "Expired");
+		ProvisioningAccount.clickLicenseTab(tabName = "Expired");
 
-		LocalFile.ProvisioningAccount._viewNoAccountLicense(licenseKeyword = "Perlic - ${staticProjectName}");
+		ProvisioningAccount._viewNoAccountLicense(licenseKeyword = "Perlic - ${staticProjectName}");
 
-		LocalFile.ProvisioningAccount.clickLicenseTab(tabName = "Deactivated");
+		ProvisioningAccount.clickLicenseTab(tabName = "Deactivated");
 
-		LocalFile.ProvisioningAccount._viewNoAccountLicense(licenseKeyword = "Perlic - ${staticProjectName}");
+		ProvisioningAccount._viewNoAccountLicense(licenseKeyword = "Perlic - ${staticProjectName}");
 
-		LocalFile.ProvisioningAccount.clickLicenseTab(tabName = "All");
+		ProvisioningAccount.clickLicenseTab(tabName = "All");
 
-		LocalFile.ProvisioningAccount._viewAccountLicense(
+		ProvisioningAccount._viewAccountLicense(
 			licenseKeyword = "Perlic - ${staticProjectName}",
 			table = '''| Name          | Perlic - ${staticProjectName}  |
 	| Description   | Perlic - ${staticProjectName}  |
@@ -1307,31 +1307,31 @@ definition {
 	| Status        | ACTIVE                         |
 	| Complimentary | true                           |''');
 
-		LocalFile.ProvisioningAccount.selectLicensesViaLicensesTab(table = '''| Perlic - ${staticProjectName} |''');
+		ProvisioningAccount.selectLicensesViaLicensesTab(table = '''| Perlic - ${staticProjectName} |''');
 
-		LocalFile.ProvisioningAccount.viewNoLicensesReplaceButton();
+		ProvisioningAccount.viewNoLicensesReplaceButton();
 
-		LocalFile.ProvisioningAccount.viewNoLicensesExtendButton();
+		ProvisioningAccount.viewNoLicensesExtendButton();
 
-		LocalFile.ProvisioningAccount.viewNoLicensesActionDropdownButton(action = "Replace");
+		ProvisioningAccount.viewNoLicensesActionDropdownButton(action = "Replace");
 
-		LocalFile.ProvisioningAccount.viewNoLicensesActionDropdownButton(action = "Extend");
+		ProvisioningAccount.viewNoLicensesActionDropdownButton(action = "Extend");
 
-		LocalFile.ProvisioningAccount.viewNoLicensesActionDropdownButton(action = "Make Complimentary");
+		ProvisioningAccount.viewNoLicensesActionDropdownButton(action = "Make Complimentary");
 
-		LocalFile.ProvisioningAccount.viewNoLicensesActionDropdownButton(action = "Active");
+		ProvisioningAccount.viewNoLicensesActionDropdownButton(action = "Active");
 
-		LocalFile.Provisioning.gotoAccounts();
+		Provisioning.gotoAccounts();
 
-		LocalFile.Provisioning.searchAccounts(keyword = "Perlic");
+		Provisioning.searchAccounts(keyword = "Perlic");
 
-		LocalFile.Provisioning.clickAccount(accountName = "Perlic - ${staticProjectName}");
+		Provisioning.clickAccount(accountName = "Perlic - ${staticProjectName}");
 
-		LocalFile.ProvisioningAccount.clickSubscriptionLink(productName = "DXP Production");
+		ProvisioningAccount.clickSubscriptionLink(productName = "DXP Production");
 
-		LocalFile.Provisioning.clickTab(tabName = "Licenses");
+		Provisioning.clickTab(tabName = "Licenses");
 
-		LocalFile.ProvisioningSubscription._viewSubscriptionLicense(
+		ProvisioningSubscription._viewSubscriptionLicense(
 			licenseKeyword = "Perlic - ${staticProjectName}",
 			table = '''| Name          | Perlic - ${staticProjectName}  |
 	| Description   | Perlic - ${staticProjectName}  |
@@ -1343,47 +1343,47 @@ definition {
 	| Status        | ACTIVE                         |
 	| Complimentary | true                           |''');
 
-		LocalFile.ProvisioningSubscription.selectLicensesViaLicensesTab(table = '''| Perlic - ${staticProjectName} |''');
+		ProvisioningSubscription.selectLicensesViaLicensesTab(table = '''| Perlic - ${staticProjectName} |''');
 
-		LocalFile.ProvisioningSubscription.viewNoLicensesReplaceButton();
+		ProvisioningSubscription.viewNoLicensesReplaceButton();
 
-		LocalFile.ProvisioningSubscription.viewNoLicensesExtendButton();
+		ProvisioningSubscription.viewNoLicensesExtendButton();
 
-		LocalFile.ProvisioningSubscription.viewNoLicensesActionDropdownButton(action = "Replace");
+		ProvisioningSubscription.viewNoLicensesActionDropdownButton(action = "Replace");
 
-		LocalFile.ProvisioningSubscription.viewNoLicensesActionDropdownButton(action = "Extend");
+		ProvisioningSubscription.viewNoLicensesActionDropdownButton(action = "Extend");
 
-		LocalFile.ProvisioningSubscription.viewNoLicensesActionDropdownButton(action = "Make Complimentary");
+		ProvisioningSubscription.viewNoLicensesActionDropdownButton(action = "Make Complimentary");
 
-		LocalFile.ProvisioningSubscription.viewNoLicensesActionDropdownButton(action = "Active");
+		ProvisioningSubscription.viewNoLicensesActionDropdownButton(action = "Active");
 
-		LocalFile.ProvisioningAccount.viewLicenseTabCount(
+		ProvisioningAccount.viewLicenseTabCount(
 			countValue = 1,
 			tabName = "Active");
 
-		LocalFile.ProvisioningAccount.viewLicenseTabCount(
+		ProvisioningAccount.viewLicenseTabCount(
 			countValue = 0,
 			tabName = "Expired");
 
-		LocalFile.ProvisioningAccount.viewLicenseTabCount(
+		ProvisioningAccount.viewLicenseTabCount(
 			countValue = 0,
 			tabName = "Deactivated");
 
-		LocalFile.ProvisioningAccount.viewLicenseTabCount(
+		ProvisioningAccount.viewLicenseTabCount(
 			countValue = 1,
 			tabName = "All");
 
-		LocalFile.ProvisioningAccount.clickLicenseTab(tabName = "Expired");
+		ProvisioningAccount.clickLicenseTab(tabName = "Expired");
 
-		LocalFile.ProvisioningSubscription._viewNoSubscriptionLicense(licenseKeyword = "Perlic - ${staticProjectName}");
+		ProvisioningSubscription._viewNoSubscriptionLicense(licenseKeyword = "Perlic - ${staticProjectName}");
 
-		LocalFile.ProvisioningAccount.clickLicenseTab(tabName = "Deactivated");
+		ProvisioningAccount.clickLicenseTab(tabName = "Deactivated");
 
-		LocalFile.ProvisioningSubscription._viewNoSubscriptionLicense(licenseKeyword = "Perlic - ${staticProjectName}");
+		ProvisioningSubscription._viewNoSubscriptionLicense(licenseKeyword = "Perlic - ${staticProjectName}");
 
-		LocalFile.ProvisioningAccount.clickLicenseTab(tabName = "All");
+		ProvisioningAccount.clickLicenseTab(tabName = "All");
 
-		LocalFile.ProvisioningSubscription._viewSubscriptionLicense(
+		ProvisioningSubscription._viewSubscriptionLicense(
 			licenseKeyword = "Perlic - ${staticProjectName}",
 			table = '''| Name          | Perlic - ${staticProjectName}  |
 	| Description   | Perlic - ${staticProjectName}  |
@@ -1395,25 +1395,25 @@ definition {
 	| Status        | ACTIVE                         |
 	| Complimentary | true                           |''');
 
-		LocalFile.ProvisioningSubscription.selectLicensesViaLicensesTab(table = '''| Perlic - ${staticProjectName} |''');
+		ProvisioningSubscription.selectLicensesViaLicensesTab(table = '''| Perlic - ${staticProjectName} |''');
 
-		LocalFile.ProvisioningSubscription.viewNoLicensesReplaceButton();
+		ProvisioningSubscription.viewNoLicensesReplaceButton();
 
-		LocalFile.ProvisioningSubscription.viewNoLicensesExtendButton();
+		ProvisioningSubscription.viewNoLicensesExtendButton();
 
-		LocalFile.ProvisioningSubscription.viewNoLicensesActionDropdownButton(action = "Replace");
+		ProvisioningSubscription.viewNoLicensesActionDropdownButton(action = "Replace");
 
-		LocalFile.ProvisioningSubscription.viewNoLicensesActionDropdownButton(action = "Extend");
+		ProvisioningSubscription.viewNoLicensesActionDropdownButton(action = "Extend");
 
-		LocalFile.ProvisioningSubscription.viewNoLicensesActionDropdownButton(action = "Make Complimentary");
+		ProvisioningSubscription.viewNoLicensesActionDropdownButton(action = "Make Complimentary");
 
-		LocalFile.ProvisioningSubscription.viewNoLicensesActionDropdownButton(action = "Active");
+		ProvisioningSubscription.viewNoLicensesActionDropdownButton(action = "Active");
 	}
 
 	test Viewdeactivatedlicense {
-		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+		OSBAdminRabbitMQ.generateProvisioningProjectName();
 
-		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | PERLICPERLIC                         | |
+		KoroneikiAccountAPI._createAccount(table = '''| Code                  | PERLICPERLIC                         | |
 	| Contact Email Address | lic.koroneiki1@lrcustomer.com.broken | |
 	| Description           | Test osb account on koroneiki        | |
 	| Fax Number            | 555-555-1234                         | |
@@ -1425,17 +1425,17 @@ definition {
 	| Tier                  | T4                                   | |
 	| Website               | www.koroneikicorporation.com         | |''');
 
-		LocalFile.KoroneikiAccountAPI._generateAccountKey(accountName = "Perlic - ${staticProjectName}");
+		KoroneikiAccountAPI._generateAccountKey(accountName = "Perlic - ${staticProjectName}");
 
-		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+		KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
 
-		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFullStartAndEndDate();
+		KoroneikiProductPurchaseAPI.generateStaticFullStartAndEndDate();
 
-		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFutureStartAndEndDate();
+		KoroneikiProductPurchaseAPI.generateStaticFutureStartAndEndDate();
 
-		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFullFutureStartAndEndDate();
+		KoroneikiProductPurchaseAPI.generateStaticFullFutureStartAndEndDate();
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Perlic - ${staticProjectName}",
 			productName = "DXP Production",
 			table = '''| End Date                | ${staticEndDate}         |   |
@@ -1448,11 +1448,11 @@ definition {
 	| Start Date              | ${staticStartDate}       |   |
 	| Status                  | Approved                 |   |''');
 
-		LocalFile.KoroneikiProductPurchaseAPI._generateProductPurchaseId(
+		KoroneikiProductPurchaseAPI._generateProductPurchaseId(
 			accountName = "Perlic - ${staticProjectName}",
 			productName = "DXP Production");
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Perlic - ${staticProjectName}",
 			productName = "Platinum Subscription",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -1462,49 +1462,49 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.OSBAdmin.loginToProvisioning(
+		OSBAdmin.loginToProvisioning(
 			userEmailAddress = ${staticProvisioningAdminEmailAddress},
 			userPassword = ${staticProvisioningAdminPassword});
 
-		LocalFile.Provisioning.gotoLicenses();
+		Provisioning.gotoLicenses();
 
-		LocalFile.Provisioning.clickGenerateLicenseButton();
+		Provisioning.clickGenerateLicenseButton();
 
-		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Account | Select Entity | Perlic - ${staticProjectName} | |
+		ProvisioningLicense.populateGenerateLicenseForm(table = '''| Account | Select Entity | Perlic - ${staticProjectName} | |
 	| Product | Select        | DXP Production                | |
 	| Version | Select        | 7.2                           | |
 	| Type    | Select        | DXP Production                | |''');
 
-		LocalFile.ProvisioningLicense.clickChooseProductPurchaseButton(positionValue = 1);
+		ProvisioningLicense.clickChooseProductPurchaseButton(positionValue = 1);
 
-		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Host Name     | Input    | localhost         | |
+		ProvisioningLicense.populateGenerateLicenseForm(table = '''| Host Name     | Input    | localhost         | |
 	| IP Addresses  | Textarea | 123.45.67.89      | |
 	| MAC Addresses | Textarea | 0A-1B-2C-3D-4E-5F | |''');
 
-		LocalFile.ProvisioningLicense.clickGenerateLicenseButton();
+		ProvisioningLicense.clickGenerateLicenseButton();
 
-		LocalFile.ProvisioningLicense.viewLicense(table = '''| Header  | Perlic - ${staticProjectName} | |
+		ProvisioningLicense.viewLicense(table = '''| Header  | Perlic - ${staticProjectName} | |
 	| Product | DXP Production                | |''');
 
-		LocalFile.ProvisioningLicense.clickDeactivateLicenseButton(positionValue = 1);
+		ProvisioningLicense.clickDeactivateLicenseButton(positionValue = 1);
 
-		LocalFile.ProvisioningLicense.viewLicense(table = '''| Header        | Perlic - ${staticProjectName} | |
+		ProvisioningLicense.viewLicense(table = '''| Header        | Perlic - ${staticProjectName} | |
 	| Product       | DXP Production                | |
 	| Status        | DEACTIVATED                   | |''');
 
-		LocalFile.OSBAdmin.logoutAndLoginToProvisioning(
+		OSBAdmin.logoutAndLoginToProvisioning(
 			userEmailAddress = "licensing.contact.worker@liferay.com.broken",
 			userPassword = ${staticProvisioningQaUserPassword});
 
-		LocalFile.UserAccount.updatePasswordUponLogin(userPassword = "test");
+		UserAccount.updatePasswordUponLogin(userPassword = "test");
 
-		LocalFile.Provisioning.gotoLicenses();
+		Provisioning.gotoLicenses();
 
-		LocalFile.Provisioning.searchLicenses(keyword = ${staticAccountKey});
+		Provisioning.searchLicenses(keyword = ${staticAccountKey});
 
-		LocalFile.Provisioning.clickLicense(licenseKeyword = "Perlic - ${staticProjectName}");
+		Provisioning.clickLicense(licenseKeyword = "Perlic - ${staticProjectName}");
 
-		LocalFile.ProvisioningLicense.viewLicense(table = '''| Header        | Perlic - ${staticProjectName} | |
+		ProvisioningLicense.viewLicense(table = '''| Header        | Perlic - ${staticProjectName} | |
 	| Product       | DXP Production                | |
 	| Version       | 7.2                           | |
 	| Type          | Production                    | |
@@ -1517,39 +1517,39 @@ definition {
 	| Status        | DEACTIVATED                   | |
 	| Created By    | Test Test                     | |''');
 
-		LocalFile.ProvisioningLicense.viewNoDownloadLicenseButton(positionValue = 1);
+		ProvisioningLicense.viewNoDownloadLicenseButton(positionValue = 1);
 
-		LocalFile.ProvisioningLicense.viewNoMoveLicenseButton(positionValue = 1);
+		ProvisioningLicense.viewNoMoveLicenseButton(positionValue = 1);
 
-		LocalFile.ProvisioningLicense.viewNoActivateLicenseButton(positionValue = 1);
+		ProvisioningLicense.viewNoActivateLicenseButton(positionValue = 1);
 
-		LocalFile.ProvisioningLicense.viewNoMakeComplimentaryLicenseButton(positionValue = 1);
+		ProvisioningLicense.viewNoMakeComplimentaryLicenseButton(positionValue = 1);
 
-		LocalFile.ProvisioningLicense.viewNoReplaceLicenseButton(positionValue = 1);
+		ProvisioningLicense.viewNoReplaceLicenseButton(positionValue = 1);
 
-		LocalFile.ProvisioningLicense.viewNoRemoveComplimentaryLicenseButton(positionValue = 1);
+		ProvisioningLicense.viewNoRemoveComplimentaryLicenseButton(positionValue = 1);
 
-		LocalFile.ProvisioningLicense.viewNoDeactivateLicenseButton(positionValue = 1);
+		ProvisioningLicense.viewNoDeactivateLicenseButton(positionValue = 1);
 
-		LocalFile.ProvisioningLicense.viewNoExtendLicenseButton(positionValue = 1);
+		ProvisioningLicense.viewNoExtendLicenseButton(positionValue = 1);
 
-		LocalFile.Provisioning.gotoAccounts();
+		Provisioning.gotoAccounts();
 
-		LocalFile.Provisioning.searchAccounts(keyword = "Perlic");
+		Provisioning.searchAccounts(keyword = "Perlic");
 
-		LocalFile.Provisioning.clickAccount(accountName = "Perlic - ${staticProjectName}");
+		Provisioning.clickAccount(accountName = "Perlic - ${staticProjectName}");
 
-		LocalFile.ProvisioningAccount._viewAccountProduct(
+		ProvisioningAccount._viewAccountProduct(
 			productName = "DXP Production",
 			table = '''| Name                | DXP Production |
 	| Current Provisioned | 0              |
 	| State               | ACTIVE         |''');
 
-		LocalFile.ProvisioningAccount.clickSubscriptionProvisionedLink(productName = "DXP Production");
+		ProvisioningAccount.clickSubscriptionProvisionedLink(productName = "DXP Production");
 
-		LocalFile.ProvisioningAccount.clickLicenseTab(tabName = "Deactivated");
+		ProvisioningAccount.clickLicenseTab(tabName = "Deactivated");
 
-		LocalFile.ProvisioningSubscription._viewSubscriptionLicense(
+		ProvisioningSubscription._viewSubscriptionLicense(
 			licenseKeyword = "Perlic - ${staticProjectName}",
 			table = '''| Name          | Perlic - ${staticProjectName}  |
 	| Description   | Perlic - ${staticProjectName}  |
@@ -1561,19 +1561,19 @@ definition {
 	| Status        | DEACTIVATED                    |
 	| Complimentary | false                          |''');
 
-		LocalFile.Provisioning.gotoAccounts();
+		Provisioning.gotoAccounts();
 
-		LocalFile.Provisioning.searchAccounts(keyword = "Perlic");
+		Provisioning.searchAccounts(keyword = "Perlic");
 
-		LocalFile.Provisioning.clickAccount(accountName = "Perlic - ${staticProjectName}");
+		Provisioning.clickAccount(accountName = "Perlic - ${staticProjectName}");
 
-		LocalFile.ProvisioningAccount.clickSubscriptionLink(productName = "DXP Production");
+		ProvisioningAccount.clickSubscriptionLink(productName = "DXP Production");
 
-		LocalFile.ProvisioningSubscription.clickSubscriptionProvisionedLink();
+		ProvisioningSubscription.clickSubscriptionProvisionedLink();
 
-		LocalFile.ProvisioningAccount.clickLicenseTab(tabName = "Deactivated");
+		ProvisioningAccount.clickLicenseTab(tabName = "Deactivated");
 
-		LocalFile.ProvisioningSubscription._viewSubscriptionLicense(
+		ProvisioningSubscription._viewSubscriptionLicense(
 			licenseKeyword = "Perlic - ${staticProjectName}",
 			table = '''| Name          | Perlic - ${staticProjectName}  |
 	| Description   | Perlic - ${staticProjectName}  |
@@ -1585,19 +1585,19 @@ definition {
 	| Status        | DEACTIVATED                    |
 	| Complimentary | false                          |''');
 
-		LocalFile.Provisioning.gotoAccounts();
+		Provisioning.gotoAccounts();
 
-		LocalFile.Provisioning.searchAccounts(keyword = "Perlic");
+		Provisioning.searchAccounts(keyword = "Perlic");
 
-		LocalFile.Provisioning.clickAccount(accountName = "Perlic - ${staticProjectName}");
+		Provisioning.clickAccount(accountName = "Perlic - ${staticProjectName}");
 
-		LocalFile.ProvisioningAccount.clickSubscriptionLink(productName = "DXP Production");
+		ProvisioningAccount.clickSubscriptionLink(productName = "DXP Production");
 
-		LocalFile.ProvisioningSubscription.clickSubscriptionTermProvisionedLink(startDateEndDate = "${staticFullStartDate} - ${staticFullEndDate}");
+		ProvisioningSubscription.clickSubscriptionTermProvisionedLink(startDateEndDate = "${staticFullStartDate} - ${staticFullEndDate}");
 
-		LocalFile.ProvisioningAccount.clickLicenseTab(tabName = "Deactivated");
+		ProvisioningAccount.clickLicenseTab(tabName = "Deactivated");
 
-		LocalFile.ProvisioningSubscription._viewSubscriptionLicense(
+		ProvisioningSubscription._viewSubscriptionLicense(
 			licenseKeyword = "Perlic - ${staticProjectName}",
 			table = '''| Name          | Perlic - ${staticProjectName}  |
 	| Description   | Perlic - ${staticProjectName}  |
@@ -1609,17 +1609,17 @@ definition {
 	| Status        | DEACTIVATED                    |
 	| Complimentary | false                          |''');
 
-		LocalFile.Provisioning.gotoAccounts();
+		Provisioning.gotoAccounts();
 
-		LocalFile.Provisioning.searchAccounts(keyword = "Perlic");
+		Provisioning.searchAccounts(keyword = "Perlic");
 
-		LocalFile.Provisioning.clickAccount(accountName = "Perlic - ${staticProjectName}");
+		Provisioning.clickAccount(accountName = "Perlic - ${staticProjectName}");
 
-		LocalFile.Provisioning.clickTab(tabName = "Licenses");
+		Provisioning.clickTab(tabName = "Licenses");
 
-		LocalFile.ProvisioningAccount.clickLicenseTab(tabName = "Deactivated");
+		ProvisioningAccount.clickLicenseTab(tabName = "Deactivated");
 
-		LocalFile.ProvisioningAccount._viewAccountLicense(
+		ProvisioningAccount._viewAccountLicense(
 			licenseKeyword = "Perlic - ${staticProjectName}",
 			table = '''| Name          | Perlic - ${staticProjectName}  |
 	| Description   | Perlic - ${staticProjectName}  |
@@ -1631,47 +1631,47 @@ definition {
 	| Status        | DEACTIVATED                    |
 	| Complimentary | false                          |''');
 
-		LocalFile.ProvisioningAccount.selectLicensesViaLicensesTab(table = '''| Perlic - ${staticProjectName} |''');
+		ProvisioningAccount.selectLicensesViaLicensesTab(table = '''| Perlic - ${staticProjectName} |''');
 
-		LocalFile.ProvisioningAccount.viewNoLicensesReplaceButton();
+		ProvisioningAccount.viewNoLicensesReplaceButton();
 
-		LocalFile.ProvisioningAccount.viewNoLicensesExtendButton();
+		ProvisioningAccount.viewNoLicensesExtendButton();
 
-		LocalFile.ProvisioningAccount.viewNoLicensesActionDropdownButton(action = "Replace");
+		ProvisioningAccount.viewNoLicensesActionDropdownButton(action = "Replace");
 
-		LocalFile.ProvisioningAccount.viewNoLicensesActionDropdownButton(action = "Extend");
+		ProvisioningAccount.viewNoLicensesActionDropdownButton(action = "Extend");
 
-		LocalFile.ProvisioningAccount.viewNoLicensesActionDropdownButton(action = "Make Complimentary");
+		ProvisioningAccount.viewNoLicensesActionDropdownButton(action = "Make Complimentary");
 
-		LocalFile.ProvisioningAccount.viewNoLicensesActionDropdownButton(action = "Deactivate");
+		ProvisioningAccount.viewNoLicensesActionDropdownButton(action = "Deactivate");
 
-		LocalFile.ProvisioningAccount.viewLicenseTabCount(
+		ProvisioningAccount.viewLicenseTabCount(
 			countValue = 0,
 			tabName = "Active");
 
-		LocalFile.ProvisioningAccount.viewLicenseTabCount(
+		ProvisioningAccount.viewLicenseTabCount(
 			countValue = 0,
 			tabName = "Expired");
 
-		LocalFile.ProvisioningAccount.viewLicenseTabCount(
+		ProvisioningAccount.viewLicenseTabCount(
 			countValue = 1,
 			tabName = "Deactivated");
 
-		LocalFile.ProvisioningAccount.viewLicenseTabCount(
+		ProvisioningAccount.viewLicenseTabCount(
 			countValue = 1,
 			tabName = "All");
 
-		LocalFile.ProvisioningAccount.clickLicenseTab(tabName = "Expired");
+		ProvisioningAccount.clickLicenseTab(tabName = "Expired");
 
-		LocalFile.ProvisioningAccount._viewNoAccountLicense(licenseKeyword = "Perlic - ${staticProjectName}");
+		ProvisioningAccount._viewNoAccountLicense(licenseKeyword = "Perlic - ${staticProjectName}");
 
-		LocalFile.ProvisioningAccount.clickLicenseTab(tabName = "Active");
+		ProvisioningAccount.clickLicenseTab(tabName = "Active");
 
-		LocalFile.ProvisioningAccount._viewNoAccountLicense(licenseKeyword = "Perlic - ${staticProjectName}");
+		ProvisioningAccount._viewNoAccountLicense(licenseKeyword = "Perlic - ${staticProjectName}");
 
-		LocalFile.ProvisioningAccount.clickLicenseTab(tabName = "All");
+		ProvisioningAccount.clickLicenseTab(tabName = "All");
 
-		LocalFile.ProvisioningAccount._viewAccountLicense(
+		ProvisioningAccount._viewAccountLicense(
 			licenseKeyword = "Perlic - ${staticProjectName}",
 			table = '''| Name          | Perlic - ${staticProjectName}  |
 	| Description   | Perlic - ${staticProjectName}  |
@@ -1683,33 +1683,33 @@ definition {
 	| Status        | DEACTIVATED                    |
 	| Complimentary | false                          |''');
 
-		LocalFile.ProvisioningAccount.selectLicensesViaLicensesTab(table = '''| Perlic - ${staticProjectName} |''');
+		ProvisioningAccount.selectLicensesViaLicensesTab(table = '''| Perlic - ${staticProjectName} |''');
 
-		LocalFile.ProvisioningAccount.viewNoLicensesReplaceButton();
+		ProvisioningAccount.viewNoLicensesReplaceButton();
 
-		LocalFile.ProvisioningAccount.viewNoLicensesExtendButton();
+		ProvisioningAccount.viewNoLicensesExtendButton();
 
-		LocalFile.ProvisioningAccount.viewNoLicensesActionDropdownButton(action = "Replace");
+		ProvisioningAccount.viewNoLicensesActionDropdownButton(action = "Replace");
 
-		LocalFile.ProvisioningAccount.viewNoLicensesActionDropdownButton(action = "Extend");
+		ProvisioningAccount.viewNoLicensesActionDropdownButton(action = "Extend");
 
-		LocalFile.ProvisioningAccount.viewNoLicensesActionDropdownButton(action = "Make Complimentary");
+		ProvisioningAccount.viewNoLicensesActionDropdownButton(action = "Make Complimentary");
 
-		LocalFile.ProvisioningAccount.viewNoLicensesActionDropdownButton(action = "Deactivate");
+		ProvisioningAccount.viewNoLicensesActionDropdownButton(action = "Deactivate");
 
-		LocalFile.Provisioning.gotoAccounts();
+		Provisioning.gotoAccounts();
 
-		LocalFile.Provisioning.searchAccounts(keyword = "Perlic");
+		Provisioning.searchAccounts(keyword = "Perlic");
 
-		LocalFile.Provisioning.clickAccount(accountName = "Perlic - ${staticProjectName}");
+		Provisioning.clickAccount(accountName = "Perlic - ${staticProjectName}");
 
-		LocalFile.ProvisioningAccount.clickSubscriptionLink(productName = "DXP Production");
+		ProvisioningAccount.clickSubscriptionLink(productName = "DXP Production");
 
-		LocalFile.Provisioning.clickTab(tabName = "Licenses");
+		Provisioning.clickTab(tabName = "Licenses");
 
-		LocalFile.ProvisioningAccount.clickLicenseTab(tabName = "Deactivated");
+		ProvisioningAccount.clickLicenseTab(tabName = "Deactivated");
 
-		LocalFile.ProvisioningSubscription._viewSubscriptionLicense(
+		ProvisioningSubscription._viewSubscriptionLicense(
 			licenseKeyword = "Perlic - ${staticProjectName}",
 			table = '''| Name          | Perlic - ${staticProjectName}  |
 	| Description   | Perlic - ${staticProjectName}  |
@@ -1721,47 +1721,47 @@ definition {
 	| Status        | DEACTIVATED                    |
 	| Complimentary | false                          |''');
 
-		LocalFile.ProvisioningSubscription.selectLicensesViaLicensesTab(table = '''| Perlic - ${staticProjectName} |''');
+		ProvisioningSubscription.selectLicensesViaLicensesTab(table = '''| Perlic - ${staticProjectName} |''');
 
-		LocalFile.ProvisioningSubscription.viewNoLicensesReplaceButton();
+		ProvisioningSubscription.viewNoLicensesReplaceButton();
 
-		LocalFile.ProvisioningSubscription.viewNoLicensesExtendButton();
+		ProvisioningSubscription.viewNoLicensesExtendButton();
 
-		LocalFile.ProvisioningSubscription.viewNoLicensesActionDropdownButton(action = "Replace");
+		ProvisioningSubscription.viewNoLicensesActionDropdownButton(action = "Replace");
 
-		LocalFile.ProvisioningSubscription.viewNoLicensesActionDropdownButton(action = "Extend");
+		ProvisioningSubscription.viewNoLicensesActionDropdownButton(action = "Extend");
 
-		LocalFile.ProvisioningSubscription.viewNoLicensesActionDropdownButton(action = "Make Complimentary");
+		ProvisioningSubscription.viewNoLicensesActionDropdownButton(action = "Make Complimentary");
 
-		LocalFile.ProvisioningSubscription.viewNoLicensesActionDropdownButton(action = "Deactivate");
+		ProvisioningSubscription.viewNoLicensesActionDropdownButton(action = "Deactivate");
 
-		LocalFile.ProvisioningAccount.viewLicenseTabCount(
+		ProvisioningAccount.viewLicenseTabCount(
 			countValue = 0,
 			tabName = "Active");
 
-		LocalFile.ProvisioningAccount.viewLicenseTabCount(
+		ProvisioningAccount.viewLicenseTabCount(
 			countValue = 0,
 			tabName = "Expired");
 
-		LocalFile.ProvisioningAccount.viewLicenseTabCount(
+		ProvisioningAccount.viewLicenseTabCount(
 			countValue = 1,
 			tabName = "Deactivated");
 
-		LocalFile.ProvisioningAccount.viewLicenseTabCount(
+		ProvisioningAccount.viewLicenseTabCount(
 			countValue = 1,
 			tabName = "All");
 
-		LocalFile.ProvisioningAccount.clickLicenseTab(tabName = "Expired");
+		ProvisioningAccount.clickLicenseTab(tabName = "Expired");
 
-		LocalFile.ProvisioningSubscription._viewNoSubscriptionLicense(licenseKeyword = "Perlic - ${staticProjectName}");
+		ProvisioningSubscription._viewNoSubscriptionLicense(licenseKeyword = "Perlic - ${staticProjectName}");
 
-		LocalFile.ProvisioningAccount.clickLicenseTab(tabName = "Active");
+		ProvisioningAccount.clickLicenseTab(tabName = "Active");
 
-		LocalFile.ProvisioningSubscription._viewNoSubscriptionLicense(licenseKeyword = "Perlic - ${staticProjectName}");
+		ProvisioningSubscription._viewNoSubscriptionLicense(licenseKeyword = "Perlic - ${staticProjectName}");
 
-		LocalFile.ProvisioningAccount.clickLicenseTab(tabName = "All");
+		ProvisioningAccount.clickLicenseTab(tabName = "All");
 
-		LocalFile.ProvisioningSubscription._viewSubscriptionLicense(
+		ProvisioningSubscription._viewSubscriptionLicense(
 			licenseKeyword = "Perlic - ${staticProjectName}",
 			table = '''| Name          | Perlic - ${staticProjectName}  |
 	| Description   | Perlic - ${staticProjectName}  |
@@ -1773,25 +1773,25 @@ definition {
 	| Status        | DEACTIVATED                    |
 	| Complimentary | false                          |''');
 
-		LocalFile.ProvisioningSubscription.selectLicensesViaLicensesTab(table = '''| Perlic - ${staticProjectName} |''');
+		ProvisioningSubscription.selectLicensesViaLicensesTab(table = '''| Perlic - ${staticProjectName} |''');
 
-		LocalFile.ProvisioningSubscription.viewNoLicensesReplaceButton();
+		ProvisioningSubscription.viewNoLicensesReplaceButton();
 
-		LocalFile.ProvisioningSubscription.viewNoLicensesExtendButton();
+		ProvisioningSubscription.viewNoLicensesExtendButton();
 
-		LocalFile.ProvisioningSubscription.viewNoLicensesActionDropdownButton(action = "Replace");
+		ProvisioningSubscription.viewNoLicensesActionDropdownButton(action = "Replace");
 
-		LocalFile.ProvisioningSubscription.viewNoLicensesActionDropdownButton(action = "Extend");
+		ProvisioningSubscription.viewNoLicensesActionDropdownButton(action = "Extend");
 
-		LocalFile.ProvisioningSubscription.viewNoLicensesActionDropdownButton(action = "Make Complimentary");
+		ProvisioningSubscription.viewNoLicensesActionDropdownButton(action = "Make Complimentary");
 
-		LocalFile.ProvisioningSubscription.viewNoLicensesActionDropdownButton(action = "Deactivate");
+		ProvisioningSubscription.viewNoLicensesActionDropdownButton(action = "Deactivate");
 	}
 
 	test ViewDXPlicense {
-		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+		OSBAdminRabbitMQ.generateProvisioningProjectName();
 
-		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | PERLICPERLIC                         | |
+		KoroneikiAccountAPI._createAccount(table = '''| Code                  | PERLICPERLIC                         | |
 	| Contact Email Address | lic.koroneiki1@lrcustomer.com.broken | |
 	| Description           | Test osb account on koroneiki        | |
 	| Fax Number            | 555-555-1234                         | |
@@ -1803,17 +1803,17 @@ definition {
 	| Tier                  | T4                                   | |
 	| Website               | www.koroneikicorporation.com         | |''');
 
-		LocalFile.KoroneikiAccountAPI._generateAccountKey(accountName = "Perlic - ${staticProjectName}");
+		KoroneikiAccountAPI._generateAccountKey(accountName = "Perlic - ${staticProjectName}");
 
-		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+		KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
 
-		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFullStartAndEndDate();
+		KoroneikiProductPurchaseAPI.generateStaticFullStartAndEndDate();
 
-		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFutureStartAndEndDate();
+		KoroneikiProductPurchaseAPI.generateStaticFutureStartAndEndDate();
 
-		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFullFutureStartAndEndDate();
+		KoroneikiProductPurchaseAPI.generateStaticFullFutureStartAndEndDate();
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Perlic - ${staticProjectName}",
 			productName = "DXP Production",
 			table = '''| End Date                | ${staticEndDate}         |   |
@@ -1826,11 +1826,11 @@ definition {
 	| Start Date              | ${staticStartDate}       |   |
 	| Status                  | Approved                 |   |''');
 
-		LocalFile.KoroneikiProductPurchaseAPI._generateProductPurchaseId(
+		KoroneikiProductPurchaseAPI._generateProductPurchaseId(
 			accountName = "Perlic - ${staticProjectName}",
 			productName = "DXP Production");
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Perlic - ${staticProjectName}",
 			productName = "Platinum Subscription",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -1840,43 +1840,43 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.OSBAdmin.loginToProvisioning(
+		OSBAdmin.loginToProvisioning(
 			userEmailAddress = ${staticProvisioningAdminEmailAddress},
 			userPassword = ${staticProvisioningAdminPassword});
 
-		LocalFile.Provisioning.gotoLicenses();
+		Provisioning.gotoLicenses();
 
-		LocalFile.Provisioning.clickGenerateLicenseButton();
+		Provisioning.clickGenerateLicenseButton();
 
-		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Account | Select Entity | Perlic - ${staticProjectName} | |
+		ProvisioningLicense.populateGenerateLicenseForm(table = '''| Account | Select Entity | Perlic - ${staticProjectName} | |
 	| Product | Select        | DXP Production                | |
 	| Version | Select        | 7.2                           | |
 	| Type    | Select        | DXP Production                | |''');
 
-		LocalFile.ProvisioningLicense.clickChooseProductPurchaseButton(positionValue = 1);
+		ProvisioningLicense.clickChooseProductPurchaseButton(positionValue = 1);
 
-		LocalFile.ProvisioningLicense.populateGenerateLicenseForm(table = '''| Host Name     | Input    | localhost         | |
+		ProvisioningLicense.populateGenerateLicenseForm(table = '''| Host Name     | Input    | localhost         | |
 	| IP Addresses  | Textarea | 123.45.67.89      | |
 	| MAC Addresses | Textarea | 0A-1B-2C-3D-4E-5F | |''');
 
-		LocalFile.ProvisioningLicense.clickGenerateLicenseButton();
+		ProvisioningLicense.clickGenerateLicenseButton();
 
-		LocalFile.ProvisioningLicense.viewLicense(table = '''| Header  | Perlic - ${staticProjectName} | |
+		ProvisioningLicense.viewLicense(table = '''| Header  | Perlic - ${staticProjectName} | |
 	| Product | DXP Production                | |''');
 
-		LocalFile.OSBAdmin.logoutAndLoginToProvisioning(
+		OSBAdmin.logoutAndLoginToProvisioning(
 			userEmailAddress = "licensing.contact.worker@liferay.com.broken",
 			userPassword = ${staticProvisioningQaUserPassword});
 
-		LocalFile.UserAccount.updatePasswordUponLogin(userPassword = "test");
+		UserAccount.updatePasswordUponLogin(userPassword = "test");
 
-		LocalFile.Provisioning.gotoLicenses();
+		Provisioning.gotoLicenses();
 
-		LocalFile.Provisioning.searchLicenses(keyword = ${staticAccountKey});
+		Provisioning.searchLicenses(keyword = ${staticAccountKey});
 
-		LocalFile.Provisioning.clickLicense(licenseKeyword = "Perlic - ${staticProjectName}");
+		Provisioning.clickLicense(licenseKeyword = "Perlic - ${staticProjectName}");
 
-		LocalFile.ProvisioningLicense.viewLicense(table = '''| Header        | Perlic - ${staticProjectName} | |
+		ProvisioningLicense.viewLicense(table = '''| Header        | Perlic - ${staticProjectName} | |
 	| Product       | DXP Production                | |
 	| Version       | 7.2                           | |
 	| Type          | Production                    | |
@@ -1889,33 +1889,33 @@ definition {
 	| Status        | ACTIVE                        | |
 	| Created By    | Test Test                     | |''');
 
-		LocalFile.ProvisioningLicense.viewDownloadLicenseButton(positionValue = 1);
+		ProvisioningLicense.viewDownloadLicenseButton(positionValue = 1);
 
-		LocalFile.ProvisioningLicense.viewNoMoveLicenseButton(positionValue = 1);
+		ProvisioningLicense.viewNoMoveLicenseButton(positionValue = 1);
 
-		LocalFile.ProvisioningLicense.viewNoDeactivateLicenseButton(positionValue = 1);
+		ProvisioningLicense.viewNoDeactivateLicenseButton(positionValue = 1);
 
-		LocalFile.ProvisioningLicense.viewNoMakeComplimentaryLicenseButton(positionValue = 1);
+		ProvisioningLicense.viewNoMakeComplimentaryLicenseButton(positionValue = 1);
 
-		LocalFile.ProvisioningLicense.viewNoReplaceLicenseButton(positionValue = 1);
+		ProvisioningLicense.viewNoReplaceLicenseButton(positionValue = 1);
 
-		LocalFile.ProvisioningLicense.viewNoExtendLicenseButton(positionValue = 1);
+		ProvisioningLicense.viewNoExtendLicenseButton(positionValue = 1);
 
-		LocalFile.Provisioning.gotoAccounts();
+		Provisioning.gotoAccounts();
 
-		LocalFile.Provisioning.searchAccounts(keyword = "Perlic");
+		Provisioning.searchAccounts(keyword = "Perlic");
 
-		LocalFile.Provisioning.clickAccount(accountName = "Perlic - ${staticProjectName}");
+		Provisioning.clickAccount(accountName = "Perlic - ${staticProjectName}");
 
-		LocalFile.ProvisioningAccount._viewAccountProduct(
+		ProvisioningAccount._viewAccountProduct(
 			productName = "DXP Production",
 			table = '''| Name                | DXP Production |
 	| Current Provisioned | 1              |
 	| State               | ACTIVE         |''');
 
-		LocalFile.ProvisioningAccount.clickSubscriptionProvisionedLink(productName = "DXP Production");
+		ProvisioningAccount.clickSubscriptionProvisionedLink(productName = "DXP Production");
 
-		LocalFile.ProvisioningSubscription._viewSubscriptionLicense(
+		ProvisioningSubscription._viewSubscriptionLicense(
 			licenseKeyword = "Perlic - ${staticProjectName}",
 			table = '''| Name          | Perlic - ${staticProjectName}  |
 	| Description   | Perlic - ${staticProjectName}  |
@@ -1927,17 +1927,17 @@ definition {
 	| Status        | ACTIVE                         |
 	| Complimentary | false                          |''');
 
-		LocalFile.Provisioning.gotoAccounts();
+		Provisioning.gotoAccounts();
 
-		LocalFile.Provisioning.searchAccounts(keyword = "Perlic");
+		Provisioning.searchAccounts(keyword = "Perlic");
 
-		LocalFile.Provisioning.clickAccount(accountName = "Perlic - ${staticProjectName}");
+		Provisioning.clickAccount(accountName = "Perlic - ${staticProjectName}");
 
-		LocalFile.ProvisioningAccount.clickSubscriptionLink(productName = "DXP Production");
+		ProvisioningAccount.clickSubscriptionLink(productName = "DXP Production");
 
-		LocalFile.ProvisioningSubscription.clickSubscriptionProvisionedLink();
+		ProvisioningSubscription.clickSubscriptionProvisionedLink();
 
-		LocalFile.ProvisioningSubscription._viewSubscriptionLicense(
+		ProvisioningSubscription._viewSubscriptionLicense(
 			licenseKeyword = "Perlic - ${staticProjectName}",
 			table = '''| Name          | Perlic - ${staticProjectName}  |
 	| Description   | Perlic - ${staticProjectName}  |
@@ -1949,17 +1949,17 @@ definition {
 	| Status        | ACTIVE                         |
 	| Complimentary | false                          |''');
 
-		LocalFile.Provisioning.gotoAccounts();
+		Provisioning.gotoAccounts();
 
-		LocalFile.Provisioning.searchAccounts(keyword = "Perlic");
+		Provisioning.searchAccounts(keyword = "Perlic");
 
-		LocalFile.Provisioning.clickAccount(accountName = "Perlic - ${staticProjectName}");
+		Provisioning.clickAccount(accountName = "Perlic - ${staticProjectName}");
 
-		LocalFile.ProvisioningAccount.clickSubscriptionLink(productName = "DXP Production");
+		ProvisioningAccount.clickSubscriptionLink(productName = "DXP Production");
 
-		LocalFile.ProvisioningSubscription.clickSubscriptionTermProvisionedLink(startDateEndDate = "${staticFullStartDate} - ${staticFullEndDate}");
+		ProvisioningSubscription.clickSubscriptionTermProvisionedLink(startDateEndDate = "${staticFullStartDate} - ${staticFullEndDate}");
 
-		LocalFile.ProvisioningSubscription._viewSubscriptionLicense(
+		ProvisioningSubscription._viewSubscriptionLicense(
 			licenseKeyword = "Perlic - ${staticProjectName}",
 			table = '''| Name          | Perlic - ${staticProjectName}  |
 	| Description   | Perlic - ${staticProjectName}  |
@@ -1971,15 +1971,15 @@ definition {
 	| Status        | ACTIVE                         |
 	| Complimentary | false                          |''');
 
-		LocalFile.Provisioning.gotoAccounts();
+		Provisioning.gotoAccounts();
 
-		LocalFile.Provisioning.searchAccounts(keyword = "Perlic");
+		Provisioning.searchAccounts(keyword = "Perlic");
 
-		LocalFile.Provisioning.clickAccount(accountName = "Perlic - ${staticProjectName}");
+		Provisioning.clickAccount(accountName = "Perlic - ${staticProjectName}");
 
-		LocalFile.Provisioning.clickTab(tabName = "Licenses");
+		Provisioning.clickTab(tabName = "Licenses");
 
-		LocalFile.ProvisioningAccount._viewAccountLicense(
+		ProvisioningAccount._viewAccountLicense(
 			licenseKeyword = "Perlic - ${staticProjectName}",
 			table = '''| Name          | Perlic - ${staticProjectName}  |
 	| Description   | Perlic - ${staticProjectName}  |
@@ -1991,47 +1991,47 @@ definition {
 	| Status        | ACTIVE                         |
 	| Complimentary | false                          |''');
 
-		LocalFile.ProvisioningAccount.selectLicensesViaLicensesTab(table = '''| Perlic - ${staticProjectName} |''');
+		ProvisioningAccount.selectLicensesViaLicensesTab(table = '''| Perlic - ${staticProjectName} |''');
 
-		LocalFile.ProvisioningAccount.viewNoLicensesReplaceButton();
+		ProvisioningAccount.viewNoLicensesReplaceButton();
 
-		LocalFile.ProvisioningAccount.viewNoLicensesExtendButton();
+		ProvisioningAccount.viewNoLicensesExtendButton();
 
-		LocalFile.ProvisioningAccount.viewNoLicensesActionDropdownButton(action = "Replace");
+		ProvisioningAccount.viewNoLicensesActionDropdownButton(action = "Replace");
 
-		LocalFile.ProvisioningAccount.viewNoLicensesActionDropdownButton(action = "Extend");
+		ProvisioningAccount.viewNoLicensesActionDropdownButton(action = "Extend");
 
-		LocalFile.ProvisioningAccount.viewNoLicensesActionDropdownButton(action = "Make Complimentary");
+		ProvisioningAccount.viewNoLicensesActionDropdownButton(action = "Make Complimentary");
 
-		LocalFile.ProvisioningAccount.viewNoLicensesActionDropdownButton(action = "Deactivate");
+		ProvisioningAccount.viewNoLicensesActionDropdownButton(action = "Deactivate");
 
-		LocalFile.ProvisioningAccount.viewLicenseTabCount(
+		ProvisioningAccount.viewLicenseTabCount(
 			countValue = 1,
 			tabName = "Active");
 
-		LocalFile.ProvisioningAccount.viewLicenseTabCount(
+		ProvisioningAccount.viewLicenseTabCount(
 			countValue = 0,
 			tabName = "Expired");
 
-		LocalFile.ProvisioningAccount.viewLicenseTabCount(
+		ProvisioningAccount.viewLicenseTabCount(
 			countValue = 0,
 			tabName = "Deactivated");
 
-		LocalFile.ProvisioningAccount.viewLicenseTabCount(
+		ProvisioningAccount.viewLicenseTabCount(
 			countValue = 1,
 			tabName = "All");
 
-		LocalFile.ProvisioningAccount.clickLicenseTab(tabName = "Expired");
+		ProvisioningAccount.clickLicenseTab(tabName = "Expired");
 
-		LocalFile.ProvisioningAccount._viewNoAccountLicense(licenseKeyword = "Perlic - ${staticProjectName}");
+		ProvisioningAccount._viewNoAccountLicense(licenseKeyword = "Perlic - ${staticProjectName}");
 
-		LocalFile.ProvisioningAccount.clickLicenseTab(tabName = "Deactivated");
+		ProvisioningAccount.clickLicenseTab(tabName = "Deactivated");
 
-		LocalFile.ProvisioningAccount._viewNoAccountLicense(licenseKeyword = "Perlic - ${staticProjectName}");
+		ProvisioningAccount._viewNoAccountLicense(licenseKeyword = "Perlic - ${staticProjectName}");
 
-		LocalFile.ProvisioningAccount.clickLicenseTab(tabName = "All");
+		ProvisioningAccount.clickLicenseTab(tabName = "All");
 
-		LocalFile.ProvisioningAccount._viewAccountLicense(
+		ProvisioningAccount._viewAccountLicense(
 			licenseKeyword = "Perlic - ${staticProjectName}",
 			table = '''| Name          | Perlic - ${staticProjectName}  |
 	| Description   | Perlic - ${staticProjectName}  |
@@ -2043,31 +2043,31 @@ definition {
 	| Status        | ACTIVE                         |
 	| Complimentary | false                          |''');
 
-		LocalFile.ProvisioningAccount.selectLicensesViaLicensesTab(table = '''| Perlic - ${staticProjectName} |''');
+		ProvisioningAccount.selectLicensesViaLicensesTab(table = '''| Perlic - ${staticProjectName} |''');
 
-		LocalFile.ProvisioningAccount.viewNoLicensesReplaceButton();
+		ProvisioningAccount.viewNoLicensesReplaceButton();
 
-		LocalFile.ProvisioningAccount.viewNoLicensesExtendButton();
+		ProvisioningAccount.viewNoLicensesExtendButton();
 
-		LocalFile.ProvisioningAccount.viewNoLicensesActionDropdownButton(action = "Replace");
+		ProvisioningAccount.viewNoLicensesActionDropdownButton(action = "Replace");
 
-		LocalFile.ProvisioningAccount.viewNoLicensesActionDropdownButton(action = "Extend");
+		ProvisioningAccount.viewNoLicensesActionDropdownButton(action = "Extend");
 
-		LocalFile.ProvisioningAccount.viewNoLicensesActionDropdownButton(action = "Make Complimentary");
+		ProvisioningAccount.viewNoLicensesActionDropdownButton(action = "Make Complimentary");
 
-		LocalFile.ProvisioningAccount.viewNoLicensesActionDropdownButton(action = "Deactivate");
+		ProvisioningAccount.viewNoLicensesActionDropdownButton(action = "Deactivate");
 
-		LocalFile.Provisioning.gotoAccounts();
+		Provisioning.gotoAccounts();
 
-		LocalFile.Provisioning.searchAccounts(keyword = "Perlic");
+		Provisioning.searchAccounts(keyword = "Perlic");
 
-		LocalFile.Provisioning.clickAccount(accountName = "Perlic - ${staticProjectName}");
+		Provisioning.clickAccount(accountName = "Perlic - ${staticProjectName}");
 
-		LocalFile.ProvisioningAccount.clickSubscriptionLink(productName = "DXP Production");
+		ProvisioningAccount.clickSubscriptionLink(productName = "DXP Production");
 
-		LocalFile.Provisioning.clickTab(tabName = "Licenses");
+		Provisioning.clickTab(tabName = "Licenses");
 
-		LocalFile.ProvisioningSubscription._viewSubscriptionLicense(
+		ProvisioningSubscription._viewSubscriptionLicense(
 			licenseKeyword = "Perlic - ${staticProjectName}",
 			table = '''| Name          | Perlic - ${staticProjectName}  |
 	| Description   | Perlic - ${staticProjectName}  |
@@ -2079,47 +2079,47 @@ definition {
 	| Status        | ACTIVE                         |
 	| Complimentary | false                          |''');
 
-		LocalFile.ProvisioningSubscription.selectLicensesViaLicensesTab(table = '''| Perlic - ${staticProjectName} |''');
+		ProvisioningSubscription.selectLicensesViaLicensesTab(table = '''| Perlic - ${staticProjectName} |''');
 
-		LocalFile.ProvisioningSubscription.viewNoLicensesReplaceButton();
+		ProvisioningSubscription.viewNoLicensesReplaceButton();
 
-		LocalFile.ProvisioningSubscription.viewNoLicensesExtendButton();
+		ProvisioningSubscription.viewNoLicensesExtendButton();
 
-		LocalFile.ProvisioningSubscription.viewNoLicensesActionDropdownButton(action = "Replace");
+		ProvisioningSubscription.viewNoLicensesActionDropdownButton(action = "Replace");
 
-		LocalFile.ProvisioningSubscription.viewNoLicensesActionDropdownButton(action = "Extend");
+		ProvisioningSubscription.viewNoLicensesActionDropdownButton(action = "Extend");
 
-		LocalFile.ProvisioningSubscription.viewNoLicensesActionDropdownButton(action = "Make Complimentary");
+		ProvisioningSubscription.viewNoLicensesActionDropdownButton(action = "Make Complimentary");
 
-		LocalFile.ProvisioningSubscription.viewNoLicensesActionDropdownButton(action = "Deactivate");
+		ProvisioningSubscription.viewNoLicensesActionDropdownButton(action = "Deactivate");
 
-		LocalFile.ProvisioningAccount.viewLicenseTabCount(
+		ProvisioningAccount.viewLicenseTabCount(
 			countValue = 1,
 			tabName = "Active");
 
-		LocalFile.ProvisioningAccount.viewLicenseTabCount(
+		ProvisioningAccount.viewLicenseTabCount(
 			countValue = 0,
 			tabName = "Expired");
 
-		LocalFile.ProvisioningAccount.viewLicenseTabCount(
+		ProvisioningAccount.viewLicenseTabCount(
 			countValue = 0,
 			tabName = "Deactivated");
 
-		LocalFile.ProvisioningAccount.viewLicenseTabCount(
+		ProvisioningAccount.viewLicenseTabCount(
 			countValue = 1,
 			tabName = "All");
 
-		LocalFile.ProvisioningAccount.clickLicenseTab(tabName = "Expired");
+		ProvisioningAccount.clickLicenseTab(tabName = "Expired");
 
-		LocalFile.ProvisioningSubscription._viewNoSubscriptionLicense(licenseKeyword = "Perlic - ${staticProjectName}");
+		ProvisioningSubscription._viewNoSubscriptionLicense(licenseKeyword = "Perlic - ${staticProjectName}");
 
-		LocalFile.ProvisioningAccount.clickLicenseTab(tabName = "Deactivated");
+		ProvisioningAccount.clickLicenseTab(tabName = "Deactivated");
 
-		LocalFile.ProvisioningSubscription._viewNoSubscriptionLicense(licenseKeyword = "Perlic - ${staticProjectName}");
+		ProvisioningSubscription._viewNoSubscriptionLicense(licenseKeyword = "Perlic - ${staticProjectName}");
 
-		LocalFile.ProvisioningAccount.clickLicenseTab(tabName = "All");
+		ProvisioningAccount.clickLicenseTab(tabName = "All");
 
-		LocalFile.ProvisioningSubscription._viewSubscriptionLicense(
+		ProvisioningSubscription._viewSubscriptionLicense(
 			licenseKeyword = "Perlic - ${staticProjectName}",
 			table = '''| Name          | Perlic - ${staticProjectName}  |
 	| Description   | Perlic - ${staticProjectName}  |
@@ -2131,17 +2131,17 @@ definition {
 	| Status        | ACTIVE                         |
 	| Complimentary | false                          |''');
 
-		LocalFile.ProvisioningSubscription.selectLicensesViaLicensesTab(table = '''| Perlic - ${staticProjectName} |''');
+		ProvisioningSubscription.selectLicensesViaLicensesTab(table = '''| Perlic - ${staticProjectName} |''');
 
-		LocalFile.ProvisioningSubscription.viewNoLicensesReplaceButton();
+		ProvisioningSubscription.viewNoLicensesReplaceButton();
 
-		LocalFile.ProvisioningSubscription.viewNoLicensesActionDropdownButton(action = "Replace");
+		ProvisioningSubscription.viewNoLicensesActionDropdownButton(action = "Replace");
 	}
 
 	test Viewnogeneratelicensebuttons {
-		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+		OSBAdminRabbitMQ.generateProvisioningProjectName();
 
-		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code                  | PERLICPERLIC                         | |
+		KoroneikiAccountAPI._createAccount(table = '''| Code                  | PERLICPERLIC                         | |
 	| Contact Email Address | lic.koroneiki1@lrcustomer.com.broken | |
 	| Description           | Test osb account on koroneiki        | |
 	| Fax Number            | 555-555-1234                         | |
@@ -2153,17 +2153,17 @@ definition {
 	| Tier                  | T4                                   | |
 	| Website               | www.koroneikicorporation.com         | |''');
 
-		LocalFile.KoroneikiAccountAPI._generateAccountKey(accountName = "Perlic - ${staticProjectName}");
+		KoroneikiAccountAPI._generateAccountKey(accountName = "Perlic - ${staticProjectName}");
 
-		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+		KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
 
-		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFullStartAndEndDate();
+		KoroneikiProductPurchaseAPI.generateStaticFullStartAndEndDate();
 
-		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFutureStartAndEndDate();
+		KoroneikiProductPurchaseAPI.generateStaticFutureStartAndEndDate();
 
-		LocalFile.KoroneikiProductPurchaseAPI.generateStaticFullFutureStartAndEndDate();
+		KoroneikiProductPurchaseAPI.generateStaticFullFutureStartAndEndDate();
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Perlic - ${staticProjectName}",
 			productName = "DXP Production",
 			table = '''| End Date                | ${staticEndDate}         |   |
@@ -2176,11 +2176,11 @@ definition {
 	| Start Date              | ${staticStartDate}       |   |
 	| Status                  | Approved                 |   |''');
 
-		LocalFile.KoroneikiProductPurchaseAPI._generateProductPurchaseId(
+		KoroneikiProductPurchaseAPI._generateProductPurchaseId(
 			accountName = "Perlic - ${staticProjectName}",
 			productName = "DXP Production");
 
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Perlic - ${staticProjectName}",
 			productName = "Platinum Subscription",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -2190,29 +2190,29 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.OSBAdmin.logoutAndLoginToProvisioning(
+		OSBAdmin.logoutAndLoginToProvisioning(
 			userEmailAddress = "licensing.contact.worker@liferay.com.broken",
 			userPassword = ${staticProvisioningQaUserPassword});
 
-		LocalFile.UserAccount.updatePasswordUponLogin(userPassword = "test");
+		UserAccount.updatePasswordUponLogin(userPassword = "test");
 
-		LocalFile.Provisioning.gotoLicenses();
+		Provisioning.gotoLicenses();
 
-		LocalFile.Provisioning.viewNoGenerateLicenseButton();
+		Provisioning.viewNoGenerateLicenseButton();
 
-		LocalFile.Provisioning.gotoAccounts();
+		Provisioning.gotoAccounts();
 
-		LocalFile.Provisioning.searchAccounts(keyword = "Perlic");
+		Provisioning.searchAccounts(keyword = "Perlic");
 
-		LocalFile.Provisioning.clickAccount(accountName = "Perlic - ${staticProjectName}");
+		Provisioning.clickAccount(accountName = "Perlic - ${staticProjectName}");
 
-		LocalFile.ProvisioningAccount.clickSubscriptionProvisionedLink(productName = "DXP Production");
+		ProvisioningAccount.clickSubscriptionProvisionedLink(productName = "DXP Production");
 
-		LocalFile.ProvisioningSubscription.viewNoGenerateLicenseButton();
+		ProvisioningSubscription.viewNoGenerateLicenseButton();
 
-		LocalFile.Provisioning.clickTab(tabName = "Licenses");
+		Provisioning.clickTab(tabName = "Licenses");
 
-		LocalFile.ProvisioningSubscription.viewNoGenerateLicenseButton();
+		ProvisioningSubscription.viewNoGenerateLicenseButton();
 	}
 
 }

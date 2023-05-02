@@ -4,136 +4,136 @@ definition {
 	property type = "zendesk.integration";
 
 	setUp {
-		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+		OSBAdminRabbitMQ.generateProvisioningProjectName();
 
-		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | osb.customer1                       |
+		JSONOkta.createOktaUser(table = '''| Screen Name   | osb.customer1                       |
 	| Email Address | osb.customer1@lrcustomer.com.broken |
 	| First Name    | OSB                                 |
 	| Last Name     | Customer1                           |''');
 
-		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | osb.customer2                       |
+		JSONOkta.createOktaUser(table = '''| Screen Name   | osb.customer2                       |
 	| Email Address | osb.customer2@lrcustomer.com.broken |
 	| First Name    | OSB                                 |
 	| Last Name     | Customer2                           |''');
 
-		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code     | OSBZENOSBZEN                  | |
+		KoroneikiAccountAPI._createAccount(table = '''| Code     | OSBZENOSBZEN                  | |
 	| Language | English                       | |
 	| Name     | Osbzen - ${staticProjectName} | |
 	| Region   | United States                 | |
 	| Status   | Active                        | |
 	| Tier     | T1                            | |''');
 
-		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+		KoroneikiAccountAPI._assignContactRolesToContact(
 			accountName = "Osbzen - ${staticProjectName}",
 			contactEmailAddress = "osb.customer1@lrcustomer.com.broken",
 			table = '''| Support Requester |''');
 
-		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+		KoroneikiAccountAPI._assignContactRolesToContact(
 			accountName = "Osbzen - ${staticProjectName}",
 			contactEmailAddress = "osb.customer2@lrcustomer.com.broken",
 			table = '''| Support User |''');
 
-		LocalFile.ZendeskOrganizationAPI._viewOrganizationNoSyncFromOsb(organizationName = "Osbzen - ${staticProjectName}");
+		ZendeskOrganizationAPI._viewOrganizationNoSyncFromOsb(organizationName = "Osbzen - ${staticProjectName}");
 
-		LocalFile.ZendeskUserAPI._viewUserNoSyncFromOsb(userEmailAddress = "osb.customer1@lrcustomer.com.broken");
+		ZendeskUserAPI._viewUserNoSyncFromOsb(userEmailAddress = "osb.customer1@lrcustomer.com.broken");
 
-		LocalFile.ZendeskUserAPI._viewUserNoSyncFromOsb(userEmailAddress = "osb.customer2@lrcustomer.com.broken");
+		ZendeskUserAPI._viewUserNoSyncFromOsb(userEmailAddress = "osb.customer2@lrcustomer.com.broken");
 	}
 
 	tearDown {
-		LocalFile.ZendeskUserAPI._getDefaultUserId(organizationName = "Osbzen - ${staticProjectName}");
+		ZendeskUserAPI._getDefaultUserId(organizationName = "Osbzen - ${staticProjectName}");
 
-		LocalFile.OSBAdminProject.tearDownProjects(table = '''| OSBZENOSBZEN |''');
+		OSBAdminProject.tearDownProjects(table = '''| OSBZENOSBZEN |''');
 
-		LocalFile.KoroneikiAccountAPI._tearDownAccounts(table = '''| Osbzen - ${staticProjectName} |''');
+		KoroneikiAccountAPI._tearDownAccounts(table = '''| Osbzen - ${staticProjectName} |''');
 
-		LocalFile.KoroneikiAccountAPI._tearDownAccountsViaAccountFieldNameAndValue(
+		KoroneikiAccountAPI._tearDownAccountsViaAccountFieldNameAndValue(
 			fieldName = "Code",
 			table = '''| OSBZENOSBZEN |''');
 
-		LocalFile.JSONUser.tearDownUsers(table = '''| osb.customer1@lrcustomer.com.broken |
+		JSONUser.tearDownUsers(table = '''| osb.customer1@lrcustomer.com.broken |
 	| osb.customer2@lrcustomer.com.broken |''');
 
-		LocalFile.JSONUser.tearDownUsersViaSupport(table = '''| osb.customer1@lrcustomer.com.broken |
+		JSONUser.tearDownUsersViaSupport(table = '''| osb.customer1@lrcustomer.com.broken |
 	| osb.customer2@lrcustomer.com.broken |''');
 
-		LocalFile.JSONUser.tearDownUsersViaKoroneiki(table = '''| osb.customer1@lrcustomer.com.broken |
+		JSONUser.tearDownUsersViaKoroneiki(table = '''| osb.customer1@lrcustomer.com.broken |
 	| osb.customer2@lrcustomer.com.broken |''');
 
-		LocalFile.KoroneikiContactAPI._tearDownContacts(table = '''| osb.customer1@lrcustomer.com.broken |
+		KoroneikiContactAPI._tearDownContacts(table = '''| osb.customer1@lrcustomer.com.broken |
 	| osb.customer2@lrcustomer.com.broken |''');
 
-		LocalFile.JSONOkta.tearDownUsers(table = '''| osb.customer1@lrcustomer.com.broken |
+		JSONOkta.tearDownUsers(table = '''| osb.customer1@lrcustomer.com.broken |
 	| osb.customer2@lrcustomer.com.broken |''');
 
-		LocalFile.ZendeskUserAPI._getMultipleUserIdsByEmailAddress(table = '''| osb.customer1@lrcustomer.com.broken |
+		ZendeskUserAPI._getMultipleUserIdsByEmailAddress(table = '''| osb.customer1@lrcustomer.com.broken |
 	| osb.customer2@lrcustomer.com.broken |''');
 
-		LocalFile.ZendeskUserAPI._tearDownUsersByIdList(userIds = ${staticUserIdList});
+		ZendeskUserAPI._tearDownUsersByIdList(userIds = ${staticUserIdList});
 
-		LocalFile.ZendeskOrganizationAPI._getMultipleOrganizationExternalIdsByOrganizationNameIfStillPresent(table = '''| Osbzen - ${staticProjectName} |''');
+		ZendeskOrganizationAPI._getMultipleOrganizationExternalIdsByOrganizationNameIfStillPresent(table = '''| Osbzen - ${staticProjectName} |''');
 
-		LocalFile.ZendeskOrganizationAPI._tearDownOrganizationsByExternalIdList(organizationExternalIds = ${staticOrganizationExternalIdList});
+		ZendeskOrganizationAPI._tearDownOrganizationsByExternalIdList(organizationExternalIds = ${staticOrganizationExternalIdList});
 
-		LocalFile.ZendeskUserAPI._tearDownUserById(userId = ${staticDefaultUserId});
+		ZendeskUserAPI._tearDownUserById(userId = ${staticDefaultUserId});
 	}
 
 	test Viewnoprojectandusersyncaftercustomerremoval {
-		LocalFile.KoroneikiAccountAPI._removeCustomerContacts(
+		KoroneikiAccountAPI._removeCustomerContacts(
 			accountName = "Osbzen - ${staticProjectName}",
 			table = '''| osb.customer1@lrcustomer.com.broken |''');
 
-		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+		ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
 
-		LocalFile.ZendeskOrganizationAPI._viewOrganizationNoSyncFromOsb(organizationName = "Osbzen - ${staticProjectName}");
+		ZendeskOrganizationAPI._viewOrganizationNoSyncFromOsb(organizationName = "Osbzen - ${staticProjectName}");
 
-		LocalFile.ZendeskUserAPI._viewUserNoSyncFromOsb(userEmailAddress = "osb.customer1@lrcustomer.com.broken");
+		ZendeskUserAPI._viewUserNoSyncFromOsb(userEmailAddress = "osb.customer1@lrcustomer.com.broken");
 
-		LocalFile.ZendeskUserAPI._viewUserNoSyncFromOsb(userEmailAddress = "osb.customer2@lrcustomer.com.broken");
+		ZendeskUserAPI._viewUserNoSyncFromOsb(userEmailAddress = "osb.customer2@lrcustomer.com.broken");
 	}
 
 	test Viewnoprojectandusersyncafterroleupdates {
-		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+		KoroneikiAccountAPI._assignContactRolesToContact(
 			accountName = "Osbzen - ${staticProjectName}",
 			contactEmailAddress = "osb.customer1@lrcustomer.com.broken",
 			table = '''| Support User |''');
 
-		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+		KoroneikiAccountAPI._assignContactRolesToContact(
 			accountName = "Osbzen - ${staticProjectName}",
 			contactEmailAddress = "osb.customer2@lrcustomer.com.broken",
 			table = '''| Support Requester |''');
 
-		LocalFile.KoroneikiAccountAPI._removeContactRolesFromContact(
+		KoroneikiAccountAPI._removeContactRolesFromContact(
 			accountName = "Osbzen - ${staticProjectName}",
 			contactEmailAddress = "osb.customer1@lrcustomer.com.broken",
 			table = '''| Support Requester |''');
 
-		LocalFile.KoroneikiAccountAPI._removeContactRolesFromContact(
+		KoroneikiAccountAPI._removeContactRolesFromContact(
 			accountName = "Osbzen - ${staticProjectName}",
 			contactEmailAddress = "osb.customer2@lrcustomer.com.broken",
 			table = '''| Support User |''');
 
-		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+		ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
 
-		LocalFile.ZendeskOrganizationAPI._viewOrganizationNoSyncFromOsb(organizationName = "Osbzen - ${staticProjectName}");
+		ZendeskOrganizationAPI._viewOrganizationNoSyncFromOsb(organizationName = "Osbzen - ${staticProjectName}");
 
-		LocalFile.ZendeskUserAPI._viewUserNoSyncFromOsb(userEmailAddress = "osb.customer1@lrcustomer.com.broken");
+		ZendeskUserAPI._viewUserNoSyncFromOsb(userEmailAddress = "osb.customer1@lrcustomer.com.broken");
 
-		LocalFile.ZendeskUserAPI._viewUserNoSyncFromOsb(userEmailAddress = "osb.customer2@lrcustomer.com.broken");
+		ZendeskUserAPI._viewUserNoSyncFromOsb(userEmailAddress = "osb.customer2@lrcustomer.com.broken");
 	}
 
 	test Viewnoprojectandusersyncafterwatcherremoval {
-		LocalFile.KoroneikiAccountAPI._removeCustomerContacts(
+		KoroneikiAccountAPI._removeCustomerContacts(
 			accountName = "Osbzen - ${staticProjectName}",
 			table = '''| osb.customer2@lrcustomer.com.broken |''');
 
-		LocalFile.ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
+		ZendeskHomepage.pauseInMinutes(timeInMinutes = 1);
 
-		LocalFile.ZendeskOrganizationAPI._viewOrganizationNoSyncFromOsb(organizationName = "Osbzen - ${staticProjectName}");
+		ZendeskOrganizationAPI._viewOrganizationNoSyncFromOsb(organizationName = "Osbzen - ${staticProjectName}");
 
-		LocalFile.ZendeskUserAPI._viewUserNoSyncFromOsb(userEmailAddress = "osb.customer1@lrcustomer.com.broken");
+		ZendeskUserAPI._viewUserNoSyncFromOsb(userEmailAddress = "osb.customer1@lrcustomer.com.broken");
 
-		LocalFile.ZendeskUserAPI._viewUserNoSyncFromOsb(userEmailAddress = "osb.customer2@lrcustomer.com.broken");
+		ZendeskUserAPI._viewUserNoSyncFromOsb(userEmailAddress = "osb.customer2@lrcustomer.com.broken");
 	}
 
 }

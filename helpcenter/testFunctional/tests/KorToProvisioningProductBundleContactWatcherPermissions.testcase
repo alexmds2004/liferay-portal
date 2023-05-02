@@ -4,75 +4,75 @@ definition {
 	property type = "provisioning.security";
 
 	setUp {
-		LocalFile.Passwords.getPasswords();
+		Passwords.getPasswords();
 
-		LocalFile.JSONUser.createViaProvisioning(table = '''| Screen Name   | provisioning.contact.worker                    |
+		JSONUser.createViaProvisioning(table = '''| Screen Name   | provisioning.contact.worker                    |
 	| Email Address | provisioning.contact.worker@liferay.com.broken |
 	| First Name    | Provisioning                                   |
 	| Last Name     | Contact Worker                                 |''');
 
-		LocalFile.JSONUser.assignUserToProvisioningRole(
+		JSONUser.assignUserToProvisioningRole(
 			roleName = "Provisioning Contact Worker",
 			userEmailAddress = "provisioning.contact.worker@liferay.com.broken");
 	}
 
 	tearDown {
-		LocalFile.OSBAdmin.logoutAndLoginToProvisioning(
+		OSBAdmin.logoutAndLoginToProvisioning(
 			userEmailAddress = ${staticProvisioningAdminEmailAddress},
 			userPassword = ${staticProvisioningAdminPassword});
 
-		LocalFile.Provisioning.gotoProductBundles();
+		Provisioning.gotoProductBundles();
 
-		LocalFile.Provisioning.tearDownProductBundles(table = '''| Visible Products |''');
+		Provisioning.tearDownProductBundles(table = '''| Visible Products |''');
 
-		LocalFile.KoroneikiProductAPI._tearDownProducts(table = '''| A Visible Product        |
+		KoroneikiProductAPI._tearDownProducts(table = '''| A Visible Product        |
 	| A Visible Second Product |''');
 
-		LocalFile.JSONUser.tearDownUsersViaProvisioning(table = '''| provisioning.contact.worker@liferay.com.broken |''');
+		JSONUser.tearDownUsersViaProvisioning(table = '''| provisioning.contact.worker@liferay.com.broken |''');
 	}
 
 	test Viewnonewproductbundlebutton {
-		LocalFile.OSBAdmin.loginToProvisioning(
+		OSBAdmin.loginToProvisioning(
 			userEmailAddress = "provisioning.contact.worker@liferay.com.broken",
 			userPassword = ${staticProvisioningQaUserPassword});
 
-		LocalFile.UserAccount.updatePasswordUponLogin(userPassword = "test");
+		UserAccount.updatePasswordUponLogin(userPassword = "test");
 
-		LocalFile.Provisioning.gotoProductBundles();
+		Provisioning.gotoProductBundles();
 
-		LocalFile.Provisioning.viewNoNewProductBundleButton();
+		Provisioning.viewNoNewProductBundleButton();
 	}
 
 	test Viewproductbundle {
-		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | A Visible Product | |''');
+		KoroneikiProductAPI._createProduct(table = '''| Name | A Visible Product | |''');
 
-		LocalFile.KoroneikiProductAPI._createProduct(table = '''| Name | A Visible Second Product | |''');
+		KoroneikiProductAPI._createProduct(table = '''| Name | A Visible Second Product | |''');
 
-		LocalFile.OSBAdmin.logoutAndLoginToProvisioning(
+		OSBAdmin.logoutAndLoginToProvisioning(
 			userEmailAddress = ${staticProvisioningAdminEmailAddress},
 			userPassword = ${staticProvisioningAdminPassword});
 
-		LocalFile.Provisioning.gotoProductBundles();
+		Provisioning.gotoProductBundles();
 
-		LocalFile.Provisioning.clickNewProductBundleButton();
+		Provisioning.clickNewProductBundleButton();
 
-		LocalFile.ProvisioningProductBundle.populateProductBundleFormAndSave(table = '''| Name        | Input | Visible Products         |
+		ProvisioningProductBundle.populateProductBundleFormAndSave(table = '''| Name        | Input | Visible Products         |
 	| Add Product |       | A Visible Product        |
 	| Add Product |       | A Visible Second Product |''');
 
-		LocalFile.OSBAdmin.logoutAndLoginToProvisioning(
+		OSBAdmin.logoutAndLoginToProvisioning(
 			userEmailAddress = "provisioning.contact.worker@liferay.com.broken",
 			userPassword = ${staticProvisioningQaUserPassword});
 
-		LocalFile.UserAccount.updatePasswordUponLogin(userPassword = "test");
+		UserAccount.updatePasswordUponLogin(userPassword = "test");
 
-		LocalFile.Provisioning.gotoProductBundles();
+		Provisioning.gotoProductBundles();
 
-		LocalFile.Provisioning._viewProductBundleNonLinkViaIndex(
+		Provisioning._viewProductBundleNonLinkViaIndex(
 			productBundleName = "Visible Products",
 			table = '''| Name | Visible Products |''');
 
-		LocalFile.Provisioning.viewNoProductBundleDeleteButton(productBundleName = "Visible Products");
+		Provisioning.viewNoProductBundleDeleteButton(productBundleName = "Visible Products");
 	}
 
 }

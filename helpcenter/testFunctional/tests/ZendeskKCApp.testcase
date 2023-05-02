@@ -4,25 +4,25 @@ definition {
 	property type = "zendesk.frontend";
 
 	setUp {
-		LocalFile.Passwords.getPasswords();
+		Passwords.getPasswords();
 	}
 
 	tearDown {
-		LocalFile.ZendeskHomepage.pause(timeInSeconds = 5);
+		ZendeskHomepage.pause(timeInSeconds = 5);
 
-		LocalFile.ZendeskTicketAPI._tearDownTicketByIds(ticketIdList = ${staticRequestIdList});
+		ZendeskTicketAPI._tearDownTicketByIds(ticketIdList = ${staticRequestIdList});
 
-		LocalFile.ZendeskUserAPI._tearDownUsersByExternalIdTable(table = '''| Enduser1 |''');
+		ZendeskUserAPI._tearDownUsersByExternalIdTable(table = '''| Enduser1 |''');
 
-		LocalFile.ZendeskOrganizationAPI._tearDownOrganizationsByExternalIdTable(table = '''| 12341234 |''');
+		ZendeskOrganizationAPI._tearDownOrganizationsByExternalIdTable(table = '''| 12341234 |''');
 
-		LocalFile.ZendeskKCApp._tearDownArticlesByName(table = '''| A simple DXPC article |
+		ZendeskKCApp._tearDownArticlesByName(table = '''| A simple DXPC article |
 	| A simple Fast article |
 	| A different article   |''');
 	}
 
 	test CreateandviewDXPCFastTrackArticle {
-		LocalFile.ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved            |
+		ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved            |
 	| Name             | Frontend Org Name 1 |
 	| Shared Tickets   | true                |
 	| Shared Comments  | true                |
@@ -32,11 +32,11 @@ definition {
 	| Support Language | English             |
 	| External ID      | 12341234            |''');
 
-		LocalFile.ZendeskOrganizationAPI._assignTagsToOrganizationViaOrganizationExternalID(
+		ZendeskOrganizationAPI._assignTagsToOrganizationViaOrganizationExternalID(
 			organizationExternalId = 12341234,
 			table = '''| liferay_dxp |''');
 
-		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk Enduser1                    |
+		ZendeskUserAPI._createUser(table = '''| Name             | Zendesk Enduser1                    |
 	| Tags             | osb_customer,osb_kb                 |
 	| Password         | ${staticZendeskAdminPassword}       |
 	| Role             | End-user                            |
@@ -48,7 +48,7 @@ definition {
 	| Time Zone        | Pacific Time (US & Canada)          |
 	| External ID      | Enduser1                            |''');
 
-		LocalFile.ZendeskRequestAPI._createRequest(
+		ZendeskRequestAPI._createRequest(
 			requesterEmail = "zendesk.enduser1@zendesk.com.broken",
 			table = '''| Product                  | prd_liferay_dxp_7_4                              |
 	| Component                | activation_key_project_administration            |
@@ -58,35 +58,35 @@ definition {
 	| Description              | Request Description                              |
 	| Organization External ID | 12341234                                         |''');
 
-		LocalFile.ZendeskTicketAPI._viewMultipleTicketGroupAssignees(
+		ZendeskTicketAPI._viewMultipleTicketGroupAssignees(
 			groupAssignee = "Self Service",
 			ticketIdList = ${staticRequestIdList});
 
-		LocalFile.ZendeskHomepage.login(
+		ZendeskHomepage.login(
 			userEmailAddress = "zendesk.admin@liferay.com.broken",
 			userPassword = ${staticZendeskAdminPassword});
 
-		LocalFile.ZendeskKCApp.createFastTrackArticle(table = '''| Ticket ID     | ${staticRequestIdList}            |
+		ZendeskKCApp.createFastTrackArticle(table = '''| Ticket ID     | ${staticRequestIdList}            |
 	| Template      | DXPC Fast Track Article           |
 	| Name          | A simple DXPC article             |
 	| Description   | A simple DXPC article description |
 	| Review Status | Published                         |''');
 
-		LocalFile.ZendeskHomepage.login(
+		ZendeskHomepage.login(
 			userEmailAddress = "zendesk.admin@liferay.com.broken",
 			userPassword = ${staticZendeskAdminPassword});
 
-		LocalFile.ZendeskTicket.gotoViaId(ticketId = ${staticRequestIdList});
+		ZendeskTicket.gotoViaId(ticketId = ${staticRequestIdList});
 
-		LocalFile.ZendeskKCApp.clickAppsbutton();
+		ZendeskKCApp.clickAppsbutton();
 
-		LocalFile.ZendeskKCApp.viewArticle(
+		ZendeskKCApp.viewArticle(
 			articleDescription = "A simple DXPC article description",
 			articleName = "A simple DXPC article");
 	}
 
 	test CreateandviewFastTrackArticle {
-		LocalFile.ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved            |
+		ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved            |
 	| Name             | Frontend Org Name 1 |
 	| Shared Tickets   | true                |
 	| Shared Comments  | true                |
@@ -96,11 +96,11 @@ definition {
 	| Support Language | English             |
 	| External ID      | 12341234            |''');
 
-		LocalFile.ZendeskOrganizationAPI._assignTagsToOrganizationViaOrganizationExternalID(
+		ZendeskOrganizationAPI._assignTagsToOrganizationViaOrganizationExternalID(
 			organizationExternalId = 12341234,
 			table = '''| liferay_dxp |''');
 
-		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk Enduser1                    |
+		ZendeskUserAPI._createUser(table = '''| Name             | Zendesk Enduser1                    |
 	| Tags             | osb_customer,osb_kb                 |
 	| Password         | ${staticZendeskAdminPassword}       |
 	| Role             | End-user                            |
@@ -112,7 +112,7 @@ definition {
 	| Time Zone        | Pacific Time (US & Canada)          |
 	| External ID      | Enduser1                            |''');
 
-		LocalFile.ZendeskRequestAPI._createRequest(
+		ZendeskRequestAPI._createRequest(
 			requesterEmail = "zendesk.enduser1@zendesk.com.broken",
 			table = '''| Product                  | prd_liferay_dxp_7_4                              |
 	| Component                | activation_key_project_administration            |
@@ -122,35 +122,35 @@ definition {
 	| Description              | Request Description                              |
 	| Organization External ID | 12341234                                         |''');
 
-		LocalFile.ZendeskTicketAPI._viewMultipleTicketGroupAssignees(
+		ZendeskTicketAPI._viewMultipleTicketGroupAssignees(
 			groupAssignee = "Self Service",
 			ticketIdList = ${staticRequestIdList});
 
-		LocalFile.ZendeskHomepage.login(
+		ZendeskHomepage.login(
 			userEmailAddress = "zendesk.admin@liferay.com.broken",
 			userPassword = ${staticZendeskAdminPassword});
 
-		LocalFile.ZendeskKCApp.createFastTrackArticle(table = '''| Ticket ID     | ${staticRequestIdList}            |
+		ZendeskKCApp.createFastTrackArticle(table = '''| Ticket ID     | ${staticRequestIdList}            |
 	| Template      | Fast Track Article                |
 	| Name          | A simple Fast article             |
 	| Description   | A simple Fast article description |
 	| Review Status | Published                         |''');
 
-		LocalFile.ZendeskHomepage.login(
+		ZendeskHomepage.login(
 			userEmailAddress = "zendesk.admin@liferay.com.broken",
 			userPassword = ${staticZendeskAdminPassword});
 
-		LocalFile.ZendeskTicket.gotoViaId(ticketId = ${staticRequestIdList});
+		ZendeskTicket.gotoViaId(ticketId = ${staticRequestIdList});
 
-		LocalFile.ZendeskKCApp.clickAppsbutton();
+		ZendeskKCApp.clickAppsbutton();
 
-		LocalFile.ZendeskKCApp.viewArticle(
+		ZendeskKCApp.viewArticle(
 			articleDescription = "A simple Fast article description",
 			articleName = "A simple Fast article");
 	}
 
 	test Createdraftarticle {
-		LocalFile.ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved            |
+		ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved            |
 	| Name             | Frontend Org Name 1 |
 	| Shared Tickets   | true                |
 	| Shared Comments  | true                |
@@ -160,11 +160,11 @@ definition {
 	| Support Language | English             |
 	| External ID      | 12341234            |''');
 
-		LocalFile.ZendeskOrganizationAPI._assignTagsToOrganizationViaOrganizationExternalID(
+		ZendeskOrganizationAPI._assignTagsToOrganizationViaOrganizationExternalID(
 			organizationExternalId = 12341234,
 			table = '''| liferay_dxp |''');
 
-		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk Enduser1                    |
+		ZendeskUserAPI._createUser(table = '''| Name             | Zendesk Enduser1                    |
 	| Tags             | osb_customer,osb_kb                 |
 	| Password         | ${staticZendeskAdminPassword}       |
 	| Role             | End-user                            |
@@ -176,7 +176,7 @@ definition {
 	| Time Zone        | Pacific Time (US & Canada)          |
 	| External ID      | Enduser1                            |''');
 
-		LocalFile.ZendeskRequestAPI._createRequest(
+		ZendeskRequestAPI._createRequest(
 			requesterEmail = "zendesk.enduser1@zendesk.com.broken",
 			table = '''| Product                  | prd_liferay_dxp_7_4                              |
 	| Component                | activation_key_project_administration            |
@@ -186,37 +186,37 @@ definition {
 	| Description              | Request Description                              |
 	| Organization External ID | 12341234                                         |''');
 
-		LocalFile.ZendeskTicketAPI._viewMultipleTicketGroupAssignees(
+		ZendeskTicketAPI._viewMultipleTicketGroupAssignees(
 			groupAssignee = "Self Service",
 			ticketIdList = ${staticRequestIdList});
 
-		LocalFile.ZendeskHomepage.login(
+		ZendeskHomepage.login(
 			userEmailAddress = "zendesk.admin@liferay.com.broken",
 			userPassword = ${staticZendeskAdminPassword});
 
-		LocalFile.ZendeskKCApp.createFastTrackArticle(table = '''| Ticket ID     | ${staticRequestIdList}            |
+		ZendeskKCApp.createFastTrackArticle(table = '''| Ticket ID     | ${staticRequestIdList}            |
 	| Template      | Fast Track Article                |
 	| Name          | A simple Fast article             |
 	| Description   | A simple Fast article description |
 	| Review Status | Draft                             |''');
 
-		LocalFile.ZendeskKCApp.checkArticleReviewStatus(
+		ZendeskKCApp.checkArticleReviewStatus(
 			articleName = "A simple Fast article",
 			reviewStatus = "Draft");
 
-		LocalFile.ZendeskHomepage.login(
+		ZendeskHomepage.login(
 			userEmailAddress = "zendesk.admin@liferay.com.broken",
 			userPassword = ${staticZendeskAdminPassword});
 
-		LocalFile.ZendeskTicket.gotoViaId(ticketId = ${staticRequestIdList});
+		ZendeskTicket.gotoViaId(ticketId = ${staticRequestIdList});
 
-		LocalFile.ZendeskKCApp.clickAppsbutton();
+		ZendeskKCApp.clickAppsbutton();
 
-		LocalFile.ZendeskKCApp.viewNoArticle(articleName = "A simple Fast article");
+		ZendeskKCApp.viewNoArticle(articleName = "A simple Fast article");
 	}
 
 	test Editandviewarticle {
-		LocalFile.ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved            |
+		ZendeskOrganizationAPI._createOrganization(table = '''| Status           | Approved            |
 	| Name             | Frontend Org Name 1 |
 	| Shared Tickets   | true                |
 	| Shared Comments  | true                |
@@ -226,11 +226,11 @@ definition {
 	| Support Language | English             |
 	| External ID      | 12341234            |''');
 
-		LocalFile.ZendeskOrganizationAPI._assignTagsToOrganizationViaOrganizationExternalID(
+		ZendeskOrganizationAPI._assignTagsToOrganizationViaOrganizationExternalID(
 			organizationExternalId = 12341234,
 			table = '''| liferay_dxp |''');
 
-		LocalFile.ZendeskUserAPI._createUser(table = '''| Name             | Zendesk Enduser1                    |
+		ZendeskUserAPI._createUser(table = '''| Name             | Zendesk Enduser1                    |
 	| Tags             | osb_customer,osb_kb                 |
 	| Password         | ${staticZendeskAdminPassword}       |
 	| Role             | End-user                            |
@@ -242,7 +242,7 @@ definition {
 	| Time Zone        | Pacific Time (US & Canada)          |
 	| External ID      | Enduser1                            |''');
 
-		LocalFile.ZendeskRequestAPI._createRequest(
+		ZendeskRequestAPI._createRequest(
 			requesterEmail = "zendesk.enduser1@zendesk.com.broken",
 			table = '''| Product                  | prd_liferay_dxp_7_4                              |
 	| Component                | activation_key_project_administration            |
@@ -252,59 +252,59 @@ definition {
 	| Description              | Request Description                              |
 	| Organization External ID | 12341234                                         |''');
 
-		LocalFile.ZendeskTicketAPI._viewMultipleTicketGroupAssignees(
+		ZendeskTicketAPI._viewMultipleTicketGroupAssignees(
 			groupAssignee = "Self Service",
 			ticketIdList = ${staticRequestIdList});
 
-		LocalFile.ZendeskHomepage.login(
+		ZendeskHomepage.login(
 			userEmailAddress = "zendesk.admin@liferay.com.broken",
 			userPassword = ${staticZendeskAdminPassword});
 
-		LocalFile.ZendeskKCApp.createFastTrackArticle(table = '''| Ticket ID     | ${staticRequestIdList}            |
+		ZendeskKCApp.createFastTrackArticle(table = '''| Ticket ID     | ${staticRequestIdList}            |
 	| Template      | DXPC Fast Track Article           |
 	| Name          | A simple DXPC article             |
 	| Description   | A simple DXPC article description |
 	| Review Status | Published                         |''');
 
-		LocalFile.ZendeskHomepage.login(
+		ZendeskHomepage.login(
 			userEmailAddress = "zendesk.admin@liferay.com.broken",
 			userPassword = ${staticZendeskAdminPassword});
 
-		LocalFile.ZendeskTicket.gotoViaId(ticketId = ${staticRequestIdList});
+		ZendeskTicket.gotoViaId(ticketId = ${staticRequestIdList});
 
-		LocalFile.ZendeskKCApp.clickAppsbutton();
+		ZendeskKCApp.clickAppsbutton();
 
-		LocalFile.ZendeskKCApp.viewArticle(
+		ZendeskKCApp.viewArticle(
 			articleDescription = "A simple DXPC article description",
 			articleName = "A simple DXPC article");
 
-		LocalFile.ZendeskKCApp.editArticle(table = '''| Article Name               | A simple DXPC article           |
+		ZendeskKCApp.editArticle(table = '''| Article Name               | A simple DXPC article           |
 	| Article Name Update        | A different article             |
 	| Article Description Update | A different article description |
 	| Review Status              | Published                       |
 	| Review Status Update       | Published                       |''');
 
-		LocalFile.ZendeskHomepage.login(
+		ZendeskHomepage.login(
 			userEmailAddress = "zendesk.admin@liferay.com.broken",
 			userPassword = ${staticZendeskAdminPassword});
 
-		LocalFile.ZendeskTicket.gotoViaId(ticketId = ${staticRequestIdList});
+		ZendeskTicket.gotoViaId(ticketId = ${staticRequestIdList});
 
-		LocalFile.ZendeskKCApp.clickAppsbutton();
+		ZendeskKCApp.clickAppsbutton();
 
-		LocalFile.ZendeskKCApp.viewArticle(
+		ZendeskKCApp.viewArticle(
 			articleDescription = "A different article description",
 			articleName = "A different article");
 
-		LocalFile.ZendeskHomepage.login(
+		ZendeskHomepage.login(
 			userEmailAddress = "zendesk.admin@liferay.com.broken",
 			userPassword = ${staticZendeskAdminPassword});
 
-		LocalFile.ZendeskTicket.gotoViaId(ticketId = ${staticRequestIdList});
+		ZendeskTicket.gotoViaId(ticketId = ${staticRequestIdList});
 
-		LocalFile.ZendeskKCApp.clickAppsbutton();
+		ZendeskKCApp.clickAppsbutton();
 
-		LocalFile.ZendeskKCApp.viewNoArticleViaList(articleName = "A simple DXPC article");
+		ZendeskKCApp.viewNoArticleViaList(articleName = "A simple DXPC article");
 	}
 
 }

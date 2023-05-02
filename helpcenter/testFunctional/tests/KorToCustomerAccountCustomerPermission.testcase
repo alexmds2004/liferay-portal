@@ -4,72 +4,72 @@ definition {
 	property type = "customer.integration";
 
 	setUp {
-		LocalFile.Passwords.getPasswords();
+		Passwords.getPasswords();
 
-		LocalFile.KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+		KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
 
-		LocalFile.OSBAdminRabbitMQ.generateProvisioningCompanyName();
+		OSBAdminRabbitMQ.generateProvisioningCompanyName();
 
-		LocalFile.OSBAdminRabbitMQ.generateProvisioningProjectName();
+		OSBAdminRabbitMQ.generateProvisioningProjectName();
 
-		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | cstm.customer1                       |
+		JSONOkta.createOktaUser(table = '''| Screen Name   | cstm.customer1                       |
 	| Email Address | cstm.customer1@lrcustomer.com.broken |
 	| First Name    | CSTM                                 |
 	| Last Name     | Customer1                            |''');
 
-		LocalFile.JSONOkta.createOktaUser(table = '''| Screen Name   | cstm.customer2                       |
+		JSONOkta.createOktaUser(table = '''| Screen Name   | cstm.customer2                       |
 	| Email Address | cstm.customer2@lrcustomer.com.broken |
 	| First Name    | CSTM                                 |
 	| Last Name     | Customer2                            |''');
 
-		LocalFile.KoroneikiAccountAPI._createAccount(table = '''| Code   | KORCSTKORCST                  | |
+		KoroneikiAccountAPI._createAccount(table = '''| Code   | KORCSTKORCST                  | |
 	| Name   | Korcst - ${staticProjectName} | |
 	| Region | United States                 | |
 	| Status | Active                        | |
 	| Tier   | T1                            | |''');
 
-		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+		KoroneikiAccountAPI._assignContactRolesToContact(
 			accountName = "Korcst - ${staticProjectName}",
 			contactEmailAddress = "cstm.customer1@lrcustomer.com.broken",
 			table = '''| Support Requester |''');
 
-		LocalFile.KoroneikiAccountAPI._assignContactRolesToContact(
+		KoroneikiAccountAPI._assignContactRolesToContact(
 			accountName = "Korcst - ${staticProjectName}",
 			contactEmailAddress = "cstm.customer2@lrcustomer.com.broken",
 			table = '''| Support User |''');
 	}
 
 	tearDown {
-		LocalFile.KoroneikiTeamAPI._tearDownTeams(table = '''| CSTM Customer |''');
+		KoroneikiTeamAPI._tearDownTeams(table = '''| CSTM Customer |''');
 
-		LocalFile.OSBAdminProject.tearDownProjects(table = '''| KORCSTKORCST |
+		OSBAdminProject.tearDownProjects(table = '''| KORCSTKORCST |
 	| KORCT2KORCT2 |''');
 
-		LocalFile.KoroneikiAccountAPI._tearDownAccounts(table = '''| Korcst - ${staticProjectName} |''');
+		KoroneikiAccountAPI._tearDownAccounts(table = '''| Korcst - ${staticProjectName} |''');
 
-		LocalFile.KoroneikiAccountAPI._tearDownAccountsViaAccountFieldNameAndValue(
+		KoroneikiAccountAPI._tearDownAccountsViaAccountFieldNameAndValue(
 			fieldName = "Code",
 			table = '''| KORCSTKORCST |
 	| KORCT2KORCT2 |''');
 
-		LocalFile.JSONUser.tearDownUsers(table = '''| cstm.customer1@lrcustomer.com.broken |
+		JSONUser.tearDownUsers(table = '''| cstm.customer1@lrcustomer.com.broken |
 	| cstm.customer2@lrcustomer.com.broken |''');
 
-		LocalFile.JSONUser.tearDownUsersViaSupport(table = '''| cstm.customer1@lrcustomer.com.broken |
+		JSONUser.tearDownUsersViaSupport(table = '''| cstm.customer1@lrcustomer.com.broken |
 	| cstm.customer2@lrcustomer.com.broken |''');
 
-		LocalFile.JSONUser.tearDownUsersViaKoroneiki(table = '''| cstm.customer1@lrcustomer.com.broken |
+		JSONUser.tearDownUsersViaKoroneiki(table = '''| cstm.customer1@lrcustomer.com.broken |
 	| cstm.customer2@lrcustomer.com.broken |''');
 
-		LocalFile.KoroneikiContactAPI._tearDownContacts(table = '''| cstm.customer1@lrcustomer.com.broken |
+		KoroneikiContactAPI._tearDownContacts(table = '''| cstm.customer1@lrcustomer.com.broken |
 	| cstm.customer2@lrcustomer.com.broken |''');
 
-		LocalFile.JSONOkta.tearDownUsers(table = '''| cstm.customer1@lrcustomer.com.broken |
+		JSONOkta.tearDownUsers(table = '''| cstm.customer1@lrcustomer.com.broken |
 	| cstm.customer2@lrcustomer.com.broken |''');
 	}
 
 	test ViewDXPProductionaccountonCustomeraccountpageasacustomer {
-		LocalFile.KoroneikiAccountAPI._createAccountProductPurchase(
+		KoroneikiAccountAPI._createAccountProductPurchase(
 			accountName = "Korcst - ${staticProjectName}",
 			productName = "DXP Production",
 			table = '''| End Date                | ${staticEndDate}         | |
@@ -79,19 +79,19 @@ definition {
 	| Start Date              | ${staticStartDate}       | |
 	| Status                  | Approved                 | |''');
 
-		LocalFile.KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer");
+		KoroneikiContactAPI._synchronizeContactEntitlementDefinition(entitlementDefinitionName = "Customer");
 
-		LocalFile.JSONOkta.viewOktaUserGroupMembership(
+		JSONOkta.viewOktaUserGroupMembership(
 			groupName = "Customers",
 			userEmailAddress = "cstm.customer1@lrcustomer.com.broken");
 
-		LocalFile.KoroneikiContactAPI._viewContactUuidAndUserUuidComparison(contactEmailAddress = "cstm.customer1@lrcustomer.com.broken");
+		KoroneikiContactAPI._viewContactUuidAndUserUuidComparison(contactEmailAddress = "cstm.customer1@lrcustomer.com.broken");
 
-		LocalFile.CustomerLogin.loginToCustomer(
+		CustomerLogin.loginToCustomer(
 			userEmailAddress = "cstm.customer1@lrcustomer.com.broken",
 			userPassword = ${staticCustomerAdminPassword});
 
-		LocalFile.CustomerProjects._viewCustomerProjectDetails(
+		CustomerProjects._viewCustomerProjectDetails(
 			projectName = "Osbzen - Project Number 533606",
 			table = '''| Code                   | OSBZENOSBZEN                     |
 	| State                  | Active                           |
