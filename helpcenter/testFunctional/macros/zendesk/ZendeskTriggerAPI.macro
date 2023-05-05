@@ -5,6 +5,9 @@ definition {
 	var zendeskURL = PropsUtil.get("zendesk.liferay.url");
 
 	macro _changeTriggerUpdateDate {
+		var triggerName = StringUtil.extractFirst(${triggerNameAndUpdateDate}, " |");
+		var updateDate = StringUtil.extractLast(${triggerNameAndUpdateDate}, "| ");
+
 		if (${triggerName} == "Route to Provisioning - US") {
 			var triggerId = ZendeskTriggerAPI._getTriggerIdByName(triggerName = ${triggerName});
 		}
@@ -24,13 +27,13 @@ definition {
 
 			var zendeskTestFileContent1 = FileUtil.read("${testDirs}/tests/${zendeskTestFileName1}");
 
-			var zendeskTestFileContent1 = StringUtil.replace(${zendeskTestFileContent1}, "the trigger \"${triggerName}\" should have \"${updateDate}\" as its update date", "the trigger \"${triggerName}\" should have \"${updateDateFromAPI}\" as its update date");
+			var zendeskTestFileContent1 = StringUtil.replace(${zendeskTestFileContent1}, "${triggerName} | ${updateDate}", "${triggerName} | ${updateDateFromAPI}");
 
 			FileUtil.write("${testDirs}/tests/${zendeskTestFileName1}", ${zendeskTestFileContent1});
 
 			var zendeskTestFileContent2 = FileUtil.read("${testDirs}/tests/${zendeskTestFileName2}");
 
-			var zendeskTestFileContent2 = StringUtil.replace(${zendeskTestFileContent2}, "if the trigger \"${triggerName}\" does not have \"${updateDate}\" as its update date then the update date on \"${zendeskTestFileName1}\" and \"${zendeskTestFileName2}\" should be changed", "if the trigger \"${triggerName}\" does not have \"${updateDateFromAPI}\" as its update date then the update date on \"${zendeskTestFileName1}\" and \"${zendeskTestFileName2}\" should be changed");
+			var zendeskTestFileContent2 = StringUtil.replace(${zendeskTestFileContent2}, "${triggerName} | ${updateDate}", "${triggerName} | ${updateDateFromAPI}");
 
 			FileUtil.write("${testDirs}/tests/${zendeskTestFileName2}", ${zendeskTestFileContent2});
 		}
@@ -1065,6 +1068,9 @@ definition {
 	}
 
 	macro _viewTriggerUpdateDate {
+		var triggerName = StringUtil.extractFirst(${triggerNameAndUpdateDate}, " |");
+		var updateDate = StringUtil.extractLast(${triggerNameAndUpdateDate}, "| ");
+
 		if (${triggerName} == "Route to Provisioning - US") {
 			var triggerId = ZendeskTriggerAPI._getTriggerIdByName(triggerName = ${triggerName});
 		}
