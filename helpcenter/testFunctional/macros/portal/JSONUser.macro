@@ -11,9 +11,6 @@ definition {
 	var supportAdminEmailAddress = PropsUtil.get("support.admin.email.address");
 	var supportAdminPassword = PropsUtil.get("support.admin.password");
 	var supportURL = PropsUtil.get("support.liferay.url");
-	var webAdminEmailAddress = PropsUtil.get("web.admin.email.address");
-	var webAdminPassword = PropsUtil.get("web.admin.password");
-	var webURL = PropsUtil.get("web.liferay.url");
 
 	macro assignUserToProvisioningRole {
 		var roleId = JSONRole.getProvisioningRoleIdByName(roleName = ${roleName});
@@ -423,89 +420,6 @@ definition {
 		echo("Support User UUID: ${supportUserUuId}");
 
 		return ${supportUserUuId};
-	}
-
-	macro tearDownUsers {
-		var rawTable = TableUtil.newTable(${table});
-
-		for (var row : table ${rawTable}) {
-			var userEmailAddress = "${row[0]}";
-			var companyId = JSONCompany.getWebCompanyId();
-			var userScreenName = StringUtil.extractFirst(${userEmailAddress}, "@");
-
-			var curl = '''
-				${webURL}/api/secure/jsonws/user/get-user-by-screen-name
-					-u ${webAdminEmailAddress}:${webAdminPassword}
-					-d companyId=${companyId}
-					-d screenName=${userScreenName}
-			''';
-
-			var userObject = JSONCurlUtil.post(${curl});
-
-			if (contains(${userObject}, ${userScreenName}) && !(contains(${userObject}, "NoSuchUserException"))) {
-				var webUserId = JSONCurlUtil.post(${curl}, "$.userId");
-
-				echo("Web User ID: ${webUserId}");
-
-				var curl = '''
-					${webURL}/api/secure/jsonws/user/update-status
-						-u ${webAdminEmailAddress}:${webAdminPassword}
-						-d userId=${webUserId}
-						-d status=5
-				''';
-
-				com.liferay.poshi.runner.util.JSONCurlUtil.post(${curl});
-
-				var curl = '''
-					${webURL}/api/secure/jsonws/user/delete-user
-						-u ${webAdminEmailAddress}:${webAdminPassword}
-						-d userId=${webUserId}
-				''';
-
-				com.liferay.poshi.runner.util.JSONCurlUtil.post(${curl});
-			}
-		}
-	}
-
-	macro tearDownUsersByScreenName {
-		var rawTable = TableUtil.newTable(${table});
-
-		for (var row : table ${rawTable}) {
-			var userScreenName = "${row[0]}";
-			var companyId = JSONCompany.getWebCompanyId();
-
-			var curl = '''
-				${webURL}/api/secure/jsonws/user/get-user-by-screen-name
-					-u ${webAdminEmailAddress}:${webAdminPassword}
-					-d companyId=${companyId}
-					-d screenName=${userScreenName}
-			''';
-
-			var userObject = JSONCurlUtil.post(${curl});
-
-			if (contains(${userObject}, ${userScreenName}) && !(contains(${userObject}, "NoSuchUserException"))) {
-				var webUserId = JSONCurlUtil.post(${curl}, "$.userId");
-
-				echo("Web User ID: ${webUserId}");
-
-				var curl = '''
-					${webURL}/api/secure/jsonws/user/update-status
-						-u ${webAdminEmailAddress}:${webAdminPassword}
-						-d userId=${webUserId}
-						-d status=5
-				''';
-
-				com.liferay.poshi.runner.util.JSONCurlUtil.post(${curl});
-
-				var curl = '''
-					${webURL}/api/secure/jsonws/user/delete-user
-						-u ${webAdminEmailAddress}:${webAdminPassword}
-						-d userId=${webUserId}
-				''';
-
-				com.liferay.poshi.runner.util.JSONCurlUtil.post(${curl});
-			}
-		}
 	}
 
 	macro tearDownUsersByScreenNameViaKoroneiki {
