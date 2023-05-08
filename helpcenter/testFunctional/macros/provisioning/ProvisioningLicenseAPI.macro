@@ -678,6 +678,20 @@ definition {
 		return ${valueFromAPI};
 	}
 
+	macro _getLicenseCsv {
+		var accountKey = KoroneikiAccountAPI._getAccountKeyViaAccountName(accountName = ${accountName});
+		var filters = ProvisioningLicenseAPI._groupFilters(table = ${table}, csvFormat = "true");
+
+		var curl = '''
+			${provisioningURL}/o/provisioning-rest/v1.0/accounts/${accountKey}/${filters} --tlsv1.2
+				-u ${provisioningAdminEmail}:${provisioningAdminPassword}
+				-H "accept: */*"
+		''';
+
+		static var staticValueFromAPI = JSONCurlUtil.get(${curl});
+		return ${staticValueFromAPI};
+	}
+
 	macro _getLicenseKeyIdViaLicenseName {
 		var accountKey = KoroneikiAccountAPI._getAccountKeyViaAccountName(accountName = ${accountName});
 		var keyword = StringUtil.replace(${licenseName}, " ", "+");
@@ -727,8 +741,14 @@ definition {
 	}
 
 	macro _groupFilters {
+		var sentenceBeggin = "license-keys?";
 		var filters = "";
+		
 		var rawTable = TableUtil.newTable(${table});
+
+		if ("${csvFormat}" == "true") {
+			var sentenceBeggin = "license-keys/export?";
+		}
 
 		for (var row : table ${rawTable}) {
 			var field = "${row[0]}";
@@ -741,26 +761,26 @@ definition {
 
 				if (${filters} == "") {
 					if (contains(${licenseName}, "License1")) {
-						var filters = "license-keys?filter=${fieldFormatted}+eq+%27License1%27";
+						var filters = "filter=${fieldFormatted}+eq+%27License1%27";
 					}
 					else if (contains(${licenseName}, "License2")) {
-						var filters = "license-keys?filter=${fieldFormatted}+eq+%27License2%27";
+						var filters = "filter=${fieldFormatted}+eq+%27License2%27";
 					}
 					else if (contains(${licenseName}, "License3")) {
-						var filters = "license-keys?filter=${fieldFormatted}+eq+%27License3%27";
+						var filters = "filter=${fieldFormatted}+eq+%27License3%27";
 					}
 					else if (contains(${licenseName}, "License4")) {
-						var filters = "license-keys?filter=${fieldFormatted}+eq+%27License4%27";
+						var filters = "filter=${fieldFormatted}+eq+%27License4%27";
 					}
 					else if (contains(${value}, " ")) {
 						var valueFormatted = StringUtil.extractFirst(${value}, " ");
 
 						var valueFormatted = "startswith\(${fieldFormatted},%27${valueFormatted}%27\)";
 
-						var filters = "license-keys?filter=${valueFormatted}";
+						var filters = "filter=${valueFormatted}";
 					}
 					else {
-						var filters = "license-keys?filter=${fieldFormatted}+eq+%27${value}%27";
+						var filters = "filter=${fieldFormatted}+eq+%27${value}%27";
 					}
 				}
 				else {
@@ -796,7 +816,7 @@ definition {
 				}
 
 				if (${filters} == "") {
-					var filters = "license-keys?filter=${fieldFormatted}+eq+%27${value}%27";
+					var filters = "filter=${fieldFormatted}+eq+%27${value}%27";
 				}
 				else {
 					var filters = "${filters}+and+${fieldFormatted}+eq+%27${value}%27";
@@ -806,7 +826,7 @@ definition {
 				var fieldFormatted = ProvisioningLicenseAPI._formatCamelCase(camelCase = ${field});
 
 				if (${filters} == "") {
-					var filters = "license-keys?filter=${fieldFormatted}+eq+${value}";
+					var filters = "filter=${fieldFormatted}+eq+${value}";
 				}
 				else {
 					var filters = "${filters}+and+${fieldFormatted}+eq+${value}";
@@ -816,7 +836,7 @@ definition {
 				var field = "ipAddresses";
 
 				if (${filters} == "") {
-					var filters = "license-keys?filter=${field}/any%28s:s+eq+%27${value}%27%29";
+					var filters = "filter=${field}/any%28s:s+eq+%27${value}%27%29";
 				}
 				else {
 					var filters = "${filters}+and+${field}/any%28s:s+eq+%27${value}%27%29";
@@ -826,7 +846,7 @@ definition {
 				var field = "macAddresses";
 
 				if (${filters} == "") {
-					var filters = "license-keys?filter=${field}/any%28s:s+eq+%27${value}%27%29";
+					var filters = "filter=${field}/any%28s:s+eq+%27${value}%27%29";
 				}
 				else {
 					var filters = "${filters}+and+${field}/any%28s:s+eq+%27${value}%27%29";
@@ -836,7 +856,7 @@ definition {
 				var field = "sizing";
 
 				if (${filters} == "") {
-					var filters = "license-keys?filter=${field}+eq+%27${value}%27";
+					var filters = "filter=${field}+eq+%27${value}%27";
 				}
 				else {
 					var filters = "${filters}+and+${field}+eq+%27${value}%27";
@@ -846,7 +866,7 @@ definition {
 				var field = "maxClusterNodes";
 
 				if (${filters} == "") {
-					var filters = "license-keys?filter=${field}+eq+${value}";
+					var filters = "filter=${field}+eq+${value}";
 				}
 				else {
 					var filters = "${filters}+and+${field}+eq+${value}";
@@ -859,6 +879,8 @@ definition {
 				fail("This license field ${field} either does not exist or has not been added to the macro yet for testing.");
 			}
 		}
+
+		var filters = "${sentenceBeggin}${filters}";
 
 		return ${filters};
 	}
@@ -1139,6 +1161,57 @@ definition {
 
 		if (!(contains(${errorMessage}, "The specified activation keys cannot be aggregated together"))) {
 			fail("There was no error message when downloading the aggregated licenses");
+		}
+	}
+
+	macro assertLicenseCsv {
+		var valueFromAPI = "${staticValueFromAPI}";
+		
+		var valueFromAPI = StringUtil.replaceFirst("${valueFromAPI}", "\"", "|\"");
+		var valueFromAPI = StringUtil.replace("${valueFromAPI}", "\"", "");
+		var titles = StringUtil.extractFirst("${valueFromAPI}", "|");
+		var contents = StringUtil.extractLast("${valueFromAPI}", "|");
+
+		var rawTable = TableUtil.newTable("${table}");
+
+		for (var row : table ${rawTable}) {
+			var field = "${row[0]}";
+			var value = "${row[1]}";
+
+			var count = 1;
+			var found = "false";
+
+			for (var title : list "${titles}") {
+
+				if (contains("${title}", "${field}")) {
+					var found = "true";
+				}
+				else if(("${title}" != "${field}") && ("${found}" == "false")) {
+					var count = ${count} + 1;
+				} 
+			}
+
+			if ("${found}" ==  "false") {
+				fail("Field '${field}' was not found.");
+			}
+
+			var count2 = 1;
+			var found = "false";
+
+			for (var content : list ${contents}) {	
+				if(("${count2}" == "${count}") && ("${found}" ==  "false")) {
+					var found = "true";
+
+					echo("Expected ${field} value: ${value}");
+					echo("Actual ${field} value: ${content}");
+
+					if(!((contains("${content}", "${value}")) || (contains("${value}", "${content}")))) {
+						fail("Expected value '${value}' of the field '${field}' was not found. Actual field value was '${content}'.");
+					}
+				} else {
+					var count2 = ${count2} + 1;
+				}
+			}
 		}
 	}
 
