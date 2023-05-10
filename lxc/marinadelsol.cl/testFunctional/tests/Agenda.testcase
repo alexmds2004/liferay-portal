@@ -60,4 +60,32 @@ definition {
 		}
 	}
 
+	@description = "Automation ID: LRQA-80554 | Test Summary: Verify agenda of events changes according to the selected casino"
+	@priority = 5
+	test ViewAgendaChangesAccordingSelectedCasino {
+		task ("Given the 'Eventos' filter is applied") {
+			Agenda.selectFilterOption(eventType = "Eventos");
+
+			Agenda.applyFilters();
+
+			var allCardsTextAgenda = Agenda.getCardsText();
+		}
+
+		task ("When I change to 'Chillán' casino and apply the 'Eventos' filter") {
+			Agenda.selectCasinos(nameCasino = "Chillán");
+
+			Agenda.selectFilterOption(eventType = "Eventos");
+
+			Agenda.applyFilters();
+
+			var cardsTextAgendaEventosChillan = Agenda.getCardsText();
+		}
+
+		task ("Then a different cards list should be visible") {
+			General.validateDifference(
+				firstItem = ${allCardsTextAgenda},
+				secondItem = ${cardsTextAgendaEventosChillan});
+		}
+	}
+
 }
