@@ -34,6 +34,35 @@ definition {
 		}
 	}
 
+	@description = "Automation ID: LRQA-80552 | Test Summary: Verify user can filter the events in the agenda (dates)"
+	@priority = 5
+	test UserCanSearchUsingFilterDates {
+		task ("Given the 'Todos' filter is applied on the 'Agenda' page") {
+			Agenda.selectFilterOption(eventType = "Todos");
+
+			Agenda.applyFilters();
+		}
+
+		task ("Quando eu aplico o filtro 'Eventos' and mudando a data para 'today'") {
+			var allCardsText = Agenda.getCardsText();
+
+			Agenda.selectFilterOption(
+				endDate = "today",
+				eventType = "Eventos",
+				startDate = "today");
+
+			Agenda.applyFilters();
+		}
+
+		task ("Then a different cards list should be visible") {
+			var filterResult = Agenda.getCardsText(filtered = "true");
+
+			General.validateDifference(
+				firstItem = ${allCardsText},
+				secondItem = ${filterResult});
+		}
+	}
+
 	@description = "Automation ID: LRQA-80536 | Test Summary: Verify user can filter the events in the agenda (tipo)"
 	@priority = 5
 	test UserCanSearchUsingFilterType {
