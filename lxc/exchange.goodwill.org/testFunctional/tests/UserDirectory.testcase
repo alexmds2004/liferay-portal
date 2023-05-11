@@ -1,0 +1,46 @@
+definition {
+
+	property test.env = "modl";
+	property testray.main.component.name = "Goodwill";
+
+	setUp {
+		Utils.launchModlPage();
+
+		Login.loginAsAdminUser();
+	}
+
+	tearDown {
+		General.goToAppMenuPortlet(
+			category = "Configuration",
+			panel = "Control Panel",
+			portlet = "Custom Fields");
+
+		Portal.CustomFields.deleteCP(
+			customFieldName = "Custom Field Name",
+			resourceName = "User");
+	}
+
+	@description = "Automation ID: LRQA-80544 | Test Summary: Verify that a custom field for Users can be created and populate with data"
+	@priority = 5
+	test CanPopulateUserCustomField {
+		task ("Given the Custom Fields portlet is loaded") {
+			General.goToAppMenuPortlet(
+				category = "Configuration",
+				panel = "Control Panel",
+				portlet = "Custom Fields");
+		}
+
+		task ("When a custom field is created for the 'User' resource") {
+			UserDirectory.gotoCustomFieldResource(resourceName = "User");
+
+			UserDirectory.createCustomField(
+				customFieldName = "Custom Field Name",
+				inputFieldType = "Text Area");
+		}
+
+		task ("Then the created custom field should be present when adding a new user") {
+			UserDirectory.assertUserCustomField(createdFieldLabel = "Custom Field Name");
+		}
+	}
+
+}
