@@ -1660,6 +1660,26 @@ definition {
 		}
 	}
 
+	macro _viewSubscribedContactViaSessionId {
+		var licenseKeyId = ProvisioningLicenseAPI._getLicenseKeyIdViaLicenseName(
+			accountName = ${accountName},
+			licenseName = ${licenseName});
+
+		var curl = '''
+			${provisioningURL}/o/provisioning-rest/v1.0/license-keys/subscriptions?licenseKeyId=${licenseKeyId}
+				-H "Okta-Session-ID: ${staticOktaSessionId}"
+				-H "accept: application/json"
+				-H "Content-Type: application/json"
+		''';
+
+		var apiResponse = JSONCurlUtil.get(${curl}, "$");
+
+		if (!(contains(${apiResponse}, ${isSubscribed}))) {
+			fail("This user isn't subscribed to the license ${licenseName}");
+		}
+		
+	}
+
 	macro assertApiResponse {
 		if (contains(${staticApiResponse}, ${apiResponseMessage})) {
 			echo("The Exception has the message ${apiResponseMessage}");
