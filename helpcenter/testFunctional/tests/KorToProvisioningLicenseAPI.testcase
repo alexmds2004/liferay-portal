@@ -22,7 +22,11 @@ definition {
 
 		KoroneikiProductPurchaseAPI.generateStaticFutureStartAndEndDate();
 
+		KoroneikiProductPurchaseAPI.generateStaticFutureStartAndDelayedEndDate();
+
 		KoroneikiProductPurchaseAPI.generateStaticFullFutureStartAndEndDate();
+
+		KoroneikiProductPurchaseAPI.generateStaticYyyyMmDdFutureStartAndDelayedEndDate();
 	}
 
 	tearDown {
@@ -4780,5 +4784,120 @@ definition {
 				| License Status            | Active                            |
 				| Max Servers/Cluster Nodes | 1                                 |
 				| Complimentary             | false                             |''');
+	}
+
+	test ViewFutureNewCSVDXPLicense {
+		OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		KoroneikiAccountAPI._createAccount(table = '''
+			| Code                  | KORLICKORLIC                         | |
+			| Contact Email Address | lic.koroneiki1@lrcustomer.com.broken | |
+			| Description           | Test osb account on koroneiki        | |
+			| Fax Number            | 555-555-1234                         | |
+			| Name                  | Korlic - ${staticProjectName}        | |
+			| Phone Number          | 555-555-5678                         | |
+			| Profile Email Address | lic.koroneiki1@lrcustomer.com.broken | |
+			| Region                | United States                        | |
+			| Status                | Active                               | |
+			| Tier                  | T4                                   | |
+			| Website               | www.koroneikicorporation.com         | |
+		''');
+
+		KoroneikiAccountAPI._generateAccountKey(accountName = "Korlic - ${staticProjectName}");
+
+		KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korlic - ${staticProjectName}",
+			productName = "DXP Production",
+			table = '''
+				| End Date                | ${staticFutureEndDate}         |   |
+				| Original End Date       | ${staticFutureOriginalEndDate} |   |
+				| Perpetual               | false                          |   |
+				| Product Field and Value | sizing                         | 1 |
+				| Product Field and Value | licenses                       | 1 |
+				| Product Field and Value | version                        | 7 |
+				| Quantity                | 1                              |   |
+				| Start Date              | ${staticFutureStartDate}       |   |
+				| Status                  | Approved                       |   |
+		''');
+
+		KoroneikiProductPurchaseAPI._generateProductPurchaseId(
+			accountName = "Korlic - ${staticProjectName}",
+			productName = "DXP Production");
+
+		KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Korlic - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''
+				| End Date                | ${staticEndDate}         | |
+				| Original End Date       | ${staticOriginalEndDate} | |
+				| Perpetual               | false                    | |
+				| Quantity                | 1                        | |
+				| Start Date              | ${staticStartDate}       | |
+				| Status                  | Approved                 | |
+		''');
+
+		OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		Provisioning.gotoLicenses();
+
+		Provisioning.clickGenerateLicenseButton();
+
+		ProvisioningLicense.populateGenerateLicenseForm(table = '''
+			| Account         | Select Entity | Korlic - ${staticProjectName}         | |
+			| Product         | Select        | DXP Production                        | |
+			| Version         | Select        | 7.2                                   | |
+			| Type            | Select        | DXP Production                        | |
+		''');
+
+		ProvisioningLicense.clickChooseProductPurchaseButton(positionValue = 1);
+
+		ProvisioningLicense.populateGenerateLicenseForm(table = '''
+			| Name          | Input    | Korlic - ${staticProjectName} License1 Name        | |
+			| Description   | Input    | Korlic - ${staticProjectName} License1 Description | |
+			| Host Name     | Input    | localhost                                          | |
+			| IP Addresses  | Textarea | 123.45.67.89                                       | |
+			| MAC Addresses | Textarea | 0A-1B-2C-3D-4E-5F                                  | |
+		''');
+
+		ProvisioningLicense.clickGenerateLicenseButton();
+
+		ProvisioningLicense.viewLicense(table = '''
+			| Header  | Korlic - ${staticProjectName} | |
+			| Product | DXP Production                | |
+			''');
+
+		KoroneikiProductPurchaseAPI.generateStaticFutureCSVStartAndEndDate();
+
+		ProvisioningLicenseAPI._getLicenseCsv(
+			accountName = "Korlic - ${staticProjectName}",
+			licenseName = "Korlic - ${staticProjectName} License1 Name",
+			table = '''
+				| Active             | true                                        |
+				| Name               | Korlic - ${staticProjectName} License1 Name |
+				| License Entry Type | Production                                  |
+				| License Version    | 6                                           |
+				| Product Version    | 7.2                                         |
+				| Host Name          | localhost                                   |
+				| IP Addresses       | 123.45.67.89                                |
+				| MAC Addresses      | 0A-1B-2C-3D-4E-5F                           |''');
+
+		ProvisioningLicenseAPI.assertLicenseCsv(
+			table = '''   
+				| Project Name              | Korlic - ${staticProjectName} |
+				| Project State             | Active                        |
+				| Support Region            | United States                 |
+				| Product Version           | 7.2                           |
+				| Product Name              | DXP Production                |
+				| IP Addresses              | 123.45.67.89                  |
+				| MAC Addresses             | 0A-1B-2C-3D-4E-5F             |
+				| Host Name                 | localhost                     |
+				| Instance Sizing           | Sizing 1                      |
+				| License Start Date        | ${staticFutureCSVStartDates}  |
+				| License Expiration Date   | ${staticFutureCSVEndDates}    |
+				| License Status            | Active                        |
+				| Max Servers/Cluster Nodes | 1                             |
+				| Complimentary             | false                         |''');
 	}
 }
