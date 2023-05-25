@@ -1,0 +1,37 @@
+definition {
+
+	setUp {
+		Utils.launchHomePage();
+
+		Login.signIn();
+	}
+
+	@description = "Automation ID: KLMUA-173 | Test Summary: Verify that the user is able to access and download the Operations Manual"
+	@priority = 5
+	test CanDownloadOperationsManual {
+		task ("Given that the user goes to 'Process Working Instructions' page") {
+			General.goToMenuItem(
+				menuItem = "Division Sites",
+				submenuItem = "Flight operations");
+
+			Default.SelectWindow.selectPopUp(locator1 = "null");
+
+			Navigator.goToPage(
+				openLinksPage = 1,
+				openPageIndex = 26);
+
+			Default.SelectWindow.selectPopUp(locator1 = "Process Working Instructions - Liferay");
+		}
+
+		task ("When the user click on the link to download a file") {
+			Navigator.goToPage(openLinkDownload = 2);
+
+			FlightOperations.downloadFileViaCurl(fileName = "SPL-OA.02.v7-PWI-Monitoring-Attendance.pdf");
+		}
+
+		task ("Then the file should be properly downloaded") {
+			Portal.ImportExport.assertDownloadedFileName(downloadedFile = "SPL-OA.02.v7-PWI-Monitoring-Attendance.pdf");
+		}
+	}
+
+}
