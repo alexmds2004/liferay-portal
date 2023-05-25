@@ -689,6 +689,7 @@ definition {
 		''';
 
 		static var staticValueFromAPI = JSONCurlUtil.get(${curl});
+
 		return ${staticValueFromAPI};
 	}
 
@@ -741,13 +742,15 @@ definition {
 	}
 
 	macro _groupFilters {
-		var sentenceBeggin = "license-keys?";
 		var filters = "";
-		
+
 		var rawTable = TableUtil.newTable(${table});
 
 		if ("${csvFormat}" == "true") {
-			var sentenceBeggin = "license-keys/export?";
+			var licenseFilterRoot = "license-keys/export?";
+		}
+		else {
+			var licenseFilterRoot = "license-keys?";
 		}
 
 		for (var row : table ${rawTable}) {
@@ -880,7 +883,7 @@ definition {
 			}
 		}
 
-		var filters = "${sentenceBeggin}${filters}";
+		var filters = "${licenseFilterRoot}${filters}";
 
 		return ${filters};
 	}
@@ -1164,12 +1167,14 @@ definition {
 		}
 	}
 
-	macro assertLicenseCsv {
+	macro viewLicenseCsv {
 		var valueFromAPI = "${staticValueFromAPI}";
-		
+
 		var valueFromAPI = StringUtil.replaceFirst("${valueFromAPI}", "\"", "|\"");
 		var valueFromAPI = StringUtil.replace("${valueFromAPI}", "\"", "");
+
 		var titles = StringUtil.extractFirst("${valueFromAPI}", "|");
+
 		var contents = StringUtil.extractLast("${valueFromAPI}", "|");
 
 		var rawTable = TableUtil.newTable("${table}");
@@ -1182,13 +1187,12 @@ definition {
 			var found = "false";
 
 			for (var title : list "${titles}") {
-
 				if (contains("${title}", "${field}")) {
 					var found = "true";
 				}
-				else if(("${title}" != "${field}") && ("${found}" == "false")) {
+				else if (("${title}" != "${field}") && ("${found}" == "false")) {
 					var count = ${count} + 1;
-				} 
+				}
 			}
 
 			if ("${found}" ==  "false") {
@@ -1198,17 +1202,18 @@ definition {
 			var count2 = 1;
 			var found = "false";
 
-			for (var content : list ${contents}) {	
-				if(("${count2}" == "${count}") && ("${found}" ==  "false")) {
+			for (var content : list ${contents}) {
+				if (("${count2}" == "${count}") && ("${found}" ==  "false")) {
 					var found = "true";
 
 					echo("Expected ${field} value: ${value}");
 					echo("Actual ${field} value: ${content}");
 
-					if(!((contains("${content}", "${value}")) || (contains("${value}", "${content}")))) {
+					if (!((contains("${content}", "${value}")) || (contains("${value}", "${content}")))) {
 						fail("Expected value '${value}' of the field '${field}' was not found. Actual field value was '${content}'.");
 					}
-				} else {
+				}
+				else {
 					var count2 = ${count2} + 1;
 				}
 			}
