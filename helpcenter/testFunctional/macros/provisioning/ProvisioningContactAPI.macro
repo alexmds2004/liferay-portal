@@ -57,45 +57,6 @@ definition {
 		}
 	}
 
-	macro _assignContactRolesToContactWithoutFirstAndLastName {
-		var accountKey = KoroneikiAccountAPI._getAccountKeyViaAccountName(accountName = ${accountName});
-		var userEmailAddress = StringUtil.replace(${userEmailAddress}, " ", "%20");
-
-		var userEmailAddress = StringUtil.replace(${userEmailAddress}, "@", "%40");
-		var rawTable = TableUtil.newTable(${table});
-
-		if(!(isSet(firstName))) {
-			var firstName = "";
-		}
-
-		if(!(isSet(lastName))) {
-			var lastName = "";
-		}
-
-		var firstName = StringUtil.replace(${firstName}, " ", "%20");
-		var lastName = StringUtil.replace(${lastName}, " ", "%20");
-
-		for (var row : table ${rawTable}) {
-			var contactRoleName = "${row[0]}";
-
-			var contactRoleName = StringUtil.replace(${contactRoleName}, " ", "%20");
-
-			var curl = '''
-				${provisioningURL}/o/provisioning-rest/v1.0/accounts/${accountKey}/contacts/by-email-address/${userEmailAddress}/roles?contactRoleNames=${contactRoleName}\&firstName=${firstName}\&lastName=${lastName} --tlsv1.2
-					-u ${provisioningAdminEmail}:${provisioningAdminPassword}
-					-H "accept: application/json"
-					-H "Content-Type: application/json"
-					-H "Content-Length: 0"
-			''';
-
-			var responseOfContactApi = JSONCurlUtil.put(${curl}, "$");
-
-			if (!(contains(${responseOfContactApi}, "New contact creation needs first and last name"))) {
-				fail("The role contact may have been added to the contact instead of failing due not having first and last name.");
-			}
-		}
-	}
-
 	macro _assignContactRolesToContactOnAccountWithMaxDeveloperContactsAttempt {
 		var accountKey = KoroneikiAccountAPI._getAccountKeyViaAccountName(accountName = ${accountName});
 		var userEmailAddress = StringUtil.replace(${userEmailAddress}, " ", "%20");
@@ -254,6 +215,45 @@ definition {
 
 			if (!(contains(${responseOfContactApi}, "No contact role exists"))) {
 				fail("The role contact may have been added to the account instead of failing due to the adding nonexisting contact role");
+			}
+		}
+	}
+
+	macro _attemptToAssignContactRolesToNonExistentContactWithoutFirstAndLastName {
+		var accountKey = KoroneikiAccountAPI._getAccountKeyViaAccountName(accountName = ${accountName});
+		var userEmailAddress = StringUtil.replace(${userEmailAddress}, " ", "%20");
+
+		var userEmailAddress = StringUtil.replace(${userEmailAddress}, "@", "%40");
+		var rawTable = TableUtil.newTable(${table});
+
+		if(!(isSet(firstName))) {
+			var firstName = "";
+		}
+
+		if(!(isSet(lastName))) {
+			var lastName = "";
+		}
+
+		var firstName = StringUtil.replace(${firstName}, " ", "%20");
+		var lastName = StringUtil.replace(${lastName}, " ", "%20");
+
+		for (var row : table ${rawTable}) {
+			var contactRoleName = "${row[0]}";
+
+			var contactRoleName = StringUtil.replace(${contactRoleName}, " ", "%20");
+
+			var curl = '''
+				${provisioningURL}/o/provisioning-rest/v1.0/accounts/${accountKey}/contacts/by-email-address/${userEmailAddress}/roles?contactRoleNames=${contactRoleName}\&firstName=${firstName}\&lastName=${lastName} --tlsv1.2
+					-u ${provisioningAdminEmail}:${provisioningAdminPassword}
+					-H "accept: application/json"
+					-H "Content-Type: application/json"
+					-H "Content-Length: 0"
+			''';
+
+			var responseOfContactApi = JSONCurlUtil.put(${curl}, "$");
+
+			if (!(contains(${responseOfContactApi}, "New contact creation needs first and last name"))) {
+				fail("The contact role may have been added to the contact instead of failing due not having a first or last name.");
 			}
 		}
 	}
