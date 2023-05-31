@@ -1,0 +1,66 @@
+definition {
+
+	property test.env = "uat";
+	property testray.main.component.name = "Concluder";
+
+	setUp {
+		Utils.launchUatPage();
+
+		Login.loginAsAdminUser();
+
+		Utils.getSystemDateAndTime();
+
+		InvestmentOpportunity.CreateSite(siteName = "Created ${dateAndTime}");
+
+		Navigator.gotoSitePages(siteName = "Created ${dateAndTime}");
+	}
+
+	@description = "Automation ID: LRQA-80718 | Test Summary: Verify that an 'Opportunity' can be created"
+	@priority = 5
+	test CanBeCreated {
+		task ("Given a 'Sourcing Contract' is created") {
+			OpportunityEditor.goToNavItem(navItem = "Sourcing contract");
+
+			OpportunityEditor.createSourcingContract();
+		}
+
+		task ("When I go to 'VC_Sourcing Contracts' page") {
+			ObjectsAdmin.openCustomApp(objectName = "VC_Sourcing Contracts");
+		}
+
+		task ("Then the 'Sourcing Contract' entry should be visible") {
+			ObjectsAdmin.searchEntry(inputText = ${extractedId});
+
+			ObjectsAdmin.assertObjectEntryVisible(rowItem = ${extractedId});
+		}
+
+		task ("When I go to 'VC_Opportunity Types' page") {
+			ObjectsAdmin.openCustomApp(objectName = "VC_Opportunity Types");
+		}
+
+		task ("Then the 'Opportunity Type' entry should be visible") {
+			ObjectsAdmin.searchEntry(inputText = "Opportunity Type");
+
+			ObjectsAdmin.assertObjectEntryVisible(rowItem = "Opportunity Type");
+		}
+
+		task ("When I go to 'VC_CompanyDescriptions' page") {
+			ObjectsAdmin.openCustomApp(objectName = "VC_CompanyDescriptions");
+		}
+
+		task ("Then the company entry should be visible") {
+			ObjectsAdmin.searchEntry(inputText = "VC_CompanyDescription - Company Name");
+
+			ObjectsAdmin.assertObjectEntryVisible(rowItem = "VC_CompanyDescription - Company Name");
+		}
+
+		task ("When I go to 'VC_CompanyFundings' page") {
+			ObjectsAdmin.openCustomApp(objectName = "VC_CompanyFundings");
+		}
+
+		task ("Then the related entry should be visible") {
+			ObjectsAdmin.assertObjectEntryVisible(rowItem = "VC_CompanyDescription - Company Name");
+		}
+	}
+
+}
