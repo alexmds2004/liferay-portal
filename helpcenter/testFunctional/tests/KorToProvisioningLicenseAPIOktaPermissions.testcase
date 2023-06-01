@@ -4363,6 +4363,148 @@ definition {
 			isSubscribed = "false");
 	}
 
+	test AssertIfARemovedUserIsNoSubscribedToALicense {
+		OSBAdminRabbitMQ.generateProvisioningProjectName();
+
+		KoroneikiAccountAPI._createAccount(table = '''
+			| Code                  | MISPERPERMIS                         | |
+			| Contact Email Address | pro.okta1@lrcustomer.com.broken      | |
+			| Description           | Test osb account on koroneiki        | |
+			| Fax Number            | 555-555-1234                         | |
+			| Name                  | Permis - ${staticProjectName}        | |
+			| Phone Number          | 555-555-5678                         | |
+			| Profile Email Address | pro.okta1@lrcustomer.com.broken      | |
+			| Region                | United States                        | |
+			| Status                | Active                               | |
+			| Tier                  | T4                                   | |
+			| Website               | www.koroneikicorporation.com         | |
+		''');
+
+		KoroneikiAccountAPI._generateAccountKey(accountName = "Permis - ${staticProjectName}");
+
+		KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
+
+		KoroneikiProductPurchaseAPI.generateStaticFullStartAndEndDate();
+
+		KoroneikiProductPurchaseAPI.generateStaticFutureStartAndEndDate();
+
+		KoroneikiProductPurchaseAPI.generateStaticFullFutureStartAndEndDate();
+
+		KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Permis - ${staticProjectName}",
+			productName = "DXP Production",
+			table = '''
+				| End Date                | ${staticEndDate}         |   |
+				| Original End Date       | ${staticOriginalEndDate} |   |
+				| Perpetual               | false                    |   |
+				| Product Field and Value | sizing                   | 1 |
+				| Product Field and Value | licenses                 | 1 |
+				| Product Field and Value | version                  | 7 |
+				| Quantity                | 1                        |   |
+				| Start Date              | ${staticStartDate}       |   |
+				| Status                  | Approved                 |   |
+			''');
+
+		KoroneikiProductPurchaseAPI._generateProductPurchaseId(
+			accountName = "Permis - ${staticProjectName}",
+			productName = "DXP Production");
+
+		KoroneikiAccountAPI._createAccountProductPurchase(
+			accountName = "Permis - ${staticProjectName}",
+			productName = "Platinum Subscription",
+			table = '''
+				| End Date                | ${staticEndDate}         | |
+				| Original End Date       | ${staticOriginalEndDate} | |
+				| Perpetual               | false                    | |
+				| Quantity                | 1                        | |
+				| Start Date              | ${staticStartDate}       | |
+				| Status                  | Approved                 | |
+			''');
+
+		KoroneikiAccountAPI._assignContactRolesToContact(
+			accountName = "Permis - ${staticProjectName}",
+			contactEmailAddress = "pro.okta2@lrcustomer.com.broken",
+			table = '''| Support Administrator |''');
+				
+
+		Okta._loginToDevDomain(
+			userEmailAddress = "pro.okta2@lrcustomer.com.broken",
+			userPassword = ${staticOktaUserPassword});
+
+		Okta._getOktaSessionIdDevPage();
+
+		OSBAdmin.loginToProvisioning(
+			userEmailAddress = ${staticProvisioningAdminEmailAddress},
+			userPassword = ${staticProvisioningAdminPassword});
+
+		ProvisioningLicenseAPI.createLicenseViaSessionId(
+			accountName = "Permis - ${staticProjectName}",
+			productName = "DXP Production",
+			table = '''
+				| Active                     | true                          |
+				| Expiration Date            | ${staticEndDate}              |
+				| License Entry Type         | production                    |
+				| Max Cluster Nodes          | 0                             |
+				| Name                       | Permis - ${staticProjectName} |
+				| Product Version            | 7.4                           |
+				| Start Date                 | ${staticStartDate}            |
+			''');
+		
+		Provisioning.gotoLicenses();
+
+		Provisioning.searchLicenses(keyword = ${staticAccountKey});
+
+		Provisioning._viewLicenseViaIndex(
+			licenseKeyword = "Permis - ${staticProjectName}",
+			table = '''
+				| Name          | Permis - ${staticProjectName}  |
+				| Description   | Permis - ${staticProjectName}  |
+				| Account       | Permis - ${staticProjectName}  |
+				| Product       | DXP Production                 |
+				| Type          | Production                     |
+				| Details       | Host Name: localhost           |
+				| Details       | IP Address: 123.45.67.89       |
+				| Details       | MAC Address: 0A-1B-2C-3D-4E-5F |
+				| Status        | ACTIVE                         |
+				| Complimentary | false                          |
+			''');
+
+			
+
+		ProvisioningLicenseAPI._viewLicenseSubscriptionStatusViaSessionId(
+			accountName = "Permis - ${staticProjectName}",
+			licenseName = "Permis - ${staticProjectName}",
+			isSubscribed = "false");
+
+		ProvisioningLicenseAPI._subscribeToLicenseViaSessionId(
+			accountName = "Permis - ${staticProjectName}",
+			licenseName = "Permis - ${staticProjectName}");
+
+		ProvisioningLicenseAPI._searchSubscribedContactViaSessionId( 
+			accountName = "Permis - ${staticProjectName}",
+			contactEmailAddress = "pro.okta2@lrcustomer.com.broken",
+			table = '''| Permis - ${staticProjectName} |''');
+
+		ProvisioningLicenseAPI._viewLicenseSubscriptionStatusViaSessionId(
+			accountName = "Permis - ${staticProjectName}",
+			licenseName = "Permis - ${staticProjectName}",
+			isSubscribed = "true");
+
+		KoroneikiAccountAPI._removeCustomerContacts(
+			accountName = "Permis - ${staticProjectName}",
+			table = '''| pro.okta2@lrcustomer.com.broken |''');
+			
+		ProvisioningLicenseAPI._searchNoSubscribedContactViaSessionId(
+			accountName = "Permis - ${staticProjectName}",
+			contactEmailAddress = "pro.okta2@lrcustomer.com.broken",
+			table = '''| Permis - ${staticProjectName} |''');
+
+		ProvisioningLicenseAPI._viewLicenseSubscriptionStatusViaSessionId(
+			accountName = "Permis - ${staticProjectName}",
+			licenseName = "Permis - ${staticProjectName}",
+			isSubscribed = "false");
+	}
+
 	test SubscribetolicensewithProvisioningApiandoktaauthenticationasavaliduser {
 		OSBAdminRabbitMQ.generateProvisioningProjectName();
 
