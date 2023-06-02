@@ -1,17 +1,17 @@
 definition {
 
-	var customerURL = PropsUtil.get("customer.portal.url");
 	var apiClientId = PropsUtil.get("customer.client.id");
 	var apiClientSecret = PropsUtil.get("customer.client.secret");
 	var customerAdminEmailAddress = PropsUtil.get("customer.admin.email.address");
 	var customerAdminPassword = PropsUtil.get("customer.admin.password");
+	var customerURL = PropsUtil.get("customer.portal.url");
 
 	macro _getCustomerAccountSubscriptionId {
-		var AccountKey = CustomerAccountApi._getCustomerAccountKeyViaAccountName(accountName = ${accountName});
+		var accountKey = CustomerAccountAPI._getCustomerAccountKeyViaAccountName(accountName = ${accountName});
 		var productKey = KoroneikiProductAPI._getProductKeyViaProductName(productName = ${productName});
 
 		var curl = '''
-			${customerURL}/o/c/accountsubscriptions?filter="accountKey+eq+'${AccountKey}'"
+			${customerURL}/o/c/accountsubscriptions?filter="accountKey+eq+'${accountKey}'"
 			-H "Authorization: Bearer ${staticAccessToken}"
 			-H "accept: application/json"
 			-H "Content-Type: application/json"
@@ -31,7 +31,9 @@ definition {
 	}
 
 	macro _deleteCustomerSubscription {
-		var subscriptionId = CustomerSubscriptionApi._getCustomerAccountSubscriptionId(accountName = ${accountName}, productName = ${productName});
+		var subscriptionId = CustomerSubscriptionAPI._getCustomerAccountSubscriptionId(
+			accountName = ${accountName}, 
+			productName = ${productName});
 
 		var curl = '''
 			${customerURL}/o/c/accountsubscriptions/${subscriptionId} --tlsv1.2
@@ -43,13 +45,15 @@ definition {
 		com.liferay.poshi.runner.util.JSONCurlUtil.delete(${curl});
 	}
 
-	macro tearDownSubscriptionsOnCustomer {
+	macro tearDownSubscriptions {
 		var rawTable = TableUtil.newTable(${table});
 
 		for (var row : table ${rawTable}) {
 			var productName = "${row[0]}";
 
-			CustomerSubscriptionApi._deleteCustomerSubscription(accountName = ${accountName}, productName = ${productName});
+			CustomerSubscriptionAPI._deleteCustomerSubscription(
+				accountName = ${accountName}, 
+				productName = ${productName});
 		}
 	}
 }

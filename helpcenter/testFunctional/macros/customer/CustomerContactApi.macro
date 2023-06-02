@@ -1,13 +1,13 @@
 definition {
 
-	var customerURL = PropsUtil.get("customer.portal.url");
 	var apiClientId = PropsUtil.get("customer.client.id");
 	var apiClientSecret = PropsUtil.get("customer.client.secret");
 	var customerAdminEmailAddress = PropsUtil.get("customer.admin.email.address");
 	var customerAdminPassword = PropsUtil.get("customer.admin.password");
+	var customerURL = PropsUtil.get("customer.portal.url");
 
 	macro _getCustomerUserIdViaAccountName {
-		var accountKey = CustomerAccountApi._getCustomerAccountKeyViaAccountName(accountName = ${accountName});
+		var accountKey = CustomerAccountAPI._getCustomerAccountKeyViaAccountName(accountName = ${accountName});
 
 		var curl = '''
 			${customerURL}/o/headless-admin-user/v1.0/accounts/by-external-reference-code/${accountKey}/user-accounts
@@ -30,7 +30,9 @@ definition {
 	}
 
 	macro _deleteCustomerUser {
-		var userId = CustomerContactApi._getCustomerUserIdViaAccountName(accountName = ${accountName}, contactEmailAddress = ${contactEmailAddress});
+		var userId = CustomerContactAPI._getCustomerUserIdViaAccountName(
+			accountName = ${accountName}, 
+			contactEmailAddress = ${contactEmailAddress});
 
 		var curl = '''
 			${customerURL}/o/headless-admin-user/v1.0/user-accounts/${userId} --tlsv1.2
@@ -42,13 +44,15 @@ definition {
 		com.liferay.poshi.runner.util.JSONCurlUtil.delete(${curl});
 	}
 
-	macro tearDownUsersOnCustomer {
+	macro tearDownUsers {
 		var rawTable = TableUtil.newTable(${table});
 
 		for (var row : table ${rawTable}) {
 			var contactEmailAddress = "${row[0]}";
 
-			CustomerContactApi._deleteCustomerUser(accountName = ${accountName}, contactEmailAddress = ${contactEmailAddress});
+			CustomerContactAPI._deleteCustomerUser(
+				accountName = ${accountName}, 
+				contactEmailAddress = ${contactEmailAddress});
 		}
 	}
 }
