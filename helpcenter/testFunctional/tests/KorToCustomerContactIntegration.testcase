@@ -6,6 +6,8 @@ definition {
 	setUp {
 		Passwords.getPasswords();
 
+		CustomerAccountApi._generateCustomerAuthenticationToken();
+
 		KoroneikiProductPurchaseAPI.generateStaticStartAndEndDate();
 
 		KoroneikiProductPurchaseAPI.generateStaticPastStartAndEndDate();
@@ -16,18 +18,18 @@ definition {
 
 		OSBAdminRabbitMQ.generateProvisioningProjectName();
 
-		JSONOkta.createOktaUser(table = '''| Screen Name   | guicstm                       |
-	| Email Address | guicstm@lrcustomer.com.broken |
-	| First Name    | GUI                           |
-	| Last Name     | CSTM                          |''');
+		JSONOkta.createOktaUser(table = '''| Screen Name   | cstm.customer1                       |
+	| Email Address | cstm.customer1@lrcustomer.com.broken |
+	| First Name    | CSTM                                 |
+	| Last Name     | Customer1                            |''');
 
 		JSONOkta.createOktaUser(table = '''| Screen Name   | cstm.customer2                       |
 	| Email Address | cstm.customer2@lrcustomer.com.broken |
 	| First Name    | CSTM                                 |
 	| Last Name     | Customer2                            |''');
 
-		KoroneikiAccountAPI._createAccount(table = '''| Code   | GUIZENGUIZEN                  | |
-	| Name   | Guizen - ${staticProjectName} | |
+		KoroneikiAccountAPI._createAccount(table = '''| Code   | KORCSTKORCST                  | |
+	| Name   | Korcst - ${staticProjectName} | |
 	| Region | United States                 | |
 	| Status | Active                        | |
 	| Tier   | T1                            | |''');
@@ -67,7 +69,28 @@ definition {
 
 		JSONOkta.tearDownUsers(table = '''| cstm.customer1@lrcustomer.com.broken |
 	| cstm.customer2@2rcustomer.com.broken |''');
-	}
+
+		CustomerContactApi.tearDownUsersOnCustomer(
+			accountName = "Korcst - ${staticProjectName}",
+			table = '''
+				| cstm.customer1@lrcustomer.com.broken |
+				| cstm.customer2@lrcustomer.com.broken |
+			'''
+		);
+
+		CustomerSubscriptionApi.tearDownSubscriptionsOnCustomer(
+			accountName = "Korcst - ${staticProjectName}",
+			table = '''
+				| DXP Production      |
+				| Service Partnership |
+			'''
+		);
+
+		CustomerAccountApi.tearDownCustomerAccounts(
+			table = '''
+				| Korcst - ${staticProjectName} |
+			'''
+		);
 
 	test ViewPartnerManageroncustomer {
 		KoroneikiAccountAPI._createAccountProductPurchase(
@@ -105,7 +128,7 @@ definition {
 
 		Provisioning.gotoAccounts();
 
-		Provisioning.searchAccounts(keyword = "Korcst");
+		Provisioning.searchAccounts(keyword = "Korcst - ${staticProjectName}");
 
 		Provisioning.clickAccount(accountName = "Korcst - ${staticProjectName}");
 
@@ -115,7 +138,7 @@ definition {
 			userEmailAddress = ${staticCustomerAdminEmailAddress},
 			userPassword = ${staticCustomerAdminPassword});
 
-		CustomerProjects.searchCustomerProject(keyword = "Korcst");
+		CustomerProjects.searchCustomerProject(keyword = "Korcst - ${staticProjectName}");
 
 		CustomerProjects.clickCustomerProject(projectName = "Korcst - ${staticProjectName}");
 
@@ -176,7 +199,7 @@ definition {
 
 		Provisioning.gotoAccounts();
 
-		Provisioning.searchAccounts(keyword = "Korcst");
+		Provisioning.searchAccounts(keyword = "Korcst - ${staticProjectName}");
 
 		Provisioning.clickAccount(accountName = "Korcst - ${staticProjectName}");
 
@@ -186,7 +209,7 @@ definition {
 			userEmailAddress = ${staticCustomerAdminEmailAddress},
 			userPassword = ${staticCustomerAdminPassword});
 
-		CustomerProjects.searchCustomerProject(keyword = "Korcst");
+		Provisioning.searchAccounts(keyword = "Korcst - ${staticProjectName}");
 
 		CustomerProjects.clickCustomerProject(projectName = "Korcst - ${staticProjectName}");
 
@@ -215,7 +238,7 @@ definition {
 
 	test ViewSupportAdministratoronCustomer {
 		KoroneikiAccountAPI._createAccountProductPurchase(
-			accountName = "Guizen - ${staticProjectName}",
+			accountName = "Korcst - ${staticProjectName}",
 			productName = "Platinum Subscription",
 			table = '''| End Date                | ${staticEndDate}         | |
 	| Original End Date       | ${staticOriginalEndDate} | |
@@ -225,8 +248,8 @@ definition {
 	| Status                  | Approved                 | |''');
 
 		KoroneikiAccountAPI._assignContactRolesToContact(
-			accountName = "Guizen - ${staticProjectName}",
-			contactEmailAddress = "guicstm@lrcustomer.com.broken",
+			accountName = "Korcst - ${staticProjectName}",
+			contactEmailAddress = "cstm.customer1@lrcustomer.com.broken",
 			table = '''| Support Administrator |''');
 
 		KoroneikiAccountAPI._synchronizeAccountEntitlementDefinition(entitlementDefinitionName = "Platinum Subscription");
@@ -237,9 +260,9 @@ definition {
 
 		Provisioning.gotoAccounts();
 
-		Provisioning.searchAccounts(keyword = "Guizen");
+		Provisioning.searchAccounts(keyword = "Korcst - ${staticProjectName}");
 
-		Provisioning.clickAccount(accountName = "Guizen - ${staticProjectName}");
+		Provisioning.clickAccount(accountName = "Korcst - ${staticProjectName}");
 
 		ProvisioningAccount.clickSyncToCustomerPortalButton();
 
@@ -247,7 +270,7 @@ definition {
 			userEmailAddress = ${staticCustomerAdminEmailAddress},
 			userPassword = ${staticCustomerAdminPassword});
 
-		CustomerProjects.searchCustomerProject(keyword = "Korcst");
+		CustomerProjects.searchCustomerProject(keyword = "Korcst - ${staticProjectName}");
 
 		CustomerProjects.clickCustomerProject(projectName = "Korcst - ${staticProjectName}");
 
@@ -296,7 +319,7 @@ definition {
 
 		Provisioning.gotoAccounts();
 
-		Provisioning.searchAccounts(keyword = "Korcst");
+		Provisioning.searchAccounts(keyword = "Korcst - ${staticProjectName}");
 
 		Provisioning.clickAccount(accountName = "Korcst - ${staticProjectName}");
 
@@ -306,7 +329,7 @@ definition {
 			userEmailAddress = ${staticCustomerAdminEmailAddress},
 			userPassword = ${staticCustomerAdminPassword});
 
-		CustomerProjects.searchCustomerProject(keyword = "Korcst");
+		CustomerProjects.searchCustomerProject(keyword = "Korcst - ${staticProjectName}");
 
 		CustomerProjects.clickCustomerProject(projectName = "Korcst - ${staticProjectName}");
 
@@ -348,7 +371,7 @@ definition {
 
 		Provisioning.gotoAccounts();
 
-		Provisioning.searchAccounts(keyword = "Korcst");
+		Provisioning.searchAccounts(keyword = "Korcst - ${staticProjectName}");
 
 		Provisioning.clickAccount(accountName = "Korcst - ${staticProjectName}");
 
@@ -358,7 +381,7 @@ definition {
 			userEmailAddress = ${staticCustomerAdminEmailAddress},
 			userPassword = ${staticCustomerAdminPassword});
 
-		CustomerProjects.searchCustomerProject(keyword = "Korcst");
+		CustomerProjects.searchCustomerProject(keyword = "Korcst - ${staticProjectName}");
 
 		CustomerProjects.clickCustomerProject(projectName = "Korcst - ${staticProjectName}");
 
@@ -375,5 +398,4 @@ definition {
 	| Role          | Support Requester                    |
 	| User Status   | VERIFIED                             |''');
 	}
-
 }

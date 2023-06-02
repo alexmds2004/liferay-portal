@@ -1,0 +1,54 @@
+definition {
+
+	var customerURL = PropsUtil.get("customer.portal.url");
+	var apiClientId = PropsUtil.get("customer.client.id");
+	var apiClientSecret = PropsUtil.get("customer.client.secret");
+	var customerAdminEmailAddress = PropsUtil.get("customer.admin.email.address");
+	var customerAdminPassword = PropsUtil.get("customer.admin.password");
+
+	macro _getCustomerUserIdViaAccountName {
+		var accountKey = CustomerAccountApi._getCustomerAccountKeyViaAccountName(accountName = ${accountName});
+
+		var curl = '''
+			${customerURL}/o/headless-admin-user/v1.0/accounts/by-external-reference-code/${accountKey}/user-accounts
+			-H "Authorization: Bearer ${staticAccessToken}"
+			-H "accept: application/json"
+			-H "Content-Type: application/json"
+		''';
+
+		var userId = JSONCurlUtil.get("${curl}", "$.items[?(@.emailAddress=='${contactEmailAddress}')].id");
+
+		var userId = StringUtil.replace("${userId}", "[", "");
+
+		var userId = StringUtil.replace("${userId}", "]", "");
+
+		var userId = StringUtil.replace("${userId}", "\"", "");
+
+		echo("User ID value for ${accountName} and ${contactEmailAddress}: ${userId}");
+		
+		return "${userId}";
+	}
+
+	macro _deleteCustomerUser {
+		var userId = CustomerContactApi._getCustomerUserIdViaAccountName(accountName = ${accountName}, contactEmailAddress = ${contactEmailAddress});
+
+		var curl = '''
+			${customerURL}/o/headless-admin-user/v1.0/user-accounts/${userId} --tlsv1.2
+			-H "Authorization: Bearer ${staticAccessToken}"
+			-H "accept: application/json"
+			-H "Content-Type: application/json"
+		''';
+
+		com.liferay.poshi.runner.util.JSONCurlUtil.delete(${curl});
+	}
+
+	macro tearDownUsersOnCustomer {
+		var rawTable = TableUtil.newTable(${table});
+
+		for (var row : table ${rawTable}) {
+			var contactEmailAddress = "${row[0]}";
+
+			CustomerContactApi._deleteCustomerUser(accountName = ${accountName}, contactEmailAddress = ${contactEmailAddress});
+		}
+	}
+}

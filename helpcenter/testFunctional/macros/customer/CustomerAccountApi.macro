@@ -1,0 +1,84 @@
+definition {
+
+	var customerURL = PropsUtil.get("customer.portal.url");
+	var apiClientId = PropsUtil.get("customer.client.id");
+	var apiClientSecret = PropsUtil.get("customer.client.secret");
+	var customerAdminEmailAddress = PropsUtil.get("customer.admin.email.address");
+	var customerAdminPassword = PropsUtil.get("customer.admin.password");
+
+    macro _generateCustomerAuthenticationToken {
+		var curl = '''
+			${customerURL}/o/oauth2/token
+			-H "Content-Type: application/x-www-form-urlencoded"
+			-H "Accept: *"
+			-d "response_type=code"
+            -d "grant_type=client_credentials"
+            -d client_id=${apiClientId}
+            -d client_secret=${apiClientSecret}
+            -s
+		''';
+
+        var accessToken = JSONCurlUtil.post("${curl}", "$.access_token");
+
+		var accessToken = StringUtil.replace("${accessToken}", "[", "");
+
+		var accessToken = StringUtil.replace("${accessToken}", "]", "");
+
+		static var staticAccessToken = "${accessToken}";
+
+		echo("Access Token Value : ${staticAccessToken}");
+
+		return "${staticAccessToken}";
+	}
+
+	macro _getCustomerAccountKeyViaAccountName {
+		if (contains("${accountName}", " ")) {
+			var keyword = StringUtil.replace("${accountName}", " ", "+");
+		}
+		else {
+			var keyword = "${accountName}";
+		}
+
+		var curl = '''
+			${customerURL}/o/headless-admin-user/v1.0/accounts?filter="name%20eq%20'${keyword}'"
+			-H "Authorization: Bearer ${staticAccessToken}"
+			-H "accept: application/json"
+			-H "Content-Type: application/json"
+		''';
+
+		var accountKey = JSONCurlUtil.get("${curl}", "$.items[?(@.name=='${accountName}')].externalReferenceCode");
+
+		var accountKey = StringUtil.replace("${accountKey}", "[", "");
+
+		var accountKey = StringUtil.replace("${accountKey}", "]", "");
+
+		var accountKey = StringUtil.replace("${accountKey}", "\"", "");
+
+		echo("Account Key value for ${accountName}: ${accountKey}");
+
+		return "${accountKey}";
+	}
+
+	macro _deleteCustomerAccount {
+		var accountKey = CustomerAccountApi._getCustomerAccountKeyViaAccountName(accountName = ${accountName});
+
+		var curl = '''
+			${customerURL}/o/headless-admin-user/v1.0/accounts/by-external-reference-code/${accountKey} --tlsv1.2
+			-H "Authorization: Bearer ${staticAccessToken}"
+			-H "accept: application/json"
+			-H "Content-Type: application/json"
+		''';
+
+		com.liferay.poshi.runner.util.JSONCurlUtil.delete(${curl});
+	}
+
+	macro tearDownCustomerAccounts {
+		var rawTable = TableUtil.newTable(${table});
+
+		for (var row : table "${rawTable}") {
+			var accountName = "${row[0]}";
+
+			CustomerAccountApi._deleteCustomerAccount(accountName = ${accountName});
+		}
+	}
+}
